@@ -27,7 +27,7 @@
 				<li><a href="#isAccessAllowed">Checking accessibility</a></li>
 				<li><a href="#publicStep">PublicStep</a></li>
 			</ul></li>
-		<li><a href="#information">Information</a></li>
+		<li><a href="#information">System Information</a></li>
 		<li><a href="#admin">Administration Calls</a></li>
 		<li><a href="#concise">Concise Syntax</a></li>
 
@@ -483,7 +483,7 @@
 		variable names for use within such a construct. Some keywords, such as
 		FETCH, are not relevant and are ignored. The language, which borrows a
 		lot from SQL is well explained in the <a
-			href="hhttp://docs.oracle.com/html/E13946_05/ejb3_langref.html"
+			href="http://docs.oracle.com/html/E13946_05/ejb3_langref.html"
 			target="_blank">Oracle JPQL documentation</a>.
 	</p>
 
@@ -545,6 +545,9 @@
 		must be specified.
 	</p>
 
+	<p>Joins can be performed - for example</p>
+	<code>SELECT u FROM User u JOIN u.userGroups ug JOIN ug.grouping
+		g WHERE g.name='FacilityAdmins'</code>
 
 	<h2 id="authorization">Authorization</h2>
 
@@ -563,6 +566,20 @@
 		of authorization rules though these rules can then allow others to
 		manipulate rules.</p>
 
+	<p>
+		Though the authorization rules are handled as efficiently as possible
+		to get the best performance define a rule to make those entity types
+		world readable where this makes sense. Such rules have no conditions
+		in the "what" field and the grouping field is left null. Such rules
+		are recognised and are cached in memory. Typically those entities
+		which are used to implement a many to many relationship can be world
+		readable as can those which represent types. The <a href="#publicStep">PublicStep</a>
+		mechanism is also available to cover the case where access to one
+		entity implies that another may be accessed. For example you might
+		define a PublicStep from Datafile to its Dataset (via the dataset
+		field) and from a Dataset to its Investigation (via the investigation
+		field). For other cases you will need to write rules.
+	</p>
 	<h3 id="rules">Rules</h3>
 	<p>
 		By default access is denied to all objects, rules allow access. It is
@@ -579,27 +596,27 @@
 		other field,
 		<code>what</code>
 		, is the rule itself. There is also a "many to one" relationship to
-		Group which may be absent.
+		Grouping which may be absent.
 	</p>
 	<p>Consider the Java code:</p>
 	<code>
-		Rule rule = new Rule(); <br /> rule.setGroup(userOffice); <br />
+		Rule rule = new Rule(); <br /> rule.setGrouping(userOffice); <br />
 		rule.setCrudFlags("CRUD"); <br /> rule.setWhat("Investigation"); <br />
 		icat.create(sessionId, rule);
 	</code>
-	<p>allows members of the userOffice group full access to all
+	<p>allows members of the userOffice Grouping full access to all
 		Investigations.</p>
 	<code>
-		Rule rule = new Rule(); <br /> rule.setGroup(null); // Not necessary
-		as it will be null on a newly created rule <br />
+		Rule rule = new Rule(); <br /> rule.setGrouping(null); // Not
+		necessary as it will be null on a newly created rule <br />
 		rule.setCrudFlags("R"); <br /> rule.setWhat("ParameterType"); <br />
 		icat.create(sessionId, rule);
 	</code>
 	<p>allows any authenticated user (with a sessionId) to read
-		Parameters. Consider a group of users: fredReaders. To allow
+		Parameters. Consider a Grouping of users: fredReaders. To allow
 		fredReaders to read a datafile with a name of "fred" we could have:</p>
 	<code>
-		Rule rule = new Rule(); <br /> rule.setGroup(fredReaders); <br />
+		Rule rule = new Rule(); <br /> rule.setGrouping(fredReaders); <br />
 		rule.setCrudFlags("R"); <br /> rule.setWhat("SELECT Datafile df WHERE
 		df.name='fred'"); <br /> icat.create(sessionId, rule);
 	</code>
@@ -631,7 +648,7 @@
 		with a name matching the currently authenticated user (from the
 		sessionId) we can have:</p>
 	<code>
-		Rule rule = new Rule(); <br /> rule.setGroup(null); <br />
+		Rule rule = new Rule(); <br /> rule.setGrouping(null); <br />
 		rule.setCrudFlags("R"); <br /> rule.setWhat("select Dataset ds,
 		ds.investigation i, i.investigationUser iu WHERE iu.name = :user"); <br />
 		icat.create(sessionId, rule);
@@ -643,19 +660,19 @@
 		specific attribute. For example the following Python:</p>
 
 	<code>
-		rule = factory.create("rule")<br /> rule.crudFlags = "U" rule.group =
-		invHackers rule.what = "select Investigation inv.doi"
+		rule = factory.create("rule")<br /> rule.crudFlags = "U"
+		rule.grouping = invHackers rule.what = "select Investigation inv.doi"
 		icat.create(sessionId, rule)
 	</code>
-	<p>allows members of the invHackers group to modify the doi field
-		of all Investigations. Currently only the UPDATE operation can be
-		controlled this way. It would be possible to also support READ however
-		as yet no compelling Use Case has been encountered.</p>
+	<p>allows members of the invHackers grouping to modify the doi
+		field of all Investigations. Currently only the UPDATE operation can
+		be controlled this way. It would be possible to also support READ
+		however as yet no compelling Use Case has been encountered.</p>
 	<p>Rules which allow everyone to read a table are cached in memory
 		and are good for performance. For example to give universal read
 		access to DatasetType the following Java code could be used:</p>
 	<code>
-		Rule rule = new Rule(); <br /> rule.setGroup(null); <br />
+		Rule rule = new Rule(); <br /> rule.setGrouping(null); <br />
 		rule.setCrudFlags("R"); <br /> rule.setWhat("DatasetType"); <br />
 		icat.create(sessionId, rule);
 	</code>
@@ -664,7 +681,7 @@
 	<p>This table has two columns (origin and field). An entry in this
 		table affects the way in which INCLUDE authorization is carried out.
 		Each entry permits all users to make a step from the origin entity by
-		the specifed relationship field without any further checking. This
+		the specified relationship field without any further checking. This
 		information is held in memory for speed. For those INCLUDEs that are
 		not mentioned in the PublicStep table a full read authorization check
 		must be made before including an object to be returned - which can be
@@ -676,6 +693,13 @@
 		ps.field = "jobs" <br /> session.create(ps)
 	</code>
 
+	<p>This will mean that if you have a query "SELECT Application a
+		INCLUDE a.jobs" then the system will only return applications your are
+		authorized to read. It will also provide all the jobs which are
+		related to those applications provided you are authorized to do so. In
+		the absence of a PublicStep it will check each one individually which
+		can be time consuming but with this PublicStep in place the system
+		will simply following the relationship without further checks.</p>
 	<h3 id="isAccessAllowed">Checking accessibility</h3>
 
 	<p class="call">boolean isAccessAllowed(String sessionId,
@@ -706,7 +730,7 @@
 
 
 
-	<h2 id="information">Information</h2>
+	<h2 id="information">System Information</h2>
 
 	<p class="call">String getApiVersion()</p>
 

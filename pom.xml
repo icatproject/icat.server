@@ -7,6 +7,8 @@
 	<version>4.8.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>ICAT Server</name>
+	<description>A metadata catalogue to support Large Facility experimental data, 
+	linking all aspects of the research chain from proposal through to publication.</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -194,7 +196,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<licence>cHJvamVjdHxvcmcuaWNhdHByb2plY3QuaWNhdC5zZXJ2ZXJ8MjAxNi0wOC0yN3x0cnVlfC0xI01Dd0NGRXBxLy92UjJXUzB0Q0tPb3lqSjBUWHNKRzRXQWhSeFVUa2c0bWNaMTRKS1RYbGlaMzEyMytreGFnPT0=</licence>
+					<licence>cHJvamVjdHxvcmcuaWNhdHByb2plY3QuaWNhdC5zZXJ2ZXJ8MjAxOC0wOS0xNXx0cnVlfC0xI01DMENGRzRQaDRMdlpvZlRwK0xsMmdENHFrZGR1VGtGQWhVQWk0eGh5cld4b25PTEJjWUhHS0pBbTcxa3VwST0=</licence>
 					<output>
 						<html>
 							<location>site/miredot</location>

@@ -9,7 +9,10 @@
 
 	<p>The ICAT server is a layer on top of a relational DBMS. The
 		database is wrapped both as a SOAP web service and as a RESTful web
-		service.</p>
+		service. Originally ICAT only exposed a SOAP interface but now REST
+		interfaces are more common than SOAP. The intention is not to develop
+		the SOAP interface further however there is no current timescale to
+		stop supporting it.</p>
 
 	<h3>SOAP interface</h3>
 	<p>For the SOAP web service each table in the database is mapped
@@ -80,14 +83,10 @@
 		not necessarily the case and in particular the anonymous authenticator
 		requires no credentials.</p>
 
-	<p>The server returns a sessionId string which identifies your
-		session and which is passed to any subsequent calls which require that
-		you are authenticated.</p>
-
 	<p>A session will time out after a server determined period of time
 		which reduces the risk of losing a sessionId. There are calls to
 		logout, to refresh a session and to find out how much time is left and
-		to find the username from the sessionId.</p>
+		to find the username associated with a session.</p>
 
 	<h2>The schema</h2>
 	<p>
