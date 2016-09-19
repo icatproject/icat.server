@@ -184,11 +184,8 @@ public class EntityBeanManager {
 				if (atts.contains(field)) {
 					sb.append(getRep(field, value));
 				} else if (updaters.contains(field)) {
-					long obId = ((EntityBaseBean) value).getId(); // Not allowed
-					// to be
-					// null
+					long obId = ((EntityBaseBean) value).getId();
 					String obType = value.getClass().getSimpleName();
-					logger.debug("One " + field.getName() + " " + obId + " " + obType);
 					Map<Long, String> idCache = exportCaches.get(obType);
 					String s = idCache.get(obId);
 					if (s == null) {
@@ -704,14 +701,8 @@ public class EntityBeanManager {
 						output.write(
 								eiHandler.getExportNull((Class<? extends EntityBaseBean>) field.getType()).getBytes());
 					} else {
-						logger.debug("One " + field.getName() + " " + value);
-						long obId = ((EntityBaseBean) value).getId(); // Not
-						// allowed
-						// to
-						// be
-						// null
+						long obId = ((EntityBaseBean) value).getId();
 						String obType = value.getClass().getSimpleName();
-						logger.debug("One " + field.getName() + " " + obId + " " + obType);
 						Map<Long, String> idCache = exportCaches.get(obType);
 						String s = idCache.get(obId);
 						if (s == null) {

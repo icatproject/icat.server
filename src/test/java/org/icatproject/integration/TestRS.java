@@ -370,7 +370,7 @@ public class TestRS {
 	@Test
 	public void testVersion() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		assertTrue(icat.getApiVersion().startsWith("4."));
+		assertTrue(icat.getVersion().startsWith("4."));
 	}
 
 	@Test
