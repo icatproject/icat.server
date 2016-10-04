@@ -15,6 +15,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.util.BytesRef;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
 
 @Comment("A parameter associated with an investigation")
@@ -38,9 +39,9 @@ public class InvestigationParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser,
-			boolean clearId, Set<EntityBaseBean> done) throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId, done);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
+			Set<EntityBaseBean> done) throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, persistMode, done);
 		this.id = null;
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");

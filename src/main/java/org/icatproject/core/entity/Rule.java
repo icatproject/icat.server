@@ -18,6 +18,7 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.SingletonFinder;
 import org.icatproject.core.oldparser.OldInput;
@@ -254,9 +255,9 @@ public class Rule extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser,
-			boolean clearId, Set<EntityBaseBean> done) throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId, done);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
+			Set<EntityBaseBean> done) throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, persistMode, done);
 		this.fixup(manager, gateKeeper);
 		logger.debug("PreparePersist of Rule for " + this.crudFlags + " of " + this.what);
 	}

@@ -112,6 +112,10 @@ public class EntityBeanManager {
 
 	}
 
+	public enum PersistMode {
+		CLONE, REST, IMPORTALL, IMPORT_OR_WS
+	};
+
 	private final static DateFormat df8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
 	private static final String linesep = System.getProperty("line.separator");
@@ -235,10 +239,17 @@ public class EntityBeanManager {
 		logger.info(userId + " creating " + bean.getClass().getSimpleName());
 		try {
 			userTransaction.begin();
+			PersistMode persistMode;
+			if (allAttributes) {
+				persistMode = PersistMode.IMPORTALL;
+			} else {
+				persistMode = PersistMode.IMPORT_OR_WS;
+			}
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 				Set<EntityBaseBean> done = new HashSet<>();
-				bean.preparePersist(userId, manager, gateKeeper, allAttributes, true, done);
+
+				bean.preparePersist(userId, manager, gateKeeper, persistMode, done);
 				logger.trace(bean + " prepared for persist.");
 				manager.persist(bean);
 				logger.trace(bean + " persisted.");
@@ -278,7 +289,7 @@ public class EntityBeanManager {
 						+ e.getMessage());
 				updateCache();
 				Set<EntityBaseBean> done = new HashSet<>();
-				bean.preparePersist(userId, manager, gateKeeper, allAttributes, true, done);
+				bean.preparePersist(userId, manager, gateKeeper, persistMode, done);
 				isUnique(bean, manager);
 				isValid(bean);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -303,7 +314,7 @@ public class EntityBeanManager {
 			try {
 				try {
 					Set<EntityBaseBean> done = new HashSet<>();
-					bean.preparePersist(userId, manager, gateKeeper, false, true, done);
+					bean.preparePersist(userId, manager, gateKeeper, PersistMode.IMPORT_OR_WS, done);
 					logger.debug(bean + " prepared for persist (createAllowed).");
 					manager.persist(bean);
 					logger.debug(bean + " persisted (createAllowed).");
@@ -316,7 +327,7 @@ public class EntityBeanManager {
 					logger.debug("Transaction rolled back for creation of " + bean + " because of " + e.getClass() + " "
 							+ e.getMessage());
 					Set<EntityBaseBean> done = new HashSet<>();
-					bean.preparePersist(userId, manager, gateKeeper, false, true, done);
+					bean.preparePersist(userId, manager, gateKeeper, PersistMode.IMPORT_OR_WS, done);
 					isUnique(bean, manager);
 					isValid(bean);
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -359,7 +370,7 @@ public class EntityBeanManager {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 				for (EntityBaseBean bean : beans) {
 					Set<EntityBaseBean> done = new HashSet<>();
-					bean.preparePersist(userId, manager, gateKeeper, false, true, done);
+					bean.preparePersist(userId, manager, gateKeeper, PersistMode.IMPORT_OR_WS, done);
 					logger.trace(bean + " prepared for persist.");
 					manager.persist(bean);
 					logger.trace(bean + " persisted.");
@@ -408,7 +419,7 @@ public class EntityBeanManager {
 				EntityBaseBean bean = beans.get(pos);
 				try {
 					Set<EntityBaseBean> done = new HashSet<>();
-					bean.preparePersist(userId, manager, gateKeeper, false, true, done);
+					bean.preparePersist(userId, manager, gateKeeper, PersistMode.IMPORT_OR_WS, done);
 					isUnique(bean, manager);
 					isValid(bean);
 				} catch (IcatException e1) {
@@ -2067,12 +2078,18 @@ public class EntityBeanManager {
 
 		if (entity.size() != 1) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-					"entity must have one keyword followed by its values in json " + entity);
+					"Entity must have one keyword followed by its values in json " + entity);
 		}
+
 		Entry<String, JsonValue> entry = entity.entrySet().iterator().next();
 		String beanName = entry.getKey();
 		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
-		JsonObject contents = (JsonObject) entry.getValue();
+		JsonValue value = entry.getValue();
+		if (value.getValueType() != ValueType.OBJECT) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"Unexpected array found in JSON " + value.toString());
+		}
+		JsonObject contents = (JsonObject) value;
 
 		EntityBaseBean bean = null;
 		try {
@@ -2096,8 +2113,8 @@ public class EntityBeanManager {
 
 		Set<EntityBaseBean> done = new HashSet<>();
 		try {
-			bean.preparePersist(userId, manager, gateKeeper, false, false, done);
 			if (create) {
+				bean.preparePersist(userId, manager, gateKeeper, PersistMode.REST, done);
 				manager.persist(bean);
 				logger.trace(bean + " persisted.");
 			}
@@ -2187,9 +2204,11 @@ public class EntityBeanManager {
 
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					"Unexpected DB response " + e.getClass() + " " + e.getMessage());
+
 		}
 
-		// Check authz now everything persisted and update creates and updates
+		// Check authz now everything persisted and update creates and
+		// updates
 		for (EntityBaseBean eb : localCreates) {
 			gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE, manager);
 			creates.add(eb);
@@ -2290,7 +2309,7 @@ public class EntityBeanManager {
 
 		cloneOneToManys(bean, clone, klass, getters, setters, rs, manager, clonedTo, userId);
 		Set<EntityBaseBean> done = new HashSet<>();
-		clone.preparePersist(userId, manager, gateKeeper, false, true, done);
+		clone.preparePersist(userId, manager, gateKeeper, PersistMode.CLONE, done);
 		logger.trace(clone + " prepared for persist.");
 
 		try {
@@ -2333,7 +2352,7 @@ public class EntityBeanManager {
 						+ e.getMessage());
 				updateCache();
 				done = new HashSet<>();
-				bean.preparePersist(userId, manager, gateKeeper, false, true, done);
+				bean.preparePersist(userId, manager, gateKeeper, PersistMode.CLONE, done);
 				isUnique(clone, manager);
 				isValid(clone);
 				logger.error("Database unhappy", e);

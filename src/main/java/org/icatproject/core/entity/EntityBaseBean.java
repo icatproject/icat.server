@@ -27,6 +27,7 @@ import org.apache.lucene.document.Document;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.manager.AccessType;
+import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
@@ -246,30 +247,62 @@ public abstract class EntityBaseBean implements Serializable {
 	 * super.preparePersist(). Note that it recurses down through all to-many
 	 * relationships.
 	 */
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean allAttributes,
-			boolean clearId, Set<EntityBaseBean> done) throws IcatException {
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
+			Set<EntityBaseBean> done) throws IcatException {
 
-		if (clearId) {
-			this.id = null;
-		}
-		if (!allAttributes || createId == null) {
+		if (persistMode == PersistMode.CLONE) {
 			createId = modId;
-		}
-		if (!allAttributes || this.modId == null) {
 			this.modId = modId;
-		}
-		Date now = null;
-		if (!allAttributes || createTime == null) {
-			now = new Date();
+			Date now = new Date();
 			createTime = now;
-		}
-		if (!allAttributes || modTime == null) {
-			if (now == null) {
-				now = new Date();
-			}
 			modTime = now;
+		} else if (persistMode == PersistMode.IMPORTALL) {
+			this.id = null;
+			if (createId == null) {
+				createId = modId;
+			}
+			if (this.modId == null) {
+				this.modId = modId;
+			}
+			Date now = null;
+			if (createTime == null) {
+				now = new Date();
+				createTime = now;
+			}
+			if (modTime == null) {
+				if (now == null) {
+					now = new Date();
+				}
+				modTime = now;
+			}
+		} else if (persistMode == PersistMode.IMPORT_OR_WS) {
+			this.id = null;
+			createId = modId;
+			this.modId = modId;
+			Date now = new Date();
+			createTime = now;
+			modTime = now;
+		} else if (persistMode == PersistMode.REST) {
+			if (createId == null) {
+				createId = modId;
+			}
+			if (this.modId == null) {
+				this.modId = modId;
+			}
+			Date now = null;
+			if (createTime == null) {
+				now = new Date();
+				createTime = now;
+			}
+			if (modTime == null) {
+				if (now == null) {
+					now = new Date();
+				}
+				modTime = now;
+			}
+		} else {
+			throw new IcatException(IcatExceptionType.INTERNAL, "Unrecognised PersistMode");
 		}
-
 		done.add(this);
 
 		Class<? extends EntityBaseBean> klass = this.getClass();
@@ -284,7 +317,7 @@ public abstract class EntityBaseBean implements Serializable {
 					if (!collection.isEmpty()) {
 						Method rev = r.getInverseSetter();
 						for (EntityBaseBean bean : collection) {
-							bean.preparePersist(modId, manager, gateKeeper, allAttributes, clearId, done);
+							bean.preparePersist(modId, manager, gateKeeper, persistMode, done);
 							rev.invoke(bean, this);
 						}
 					}
@@ -430,4 +463,5 @@ public abstract class EntityBaseBean implements Serializable {
 	public Document getDoc() {
 		return null;
 	}
+
 }

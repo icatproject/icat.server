@@ -17,6 +17,7 @@ import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.SingletonFinder;
+import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,9 +85,9 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser,
-			boolean clearId, Set<EntityBaseBean> done) throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId, done);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
+			Set<EntityBaseBean> done) throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, persistMode, done);
 		this.fixup(manager, gateKeeper);
 	}
 

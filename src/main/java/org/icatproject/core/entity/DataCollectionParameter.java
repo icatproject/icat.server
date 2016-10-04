@@ -11,13 +11,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
 
 @Comment("A parameter associated with a DataCollection")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATACOLLECTION_ID",
-		"PARAMETER_TYPE_ID" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATACOLLECTION_ID", "PARAMETER_TYPE_ID" }) })
 public class DataCollectionParameter extends Parameter implements Serializable {
 
 	@Comment("The associated DataCollection")
@@ -34,14 +34,14 @@ public class DataCollectionParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser, boolean clearId, Set<EntityBaseBean> done)
-			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId, done);
-		if (!type.isApplicableToDataCollection()) { // type has been checked as not null by super
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
+			Set<EntityBaseBean> done) throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, persistMode, done);
+		if (!type.isApplicableToDataCollection()) { // type has been checked as
+													// not null by super
 													// call
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-					"Parameter of type " + type.getName()
-							+ " is not applicable to a DataCollection");
+					"Parameter of type " + type.getName() + " is not applicable to a DataCollection");
 		}
 	}
 

@@ -1051,6 +1051,42 @@ public class TestRS {
 	}
 
 	@Test
+	public void testBug() throws Exception {
+		Session session = createAndPopulate();
+		ByteArrayOutputStream baos;
+		Long dsid = search(session, "SELECT ds.id FROM Dataset ds LIMIT 0, 1", 1).getJsonNumber(0).longValueExact();
+		Long typid = search(session, "SELECT t.id FROM ParameterType t WHERE t.applicableToDataset = True LIMIT 0, 1",
+				1).getJsonNumber(0).longValueExact();
+		System.out.println(dsid + " " + typid);
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Dataset").write("id", dsid)
+					.write("description", "how can I compare...").writeEnd().writeEnd();
+		}
+		session.write(baos.toString());
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("DatasetParameter").writeStartObject("dataset").write("id", dsid)
+					.writeEnd().writeStartObject("type").write("id", typid).writeEnd().write("numericValue", 42)
+					.writeEnd().writeEnd();
+		}
+
+		session.write(baos.toString());
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Dataset").write("id", dsid)
+					.write("description", "Attempt to update").writeEnd().writeEnd();
+		}
+		session.write(baos.toString());
+
+		assertEquals("Attempt to update",
+				search(session, "SELECT ds.description FROM Dataset ds WHERE ds.id = " + dsid, 1).getJsonString(0)
+						.getString());
+	}
+
+	@Test
 	public void testWriteBad() throws Exception {
 
 		Session session = createAndPopulate();
@@ -1147,6 +1183,23 @@ public class TestRS {
 		} catch (IcatException e) {
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
 			assertEquals("InvestigationType exists with name = 'c', facility = 'id:", e.getMessage().substring(0, 57));
+			assertEquals(0, e.getOffset());
+		}
+
+		// six
+		Long dsid = search(session, "SELECT ds.id FROM Dataset ds LIMIT 0, 1", 1).getJsonNumber(0).longValueExact();
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartArray(("Datafile")).writeStartObject().write("name", "df3")
+					.write("location", "loc3").writeStartObject("dataset").write("id", dsid).writeEnd().writeEnd()
+					.writeEnd().writeEnd();
+		}
+		try {
+			session.write(baos.toString());
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
+			assertTrue(e.getMessage().startsWith("Unexpected array found in JSON [{"));
 			assertEquals(0, e.getOffset());
 		}
 	}

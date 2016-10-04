@@ -21,6 +21,7 @@ import org.apache.lucene.document.DoubleField;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,9 +120,9 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser,
-			boolean clearId, Set<EntityBaseBean> done) throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId, done);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
+			Set<EntityBaseBean> done) throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, persistMode, done);
 		check(manager);
 	}
 
