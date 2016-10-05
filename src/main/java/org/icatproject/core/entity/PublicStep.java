@@ -85,9 +85,9 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
-			Set<EntityBaseBean> done) throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode, done);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
+			throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, persistMode);
 		this.fixup(manager, gateKeeper);
 	}
 

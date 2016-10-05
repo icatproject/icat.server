@@ -1,7 +1,6 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
-import java.util.Set;
 
 import javax.ejb.EJB;
 import javax.persistence.Column;
@@ -255,9 +254,9 @@ public class Rule extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
-			Set<EntityBaseBean> done) throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode, done);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
+			throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, persistMode);
 		this.fixup(manager, gateKeeper);
 		logger.debug("PreparePersist of Rule for " + this.crudFlags + " of " + this.what);
 	}

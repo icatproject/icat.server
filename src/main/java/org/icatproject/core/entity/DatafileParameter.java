@@ -1,7 +1,6 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
-import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -39,9 +38,9 @@ public class DatafileParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
-			Set<EntityBaseBean> done) throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode, done);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
+			throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, persistMode);
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}

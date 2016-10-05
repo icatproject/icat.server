@@ -3,7 +3,6 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -120,9 +119,9 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
-			Set<EntityBaseBean> done) throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode, done);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
+			throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, persistMode);
 		check(manager);
 	}
 

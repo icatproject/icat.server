@@ -15,6 +15,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1054,10 +1057,12 @@ public class TestRS {
 	public void testBug() throws Exception {
 		Session session = createAndPopulate();
 		ByteArrayOutputStream baos;
-		Long dsid = search(session, "SELECT ds.id FROM Dataset ds LIMIT 0, 1", 1).getJsonNumber(0).longValueExact();
+		JsonArray ds = search(session, "SELECT ds.id, ds.modTime FROM Dataset ds LIMIT 0, 1", 1).getJsonArray(0);
+		Long dsid = ds.getJsonNumber(0).longValueExact();
+		LocalDateTime modTime = LocalDateTime.parse(ds.getJsonString(1).getString(),
+				DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 		Long typid = search(session, "SELECT t.id FROM ParameterType t WHERE t.applicableToDataset = True LIMIT 0, 1",
 				1).getJsonNumber(0).longValueExact();
-		System.out.println(dsid + " " + typid);
 
 		baos = new ByteArrayOutputStream();
 		try (JsonGenerator jw = Json.createGenerator(baos)) {
@@ -1082,10 +1087,11 @@ public class TestRS {
 		}
 		session.write(baos.toString());
 
-		assertEquals("Attempt to update",
-				search(session, "SELECT ds.description FROM Dataset ds WHERE ds.id = " + dsid, 1).getJsonString(0)
-						.getString());
-
+		ds = search(session, "SELECT ds.description, ds.modTime FROM Dataset ds LIMIT 0, 1", 1).getJsonArray(0);
+		assertEquals("Attempt to update", ds.getJsonString(0).getString());
+		LocalDateTime newModTime = LocalDateTime.parse(ds.getJsonString(1).getString(),
+				DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+		assertEquals(1, newModTime.compareTo(modTime));
 	}
 
 	@Test

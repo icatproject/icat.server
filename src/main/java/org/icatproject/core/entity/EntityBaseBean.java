@@ -247,91 +247,86 @@ public abstract class EntityBaseBean implements Serializable {
 	 * super.preparePersist(). Note that it recurses down through all to-many
 	 * relationships.
 	 */
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
-			Set<EntityBaseBean> done) throws IcatException {
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
+			throws IcatException {
 
-		// Skip out if already processed
-		if (done.add(this)) {
+		logger.trace("preparePersist of " + this + " for state " + persistMode);
 
-			logger.debug("Preparing " + this + " for state " + persistMode);
-
-			if (persistMode == PersistMode.CLONE) {
+		if (persistMode == PersistMode.CLONE) {
+			createId = modId;
+			this.modId = modId;
+			Date now = new Date();
+			createTime = now;
+			modTime = now;
+		} else if (persistMode == PersistMode.IMPORTALL) {
+			this.id = null;
+			if (createId == null) {
 				createId = modId;
-				this.modId = modId;
-				Date now = new Date();
-				createTime = now;
-				modTime = now;
-			} else if (persistMode == PersistMode.IMPORTALL) {
-				this.id = null;
-				if (createId == null) {
-					createId = modId;
-				}
-				if (this.modId == null) {
-					this.modId = modId;
-				}
-				Date now = null;
-				if (createTime == null) {
-					now = new Date();
-					createTime = now;
-				}
-				if (modTime == null) {
-					if (now == null) {
-						now = new Date();
-					}
-					modTime = now;
-				}
-			} else if (persistMode == PersistMode.IMPORT_OR_WS) {
-				this.id = null;
-				createId = modId;
-				this.modId = modId;
-				Date now = new Date();
-				createTime = now;
-				modTime = now;
-			} else if (persistMode == PersistMode.REST) {
-				if (createId == null) {
-					createId = modId;
-				}
-				if (this.modId == null) {
-					this.modId = modId;
-				}
-				Date now = null;
-				if (createTime == null) {
-					now = new Date();
-					createTime = now;
-				}
-				if (modTime == null) {
-					if (now == null) {
-						now = new Date();
-					}
-					modTime = now;
-				}
-			} else {
-				throw new IcatException(IcatExceptionType.INTERNAL, "Unrecognised PersistMode");
 			}
+			if (this.modId == null) {
+				this.modId = modId;
+			}
+			Date now = null;
+			if (createTime == null) {
+				now = new Date();
+				createTime = now;
+			}
+			if (modTime == null) {
+				if (now == null) {
+					now = new Date();
+				}
+				modTime = now;
+			}
+		} else if (persistMode == PersistMode.IMPORT_OR_WS) {
+			this.id = null;
+			createId = modId;
+			this.modId = modId;
+			Date now = new Date();
+			createTime = now;
+			modTime = now;
+		} else if (persistMode == PersistMode.REST) {
+			if (createId == null) {
+				createId = modId;
+			}
+			if (this.modId == null) {
+				this.modId = modId;
+			}
+			Date now = null;
+			if (createTime == null) {
+				now = new Date();
+				createTime = now;
+			}
+			if (modTime == null) {
+				if (now == null) {
+					now = new Date();
+				}
+				modTime = now;
+			}
+		} else {
+			throw new IcatException(IcatExceptionType.INTERNAL, "Unrecognised PersistMode");
+		}
 
-			Class<? extends EntityBaseBean> klass = this.getClass();
-			Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
-			Map<Field, Method> getters = eiHandler.getGetters(klass);
-			for (Relationship r : rs) {
-				if (r.isCollection()) {
-					Method m = getters.get(r.getField());
-					try {
-						@SuppressWarnings("unchecked")
-						List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
-						if (!collection.isEmpty()) {
-							Method rev = r.getInverseSetter();
-							for (EntityBaseBean bean : collection) {
-								bean.preparePersist(modId, manager, gateKeeper, persistMode, done);
-								rev.invoke(bean, this);
-							}
+		Class<? extends EntityBaseBean> klass = this.getClass();
+		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		for (Relationship r : rs) {
+			if (r.isCollection()) {
+				Method m = getters.get(r.getField());
+				try {
+					@SuppressWarnings("unchecked")
+					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
+					if (!collection.isEmpty()) {
+						Method rev = r.getInverseSetter();
+						for (EntityBaseBean bean : collection) {
+							bean.preparePersist(modId, manager, gateKeeper, persistMode);
+							rev.invoke(bean, this);
 						}
-					} catch (Exception e) {
-						throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 					}
+				} catch (Exception e) {
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 				}
 			}
 		}
-
 	}
 
 	public EntityBaseBean pruned(boolean one, int hereVarNum, List<Step> steps, long maxEntities, GateKeeper gateKeeper,
