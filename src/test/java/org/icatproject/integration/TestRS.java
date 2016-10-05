@@ -1073,6 +1073,7 @@ public class TestRS {
 		}
 
 		session.write(baos.toString());
+		Thread.sleep(2000);
 
 		baos = new ByteArrayOutputStream();
 		try (JsonGenerator jw = Json.createGenerator(baos)) {
@@ -1084,6 +1085,21 @@ public class TestRS {
 		assertEquals("Attempt to update",
 				search(session, "SELECT ds.description FROM Dataset ds WHERE ds.id = " + dsid, 1).getJsonString(0)
 						.getString());
+
+	}
+
+	@Test
+	public void testBug2() throws Exception {
+		Session session = createAndPopulate();
+		ByteArrayOutputStream baos;
+		baos = new ByteArrayOutputStream();
+		Long dsid = search(session, "SELECT ds.id FROM Dataset ds LIMIT 0, 1", 1).getJsonNumber(0).longValueExact();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Dataset").write("id", dsid).writeStartArray("datafiles")
+					.writeStartObject().write("name", "df33").write("location", "everywhere").writeEnd().writeEnd()
+					.writeEnd().writeEnd();
+		}
+		session.write(baos.toString());
 	}
 
 	@Test

@@ -39,7 +39,6 @@ public class SampleParameter extends Parameter implements Serializable {
 	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode,
 			Set<EntityBaseBean> done) throws IcatException {
 		super.preparePersist(modId, manager, gateKeeper, persistMode, done);
-		this.id = null;
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}

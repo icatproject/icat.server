@@ -2112,9 +2112,15 @@ public class EntityBeanManager {
 		parseEntity(bean, contents, klass, manager, localCreates, localUpdates, create, userId);
 
 		Set<EntityBaseBean> done = new HashSet<>();
+
+		for (EntityBaseBean b : localUpdates.keySet()) {
+			b.setModId(userId);
+			b.setModTime(new Date());
+		}
+
 		try {
+			bean.preparePersist(userId, manager, gateKeeper, PersistMode.REST, done);
 			if (create) {
-				bean.preparePersist(userId, manager, gateKeeper, PersistMode.REST, done);
 				manager.persist(bean);
 				logger.trace(bean + " persisted.");
 			}
