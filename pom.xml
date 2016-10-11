@@ -3,26 +3,27 @@
 
 	<groupId>org.icatproject</groupId>
 	<artifactId>icat.server</artifactId>
-	<version>4.7.0</version>
+	<version>4.8.0</version>
 	<packaging>war</packaging>
 	<name>ICAT Server</name>
+	<description>A metadata catalogue to support Large Facility experimental data, 
+	linking all aspects of the research chain from proposal through to publication.</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<repoUrl>http://www.icatproject.org/mvn/repo</repoUrl>
+		<repoUrl>https://repo.icatproject.org/repo</repoUrl>
 		<serverPort>8181</serverPort>
 		<serverHost>localhost</serverHost>
-		<uniqueVersion>false</uniqueVersion>
-		<maven.install.skip>false</maven.install.skip>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<luceneVersion>5.3.0</luceneVersion>
 		<project.scm.id>github</project.scm.id>
+		<gitUrl>https://github.com/icatproject/icat.server</gitUrl>
 	</properties>
 
 	<repositories>
 		<repository>
 			<id>ICAT Repo</id>
-			<url>http://www.icatproject.org/mvn/repo</url>
+			<url>https://repo.icatproject.org/repo</url>
 		</repository>
 	</repositories>
 
@@ -35,14 +36,14 @@
 	</pluginRepositories>
 
 	<scm>
-		<connection>scm:git:https://github.com/icatproject/icat.server.git</connection>
-		<developerConnection>scm:git:https://github.com/icatproject/icat.server.git</developerConnection>
-		<url>https://github.com/icatproject/icat.server</url>
-		<tag>v4.7.0</tag>
-	</scm>
+		<connection>scm:git:${gitUrl}.git</connection>
+		<developerConnection>scm:git:${gitUrl}.git</developerConnection>
+		<url>${gitUrl}</url>
+	  <tag>v4.8.0</tag>
+  </scm>
 
 	<issueManagement>
-		<url>https://github.com/icatproject/icat.server/issues</url>
+		<url>${gitUrl}/issues</url>
 		<system>GitHub</system>
 	</issueManagement>
 
@@ -55,18 +56,18 @@
 
 	<organization>
 		<name>The ICAT Collaboration</name>
-		<url>http://www.icatproject.org</url>
+		<url>https://www.icatproject.org</url>
 	</organization>
 
 	<distributionManagement>
-		<downloadUrl>http://www.icatproject.org/mvn/repo</downloadUrl>
+		<downloadUrl>https://repo.icatproject.org/repo</downloadUrl>
 		<site>
-			<id>website</id>
-			<url>scp://www.icatproject.org/var/www/html/mvn/site/icat/server/${project.version}</url>
+			<id>repo.icatproject.org</id>
+			<url>dav:https://repo.icatproject.org/site/icat/server/${project.version}</url>
 		</site>
 		<repository>
-			<id>repo</id>
-			<url>scp://www.icatproject.org/var/www/html/mvn/repo</url>
+			<id>repo.icatproject.org</id>
+			<url>dav:https://repo.icatproject.org/repo</url>
 		</repository>
 	</distributionManagement>
 
@@ -137,13 +138,13 @@
 		<dependency>
 			<groupId>org.icatproject</groupId>
 			<artifactId>icat.utils</artifactId>
-			<version>4.14.0</version>
+			<version>4.15.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.icatproject</groupId>
 			<artifactId>icat.client</artifactId>
-			<version>4.7.0</version>
+			<version>4.8.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -164,6 +165,14 @@
 	</dependencies>
 
 	<build>
+
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav-jackrabbit</artifactId>
+				<version>2.10</version>
+			</extension>
+		</extensions>
 
 		<resources>
 			<resource>
@@ -187,11 +196,12 @@
 					</execution>
 				</executions>
 				<configuration>
-					<licence>cHJvamVjdHxvcmcuaWNhdHByb2plY3QuaWNhdC5zZXJ2ZXJ8MjAxNi0wOC0yN3x0cnVlfC0xI01Dd0NGRXBxLy92UjJXUzB0Q0tPb3lqSjBUWHNKRzRXQWhSeFVUa2c0bWNaMTRKS1RYbGlaMzEyMytreGFnPT0=</licence>
+					<licence>cHJvamVjdHxvcmcuaWNhdHByb2plY3QuaWNhdC5zZXJ2ZXJ8MjAxOC0wOS0xNXx0cnVlfC0xI01DMENGRzRQaDRMdlpvZlRwK0xsMmdENHFrZGR1VGtGQWhVQWk0eGh5cld4b25PTEJjWUhHS0pBbTcxa3VwST0=</licence>
 					<output>
 						<html>
 							<location>site/miredot</location>
 							<baseUrl>https://example.com/icat</baseUrl>
+							<intro>miredot.intro.html</intro>
 						</html>
 					</output>
 					<analysis>
@@ -227,19 +237,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
 				<version>3.3</version>
-				<dependencies>
-					<dependency><!-- add support for ssh/scp -->
-						<groupId>org.apache.maven.wagon</groupId>
-						<artifactId>wagon-ssh</artifactId>
-						<version>2.10</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.16</version>
+				<version>2.18.1</version>
 				<configuration>
 					<workingDirectory>${basedir}/src/test/config</workingDirectory>
 					<excludes>
@@ -255,7 +258,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.17</version>
+				<version>2.18.1</version>
 				<configuration>
 					<includes>
 						<include>**/integration/Test*.java</include>
@@ -289,7 +292,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.3</version>
 				<configuration>
 					<encoding>${project.build.sourceEncoding}</encoding>
 					<source>1.8</source>
@@ -300,7 +303,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>2.5.2</version>
+				<version>2.5.3</version>
 				<configuration>
 					<tagNameFormat>v@{project.version}</tagNameFormat>
 				</configuration>
@@ -309,7 +312,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
+				<version>1.5.0</version>
 				<executions>
 					<execution>
 						<id>Generate doc</id>
@@ -376,13 +379,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.7</version>
-				<dependencies>
-					<dependency><!-- add support for ssh/scp -->
-						<groupId>org.apache.maven.wagon</groupId>
-						<artifactId>wagon-ssh</artifactId>
-						<version>2.10</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 
 			<plugin>

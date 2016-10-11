@@ -7,7 +7,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -20,7 +19,6 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.util.BytesRef;
-import org.icatproject.core.IcatException;
 
 @Comment("A sample to be used in an investigation")
 @SuppressWarnings("serial")
@@ -63,18 +61,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	public List<SampleParameter> getParameters() {
 		return parameters;
-	}
-
-	@Override
-	public void isValid(EntityManager manager, boolean deepValidation) throws IcatException {
-		super.isValid(manager, deepValidation);
-		if (deepValidation) {
-			if (this.parameters != null) {
-				for (final SampleParameter sampleParameter : this.parameters) {
-					sampleParameter.isValid(manager);
-				}
-			}
-		}
 	}
 
 	public void setDatasets(List<Dataset> datasets) {

@@ -17,6 +17,7 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.SingletonFinder;
 import org.icatproject.core.oldparser.OldInput;
@@ -37,26 +38,28 @@ import org.slf4j.LoggerFactory;
 		@NamedQuery(name = "Rule.CreateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.c = TRUE"),
 		@NamedQuery(name = "Rule.ReadQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
 		@NamedQuery(name = "Rule.IncludeQuery", query = "SELECT DISTINCT r.includeJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
-		@NamedQuery(name = "Rule.UpdateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.u = TRUE"),
+		@NamedQuery(name = "Rule.UpdateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.u = TRUE AND r.attribute is NULL"),
+		@NamedQuery(name = "Rule.UpdateAttributeQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.u = TRUE AND r.attribute = :attribute"),
 		@NamedQuery(name = "Rule.DeleteQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.d = TRUE"),
 		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
 		@NamedQuery(name = "Rule.PublicQuery", query = "SELECT DISTINCT r.bean     FROM Rule r LEFT JOIN r.grouping g WHERE r.restricted = FALSE AND g IS NULL") })
 public class Rule extends EntityBaseBean implements Serializable {
 
-	@EJB
-	@XmlTransient
-	@Transient
-	private GateKeeper gatekeeper;
-
 	private final static Logger logger = LoggerFactory.getLogger(Rule.class);
 
 	public static final String CREATE_QUERY = "Rule.CreateQuery";
+
 	public static final String DELETE_QUERY = "Rule.DeleteQuery";
 	public static final String READ_QUERY = "Rule.ReadQuery";
 	public static final String INCLUDE_QUERY = "Rule.IncludeQuery";
 	public static final String SEARCH_QUERY = "Rule.SearchQuery";
 	public static final String UPDATE_QUERY = "Rule.UpdateQuery";
+	public static final String UPDATE_ATTRIBUTE_QUERY = "Rule.UpdateAttributeQuery";
 	public static final String PUBLIC_QUERY = "Rule.PublicQuery";
+	@EJB
+	@XmlTransient
+	@Transient
+	private GateKeeper gatekeeper;
 
 	@XmlTransient
 	private String bean;
@@ -99,6 +102,9 @@ public class Rule extends EntityBaseBean implements Serializable {
 	@Column(length = 1024)
 	private String includeJPQL;
 
+	@XmlTransient
+	private String attribute;
+
 	// Needed for JPA
 	public Rule() {
 	}
@@ -106,15 +112,15 @@ public class Rule extends EntityBaseBean implements Serializable {
 	private void fixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
 		this.crudFlags = this.crudFlags.toUpperCase().trim();
 		for (int i = 0; i < this.crudFlags.length(); i++) {
-			final char c = this.crudFlags.charAt(i);
-			if (c == 'C') {
-				this.c = true;
-			} else if (c == 'R') {
-				this.r = true;
-			} else if (c == 'U') {
-				this.u = true;
-			} else if (c == 'D') {
-				this.d = true;
+			final char ch = this.crudFlags.charAt(i);
+			if (ch == 'C') {
+				c = true;
+			} else if (ch == 'R') {
+				r = true;
+			} else if (ch == 'U') {
+				u = true;
+			} else if (ch == 'D') {
+				d = true;
 			} else {
 				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 						"CRUD value " + this.crudFlags + " contains " + c);
@@ -143,23 +149,33 @@ public class Rule extends EntityBaseBean implements Serializable {
 			gateKeeper.checkJPQL(query);
 		}
 
-		RuleWhat r;
+		RuleWhat rw;
 		try {
-			r = new RuleWhat(query);
+			rw = new RuleWhat(query);
 		} catch (final ParserException e) {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
 
-		crudJPQL = "SELECT COUNT(" + r.getIdPath() + ") FROM " + r.getFrom() + " WHERE " + r.getIdPath() + " = :pkid"
-				+ (r.getWhere().isEmpty() ? "" : " AND (" + r.getWhere() + ")");
-		includeJPQL = "SELECT " + r.getIdPath() + " FROM " + r.getFrom() + " WHERE " + r.getIdPath() + " IN (:pkids)"
-				+ (r.getWhere().isEmpty() ? "" : " AND (" + r.getWhere() + ")");
-		searchJPQL = "SELECT " + r.getIdPath() + " FROM " + r.getFrom()
-				+ (r.getWhere().isEmpty() ? "" : " WHERE " + r.getWhere());
+		attribute = rw.getAttribute();
+		if (attribute != null && (r || c || d)) {
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+					"Attribute selection in rules is only allowed for Update");
+		}
 
-		bean = r.getBean().getSimpleName();
+		crudJPQL = "SELECT COUNT(" + rw.getIdPath() + ") FROM " + rw.getFrom() + " WHERE " + rw.getIdPath() + " = :pkid"
+				+ (rw.getWhere().isEmpty() ? "" : " AND (" + rw.getWhere() + ")");
+		includeJPQL = "SELECT " + rw.getIdPath() + " FROM " + rw.getFrom() + " WHERE " + rw.getIdPath() + " IN (:pkids)"
+				+ (rw.getWhere().isEmpty() ? "" : " AND (" + rw.getWhere() + ")");
+		searchJPQL = "SELECT " + rw.getIdPath() + " FROM " + rw.getFrom()
+				+ (rw.getWhere().isEmpty() ? "" : " WHERE " + rw.getWhere());
 
-		restricted = !r.getWhere().isEmpty();
+		bean = rw.getBean().getSimpleName();
+
+		restricted = !rw.getWhere().isEmpty();
+	}
+
+	public String getAttribute() {
+		return attribute;
 	}
 
 	@XmlTransient
@@ -173,6 +189,10 @@ public class Rule extends EntityBaseBean implements Serializable {
 
 	public Grouping getGrouping() {
 		return grouping;
+	}
+
+	public String getSearchJPQL() {
+		return searchJPQL;
 	}
 
 	public String getWhat() {
@@ -215,12 +235,34 @@ public class Rule extends EntityBaseBean implements Serializable {
 		logger.debug("postMergeFixup of Rule for " + this.crudFlags + " of " + this.what);
 	}
 
+	@PostPersist()
+	void postPersist() {
+		try {
+			SingletonFinder.getGateKeeper().requestUpdatePublicTables();
+		} catch (Throwable e) {
+			logger.error(e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	@PostRemove()
+	void postRemove() {
+		try {
+			SingletonFinder.getGateKeeper().requestUpdatePublicTables();
+		} catch (Throwable e) {
+			logger.error(e.getClass() + " " + e.getMessage());
+		}
+	}
+
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser, boolean clearId)
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId);
+		super.preparePersist(modId, manager, gateKeeper, persistMode);
 		this.fixup(manager, gateKeeper);
 		logger.debug("PreparePersist of Rule for " + this.crudFlags + " of " + this.what);
+	}
+
+	public void setAttribute(String attribute) {
+		this.attribute = attribute;
 	}
 
 	public void setBean(String bean) {
@@ -243,10 +285,6 @@ public class Rule extends EntityBaseBean implements Serializable {
 		this.d = d;
 	}
 
-	public void setSearchJPQL(String searchJPQL) {
-		this.searchJPQL = searchJPQL;
-	}
-
 	public void setGrouping(Grouping grouping) {
 		this.grouping = grouping;
 	}
@@ -259,34 +297,16 @@ public class Rule extends EntityBaseBean implements Serializable {
 		this.restricted = restricted;
 	}
 
+	public void setSearchJPQL(String searchJPQL) {
+		this.searchJPQL = searchJPQL;
+	}
+
 	public void setU(boolean u) {
 		this.u = u;
 	}
 
 	public void setWhat(String what) {
 		this.what = what;
-	}
-
-	@PostRemove()
-	void postRemove() {
-		try {
-			SingletonFinder.getGateKeeper().requestUpdatePublicTables();
-		} catch (Throwable e) {
-			logger.error(e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	@PostPersist()
-	void postPersist() {
-		try {
-			SingletonFinder.getGateKeeper().requestUpdatePublicTables();
-		} catch (Throwable e) {
-			logger.error(e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	public String getSearchJPQL() {
-		return searchJPQL;
 	}
 
 }

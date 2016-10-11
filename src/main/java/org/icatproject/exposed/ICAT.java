@@ -274,7 +274,7 @@ public class ICAT {
 	@WebMethod
 	public boolean isAccessAllowed(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "bean") EntityBaseBean bean, @WebParam(name = "accessType") AccessType accessType)
-					throws IcatException {
+			throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
 			return beanManager.isAccessAllowed(userId, bean, manager, userTransaction, accessType);
@@ -290,15 +290,14 @@ public class ICAT {
 	@WebMethod
 	public String login(@WebParam(name = "plugin") String plugin,
 			@WebParam(name = "credentials") Map<String, String> credentials) throws IcatException {
-		logger.error("Going in");
 		String ip = ((HttpServletRequest) webServiceContext.getMessageContext().get(MessageContext.SERVLET_REQUEST))
 				.getRemoteAddr();
-		logger.error("Going in", ip);
-		Authenticator authenticator = authPlugins.get(plugin).getAuthenticator();
-		if (authenticator == null) {
+		ExtendedAuthenticator extendedAuthenticator = authPlugins.get(plugin);
+		if (extendedAuthenticator == null) {
 			throw new IcatException(IcatException.IcatExceptionType.SESSION,
 					"Authenticator mnemonic " + plugin + " not recognised");
 		}
+		Authenticator authenticator = extendedAuthenticator.getAuthenticator();
 		logger.debug("Using " + plugin + " to authenticate");
 		String userName = authenticator.authenticate(credentials, ip).getUserName();
 		return beanManager.login(userName, lifetimeMinutes, manager, userTransaction, ip);

@@ -8,10 +8,12 @@
     </breadcrumbs>
 
     <menu name="Information for Users">
+      <item name="User manual" href="user.html"/>
       <item name="Schema" href="schema.html"/>
       <item name="FAQ" href="faq.html"/>
       <item name="Issue Tracking" href="issue-tracking.html"/>
       <item name="Release Notes" href="release-notes.html"/>
+      <item name="SOAP interface" href="soap.html"/>
       <item name="RESTful interface (in new window)" href="miredot/index.html" target="_blank"/>
     </menu>
        

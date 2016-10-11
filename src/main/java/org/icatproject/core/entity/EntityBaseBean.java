@@ -10,7 +10,6 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -28,6 +27,7 @@ import org.apache.lucene.document.Document;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.manager.AccessType;
+import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
@@ -109,7 +109,7 @@ public abstract class EntityBaseBean implements Serializable {
 	@SuppressWarnings("unchecked")
 	private List<EntityBaseBean> allowedMany(Step step, Map<Field, Method> getters, GateKeeper gateKeeper,
 			String userId, EntityManager manager)
-					throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, IcatException {
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, IcatException {
 		Field field = step.getRelationship().getField();
 		List<EntityBaseBean> beans = (List<EntityBaseBean>) getters.get(field).invoke(this);
 		if (step.isAllowed()) {
@@ -121,7 +121,7 @@ public abstract class EntityBaseBean implements Serializable {
 
 	private EntityBaseBean allowedOne(Relationship r, Method method, GateKeeper gateKeeper, String userId,
 			EntityManager manager)
-					throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, IcatException {
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, IcatException {
 		EntityBaseBean bean = (EntityBaseBean) method.invoke(this);
 
 		if (bean != null && !gateKeeper.allowed(r)) {
@@ -234,61 +234,6 @@ public abstract class EntityBaseBean implements Serializable {
 		return this.modTime;
 	}
 
-	private void isValid() throws IcatException {
-		logger.trace("Checking validity of {}", this);
-		Class<? extends EntityBaseBean> klass = this.getClass();
-		List<Field> notNullFields = eiHandler.getNotNullableFields(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-
-		for (Field field : notNullFields) {
-
-			Object value;
-			try {
-				Method method = getters.get(field);
-				value = method.invoke(this, (Object[]) new Class[] {});
-			} catch (Exception e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
-			}
-
-			if (value == null) {
-				throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-						this.getClass().getSimpleName() + ": " + field.getName() + " cannot be null.");
-			}
-		}
-
-		Map<Field, Integer> stringFields = eiHandler.getStringFields(klass);
-		for (Entry<Field, Integer> entry : stringFields.entrySet()) {
-			Field field = entry.getKey();
-			Integer length = entry.getValue();
-			Method method = getters.get(field);
-			Object value;
-			try {
-				value = method.invoke(this, (Object[]) new Class[] {});
-			} catch (Exception e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
-			}
-			if (value != null) {
-				if (((String) value).length() > length) {
-					throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-							getClass().getSimpleName() + ": " + field.getName() + " cannot have length > " + length);
-				}
-			}
-		}
-
-	}
-
-	/*
-	 * If this method is overridden it should normally be called as well by
-	 * super.isValid()
-	 */
-	public void isValid(EntityManager manager) throws IcatException {
-		isValid(manager, true);
-	}
-
-	public void isValid(EntityManager manager, boolean deepValidation) throws IcatException {
-		isValid();
-	}
-
 	/*
 	 * If this method is overridden it should normally be called as well by
 	 * super.postMergeFixup()
@@ -302,27 +247,63 @@ public abstract class EntityBaseBean implements Serializable {
 	 * super.preparePersist(). Note that it recurses down through all to-many
 	 * relationships.
 	 */
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean allAttributes,
-			boolean clearId) throws IcatException {
-		if (clearId) {
-			this.id = null;
-		}
-		if (!allAttributes || createId == null) {
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
+			throws IcatException {
+
+		logger.trace("preparePersist of " + this + " for state " + persistMode);
+
+		if (persistMode == PersistMode.CLONE) {
 			createId = modId;
-		}
-		if (!allAttributes || this.modId == null) {
 			this.modId = modId;
-		}
-		Date now = null;
-		if (!allAttributes || createTime == null) {
-			now = new Date();
+			Date now = new Date();
 			createTime = now;
-		}
-		if (!allAttributes || modTime == null) {
-			if (now == null) {
-				now = new Date();
-			}
 			modTime = now;
+		} else if (persistMode == PersistMode.IMPORTALL) {
+			this.id = null;
+			if (createId == null) {
+				createId = modId;
+			}
+			if (this.modId == null) {
+				this.modId = modId;
+			}
+			Date now = null;
+			if (createTime == null) {
+				now = new Date();
+				createTime = now;
+			}
+			if (modTime == null) {
+				if (now == null) {
+					now = new Date();
+				}
+				modTime = now;
+			}
+		} else if (persistMode == PersistMode.IMPORT_OR_WS) {
+			this.id = null;
+			createId = modId;
+			this.modId = modId;
+			Date now = new Date();
+			createTime = now;
+			modTime = now;
+		} else if (persistMode == PersistMode.REST) {
+			if (createId == null) {
+				createId = modId;
+			}
+			if (this.modId == null) {
+				this.modId = modId;
+			}
+			Date now = null;
+			if (createTime == null) {
+				now = new Date();
+				createTime = now;
+			}
+			if (modTime == null) {
+				if (now == null) {
+					now = new Date();
+				}
+				modTime = now;
+			}
+		} else {
+			throw new IcatException(IcatExceptionType.INTERNAL, "Unrecognised PersistMode");
 		}
 
 		Class<? extends EntityBaseBean> klass = this.getClass();
@@ -337,7 +318,7 @@ public abstract class EntityBaseBean implements Serializable {
 					if (!collection.isEmpty()) {
 						Method rev = r.getInverseSetter();
 						for (EntityBaseBean bean : collection) {
-							bean.preparePersist(modId, manager, gateKeeper, allAttributes, clearId);
+							bean.preparePersist(modId, manager, gateKeeper, persistMode);
 							rev.invoke(bean, this);
 						}
 					}
@@ -482,4 +463,5 @@ public abstract class EntityBaseBean implements Serializable {
 	public Document getDoc() {
 		return null;
 	}
+
 }

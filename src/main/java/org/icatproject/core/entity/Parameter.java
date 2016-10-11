@@ -20,6 +20,7 @@ import org.apache.lucene.document.DoubleField;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,9 +119,9 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser, boolean clearId)
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId);
+		super.preparePersist(modId, manager, gateKeeper, persistMode);
 		check(manager);
 	}
 
@@ -128,7 +129,6 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}
-		logger.debug("PreparePersist of type " + type.getName() + " " + type.isEnforced() + " " + type.getValueType());
 		if (!type.isEnforced()) {
 			return;
 		}

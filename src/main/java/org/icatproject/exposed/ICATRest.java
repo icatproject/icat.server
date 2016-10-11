@@ -184,6 +184,50 @@ public class ICATRest {
 	}
 
 	/**
+	 * Clone an entity
+	 * 
+	 * @summary Clone
+	 * 
+	 * @param sessionId
+	 *            a sessionId of a user which takes the form
+	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 * @param name
+	 *            name of type of entity such as "Investigation"
+	 * @param id
+	 *            id of entity to be cloned
+	 * @param keys
+	 *            json string with keys to identify the clone which takes the
+	 *            form <code>{"name":"anInvName", "visitId":"v42"]</code>. If
+	 *            the entity type has more than one field to identify it then
+	 *            any value not supplied in the map represented by the json
+	 *            string will be taken from the object being cloned.
+	 * 
+	 * @return id of clone as a json string of the form <samp>{"id":126}</samp>
+	 * 
+	 * @throws IcatException
+	 *             when something is wrong
+	 */
+	@POST
+	@Path("cloner")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(MediaType.APPLICATION_JSON)
+	public String cloneEntity(@Context HttpServletRequest request, @FormParam("sessionId") String sessionId,
+			@FormParam("name") String name, @FormParam("id") long id, @FormParam("keys") String keys)
+			throws IcatException {
+
+		String userName = beanManager.getUserName(sessionId, manager);
+
+		long beanId = beanManager.cloneEntity(userName, name, id, keys, manager, userTransaction,
+				request.getRemoteAddr());
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonGenerator gen = Json.createGenerator(baos);
+		gen.writeStartObject().write("id", beanId).writeEnd();
+		gen.close();
+		return baos.toString();
+	}
+
+	/**
 	 * Delete entities as a json string.
 	 * 
 	 * @summary delete
@@ -266,7 +310,7 @@ public class ICATRest {
 	/**
 	 * Export data from ICAT
 	 * 
-	 * @summary Export
+	 * @summary Export Metadata
 	 * 
 	 * @param jsonString
 	 *            what to export which takes the form
@@ -371,6 +415,8 @@ public class ICATRest {
 	/**
 	 * Return all that can be returned when not authenticated
 	 * 
+	 * @summary Properties
+	 * 
 	 * @return a json string
 	 */
 	@GET
@@ -412,7 +458,7 @@ public class ICATRest {
 	/**
 	 * Return information about a session
 	 * 
-	 * @summary getSession
+	 * @summary Session
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -445,6 +491,8 @@ public class ICATRest {
 	 * unexpired session. This call should be used for a user logged in using an
 	 * authentication plugin configured to not return the mnemonic.
 	 * 
+	 * @summary LoggedIn
+	 * 
 	 * @param userName
 	 *            the name of the user (without mnemonic)
 	 * 
@@ -465,6 +513,8 @@ public class ICATRest {
 	 * Return whether or not a given user is logged in - i.e. has at least one
 	 * unexpired session. This call should be used for a user logged in using an
 	 * authentication plugin configured to return the mnemonic.
+	 * 
+	 * @summary LoggedIn
 	 * 
 	 * @param mnemonic
 	 *            the mnemomnic used to identify the authentication plugin
@@ -488,7 +538,7 @@ public class ICATRest {
 	/**
 	 * return the version of the icat server
 	 * 
-	 * @summary getVersion
+	 * @summary Version
 	 * 
 	 * @return json string of the form: <samp>{"version":"4.4.0"}</samp>
 	 */
@@ -548,8 +598,7 @@ public class ICATRest {
 	 * file.</dd>
 	 * </dl>
 	 * 
-	 * 
-	 * @summary importData
+	 * @summary import metadata
 	 *
 	 * @throws IcatException
 	 *             when something is wrong
@@ -773,7 +822,7 @@ public class ICATRest {
 	/**
 	 * Logout from a session
 	 * 
-	 * @summary logout
+	 * @summary Logout
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -792,7 +841,7 @@ public class ICATRest {
 	/**
 	 * perform a lucene search
 	 * 
-	 * @summary lucene
+	 * @summary lucene search
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -976,7 +1025,7 @@ public class ICATRest {
 	/**
 	 * Clear the lucene database
 	 * 
-	 * @summary luceneClear
+	 * @summary Lucene Clear
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -994,7 +1043,7 @@ public class ICATRest {
 	/**
 	 * Forces a commit of the lucene database
 	 * 
-	 * @summary commit
+	 * @summary Lucene Commit
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1012,7 +1061,7 @@ public class ICATRest {
 	/**
 	 * Return a list of class names for which population is going on
 	 * 
-	 * @summary luceneGetPopulating
+	 * @summary lucene GetPopulating
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1039,7 +1088,7 @@ public class ICATRest {
 	/**
 	 * Clear and repopulate lucene documents for the specified entityName
 	 * 
-	 * @summary lucenePopulate
+	 * @summary Lucene Populate
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1060,7 +1109,7 @@ public class ICATRest {
 	/**
 	 * Refresh session
 	 * 
-	 * @summary refresh
+	 * @summary Lucene Refresh
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -1077,8 +1126,9 @@ public class ICATRest {
 	}
 
 	/**
-	 * Return entities as a json string. This includes the functionality of both
-	 * search and get calls in the SOAP web service.
+	 * Return entities or selected values in tabular format as a json string.
+	 * This includes the functionality of both search and get calls in the SOAP
+	 * web service.
 	 * 
 	 * @summary search/get
 	 * 
@@ -1091,16 +1141,17 @@ public class ICATRest {
 	 * @param id
 	 *            it takes the form <code>732</code> and is used when the
 	 *            functionality of get is required in which case the query must
-	 *            be as described in the ICAT Java Client manual.
+	 *            be as described in the ICAT Soap manual</a>.
 	 * 
 	 * @return entities or arrays of values as a json string. The query
 	 *         <code>SELECT f FROM Facility f</code> might return
 	 *         <samp>[{"Facility":{"id":126, "name":"another fred"
 	 *         }},{"Facility":{"id":185, "name":"a fred"}} ]</samp> and is a
 	 *         list of the objects returned and takes the same form as the data
-	 *         passed in for create. If more than one quantity is listed in the
-	 *         select clause then instead of a single value being returned for
-	 *         each result an array of values is returned. For example
+	 *         passed in for create. The objects are fully self describing. If
+	 *         more than one quantity is listed in the select clause then
+	 *         instead of a single value being returned for each result an array
+	 *         of values is returned. For example
 	 *         <code>SELECT f.id, f.name FROM Facility f</code> might return:
 	 *         <samp> [[126, "another fred"],[185, "a fred"]]</samp>. If an id
 	 *         value is specified then only one object can be returned so

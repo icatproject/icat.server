@@ -1,84 +1,94 @@
 #!/usr/bin/env python
 
-from suds.client import Client
-
 import logging
 import sys
 import getpass
-import ssl
+import json
+import requests
 
-logging.basicConfig(level=logging.CRITICAL)
-
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-    # Legacy Python that doesn't verify HTTPS certificates by default
-    pass
-else:
-    # Handle target environment that doesn't support HTTPS verification
-    ssl._create_default_https_context = _create_unverified_https_context
+def check(r):
+        if r.status_code / 100 != 2:
+            json = r.json()
+            if json.get("offset"):
+                print >> sys.stderr, json["code"], json["message"], json["offset"]
+            else:
+                print >> sys.stderr, json["code"], json["message"]
+            sys.exit(1)
 
 args = sys.argv
 if len(args) < 3 or len(args) % 2 != 1:
     print >> sys.stderr, "\nThis must have two fixed arguments: url and plugin mnemonic\nfollowed by pairs of arguments to represent the credentials. For example\n\n    ", args[0], "https://example.com:8181 db username root password guess\n"
     sys.exit(1)
-
+    
 url = args[1]
+
+r = requests.get(url + "/icat/version", verify=False)
+check(r)
+print "ICAT version", r.json()["version"]
+
 plugin = args[2]
-client = None
-suffices = ["/ICATService/ICAT?wsdl", "/icat/ICAT?wsdl"]
-for suffix in suffices:
-    url = args[1]
-    if not url.endswith(suffix): url = url + suffix
-    try:
-        client = Client(url)
-        break;
-    except:
-        pass
-if not client:
-    print >> sys.stderr, "Service at url" + args[1] + " not found"
-    sys.exit(1)
-service = client.service
-factory = client.factory
 
-credentials = factory.create("login.credentials")
+credentials = []
 for i in range (3, len(args), 2):
-    entry = factory.create("login.credentials.entry")
-    entry.key = args[i]   
+    key = args[i]   
     if args[i + 1] == "-":
-        entry.value = getpass.getpass()
+        value = getpass.getpass()
     else:
-        entry.value = args[i + 1]
-    credentials.entry.append(entry)
+        value = args[i + 1]
+    credential = {}
+    credential[key] = value
+    credentials.append(credential)
     
-print "ICAT version", service.getApiVersion() 
+arg = {}
+arg["plugin"] = plugin
+arg["credentials"] = credentials
 
-sessionId = service.login(plugin, credentials)
-print "Logged in as", service.getUserName(sessionId), "with", service.getRemainingMinutes(sessionId), "minutes to go"
+r = requests.post(url + "/icat/session", data={'json': json.dumps(arg)}, verify=False)
+check(r)
+sessionId = r.json()["sessionId"]
 
-groups = service.search(sessionId, "Grouping[name='annoying animals']")
-if len(groups): 
+r = requests.get(url + "/icat/session/" + sessionId, verify=False)
+check(r)
+print "Logged in as", r.json()["userName"], "with", r.json()["remainingMinutes"], "minutes to go"
+
+r = requests.get(url + "/icat/entityManager", params = {"sessionId":sessionId, "query" : "SELECT g.id FROM Grouping g WHERE g.name='annoying animals'"}, verify = False)
+check(r)
+groupIds = r.json()
+if len(groupIds): 
     print "Grouping 'annoying animals' already exist - they will be deleted"
-    for group in groups:
-        service.delete(sessionId, group)
+    for groupId in groupIds:
+        g = {"Grouping": {"id" : groupId}}
+        r = requests.delete(url + "/icat/entityManager", params={"sessionId":sessionId, "entities" : json.dumps(g)}, verify=False)
+        check(r)
         
-group = factory.create("grouping")
-group.name = "annoying animals"
-service.create(sessionId, group)
+grouping = {"name":"annoying animals"}
+entity = {"Grouping" : grouping}
+r = requests.post(url + "/icat/entityManager", data={"sessionId":sessionId, "entities" : json.dumps(entity)}, verify=False)
+check(r)
 
-groups = service.search(sessionId, "Grouping[name='annoying animals']")
-if len(groups) != 1:
-    print >> sys.stderr, "There are now", len(groups), "groupings instead of 1 - something is wrong"
+r = requests.get(url + "/icat/entityManager", params = {"sessionId":sessionId, "query" : "SELECT g.id FROM Grouping g WHERE g.name='annoying animals'"}, verify = False)
+check(r)
+groupIds = r.json()
+
+if len(groupIds) != 1:
+    print >> sys.stderr, "There are now", len(groupIds), "groupings instead of 1 - something is wrong"
+    sys.exit(1)
+       
+for groupId in groupIds:
+        g = {"Grouping": {"id" : groupId}}
+        r = requests.delete(url + "/icat/entityManager", params={"sessionId":sessionId, "entities" : json.dumps(g)}, verify=False)
+        check(r)
+
+r = requests.get(url + "/icat/entityManager", params = {"sessionId":sessionId, "query" : "SELECT g.id FROM Grouping g WHERE g.name='annoying animals'"}, verify = False)
+check(r)
+groupIds = r.json()
+if len(groupIds):
+    print >> sys.stderr, "There are now", len(groupIds), "groupings instead of 0 - something is wrong"
     sys.exit(1)
     
-for group in groups:
-    service.delete(sessionId, group)
-    
-groups = service.search(sessionId, "Grouping[name='annoying animals']")
-if len(groups):
-    print >> sys.stderr, "There are now", len(groups), "groupings instead of 0 - something is wrong"
-    sys.exit(1)
-    
-service.logout(sessionId)
-    
+r = requests.delete(url + "/icat/session/" + sessionId, verify=False)
+check(r)
+
 print "Login, search, create, delete and logout operations were all successful."
+    
+

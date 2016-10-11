@@ -1422,7 +1422,7 @@ public class TestWS {
 	public void login() throws Exception {
 		double rm = session.getRemainingMinutes();
 		assertTrue(rm > 0);
-		assertTrue("API version", session.getApiVersion().startsWith("4.7."));
+		assertTrue("API version", session.getApiVersion().startsWith("4.8."));
 		assertEquals("db/notroot", session.getUserName());
 		Thread.sleep(10);
 		rm = session.getRemainingMinutes();
@@ -1431,6 +1431,17 @@ public class TestWS {
 
 		WSession piOneSession = session.getSession("db", "username", "piOne", "password", "piOne");
 		piOneSession.logout();
+	}
+
+	@Test
+	public void badPlugin() throws Exception {
+		try {
+			session.getSession("typo", "username", "notroot", "password", "password");
+			fail("Should throw an exception");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.SESSION, e.getFaultInfo().getType());
+			assertEquals("Authenticator mnemonic typo not recognised", e.getMessage());
+		}
 	}
 
 	@Test

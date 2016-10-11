@@ -1,6 +1,7 @@
 package org.icatproject.core.parser;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.icatproject.core.entity.Dataset;
@@ -21,20 +22,20 @@ public class TestRuleWhat {
 					e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testBad2() throws Exception {
 
 		try {
-			new RuleWhat("SELECT ds.name FROM Dataset ds");
+			new RuleWhat("SELECT ds.investigation.name FROM Dataset ds");
 			fail("Exception should have been thrown");
 		} catch (Exception e) {
 			assertEquals(ParserException.class, e.getClass());
-			assertEquals("Rule must have an entity reference in the SELECT clause rather than ds.name",
+			assertEquals("class org.icatproject.core.entity.Dataset does not have attribute investigation.name",
 					e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testBad3() throws Exception {
 
@@ -43,11 +44,10 @@ public class TestRuleWhat {
 			fail("Exception should have been thrown");
 		} catch (Exception e) {
 			assertEquals(ParserException.class, e.getClass());
-			assertEquals("Expected token from types [NAME] at token COUNT in SELECT < COUNT > ( ds ",
-					e.getMessage());
+			assertEquals("Expected token from types [NAME] at token COUNT in SELECT < COUNT > ( ds ", e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testBad4() throws Exception {
 
@@ -56,8 +56,7 @@ public class TestRuleWhat {
 			fail("Exception should have been thrown");
 		} catch (Exception e) {
 			assertEquals(ParserException.class, e.getClass());
-			assertEquals("Expected token from types [FROM] at token , in SELECT df < , > ds FROM ",
-					e.getMessage());
+			assertEquals("Expected token from types [FROM] at token , in SELECT df < , > ds FROM ", e.getMessage());
 		}
 	}
 
@@ -66,6 +65,7 @@ public class TestRuleWhat {
 		RuleWhat sq = new RuleWhat("SELECT ds FROM Dataset ds JOIN ds.parameters p WHERE p.type.name = 'TIMESTAMP' ");
 		assertEquals(" Dataset ds JOIN ds.parameters p", sq.getFrom());
 		assertEquals(" p.type.name = 'TIMESTAMP'", sq.getWhere());
+		assertNull(sq.getAttribute());
 		assertEquals(Dataset.class, sq.getBean());
 	}
 
@@ -74,7 +74,18 @@ public class TestRuleWhat {
 
 		RuleWhat sq = new RuleWhat("SELECT ds FROM Dataset ds WHERE ds.name LIKE 'PUBLIC%' ");
 		assertEquals(" Dataset ds", sq.getFrom());
+		assertNull(sq.getAttribute());
+		assertEquals(Dataset.class, sq.getBean());
+
+	}
+
+	@Test
+	public void testGoodAttribute() throws Exception {
+
+		RuleWhat sq = new RuleWhat("SELECT ds.doi FROM Dataset ds WHERE ds.name LIKE 'PUBLIC%' ");
+		assertEquals(" Dataset ds", sq.getFrom());
 		assertEquals(" ds.name LIKE 'PUBLIC%'", sq.getWhere());
+		assertEquals("doi", sq.getAttribute());
 		assertEquals(Dataset.class, sq.getBean());
 
 	}

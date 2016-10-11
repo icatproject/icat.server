@@ -1,11 +1,13 @@
 package org.icatproject.core.manager;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -25,6 +27,8 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
@@ -62,6 +66,8 @@ public class GateKeeper {
 			}
 		}
 	};
+
+	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
 	private final static Pattern tsRegExp = Pattern
 			.compile("\\{\\s*ts\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s*\\}");
@@ -404,6 +410,77 @@ public class GateKeeper {
 			e.printStackTrace();
 			logger.error("Unexpected exception", e);
 		}
+	}
+
+	public void performUpdateAuthorisation(String user, EntityBaseBean bean, JsonObject contents, EntityManager manager)
+			throws IcatException {
+		if (isAccessAllowed(user, bean, AccessType.UPDATE, manager)) {
+			return;
+		}
+
+		// Now see if all the updated attributes are allowed individually
+		logger.info("Consider {}", contents);
+		Class<? extends EntityBaseBean> klass = bean.getClass();
+		String simpleName = klass.getSimpleName();
+		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
+		Map<String, Field> fieldsByName = eiHandler.getFieldsByName(klass);
+
+		for (Entry<String, JsonValue> fentry : contents.entrySet()) {
+			String fName = fentry.getKey();
+			if (!fName.equals("id")) {
+				Field field = fieldsByName.get(fName);
+				if (updaters.contains(field)) {
+					String qName = Rule.UPDATE_ATTRIBUTE_QUERY;
+					logger.debug("Checking " + qName + " " + user + " " + simpleName + "." + fName);
+					TypedQuery<String> query = manager.createNamedQuery(qName, String.class)
+							.setParameter("member", user).setParameter("bean", simpleName)
+							.setParameter("attribute", fName);
+					List<String> restrictions = query.getResultList();
+					logger.debug("Got " + restrictions.size() + " authz queries for UPDATE by " + user + " to a "
+							+ simpleName + "." + fName);
+					boolean ok = false;
+					for (String restriction : restrictions) {
+						if (restriction == null) {
+							logger.info("Null restriction => UPDATE permitted to " + simpleName + "." + fName);
+							ok = true;
+						}
+					}
+					if (!ok) {
+						/*
+						 * Sort a copy of the results by string length. It is
+						 * probably faster to evaluate a shorter query.
+						 */
+						List<String> sortedQueries = new ArrayList<String>();
+						sortedQueries.addAll(restrictions);
+						Collections.sort(sortedQueries, stringsBySize);
+
+						Long keyVal = bean.getId();
+
+						for (String qString : sortedQueries) {
+							TypedQuery<Long> q = manager.createQuery(qString, Long.class);
+							if (qString.contains(":user")) {
+								q.setParameter("user", user);
+							}
+							q.setParameter("pkid", keyVal);
+							if (q.getSingleResult() > 0) {
+								logger.info("UPDATE to " + simpleName + "." + fName + " permitted by " + qString);
+								ok = true;
+								break;
+							}
+						}
+					}
+					if (!ok) {
+						throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
+								"UPDATE access to this " + bean.getClass().getSimpleName() + " is not allowed.");
+					}
+				} else {
+					throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
+							"UPDATE access to this " + bean.getClass().getSimpleName() + " is not allowed.");
+				}
+			}
+
+		}
+
 	}
 
 }
