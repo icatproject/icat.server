@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -65,6 +66,7 @@ import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
 import org.icatproject.core.manager.AccessType;
+import org.icatproject.core.manager.AuthenticatorInfo;
 import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfo;
@@ -387,6 +389,17 @@ public class ICAT {
 			reportThrowable(e);
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 		}
+	}
+
+	@WebMethod
+	public List<AuthenticatorInfo> getAuthenticatorInfo() throws IcatException {
+		List<AuthenticatorInfo> infos = new ArrayList<AuthenticatorInfo>();
+		for (Entry<String, ExtendedAuthenticator> entry : authPlugins.entrySet()) {
+			String mnemonic = entry.getKey();
+			ExtendedAuthenticator auth = entry.getValue();
+			infos.add(new AuthenticatorInfo(mnemonic, auth));
+		}
+		return infos;
 	}
 
 }
