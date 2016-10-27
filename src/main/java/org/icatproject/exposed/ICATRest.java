@@ -435,7 +435,7 @@ public class ICATRest {
 					.createReader(new StringReader(extendedAuthenticator.getAuthenticator().getDescription()));
 			JsonObject description = jsonReader.readObject();
 			jsonReader.close();
-			authenticatorBuilder.add("description", description);
+			authenticatorBuilder.add("keys", description.get("keys"));
 			if (extendedAuthenticator.isAdmin()) {
 				authenticatorBuilder.add("admin", true);
 			}

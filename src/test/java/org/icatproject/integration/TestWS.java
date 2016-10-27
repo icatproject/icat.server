@@ -21,6 +21,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.icatproject.AccessType;
 import org.icatproject.Application;
+import org.icatproject.AuthenticatorCredentialKey;
+import org.icatproject.AuthenticatorInfo;
 import org.icatproject.Constraint;
 import org.icatproject.DataCollection;
 import org.icatproject.Datafile;
@@ -66,6 +68,7 @@ import org.junit.Test;
  */
 public class TestWS {
 
+	private static final String version = "4.9.";
 	private static Random random;
 	private static WSession session;
 
@@ -1422,7 +1425,7 @@ public class TestWS {
 	public void login() throws Exception {
 		double rm = session.getRemainingMinutes();
 		assertTrue(rm > 0);
-		assertTrue("API version", session.getApiVersion().startsWith("4.8."));
+		assertTrue("API version", session.getApiVersion().startsWith(version));
 		assertEquals("db/notroot", session.getUserName());
 		Thread.sleep(10);
 		rm = session.getRemainingMinutes();
@@ -1441,6 +1444,28 @@ public class TestWS {
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.SESSION, e.getFaultInfo().getType());
 			assertEquals("Authenticator mnemonic typo not recognised", e.getMessage());
+		}
+	}
+
+	@Test
+	public void authenticatorInfo() throws IcatException_Exception {
+		for (AuthenticatorInfo info : session.getAuthenticatorInfo()) {
+			if (info.getMnemonic().equals("db")) {
+				assertNull(info.getFriendly());
+				assertFalse(info.isAdmin());
+				assertEquals(2, info.getKeys().size());
+				for (AuthenticatorCredentialKey key : info.getKeys()) {
+					if (key.getName().equals("username")) {
+						assertNull(key.getPattern());
+						assertFalse(key.isHide());
+					} else if (key.getName().equals("password")) {
+						assertNull(key.getPattern());
+						assertTrue(key.isHide());
+					} else {
+						fail("Unexpected key name " + key.getName());
+					}
+				}
+			}
 		}
 	}
 

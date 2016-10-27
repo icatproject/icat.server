@@ -239,6 +239,17 @@ public class ICAT {
 	}
 
 	@WebMethod
+	public List<AuthenticatorInfo> getAuthenticatorInfo() throws IcatException {
+		List<AuthenticatorInfo> infos = new ArrayList<>();
+		for (Entry<String, ExtendedAuthenticator> entry : authPlugins.entrySet()) {
+			String mnemonic = entry.getKey();
+			ExtendedAuthenticator auth = entry.getValue();
+			infos.add(new AuthenticatorInfo(mnemonic, auth));
+		}
+		return infos;
+	}
+
+	@WebMethod
 	public EntityInfo getEntityInfo(@WebParam(name = "beanName") String beanName) throws IcatException {
 		return beanManager.getEntityInfo(beanName);
 	}
@@ -262,6 +273,11 @@ public class ICAT {
 	@WebMethod
 	public String getUserName(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		return beanManager.getUserName(sessionId, manager);
+	}
+
+	@WebMethod()
+	public String getVersion() throws IcatException {
+		return Constants.API_VERSION;
 	}
 
 	@PostConstruct
@@ -389,17 +405,6 @@ public class ICAT {
 			reportThrowable(e);
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 		}
-	}
-
-	@WebMethod
-	public List<AuthenticatorInfo> getAuthenticatorInfo() throws IcatException {
-		List<AuthenticatorInfo> infos = new ArrayList<AuthenticatorInfo>();
-		for (Entry<String, ExtendedAuthenticator> entry : authPlugins.entrySet()) {
-			String mnemonic = entry.getKey();
-			ExtendedAuthenticator auth = entry.getValue();
-			infos.add(new AuthenticatorInfo(mnemonic, auth));
-		}
-		return infos;
 	}
 
 }

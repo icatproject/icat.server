@@ -93,6 +93,7 @@ public class LuceneSingleton implements Lucene {
 				this.ids = ids;
 				manager = entityManagerFactory.createEntityManager();
 			} catch (Exception e) {
+				logger.error("About to throw internal exception because of", e);
 				throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
 			}
 		}
@@ -113,6 +114,7 @@ public class LuceneSingleton implements Lucene {
 				manager.close();
 				return null;
 			} catch (Exception e) {
+				logger.error("About to throw internal exception because of", e);
 				throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
 			}
 		}
@@ -428,7 +430,7 @@ public class LuceneSingleton implements Lucene {
 
 	private Query buildInvestigationQuery(String userName, String text, String lower, String upper,
 			List<ParameterPOJO> parms, List<String> samples, String userFullName, Map<String, IndexSearcher> bucket)
-					throws QueryNodeException, IOException {
+			throws QueryNodeException, IOException {
 		logger.debug("Lucene Investigation search user:" + userName + " text:" + text + " lower:" + lower + " upper:"
 				+ upper + " parameters: " + parms + " samples:" + samples + " userFullName:" + userFullName);
 

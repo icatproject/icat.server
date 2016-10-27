@@ -14,6 +14,7 @@ import javax.xml.ws.WebServiceException;
 
 import org.icatproject.AccessType;
 import org.icatproject.Application;
+import org.icatproject.AuthenticatorInfo;
 import org.icatproject.DataCollection;
 import org.icatproject.DataCollectionDatafile;
 import org.icatproject.DataCollectionDataset;
@@ -525,6 +526,10 @@ public class WSession {
 		si.setInvestigation(inv);
 		icat.create(sessionId, si);
 
+	}
+
+	public List<AuthenticatorInfo> getAuthenticatorInfo() throws IcatException_Exception {
+		return icat.getAuthenticatorInfo();
 	}
 
 }
