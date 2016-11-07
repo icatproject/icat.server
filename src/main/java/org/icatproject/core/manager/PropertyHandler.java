@@ -14,7 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -30,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-@DependsOn("LoggingConfigurator")
 @Singleton
 public class PropertyHandler {
 

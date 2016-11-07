@@ -418,11 +418,6 @@
 			log via JMS calls. The types are specified by a space separated list
 			of values taken from READ, WRITE, SESSION, INFO.</dd>
 
-		<dt>logback.xml</dt>
-		<dd>This is optional. If present it must specify the path to a
-			logback.xml file. The path may be absolute or relative to the config
-			directory.</dd>
-
 		<dt>lucene.directory</dt>
 		<dd>This is optional. It is the path to a directory (whose parent
 			must exist) in which to store the lucene index. If this is specified

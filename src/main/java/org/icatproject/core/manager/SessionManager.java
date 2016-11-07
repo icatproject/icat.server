@@ -1,6 +1,5 @@
 package org.icatproject.core.manager;
 
-import javax.ejb.DependsOn;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.persistence.EntityManager;
@@ -10,7 +9,6 @@ import org.icatproject.core.entity.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@DependsOn("LoggingConfigurator")
 @Singleton
 public class SessionManager {
 
