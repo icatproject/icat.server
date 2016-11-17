@@ -418,11 +418,14 @@ public class ICATRest {
 	 * @summary Properties
 	 * 
 	 * @return a json string
+	 * 
+	 * @throws IcatException
+	 *             when something is wrong
 	 */
 	@GET
 	@Path("properties")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getProperties() {
+	public String getProperties() throws IcatException {
 
 		JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
 		JsonArrayBuilder authenticatorArrayBuilder = Json.createArrayBuilder();
@@ -505,6 +508,35 @@ public class ICATRest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 			gen.writeStartObject().write("loggedIn", beanManager.isLoggedIn(userName, manager)).writeEnd();
+		}
+		return baos.toString();
+	}
+
+	/**
+	 * Returns after specified number of seconds - returning elapsed time in
+	 * milliseconds
+	 * 
+	 * @summary Sleep
+	 * 
+	 * @param seconds
+	 *            how many seconds to wait before returning
+	 * 
+	 * @return json string of the form: <samp>{"slept": 20000}</samp>
+	 */
+	@GET
+	@Path("sleep/{seconds}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String sleep(@PathParam("seconds") Long seconds) {
+		long time = System.currentTimeMillis();
+		try {
+			Thread.sleep(seconds * 1000);
+		} catch (InterruptedException e) {
+			// Do nothing
+		}
+		time = (System.currentTimeMillis() - time);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartObject().write("slept", time).writeEnd();
 		}
 		return baos.toString();
 	}

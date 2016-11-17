@@ -30,8 +30,8 @@ if arg in ["CONFIGURE", "INSTALL"]:
 
 if arg == "INSTALL":       
     for v in icatProperties["authn.list"].split():
-        if "authn." + v + ".jndi" not in icatProperties:
-            abort ("authn.list included " + v + " but authn." + v + ".jndi is not defined") 
+        if "authn." + v + ".jndi" not in icatProperties and "authn." + v + ".url" not in icatProperties:
+            abort ("authn.list included " + v + " but neither authn." + v + ".url nor authn." + v + ".jndi is not defined") 
     
     if icatProperties["notification.list"]:
         for v in icatProperties["notification.list"].split():

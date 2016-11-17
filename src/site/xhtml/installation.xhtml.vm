@@ -328,12 +328,10 @@
 		</dd>
 	</dl>
 
-	<h2>The icat.properties and icat.logback.xml files</h2>
+	<h2>The icat.properties and logback.xml files</h2>
 
 	<p>If you wish to modify the provided logging levels then rename
-		icat.logback.xml.example to icat.logback.xml and update the
-		icat.properties file to reference it as explained below. The
-		icat.properties file may need other changes:</p>
+		logback.xml.example to logback.xml.</p>
 	<dl>
 		<dt>lifetimeMinutes</dt>
 		<dd>Defines the lifetime of an ICAT sessionid. You should avoid
@@ -378,30 +376,34 @@
 			stale information being used from the cache.</dd>
 
 		<dt>authn.list</dt>
-		<dd>is a space separated set of mnemonics for user to select the
-			plugin in the login call. This must not reference plugins which are
-			not installed as plugins are checked when ICAT performs its
-			initialisation; if plugins are missing ICAT will not start.</dd>
+		<dd>is a space separated set of mnemonics for a user to select
+			the authenticator in the login call. Authenticators are separate
+			applications which may be "Remote EJBs" if installed in the same
+			container or they may be restful services. The list must not
+			reference Remote EJBs which are not installed as these are checked
+			when ICAT performs its initialisation; their absence will cause ICAT
+			to not start.</dd>
+		<dt>authn.&lt;mnemonic&gt;.url</dt>
+		<dd>is a space separated list of the urls of machines with a
+			restful authenticator service. This will take the form:
+			https://example.com:443 There must be one such entry for each restful
+			authenticator. If more than one url is provided the services
+			referenced must be functionally equivalent. An invalid URL syntax
+			will cause the ICAT server not to start.</dd>
 		<dt>authn.&lt;mnemonic&gt;.jndi</dt>
-		<dd>is the jndi name to locate the plugin. When you installed the
-			plugin a message would have appeared in the server.log stating the
-			JNDI names. For example for authn_db you would expect to see
-			java:global/authn_db.ear-1.0.0/authn_db.ejb-1.0.0/DB_Authenticator.
-			There must be one such entry for each plugin.</dd>
+		<dd>
+			is the jndi name to locate an EJB authenticator. When you installed
+			the authenticator a message would have appeared in the server.log
+			stating the JNDI names. The name will start:
+			<code>java:global/</code>
+			There must be one such entry for each EJB authenticator.
+		</dd>
 		<dt>authn.&lt;mnemonic&gt;.friendly</dt>
 		<dd>is optional. It gives a name that a tool might use to label
 			the plugin.</dd>
 		<dt>authn.&lt;mnemonic&gt;.admin</dt>
 		<dd>is optional. Set to true if you wish to indicate that this
 			authenticator should only be advertised to administration tools.</dd>
-		<dt>authn.&lt;mnemonic&gt;.hostPort</dt>
-		<dd>
-			is optional. It should only be specified on satellite machines when
-			you have a group of machines working together as described at <a
-				href="#cluster">Installing a group of ICATs</a> and when you want to
-			perform authentication on the central machine. The value takes the
-			form machine:port where the port will normally be 3700.
-		</dd>
 		<dt>notification.list</dt>
 		<dd>is optional. It is a space separated set of Entity names for
 			which you with to generate notifications. For each one there must be

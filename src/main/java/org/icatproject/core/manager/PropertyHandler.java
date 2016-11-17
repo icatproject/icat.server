@@ -1,6 +1,11 @@
 package org.icatproject.core.manager;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,17 +14,40 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
-import javax.naming.Context;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.stream.JsonGenerator;
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
+import javax.json.stream.JsonParsingException;
 import javax.naming.InitialContext;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
+import org.apache.http.StatusLine;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.icatproject.authentication.Authentication;
 import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 import org.icatproject.utils.ContainerGetter;
@@ -31,6 +59,164 @@ import org.slf4j.MarkerFactory;
 
 @Singleton
 public class PropertyHandler {
+
+	public class RestAuthenticator implements Authenticator {
+
+		private String mnemonic;
+		private List<String> urls;
+
+		public RestAuthenticator(String mnemonic, String urls) throws IcatException {
+			this.mnemonic = mnemonic;
+			this.urls = Arrays.asList(urls.split("\\s+"));
+			String desc = null;
+			for (String url : this.urls) {
+				try {
+					URI uri = new URIBuilder(url).setPath("/authn." + mnemonic + "/" + "description").build();
+
+					logger.trace("Calling " + uri);
+					try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+						HttpGet httpGet = new HttpGet(uri);
+						try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+							String resp = getString(response);
+							if (desc == null) {
+								desc = resp;
+							} else if (!desc.equals(resp)) {
+								throw new IcatException(IcatExceptionType.INTERNAL,
+										"authenticators have mismatched descriptions");
+							}
+						}
+					}
+				} catch (URISyntaxException | IOException | IcatException e) {
+					logger.error(e.getClass() + " " + e.getMessage());
+				}
+			}
+			if (desc == null) {
+				throw new IcatException(IcatExceptionType.INTERNAL,
+						"No authenticator of type " + mnemonic + " is working");
+			}
+		}
+
+		@Override
+		public Authentication authenticate(Map<String, String> credentials, String ip) throws IcatException {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos)) {
+				gen.writeStartObject();
+				gen.writeStartArray("credentials");
+				for (Entry<String, String> entry : credentials.entrySet()) {
+					gen.writeStartObject().write(entry.getKey(), entry.getValue()).writeEnd();
+				}
+				gen.writeEnd();
+				gen.write("ip", ip);
+				gen.writeEnd().close();
+			}
+			for (String url : this.urls) {
+				try {
+					URI uri = new URIBuilder(url).setPath("/authn." + mnemonic + "/" + "authenticate").build();
+
+					List<NameValuePair> formparams = new ArrayList<>();
+					formparams.add(new BasicNameValuePair("json", baos.toString()));
+					try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+						HttpPost httpPost = new HttpPost(uri);
+						httpPost.setEntity(new UrlEncodedFormEntity(formparams));
+						try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+							try (JsonReader r = Json
+									.createReader(new ByteArrayInputStream(getString(response).getBytes()))) {
+								JsonObject o = r.readObject();
+								String username = o.getString("username");
+								String mechanism = null;
+								if (o.containsKey("mechanism")) {
+									mechanism = o.getString("mechanism");
+								}
+								return new Authentication(username, mechanism);
+							}
+						}
+					}
+				} catch (URISyntaxException | IOException | IcatException e) {
+					throw new IcatException(IcatExceptionType.INTERNAL,
+							"No authenticator of type " + mnemonic + " is working");
+				}
+			}
+			throw new IcatException(IcatExceptionType.INTERNAL, "No authenticator of type " + mnemonic + " is working");
+		}
+
+		@Override
+		public String getDescription() throws IcatException {
+			for (String url : this.urls) {
+				try {
+					URI uri = new URIBuilder(url).setPath("/authn." + mnemonic + "/" + "description").build();
+					try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+						HttpGet httpGet = new HttpGet(uri);
+						try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+							return getString(response);
+						}
+					}
+				} catch (URISyntaxException | IOException | IcatException e) {
+					logger.error(e.getClass() + " " + e.getMessage());
+				}
+			}
+			throw new IcatException(IcatExceptionType.INTERNAL, "No authenticator of type " + mnemonic + " is working");
+		}
+
+		private String getString(CloseableHttpResponse response) throws IcatException {
+			checkStatus(response);
+			HttpEntity entity = response.getEntity();
+			if (entity == null) {
+				throw new IcatException(IcatExceptionType.INTERNAL, "No http entity returned in response");
+			}
+			try {
+				return EntityUtils.toString(entity);
+			} catch (ParseException | IOException e) {
+				throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+			}
+		}
+
+		private void checkStatus(HttpResponse response) throws IcatException {
+			StatusLine status = response.getStatusLine();
+			if (status == null) {
+				throw new IcatException(IcatExceptionType.INTERNAL, "Status line returned is empty");
+			}
+			int rc = status.getStatusCode();
+			if (rc / 100 != 2) {
+				HttpEntity entity = response.getEntity();
+				String error;
+				if (entity == null) {
+					throw new IcatException(IcatExceptionType.INTERNAL, "No explanation provided");
+				} else {
+					try {
+						error = EntityUtils.toString(entity);
+					} catch (ParseException | IOException e) {
+						throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+					}
+				}
+				try (JsonParser parser = Json.createParser(new ByteArrayInputStream(error.getBytes()))) {
+					String code = null;
+					String message = null;
+					String key = "";
+					while (parser.hasNext()) {
+						JsonParser.Event event = parser.next();
+						if (event == Event.KEY_NAME) {
+							key = parser.getString();
+						} else if (event == Event.VALUE_STRING) {
+							if (key.equals("code")) {
+								code = parser.getString();
+							} else if (key.equals("message")) {
+								message = parser.getString();
+							}
+						}
+					}
+
+					if (code == null || message == null) {
+						throw new IcatException(IcatExceptionType.INTERNAL, error);
+					}
+					throw new IcatException(IcatExceptionType.INTERNAL, message);
+				} catch (JsonParsingException e) {
+					throw new IcatException(IcatExceptionType.INTERNAL, error);
+				}
+			}
+
+		}
+
+	}
 
 	public enum CallType {
 		READ, WRITE, SESSION, INFO
@@ -62,7 +248,7 @@ public class PropertyHandler {
 
 	}
 
-	public class HostPort {
+	private class HostPort {
 
 		private String host;
 		private Integer port;
@@ -165,11 +351,32 @@ public class PropertyHandler {
 			formattedProps.add("authn.list " + authnList);
 
 			for (String mnemonic : authnList.split("\\s+")) {
+				Authenticator authen = null;
 				key = "authn." + mnemonic + ".jndi";
-				String jndi = props.getString(key);
-				HostPort hostPort = new HostPort(props, "authn." + mnemonic + ".hostPort");
-				String host = hostPort.getHost();
-				Integer port = hostPort.getPort();
+				if (props.has(key)) {
+					String jndi = props.getString(key);
+					formattedProps.add(key + " " + jndi);
+					key = "authn." + mnemonic + ".hostPort";
+					if (props.has(key)) {
+						abend("Key  '" + key + " specified in icat.properties is no longer permitted");
+					}
+					try {
+						authen = (Authenticator) new InitialContext().lookup(jndi);
+					} catch (Throwable e) {
+						abend(e.getClass() + " reports " + e.getMessage());
+					}
+					logger.debug("Found Authenticator: " + mnemonic + " with jndi " + jndi);
+				} else {
+					key = "authn." + mnemonic + ".url";
+					String urls = props.getString(key);
+					try {
+						authen = new RestAuthenticator(mnemonic, urls);
+					} catch (IcatException e) {
+						abend(e.getClass() + " " + e.getMessage());
+					}
+					logger.error(key + " " + urls);
+					formattedProps.add(key + " " + urls);
+				}
 
 				key = "authn." + mnemonic + ".friendly";
 				String friendly = null;
@@ -184,20 +391,9 @@ public class PropertyHandler {
 					formattedProps.add(key + " " + admin);
 				}
 
-				try {
-					Context ctx = new InitialContext();
-					if (host != null) {
-						ctx.addToEnvironment("org.omg.CORBA.ORBInitialHost", host);
-						ctx.addToEnvironment("org.omg.CORBA.ORBInitialPort", Integer.toString(port));
-						logger.debug("Requesting remote authenticator at " + host + ":" + port);
-					}
-					ExtendedAuthenticator authenticator = new ExtendedAuthenticator((Authenticator) ctx.lookup(jndi),
-							friendly, admin);
-					logger.debug("Found Authenticator: " + mnemonic + " with jndi " + jndi);
-					authPlugins.put(mnemonic, authenticator);
-				} catch (Throwable e) {
-					abend(e.getClass() + " reports " + e.getMessage());
-				}
+				ExtendedAuthenticator authenticator = new ExtendedAuthenticator(authen, friendly, admin);
+				authPlugins.put(mnemonic, authenticator);
+
 			}
 
 			/* lifetimeMinutes */

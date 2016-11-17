@@ -9,6 +9,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
 
 public class AuthenticatorInfo {
@@ -18,7 +19,7 @@ public class AuthenticatorInfo {
 	private boolean admin;
 	private List<AuthenticatorCredentialKey> keys = new ArrayList<>();
 
-	public AuthenticatorInfo(String mnemonic, ExtendedAuthenticator auth) {
+	public AuthenticatorInfo(String mnemonic, ExtendedAuthenticator auth) throws IcatException {
 		this.mnemonic = mnemonic;
 
 		try (JsonReader jr = Json.createReader(new StringReader(auth.getAuthenticator().getDescription()))) {

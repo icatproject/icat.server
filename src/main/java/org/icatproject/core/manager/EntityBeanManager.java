@@ -1152,7 +1152,7 @@ public class EntityBeanManager {
 	void init() {
 		String luceneHost = propertyHandler.getLuceneHost();
 		if (luceneHost != null) {
-			String jndi = "java:global/icat.ear-" + Constants.API_VERSION + "/icat.exposed-" + Constants.API_VERSION
+			String jndi = "java:global/icat.server-" + Constants.API_VERSION
 					+ "/LuceneSingleton!org.icatproject.core.manager.Lucene";
 
 			Context ctx = null;

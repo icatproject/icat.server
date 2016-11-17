@@ -23,7 +23,7 @@
 	<repositories>
 		<repository>
 			<id>ICAT Repo</id>
-			<url>https://repo.icatproject.org/repo</url>
+			<url>${repoUrl}</url>
 		</repository>
 	</repositories>
 
@@ -60,14 +60,14 @@
 	</organization>
 
 	<distributionManagement>
-		<downloadUrl>https://repo.icatproject.org/repo</downloadUrl>
+		<downloadUrl>${repoUrl}</downloadUrl>
 		<site>
 			<id>repo.icatproject.org</id>
 			<url>dav:https://repo.icatproject.org/site/icat/server/${project.version}</url>
 		</site>
 		<repository>
 			<id>repo.icatproject.org</id>
-			<url>dav:https://repo.icatproject.org/repo</url>
+			<url>dav:${repoUrl}</url>
 		</repository>
 	</distributionManagement>
 
@@ -82,7 +82,7 @@
 		<dependency>
 			<groupId>org.icatproject</groupId>
 			<artifactId>icat.authentication</artifactId>
-			<version>4.5.0</version>
+			<version>4.5.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -126,7 +126,6 @@
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
 			<version>1.0.4</version>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -152,14 +151,12 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.3.4</version>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
 			<version>4.3.4</version>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

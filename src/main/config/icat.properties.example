@@ -23,7 +23,7 @@ exportCacheSize = 50
 authn.list = db ldap simple anon
 
 # Parameters for each of the four plugins
-authn.db.jndi       = java:global/authn.db-1.2.0/DB_Authenticator
+authn.db.url       = https://localhost:8181
 
 authn.ldap.jndi     = java:global/authn.ldap-1.2.0/LDAP_Authenticator
 authn.ldap.admin    = true
