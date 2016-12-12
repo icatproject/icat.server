@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,13 +19,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.apache.lucene.document.DateTools;
-import org.apache.lucene.document.DateTools.Resolution;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
 
 @Comment("A data file")
 @SuppressWarnings("serial")
@@ -198,8 +192,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public Document getDoc() {
-		Document doc = new Document();
+	public void getDoc(JsonGenerator gen) {
 		StringBuilder sb = new StringBuilder(name);
 		if (description != null) {
 			sb.append(" " + description);
@@ -209,18 +202,37 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		}
 		if (datafileFormat != null) {
 			sb.append(" " + datafileFormat.getName());
+		}
 
-		}
-		doc.add(new TextField("text", sb.toString(), Store.NO));
+		// doc.add(new TextField("text", sb.toString(), Store.NO));
+		gen.writeStartObject().write("type", "TextField").write("name", "text").write("value", sb.toString())
+				.writeEnd();
 		if (datafileModTime != null) {
-			doc.add(new StringField("date", DateTools.dateToString(datafileModTime, Resolution.MINUTE), Store.NO));
+			// doc.add(new StringField("date",
+			// DateTools.dateToString(datafileModTime, Resolution.MINUTE),
+			// Store.NO));
+			gen.writeStartObject().write("type", "StringField").write("name", "date")
+					.write("date", datafileModTime.getTime()).writeEnd();
 		} else if (datafileCreateTime != null) {
-			doc.add(new StringField("date", DateTools.dateToString(datafileCreateTime, Resolution.MINUTE), Store.NO));
+			// doc.add(new StringField("date",
+			// DateTools.dateToString(datafileCreateTime,
+			// Resolution.MINUTE), Store.NO));
+			gen.writeStartObject().write("type", "StringField").write("name", "date")
+					.write("date", datafileCreateTime.getTime()).writeEnd();
 		} else {
-			doc.add(new StringField("date", DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
+			// doc.add(new StringField("date",
+			// DateTools.dateToString(modTime, Resolution.MINUTE),
+			// Store.NO));
+			gen.writeStartObject().write("type", "StringField").write("name", "date").write("date", modTime.getTime())
+					.writeEnd();
 		}
-		doc.add(new StringField("id", Long.toString(id), Store.YES));
-		doc.add(new StringField("dataset", Long.toString(dataset.id), Store.NO));
-		return doc;
+		// doc.add(new StringField("id", Long.toString(id), Store.YES));
+		gen.writeStartObject().write("type", "StringField").write("name", "id").write("value", Long.toString(id))
+				.write("store", true).writeEnd();
+		// doc.add(new StringField("dataset", Long.toString(dataset.id),
+		// Store.NO));
+		gen.writeStartObject().write("type", "StringField").write("name", "dataset")
+				.write("value", Long.toString(dataset.id)).writeEnd();
+
 	}
 }

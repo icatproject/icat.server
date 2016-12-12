@@ -1,9 +1,11 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,12 +15,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.SortedDocValuesField;
-import org.apache.lucene.document.TextField;
-import org.apache.lucene.util.BytesRef;
 
 @Comment("A sample to be used in an investigation")
 @SuppressWarnings("serial")
@@ -88,14 +84,15 @@ public class Sample extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public Document getDoc() {
-		Document doc = new Document();
-		StringBuilder sb = new StringBuilder(name);
-		if (type != null) {
-			sb.append(" " + type.getName());
-		}
-		doc.add(new TextField("text", sb.toString(), Store.NO));
-		doc.add(new SortedDocValuesField("investigation", new BytesRef(Long.toString(investigation.id))));
-		return doc;
+	public void getDoc(JsonGenerator gen) {
+		// TODO Document doc = new Document();
+		// StringBuilder sb = new StringBuilder(name);
+		// if (type != null) {
+		// sb.append(" " + type.getName());
+		// }
+		// doc.add(new TextField("text", sb.toString(), Store.NO));
+		// doc.add(new SortedDocValuesField("investigation", new
+		// BytesRef(Long.toString(investigation.id))));
+		throw new InvalidParameterException("Bad sample.java");
 	}
 }

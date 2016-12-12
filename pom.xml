@@ -15,7 +15,6 @@
 		<serverPort>8181</serverPort>
 		<serverHost>localhost</serverHost>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<luceneVersion>5.3.0</luceneVersion>
 		<project.scm.id>github</project.scm.id>
 		<gitUrl>https://github.com/icatproject/icat.server</gitUrl>
 	</properties>
@@ -94,34 +93,11 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
+			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-			<version>${luceneVersion}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-queryparser</artifactId>
-			<version>${luceneVersion}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
-			<version>${luceneVersion}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-join</artifactId>
-			<version>${luceneVersion}</version>
-		</dependency>
-
+	
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
@@ -185,12 +161,12 @@
 				<artifactId>miredot-plugin</artifactId>
 				<version>1.6.2</version>
 				<executions>
-					<execution>
-						<id>miredot</id>
-						<goals>
-							<goal>restdoc</goal>
-						</goals>
-					</execution>
+	<!-- <execution> -->
+	<!-- <id>miredot</id> -->
+	<!-- <goals> -->
+	<!-- <goal>restdoc</goal> -->
+	<!-- </goals> -->
+	<!-- </execution> -->
 				</executions>
 				<configuration>
 					<licence>cHJvamVjdHxvcmcuaWNhdHByb2plY3QuaWNhdC5zZXJ2ZXJ8MjAxOC0wOS0xNXx0cnVlfC0xI01DMENGRzRQaDRMdlpvZlRwK0xsMmdENHFrZGR1VGtGQWhVQWk0eGh5cld4b25PTEJjWUhHS0pBbTcxa3VwST0=</licence>

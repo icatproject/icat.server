@@ -3,10 +3,9 @@ package org.icatproject.core.manager;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -248,46 +247,6 @@ public class PropertyHandler {
 
 	}
 
-	private class HostPort {
-
-		private String host;
-		private Integer port;
-
-		public HostPort(CheckedProperties props, String key) throws CheckedPropertyException {
-			if (props.has(key)) {
-				String hostPortString = props.getString(key);
-				String[] bits = hostPortString.split(":");
-				host = bits[0];
-				try {
-					port = Integer.parseInt(bits[1]);
-				} catch (NumberFormatException e) {
-					abend(e.getClass() + e.getMessage());
-				}
-				try {
-					String hostName = InetAddress.getLocalHost().getHostName();
-					if (hostName.equalsIgnoreCase(bits[0])) {
-						host = null;
-						port = null;
-						logger.debug(key + " is local machine so is ignored");
-					}
-				} catch (UnknownHostException e) {
-					abend(e.getClass() + e.getMessage());
-				}
-				formattedProps.add(key + " " + hostPortString);
-			}
-
-		}
-
-		public String getHost() {
-			return host;
-		}
-
-		public Integer getPort() {
-			return port;
-		}
-
-	}
-
 	public enum Operation {
 		C, U
 	}
@@ -317,14 +276,9 @@ public class PropertyHandler {
 	private int lifetimeMinutes;
 
 	private Set<CallType> logSet = new HashSet<>();
-	private String luceneDirectory;
-	private int luceneCommitSeconds;
 
 	private List<String> formattedProps = new ArrayList<String>();
-	private int luceneCommitCount;
 
-	private String luceneHost;
-	private Integer lucenePort;
 	private int maxEntities;
 	private int maxIdsInQuery;
 	private long importCacheSize;
@@ -332,6 +286,8 @@ public class PropertyHandler {
 	private ContainerType containerType;
 	private String jmsTopicConnectionFactory;
 	private String digestKey;
+	private URL luceneUrl;
+	private int lucenePopulateBlockSize;
 
 	@PostConstruct
 	private void init() {
@@ -466,20 +422,8 @@ public class PropertyHandler {
 			}
 
 			/* Lucene Host */
-			HostPort hostPort = new HostPort(props, "lucene.hostPort");
-			luceneHost = hostPort.getHost();
-			lucenePort = hostPort.getPort();
-
-			/* Lucene Directory */
-			key = "lucene.directory";
-			if (props.has(key)) {
-				luceneDirectory = props.getString(key);
-				formattedProps.add(key + " " + luceneDirectory);
-				luceneCommitSeconds = props.getPositiveInt("lucene.commitSeconds");
-				formattedProps.add("lucene.commitSeconds " + luceneCommitSeconds);
-				luceneCommitCount = props.getPositiveInt("lucene.commitCount");
-				formattedProps.add("lucene.commitCount " + luceneCommitCount);
-			}
+			luceneUrl = props.getURL("lucene.url");
+			lucenePopulateBlockSize = props.getPositiveInt("lucene.populateBlockSize");
 
 			/*
 			 * maxEntities, importCacheSize, exportCacheSize, maxIdsInQuery, key
@@ -532,28 +476,8 @@ public class PropertyHandler {
 		return logSet;
 	}
 
-	public String getLuceneDirectory() {
-		return luceneDirectory;
-	}
-
-	public int getLuceneRefreshSeconds() {
-		return luceneCommitSeconds;
-	}
-
 	public List<String> props() {
 		return formattedProps;
-	}
-
-	public int getLuceneCommitCount() {
-		return luceneCommitCount;
-	}
-
-	public String getLuceneHost() {
-		return luceneHost;
-	}
-
-	public Integer getLucenePort() {
-		return lucenePort;
 	}
 
 	public int getMaxEntities() {
@@ -582,6 +506,14 @@ public class PropertyHandler {
 
 	public String getKey() {
 		return digestKey;
+	}
+
+	public URL getLuceneUrl() {
+		return luceneUrl;
+	}
+
+	public int getLucenePopulateBlockSize() {
+		return lucenePopulateBlockSize;
 	}
 
 }

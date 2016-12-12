@@ -43,9 +43,6 @@ import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -70,9 +67,6 @@ import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
-import org.icatproject.core.manager.Lucene.LuceneSearchResult;
-import org.icatproject.core.manager.Lucene.ParameterPOJO;
-import org.icatproject.core.manager.LuceneSingleton.ScoredResult;
 import org.icatproject.core.manager.PropertyHandler.CallType;
 import org.icatproject.core.manager.PropertyHandler.Operation;
 import org.icatproject.core.oldparser.OldGetQuery;
@@ -141,9 +135,7 @@ public class EntityBeanManager {
 	Transmitter transmitter;
 
 	@EJB
-	LuceneSingleton luceneSingleton;
-
-	Lucene lucene;
+	LuceneManager lucene;
 
 	private boolean log;
 
@@ -786,12 +778,13 @@ public class EntityBeanManager {
 		}
 	}
 
-	private void filterReadAccess(List<ScoredEntityBaseBean> results, List<ScoredResult> allResults, int maxCount,
-			String userId, EntityManager manager, Class<? extends EntityBaseBean> klass) throws IcatException {
+	private void filterReadAccess(List<ScoredEntityBaseBean> results, List<ScoredEntityBaseBean> allResults,
+			int maxCount, String userId, EntityManager manager, Class<? extends EntityBaseBean> klass)
+			throws IcatException {
 
 		logger.debug("Got " + allResults.size() + " results from Lucene");
-		for (ScoredResult sr : allResults) {
-			long entityId = Long.parseLong(sr.getResult());
+		for (ScoredEntityBaseBean sr : allResults) {
+			long entityId = sr.getEntityBaseBeanId();
 			EntityBaseBean beanManaged = manager.find(klass, entityId);
 			if (beanManaged != null) {
 				try {
@@ -799,7 +792,7 @@ public class EntityBeanManager {
 					results.add(new ScoredEntityBaseBean(entityId, sr.getScore()));
 					if (results.size() > maxEntities) {
 						throw new IcatException(IcatExceptionType.VALIDATION,
-								"attempt to return more than " + maxEntities + " entitities");
+								"attempt to return more than " + maxEntities + " entities");
 					}
 					if (results.size() == maxCount) {
 						break;
@@ -1035,7 +1028,7 @@ public class EntityBeanManager {
 		List<Object> objects = jpqlQuery.getResultList();
 		if (objects.size() > maxEntities) {
 			throw new IcatException(IcatExceptionType.VALIDATION,
-					"attempt to process more than " + maxEntities + " entitities");
+					"attempt to process more than " + maxEntities + " entities");
 		}
 
 		List<Object> result = null;
@@ -1150,31 +1143,10 @@ public class EntityBeanManager {
 
 	@PostConstruct
 	void init() {
-		String luceneHost = propertyHandler.getLuceneHost();
-		if (luceneHost != null) {
-			String jndi = "java:global/icat.server-" + Constants.API_VERSION
-					+ "/LuceneSingleton!org.icatproject.core.manager.Lucene";
-
-			Context ctx = null;
-			try {
-				ctx = new InitialContext();
-				ctx.addToEnvironment("org.omg.CORBA.ORBInitialHost", luceneHost);
-				ctx.addToEnvironment("org.omg.CORBA.ORBInitialPort", Integer.toString(propertyHandler.getLucenePort()));
-				lucene = (Lucene) ctx.lookup(jndi);
-				logger.debug("Found Lucene: " + lucene + " with jndi " + jndi);
-			} catch (NamingException e) {
-				String msg = e.getClass() + " reports " + e.getMessage() + " from " + jndi;
-				logger.error(fatal, msg);
-				throw new IllegalStateException(msg);
-			}
-		} else {
-			lucene = luceneSingleton;
-		}
-
 		logRequests = propertyHandler.getLogSet();
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
-		luceneActive = lucene.getActive();
+		luceneActive = lucene.isActive();
 		maxEntities = propertyHandler.getMaxEntities();
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
@@ -1419,7 +1391,8 @@ public class EntityBeanManager {
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
 			LuceneSearchResult last = null;
-			List<ScoredResult> allResults = Collections.emptyList();
+			Long uid = null;
+			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
 			 * don't make a huge number of calls to Lucene
@@ -1429,8 +1402,9 @@ public class EntityBeanManager {
 			do {
 				if (last == null) {
 					last = lucene.datafiles(user, text, lower, upper, parms, blockSize);
+					uid = last.getUid();
 				} else {
-					last = lucene.datafilesAfter(user, text, lower, upper, parms, blockSize, last);
+					last = lucene.datafilesAfter(uid, blockSize);
 				}
 				allResults = last.getResults();
 				filterReadAccess(results, allResults, maxCount, userName, manager, Datafile.class);
@@ -1461,7 +1435,7 @@ public class EntityBeanManager {
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
 			LuceneSearchResult last = null;
-			List<ScoredResult> allResults = Collections.emptyList();
+			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
 			 * don't make a huge number of calls to Lucene
@@ -1511,7 +1485,7 @@ public class EntityBeanManager {
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
 			LuceneSearchResult last = null;
-			List<ScoredResult> allResults = Collections.emptyList();
+			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
 			 * don't make a huge number of calls to Lucene
@@ -1813,7 +1787,7 @@ public class EntityBeanManager {
 				if (beanManaged == null) {
 					if ((descendantCount += 1) > maxEntities) {
 						throw new IcatException(IcatExceptionType.VALIDATION,
-								"attempt to return more than " + maxEntities + " entitities");
+								"attempt to return more than " + maxEntities + " entities");
 					}
 					clones.add(null);
 				} else {
@@ -1821,7 +1795,7 @@ public class EntityBeanManager {
 							userId, manager);
 					if ((descendantCount += eb.getDescendantCount(maxEntities)) > maxEntities) {
 						throw new IcatException(IcatExceptionType.VALIDATION,
-								"attempt to return more than " + maxEntities + " entitities");
+								"attempt to return more than " + maxEntities + " entities");
 					}
 					clones.add(eb);
 				}

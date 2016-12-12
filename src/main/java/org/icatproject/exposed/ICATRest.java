@@ -72,7 +72,7 @@ import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.Lucene.ParameterPOJO;
+import org.icatproject.core.manager.ParameterPOJO;
 import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;

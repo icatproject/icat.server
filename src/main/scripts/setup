@@ -37,16 +37,7 @@ if arg == "INSTALL":
         for v in icatProperties["notification.list"].split():
             if "notification." + v not in icatProperties:
                 abort ("notification.list included " + v + " but notification." + v + " is not defined") 
-        
-    ld = icatProperties.get("lucene.Directory")
-    if ld:
-        parent = os.path.basename(os.path.normpath(ld))
-        if not os.path.exists(parent):
-            abort("Parent directory " + parent + " of lucene directory specified in icat.properties does not exist")
-            
-        if not icatProperties.get("lucene.commitSeconds"):
-            abort("'lucene.commitSeconds' not specified in icat.properties")
-        
+               
     actions.installFile("icat.properties")
     
     try:           

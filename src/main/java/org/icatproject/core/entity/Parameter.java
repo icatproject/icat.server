@@ -1,9 +1,11 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.security.InvalidParameterException;
 import java.util.Date;
 import java.util.List;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
@@ -13,12 +15,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apache.lucene.document.DateTools;
-import org.apache.lucene.document.DateTools.Resolution;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.DoubleField;
-import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.StringField;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
@@ -166,19 +162,20 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public Document getDoc() {
-		Document doc = new Document();
-		doc.add(new StringField("name", type.getName(), Store.NO));
-		doc.add(new StringField("units", type.getUnits(), Store.NO));
-		if (stringValue != null) {
-			doc.add(new StringField("stringValue", stringValue, Store.NO));
-		} else if (numericValue != null) {
-			doc.add(new DoubleField("numericValue", numericValue, Store.NO));
-		} else if (dateTimeValue != null) {
-			doc.add(new StringField("dateTimeValue", DateTools.dateToString(dateTimeValue, Resolution.MINUTE),
-					Store.NO));
-		}
-		return doc;
+	public void getDoc(JsonGenerator gen) {
+		// TODO Document doc = new Document();
+		// doc.add(new StringField("name", type.getName(), Store.NO));
+		// doc.add(new StringField("units", type.getUnits(), Store.NO));
+		// if (stringValue != null) {
+		// doc.add(new StringField("stringValue", stringValue, Store.NO));
+		// } else if (numericValue != null) {
+		// doc.add(new DoubleField("numericValue", numericValue, Store.NO));
+		// } else if (dateTimeValue != null) {
+		// doc.add(new StringField("dateTimeValue",
+		// DateTools.dateToString(dateTimeValue, Resolution.MINUTE),
+		// Store.NO));
+		// }
+		throw new InvalidParameterException("Parameter.java needs fixing");
 	}
 
 }

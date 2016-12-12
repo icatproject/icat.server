@@ -1,7 +1,9 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.security.InvalidParameterException;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
@@ -10,9 +12,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.SortedDocValuesField;
-import org.apache.lucene.util.BytesRef;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
@@ -55,9 +54,10 @@ public class DatasetParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public Document getDoc() {
-		Document doc = super.getDoc();
-		doc.add(new SortedDocValuesField("dataset", new BytesRef(Long.toString(dataset.id))));
-		return doc;
+	public void getDoc(JsonGenerator gen) {
+		super.getDoc(gen);
+		// TODO doc.add(new SortedDocValuesField("dataset", new
+		// BytesRef(Long.toString(dataset.id))));
+		throw new InvalidParameterException("datasetParameter.java needs fixing");
 	}
 }

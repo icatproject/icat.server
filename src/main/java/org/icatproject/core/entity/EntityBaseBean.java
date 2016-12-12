@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
@@ -23,7 +24,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.apache.lucene.document.Document;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.manager.AccessType;
@@ -31,7 +31,7 @@ import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.Lucene;
+import org.icatproject.core.manager.LuceneManager;
 import org.icatproject.core.parser.IncludeClause.Step;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +81,7 @@ public abstract class EntityBaseBean implements Serializable {
 
 	// This is only used by the older create and createMany calls and not by the
 	// new Restful write call
-	public void addToLucene(Lucene lucene) throws IcatException {
+	public void addToLucene(LuceneManager lucene) throws IcatException {
 		lucene.addDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
@@ -429,7 +429,7 @@ public abstract class EntityBaseBean implements Serializable {
 		this.modTime = modTime;
 	}
 
-	public void updateInLucene(Lucene lucene) throws IcatException {
+	public void updateInLucene(LuceneManager lucene) throws IcatException {
 		lucene.updateDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
@@ -460,8 +460,7 @@ public abstract class EntityBaseBean implements Serializable {
 	}
 
 	/* This should be overridden by classes wishing to index things in lucene */
-	public Document getDoc() {
-		return null;
+	public void getDoc(JsonGenerator gen) {
 	}
 
 }

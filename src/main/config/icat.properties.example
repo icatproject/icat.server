@@ -44,8 +44,7 @@ log.list = SESSION WRITE READ INFO
 
 # Lucene
 lucene.directory = ../data/icat/lucene
-lucene.commitSeconds = 5
-lucene.commitCount = 10000
+lucene.populateBlockSize = 10000
 
 # JMS - uncomment and edit if needed
 !jms.topicConnectionFactory = java:comp/DefaultJMSConnectionFactory

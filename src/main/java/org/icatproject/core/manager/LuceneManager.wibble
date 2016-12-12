@@ -1,0 +1,324 @@
+public class LuceneManager {
+
+	@SuppressWarnings("serial")
+	public class LuceneSearchResult implements Serializable {
+
+		public long getUid() {
+			return uid;
+		}
+
+		private List<ScoredResult> results;
+		private int doc;
+		private int shardIndex;
+		private float score;
+		private boolean scoreDocExists;
+
+		private Long uid;
+
+		public LuceneSearchResult(List<ScoredResult> results, ScoreDoc lastDoc, long uid) {
+			this.results = results;
+			if (lastDoc != null) {
+				this.doc = lastDoc.doc;
+				this.shardIndex = lastDoc.shardIndex;
+				this.score = lastDoc.score;
+				scoreDocExists = true;
+			}
+			this.uid = uid;
+		}
+
+		public List<ScoredResult> getResults() {
+			return results;
+		}
+
+		public ScoreDoc getScoreDoc() {
+			return scoreDocExists ? new ScoreDoc(doc, score, shardIndex) : null;
+		}
+
+	}
+
+
+
+
+
+	class ScoredResult {
+
+		private String result;
+		private float score;
+
+		private ScoredResult(String result, float score) {
+			this.result = result;
+			this.score = score;
+		}
+
+		public String getResult() {
+			return result;
+		}
+
+		public float getScore() {
+			return score;
+		}
+
+	}
+
+
+
+	private Query buildDatasetQuery(String userName, String text, String lower, String upper, List<ParameterPOJO> parms,
+			Map<String, IndexSearcher> bucket) throws IOException, QueryNodeException {
+		logger.debug("Lucene Dataset search user:" + userName + " text:" + text + " lower:" + lower + " upper:" + upper
+				+ " parameters: " + parms);
+		BooleanQuery.Builder theQuery = new BooleanQuery.Builder();
+
+		if (userName != null) {
+			Query iuQuery = JoinUtil.createJoinQuery("investigation", false, "id",
+					new TermQuery(new Term("name", userName)), getIndexSearcher(bucket, "InvestigationUser"),
+					ScoreMode.None);
+
+			Query invQuery = JoinUtil.createJoinQuery("id", false, "investigation", iuQuery,
+					getIndexSearcher(bucket, "Investigation"), ScoreMode.None);
+
+			theQuery.add(invQuery, Occur.MUST);
+		}
+
+		if (text != null) {
+			theQuery.add(parser.parse(text, "text"), Occur.MUST);
+		}
+
+		if (lower != null && upper != null) {
+			theQuery.add(new TermRangeQuery("startDate", new BytesRef(lower), new BytesRef(upper), true, true),
+					Occur.MUST);
+			theQuery.add(new TermRangeQuery("endDate", new BytesRef(lower), new BytesRef(upper), true, true),
+					Occur.MUST);
+		}
+
+		if (!parms.isEmpty()) {
+			IndexSearcher datasetParameterSearcher = getIndexSearcher(bucket, "DatasetParameter");
+			for (ParameterPOJO parameter : parms) {
+				BooleanQuery.Builder paramQuery = new BooleanQuery.Builder();
+				if (parameter.getName() != null) {
+					paramQuery.add(new WildcardQuery(new Term("name", parameter.getName())), Occur.MUST);
+				}
+				if (parameter.getUnits() != null) {
+					paramQuery.add(new WildcardQuery(new Term("units", parameter.getUnits())), Occur.MUST);
+				}
+				if (parameter.getStringValue() != null) {
+					paramQuery.add(new WildcardQuery(new Term("stringValue", parameter.getStringValue())), Occur.MUST);
+				} else if (parameter.getLowerDateValue() != null && parameter.getUpperDateValue() != null) {
+					paramQuery.add(new TermRangeQuery("dateTimeValue", new BytesRef(parameter.getLowerDateValue()),
+							new BytesRef(upper), true, true), Occur.MUST);
+
+				} else if (parameter.getLowerNumericValue() != null && parameter.getUpperNumericValue() != null) {
+					paramQuery.add(NumericRangeQuery.newDoubleRange("numericValue", parameter.getLowerNumericValue(),
+							parameter.getUpperNumericValue(), true, true), Occur.MUST);
+				}
+				Query toQuery = JoinUtil.createJoinQuery("dataset", false, "id", paramQuery.build(),
+						datasetParameterSearcher, ScoreMode.None);
+				theQuery.add(toQuery, Occur.MUST);
+			}
+		}
+		return maybeEmptyQuery(theQuery);
+
+	}
+
+	private Query buildInvestigationQuery(String userName, String text, String lower, String upper,
+			List<ParameterPOJO> parms, List<String> samples, String userFullName, Map<String, IndexSearcher> bucket)
+			throws QueryNodeException, IOException {
+		logger.debug("Lucene Investigation search user:" + userName + " text:" + text + " lower:" + lower + " upper:"
+				+ upper + " parameters: " + parms + " samples:" + samples + " userFullName:" + userFullName);
+
+		BooleanQuery.Builder theQuery = new BooleanQuery.Builder();
+
+		if (userName != null) {
+			Query iuQuery = JoinUtil.createJoinQuery("investigation", false, "id",
+					new TermQuery(new Term("name", userName)), getIndexSearcher(bucket, "InvestigationUser"),
+					ScoreMode.None);
+			theQuery.add(iuQuery, Occur.MUST);
+		}
+
+		if (text != null) {
+			theQuery.add(parser.parse(text, "text"), Occur.MUST);
+		}
+
+		if (lower != null && upper != null) {
+			theQuery.add(new TermRangeQuery("startDate", new BytesRef(lower), new BytesRef(upper), true, true),
+					Occur.MUST);
+			theQuery.add(new TermRangeQuery("endDate", new BytesRef(lower), new BytesRef(upper), true, true),
+					Occur.MUST);
+		}
+
+		if (!parms.isEmpty()) {
+			IndexSearcher investigationParameterSearcher = getIndexSearcher(bucket, "InvestigationParameter");
+			for (ParameterPOJO parameter : parms) {
+				BooleanQuery.Builder paramQuery = new BooleanQuery.Builder();
+				if (parameter.getName() != null) {
+					paramQuery.add(new WildcardQuery(new Term("name", parameter.getName())), Occur.MUST);
+				}
+				if (parameter.getUnits() != null) {
+					paramQuery.add(new WildcardQuery(new Term("units", parameter.getUnits())), Occur.MUST);
+				}
+				if (parameter.getStringValue() != null) {
+					paramQuery.add(new WildcardQuery(new Term("stringValue", parameter.getStringValue())), Occur.MUST);
+				}
+
+				Query toQuery = JoinUtil.createJoinQuery("investigation", false, "id", paramQuery.build(),
+						investigationParameterSearcher, ScoreMode.None);
+				theQuery.add(toQuery, Occur.MUST);
+			}
+		}
+
+		if (!samples.isEmpty()) {
+			IndexSearcher sampleSearcher = getIndexSearcher(bucket, "Sample");
+			for (String sample : samples) {
+				BooleanQuery.Builder sampleQuery = new BooleanQuery.Builder();
+				sampleQuery.add(parser.parse(sample, "text"), Occur.MUST);
+				Query toQuery = JoinUtil.createJoinQuery("investigation", false, "id", sampleQuery.build(),
+						sampleSearcher, ScoreMode.None);
+				theQuery.add(toQuery, Occur.MUST);
+			}
+		}
+
+		if (userFullName != null) {
+			BooleanQuery.Builder userFullNameQuery = new BooleanQuery.Builder();
+			userFullNameQuery.add(parser.parse(userFullName, "text"), Occur.MUST);
+			IndexSearcher investigationUserSearcher = getIndexSearcher(bucket, "InvestigationUser");
+			Query toQuery = JoinUtil.createJoinQuery("investigation", false, "id", userFullNameQuery.build(),
+					investigationUserSearcher, ScoreMode.None);
+			theQuery.add(toQuery, Occur.MUST);
+		}
+		return maybeEmptyQuery(theQuery);
+	}
+
+	// @Override
+	public LuceneSearchResult datasets(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+			int maxResults) throws IcatException {
+		Long uid = null;
+		try {
+			uid = bucketNum.getAndIncrement();
+			Map<String, IndexSearcher> bucket = new HashMap<>();
+			buckets.put(uid, bucket);
+			IndexSearcher datasetSearcher = getIndexSearcher(bucket, "Dataset");
+			Query query = buildDatasetQuery(user, text, lower, upper, parms, bucket);
+			return luceneSearchResult(datasetSearcher, query, maxResults, null, uid);
+		} catch (Exception e) {
+			freeSearcher(uid);
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	// @Override
+	public LuceneSearchResult datasetsAfter(String user, String text, String lower, String upper,
+			List<ParameterPOJO> parms, int maxResults, LuceneSearchResult last) throws IcatException {
+		long uid = last.getUid();
+		Map<String, IndexSearcher> bucket = buckets.get(uid);
+		IndexSearcher datasetSearcher = bucket.get("Dataset");
+		try {
+			Query query = buildDatasetQuery(user, text, lower, upper, parms, bucket);
+			return luceneSearchResult(datasetSearcher, query, maxResults, last.getScoreDoc(), uid);
+		} catch (Exception e) {
+			freeSearcher(uid);
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	// @Override
+	public boolean getActive() {
+		return active;
+	}
+	
+	// @Override
+	public void freeSearcher(LuceneSearchResult last) throws IcatException {
+		if (last != null) {
+			long uid = last.getUid();
+			freeSearcher(uid);
+		}
+	}
+
+	private String getString(CloseableHttpResponse response) throws IcatException {
+		checkStatus(response);
+		HttpEntity entity = response.getEntity();
+		if (entity == null) {
+			throw new IcatException(IcatExceptionType.INTERNAL, "No http entity returned in response");
+		}
+		try {
+			return EntityUtils.toString(entity);
+		} catch (ParseException | IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+
+
+	// @Override
+	public LuceneSearchResult investigations(String user, String text, String lower, String upper,
+			List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxResults) throws IcatException {
+		Long uid = null;
+		try {
+			uid = bucketNum.getAndIncrement();
+			Map<String, IndexSearcher> bucket = new HashMap<>();
+			buckets.put(uid, bucket);
+			IndexSearcher investigationSearcher = getIndexSearcher(bucket, "Investigation");
+			Query query = buildInvestigationQuery(user, text, lower, upper, parms, samples, userFullName, bucket);
+			return luceneSearchResult(investigationSearcher, query, maxResults, null, uid);
+		} catch (Exception e) {
+			freeSearcher(uid);
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	// @Override
+	public LuceneSearchResult investigationsAfter(String user, String text, String lower, String upper,
+			List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxResults,
+			LuceneSearchResult last) throws IcatException {
+		long uid = last.getUid();
+		Map<String, IndexSearcher> bucket = buckets.get(uid);
+		IndexSearcher investigationSearcher = bucket.get("Investigation");
+		try {
+			Query query = buildInvestigationQuery(user, text, lower, upper, parms, samples, userFullName, bucket);
+			return luceneSearchResult(investigationSearcher, query, maxResults, last.getScoreDoc(), uid);
+		} catch (Exception e) {
+			freeSearcher(uid);
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	private LuceneSearchResult luceneSearchResult(IndexSearcher isearcher, Query query, int maxResults,
+			ScoreDoc scoreDoc, long uid) throws IOException {
+		TopDocs topDocs = scoreDoc == null ? isearcher.search(query, maxResults)
+				: isearcher.searchAfter(scoreDoc, query, maxResults);
+		ScoreDoc[] hits = topDocs.scoreDocs;
+		logger.debug("Hits " + topDocs.totalHits + " maxscore " + topDocs.getMaxScore());
+		List<ScoredResult> results = new ArrayList<>();
+		for (ScoreDoc hit : hits) {
+			Document doc = isearcher.doc(hit.doc);
+			results.add(new ScoredResult(doc.get("id"), hit.score));
+			logger.debug(doc + " -> " + hit);
+		}
+		ScoreDoc lastDoc = results.isEmpty() ? null : hits[hits.length - 1];
+		return new LuceneSearchResult(results, lastDoc, uid);
+	}
+
+
+
+
+	// @Override
+	public void updateDocument(EntityBaseBean bean) throws IcatException {
+		String entityName = bean.getClass().getSimpleName();
+		IndexWriter indexWriter = indexWriters.get(entityName);
+		if (indexWriter != null) {
+			Long id = bean.getId();
+			if (entityName.equals(populatingClassName)) {
+				idsToCheck.add(id);
+				logger.trace("Will update {} lucene index later", entityName);
+			} else {
+				try {
+					indexWriters.get(bean.getClass().getSimpleName()).updateDocument(new Term("id", id.toString()),
+							bean.getDoc());
+					logger.trace("Updated {} lucene index", entityName);
+				} catch (IOException e) {
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+				}
+			}
+
+		}
+	}
+
+}
