@@ -422,8 +422,10 @@ public class PropertyHandler {
 			}
 
 			/* Lucene Host */
-			luceneUrl = props.getURL("lucene.url");
-			lucenePopulateBlockSize = props.getPositiveInt("lucene.populateBlockSize");
+			if (props.has("lucene.url")) {
+				luceneUrl = props.getURL("lucene.url");
+				lucenePopulateBlockSize = props.getPositiveInt("lucene.populateBlockSize");
+			}
 
 			/*
 			 * maxEntities, importCacheSize, exportCacheSize, maxIdsInQuery, key

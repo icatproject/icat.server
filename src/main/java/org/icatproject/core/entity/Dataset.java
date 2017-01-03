@@ -19,6 +19,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.icatproject.core.manager.LuceneApi;
+
 @Comment("A collection of data files and part of an investigation")
 @SuppressWarnings("serial")
 @Entity
@@ -181,46 +183,42 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void getDoc(JsonGenerator gen) {
-		// Document doc = new Document();
-		// StringBuilder sb = new StringBuilder(name + " " + type.getName() + "
-		// " + type.getName());
-		// if (description != null) {
-		// sb.append(" " + description);
-		// }
-		//
-		// if (doi != null) {
-		// sb.append(" " + doi);
-		// }
-		//
-		// if (sample != null) {
-		// sb.append(" " + sample.getName());
-		// if (sample.getType() != null) {
-		// sb.append(" " + sample.getType().getName());
-		// }
-		// }
-		// doc.add(new TextField("text", sb.toString(), Store.NO));
-		//
-		// if (startDate != null) {
-		// doc.add(new StringField("startDate",
-		// DateTools.dateToString(startDate, Resolution.MINUTE), Store.NO));
-		// } else {
-		// doc.add(new StringField("startDate", DateTools.dateToString(modTime,
-		// Resolution.MINUTE), Store.NO));
-		// }
-		//
-		// if (endDate != null) {
-		// doc.add(new StringField("endDate", DateTools.dateToString(endDate,
-		// Resolution.MINUTE), Store.NO));
-		// } else {
-		// doc.add(new StringField("endDate", DateTools.dateToString(modTime,
-		// Resolution.MINUTE), Store.NO));
-		// }
-		// doc.add(new StringField("id", Long.toString(id), Store.YES));
-		// doc.add(new SortedDocValuesField("id", new
-		// BytesRef(Long.toString(id))));
-		// doc.add(new StringField("investigation",
-		// Long.toString(investigation.id), Store.NO));
-		throw new IllegalArgumentException("Dataset.java needs updating");
+
+		StringBuilder sb = new StringBuilder(name + " " + type.getName() + " " + type.getName());
+		if (description != null) {
+			sb.append(" " + description);
+		}
+
+		if (doi != null) {
+			sb.append(" " + doi);
+		}
+
+		if (sample != null) {
+			sb.append(" " + sample.getName());
+			if (sample.getType() != null) {
+				sb.append(" " + sample.getType().getName());
+			}
+		}
+
+		LuceneApi.encodeTextfield(gen, "text", sb.toString());
+
+		if (startDate != null) {
+			LuceneApi.encodeStringField(gen, "startDate", startDate);
+		} else {
+			LuceneApi.encodeStringField(gen, "startDate", createTime);
+		}
+
+		if (endDate != null) {
+			LuceneApi.encodeStringField(gen, "endDate", endDate);
+		} else {
+			LuceneApi.encodeStringField(gen, "endDate", modTime);
+		}
+		LuceneApi.encodeStoredId(gen, id);
+
+		LuceneApi.encodeSortedDocValuesField(gen, "id", id);
+
+		LuceneApi.encodeStringField(gen, "investigation", investigation.id);
+
 	}
 
 }

@@ -22,9 +22,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
-import org.icatproject.core.entity.EntityBaseBean;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,46 +44,32 @@ public class TestLucene {
 
 	@Before
 	public void before() throws Exception {
-		for (String name : EntityInfoHandler.getEntityNamesList()) {
-			Class<EntityBaseBean> klass = EntityInfoHandler.getClass(name);
-			try {
-				klass.getDeclaredMethod("getDoc", JsonGenerator.class);
-				luceneApi.deleteAll(name);
-			} catch (NoSuchMethodException e) {
-				// There is no getDoc method so not interested
-			}
-		}
-		luceneApi.commit();
+		luceneApi.clear();
 	}
 
+	@Ignore
 	@Test
 	public void locking() throws IcatException {
 
 		try {
-			luceneApi.unlock("fred");
+			luceneApi.unlock("Dataset");
 			fail();
 		} catch (IcatException e) {
-			assertEquals("Lucene is not currently locked", e.getMessage());
+			assertEquals("Lucene is not currently locked for Dataset", e.getMessage());
 		}
-		luceneApi.lock("fred");
+		luceneApi.lock("Dataset");
 		try {
-			luceneApi.lock("fred");
+			luceneApi.lock("Dataset");
 			fail();
 		} catch (IcatException e) {
-			assertEquals("Lucene already locked by fred", e.getMessage());
+			assertEquals("Lucene already locked for Dataset", e.getMessage());
 		}
+		luceneApi.unlock("Dataset");
 		try {
-			luceneApi.lock("bill");
+			luceneApi.unlock("Dataset");
 			fail();
 		} catch (IcatException e) {
-			assertEquals("Lucene already locked by fred", e.getMessage());
-		}
-		luceneApi.unlock("fred");
-		try {
-			luceneApi.unlock("fred");
-			fail();
-		} catch (IcatException e) {
-			assertEquals("Lucene is not currently locked", e.getMessage());
+			assertEquals("Lucene is not currently locked for Dataset", e.getMessage());
 		}
 	}
 
@@ -135,16 +121,10 @@ public class TestLucene {
 				int j = i % 26;
 				String word = letters.substring(j, j + 1) + letters.substring(j, j + 1) + letters.substring(j, j + 1);
 				gen.writeStartArray();
-				gen.writeStartObject().write("type", "TextField").write("name", "text").write("value", word).writeEnd();
-
-				gen.writeStartObject().write("type", "StringField").write("name", "date")
-						.write("date", new Date().getTime()).writeEnd();
-
-				gen.writeStartObject().write("type", "StringField").write("name", "id").write("value", Long.toString(i))
-						.write("store", true).writeEnd();
-
-				gen.writeStartObject().write("type", "StringField").write("name", "dataset").write("value", "2001")
-						.writeEnd();
+				LuceneApi.encodeTextfield(gen, "text", word);
+				LuceneApi.encodeStringField(gen, "date", new Date().getTime());
+				LuceneApi.encodeStoredId(gen, new Long(i));
+				LuceneApi.encodeStringField(gen, "dataset", 2001L);
 				gen.writeEnd();
 			}
 			gen.writeEnd();
@@ -164,4 +144,72 @@ public class TestLucene {
 		}
 		luceneApi.freeSearcher(uid);
 	}
+
+	@Test
+	public void investigations() throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartArray();
+			for (int i = 0; i < 40; i++) {
+				int j = i % 26;
+				String word = letters.substring(j, j + 1) + letters.substring(j, j + 1) + letters.substring(j, j + 1);
+				gen.writeStartArray();
+				LuceneApi.encodeTextfield(gen, "text", word);
+				LuceneApi.encodeStringField(gen, "date", new Date().getTime());
+				LuceneApi.encodeStoredId(gen, new Long(i));
+				LuceneApi.encodeSortedDocValuesField(gen, "id", new Long(i));
+				gen.writeEnd();
+			}
+			gen.writeEnd();
+		}
+		addDocuments("Investigation", baos.toString());
+		LuceneSearchResult lsr = luceneApi.investigations(null, null, null, null, null, null, letters, 5);
+		Long uid = lsr.getUid();
+		logger.debug("uid {}", uid);
+		for (ScoredEntityBaseBean q : lsr.getResults()) {
+			logger.debug("+> {} {}", q.getEntityBaseBeanId(), q.getScore());
+		}
+		lsr = luceneApi.investigations(uid, 6);
+		assertTrue(lsr.getUid() == null);
+		logger.debug("uid {}", uid);
+		for (ScoredEntityBaseBean q : lsr.getResults()) {
+			logger.debug("+> {} {}", q.getEntityBaseBeanId(), q.getScore());
+		}
+		luceneApi.freeSearcher(uid);
+	}
+
+	@Test
+	public void datasets() throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartArray();
+			for (int i = 0; i < 40; i++) {
+				int j = i % 26;
+				String word = letters.substring(j, j + 1) + letters.substring(j, j + 1) + letters.substring(j, j + 1);
+				gen.writeStartArray();
+				LuceneApi.encodeTextfield(gen, "text", word);
+				LuceneApi.encodeStringField(gen, "date", new Date().getTime());
+				LuceneApi.encodeStoredId(gen, new Long(i));
+				LuceneApi.encodeSortedDocValuesField(gen, "id", new Long(i));
+				LuceneApi.encodeStringField(gen, "investigation", 2001L);
+				gen.writeEnd();
+			}
+			gen.writeEnd();
+		}
+		addDocuments("Dataset", baos.toString());
+		LuceneSearchResult lsr = luceneApi.datasets(null, null, null, null, null, 5);
+		Long uid = lsr.getUid();
+		logger.debug("uid {}", uid);
+		for (ScoredEntityBaseBean q : lsr.getResults()) {
+			logger.debug("+> {} {}", q.getEntityBaseBeanId(), q.getScore());
+		}
+		lsr = luceneApi.datafiles(uid, 6);
+		assertTrue(lsr.getUid() == null);
+		logger.debug("uid {}", uid);
+		for (ScoredEntityBaseBean q : lsr.getResults()) {
+			logger.debug("+> {} {}", q.getEntityBaseBeanId(), q.getScore());
+		}
+		luceneApi.freeSearcher(uid);
+	}
+
 }

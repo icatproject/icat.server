@@ -4,11 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -47,26 +46,6 @@ import org.slf4j.MarkerFactory;
 @Stateless
 @Singleton
 public class LuceneManager {
-
-	/**
-	 * The Set of classes for which population is requested
-	 */
-	private SortedSet<String> populateList = new ConcurrentSkipListSet<>();
-
-	/** The thread which does the population */
-	private PopulateThread populateThread;
-
-	private String populatingClassName;
-
-	@PersistenceUnit(unitName = "icat")
-	private EntityManagerFactory entityManagerFactory;
-
-	private int lucenePopulateBlockSize;
-
-	private ExecutorService getBeanDocExecutor;
-
-	final static Logger logger = LoggerFactory.getLogger(LuceneManager.class);
-	final static Marker fatal = MarkerFactory.getMarker("FATAL");
 
 	public class IndexSome implements Callable<Void> {
 
@@ -116,7 +95,7 @@ public class LuceneManager {
 				});
 
 				try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-					luceneApi.checkStatus(response);
+					LuceneApi.checkStatus(response);
 				}
 			}
 			return null;
@@ -127,22 +106,7 @@ public class LuceneManager {
 		POPULATING, STOPPING, STOPPED
 	}
 
-	@EJB
-	PropertyHandler propertyHandler;
-
-	private Set<Long> idsToCheck = new HashSet<>();
-
-	private PopState popState = PopState.STOPPED;
-
-	private ExecutorService populateExecutor;
-	private int maxThreads;
-
-	private LuceneApi luceneApi;
-
 	public class PopulateThread extends Thread {
-		// TODO make it send a request to the server to stop commits and restart
-		// them at the end. There is still a problem with multiple ICATs - but
-		// would people be so unwise?
 
 		private EntityManager manager;
 		private EntityManagerFactory entityManagerFactory;
@@ -165,7 +129,6 @@ public class LuceneManager {
 
 					if (populatingClassName != null) {
 						luceneApi.lock(populatingClassName);
-						luceneApi.deleteAll(populatingClassName);
 
 						Long start = -1L;
 
@@ -220,7 +183,7 @@ public class LuceneManager {
 						}
 
 						/*
-						 * Commit the changes
+						 * Unlock and commit the changes
 						 */
 						luceneApi.unlock(populatingClassName);
 						populateList.remove(populatingClassName);
@@ -235,33 +198,48 @@ public class LuceneManager {
 		}
 	}
 
-	@PostConstruct
-	private void init() {
-		logger.info("Initialising LuceneManager");
-		try {
-			luceneApi = new LuceneApi(new URI(propertyHandler.getLuceneUrl().toString()));
-			lucenePopulateBlockSize = propertyHandler.getLucenePopulateBlockSize();
-			maxThreads = Runtime.getRuntime().availableProcessors();
-			populateExecutor = Executors.newWorkStealingPool(maxThreads);
-			getBeanDocExecutor = Executors.newCachedThreadPool();
-			logger.info("Initialised LuceneManager");
+	final static Logger logger = LoggerFactory.getLogger(LuceneManager.class);
 
-		} catch (Exception e) {
-			logger.error(fatal, "Problem setting up LuceneManager", e);
-			throw new IllegalStateException("Problem setting up LuceneManager");
-		}
-	}
+	final static Marker fatal = MarkerFactory.getMarker("FATAL");
 
-	@PreDestroy
-	public void exit() {
-		logger.info("Closing down LuceneManager");
-		try {
-			populateExecutor.shutdown();
-			getBeanDocExecutor.shutdown();
-			logger.info("Closed down LuceneManager");
-		} catch (Exception e) {
-			logger.error(fatal, "Problem closing down LuceneManager", e);
+	/**
+	 * The Set of classes for which population is requested
+	 */
+	private SortedSet<String> populateList = new ConcurrentSkipListSet<>();
+
+	/** The thread which does the population */
+	private PopulateThread populateThread;
+	private String populatingClassName;
+
+	@PersistenceUnit(unitName = "icat")
+	private EntityManagerFactory entityManagerFactory;
+
+	private int lucenePopulateBlockSize;
+
+	private ExecutorService getBeanDocExecutor;
+
+	@EJB
+	PropertyHandler propertyHandler;
+
+	private PopState popState = PopState.STOPPED;
+	private ExecutorService populateExecutor;
+
+	private int maxThreads;
+
+	private LuceneApi luceneApi;
+
+	private boolean active;
+
+	public void addDocument(EntityBaseBean bean) throws IcatException {
+		String entityName = bean.getClass().getSimpleName();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartArray();
+			bean.getDoc(gen);
+			gen.writeEnd();
 		}
+		luceneApi.addDocument(entityName, baos.toString());
+		logger.trace("Added to {} lucene index", entityName);
 	}
 
 	public void clear() throws IcatException {
@@ -275,95 +253,93 @@ public class LuceneManager {
 			}
 		}
 		logger.debug("Lucene population terminated");
-
-		for (String name : EntityInfoHandler.getEntityNamesList()) {
-			Class<EntityBaseBean> klass = EntityInfoHandler.getClass(name);
-			try {
-				klass.getDeclaredMethod("getDoc");
-				luceneApi.deleteAll(name);
-			} catch (NoSuchMethodException e) {
-				// There is no getDoc method so not interested
-			}
-			luceneApi.commit();
-		}
+		luceneApi.clear();
 		logger.info("Lucene clear completed");
 	}
 
-	public void deleteDocument(EntityBaseBean bean) throws IcatException {
-		String entityName = bean.getClass().getSimpleName();
-		Long id = bean.getId();
-		// TODO this must be moved to the server
-		if (entityName.equals(populatingClassName)) {
-			idsToCheck.add(id);
-			logger.trace("Will delete {} from {} lucene index later", id, entityName);
-		} else {
-			luceneApi.delete(entityName, id);
-		}
-	}
-
-	public LuceneSearchResult investigations(String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, List<String> samples, String userFullName, int blockSize) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public LuceneSearchResult investigationsAfter(String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, List<String> samples, String userFullName, int blockSize,
-			LuceneSearchResult last) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void addDocument(EntityBaseBean bean) throws IcatException {
-		String entityName = bean.getClass().getSimpleName();
-		if (entityName.equals(populatingClassName)) {
-			idsToCheck.add(bean.getId());
-			logger.trace("Will add to {} lucene index later", entityName);
-		} else {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos)) {
-				gen.writeStartArray();
-				bean.getDoc(gen);
-				gen.writeEnd();
-			}
-			luceneApi.addDocument(entityName, baos.toString());
-
-			logger.trace("Added to {} lucene index", entityName);
-
-		}
-	}
-
-	public LuceneSearchResult datasets(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
-			int blockSize) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public LuceneSearchResult datasetsAfter(String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, int blockSize, LuceneSearchResult last) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void freeSearcher(LuceneSearchResult last) {
-		luceneApi.freeSearcher(last);
-	}
-
-	public boolean isActive() {
-		return true;
+	public void commit() throws IcatException {
+		luceneApi.commit();
 	}
 
 	public LuceneSearchResult datafiles(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
 			int blockSize) throws IcatException {
-		return luceneApi.datafiles(user, text, lower, upper, parms, blockSize, null);
+		return luceneApi.datafiles(user, text, lower, upper, parms, blockSize);
 	}
 
 	public LuceneSearchResult datafilesAfter(long uid, int blockSize) throws IcatException {
 		return luceneApi.datafiles(uid, blockSize);
 	}
 
+	public LuceneSearchResult datasets(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+			int blockSize) throws IcatException {
+		return luceneApi.datasets(user, text, lower, upper, parms, blockSize);
+	}
+
+	public LuceneSearchResult datasetsAfter(Long uid, int blockSize) throws IcatException {
+		return luceneApi.datasets(uid, blockSize);
+	}
+
+	public void deleteDocument(EntityBaseBean bean) throws IcatException {
+		String entityName = bean.getClass().getSimpleName();
+		Long id = bean.getId();
+		luceneApi.delete(entityName, id);
+	}
+
+	@PreDestroy
+	private void exit() {
+		logger.info("Closing down LuceneManager");
+		if (active) {
+			try {
+				populateExecutor.shutdown();
+				getBeanDocExecutor.shutdown();
+				logger.info("Closed down LuceneManager");
+			} catch (Exception e) {
+				logger.error(fatal, "Problem closing down LuceneManager", e);
+			}
+		}
+	}
+
+	public void freeSearcher(Long uid) throws IcatException {
+		luceneApi.freeSearcher(uid);
+	}
+
 	public List<String> getPopulating() {
 		return new ArrayList<>(populateList);
+	}
+
+	@PostConstruct
+	private void init() {
+		logger.info("Initialising LuceneManager");
+		URL url = propertyHandler.getLuceneUrl();
+		active = url != null;
+		if (active) {
+			try {
+				luceneApi = new LuceneApi(new URI(propertyHandler.getLuceneUrl().toString()));
+				lucenePopulateBlockSize = propertyHandler.getLucenePopulateBlockSize();
+				maxThreads = Runtime.getRuntime().availableProcessors();
+				populateExecutor = Executors.newWorkStealingPool(maxThreads);
+				getBeanDocExecutor = Executors.newCachedThreadPool();
+				logger.info("Initialised LuceneManager at {}", url);
+			} catch (Exception e) {
+				logger.error(fatal, "Problem setting up LuceneManager", e);
+				throw new IllegalStateException("Problem setting up LuceneManager");
+			}
+		} else {
+			logger.info("LuceneManager is inactive");
+		}
+	}
+
+	public LuceneSearchResult investigations(String user, String text, String lower, String upper,
+			List<ParameterPOJO> parms, List<String> samples, String userFullName, int blockSize) throws IcatException {
+		return luceneApi.investigations(user, text, lower, upper, parms, samples, userFullName, blockSize);
+	}
+
+	public LuceneSearchResult investigationsAfter(Long uid, int blockSize) throws IcatException {
+		return luceneApi.investigations(uid, blockSize);
+	}
+
+	public boolean isActive() {
+		return active;
 	}
 
 	public void populate(String entityName) throws IcatException {
@@ -388,13 +364,16 @@ public class LuceneManager {
 		}
 	}
 
-	public void updateDocument(EntityBaseBean entityBaseBean) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void commit() throws IcatException {
-		luceneApi.commit();
+	public void updateDocument(EntityBaseBean bean) throws IcatException {
+		String entityName = bean.getClass().getSimpleName();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartArray();
+			bean.getDoc(gen);
+			gen.writeEnd();
+		}
+		luceneApi.update(entityName, baos.toString(), bean.getId());
+		logger.trace("Updated {} lucene index", entityName);
 	}
 
 }

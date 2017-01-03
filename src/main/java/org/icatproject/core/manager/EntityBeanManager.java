@@ -1410,7 +1410,7 @@ public class EntityBeanManager {
 				filterReadAccess(results, allResults, maxCount, userName, manager, Datafile.class);
 			} while (results.size() != maxCount && allResults.size() == blockSize);
 			/* failing lucene retrieval calls clean up before throwing */
-			lucene.freeSearcher(last);
+			lucene.freeSearcher(uid);
 		}
 
 		if (logRequests.contains("R")) {
@@ -1435,6 +1435,7 @@ public class EntityBeanManager {
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
 			LuceneSearchResult last = null;
+			Long uid = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
@@ -1445,14 +1446,15 @@ public class EntityBeanManager {
 			do {
 				if (last == null) {
 					last = lucene.datasets(user, text, lower, upper, parms, blockSize);
+					uid = last.getUid();
 				} else {
-					last = lucene.datasetsAfter(user, text, lower, upper, parms, blockSize, last);
+					last = lucene.datasetsAfter(uid, blockSize);
 				}
 				allResults = last.getResults();
 				filterReadAccess(results, allResults, maxCount, userName, manager, Dataset.class);
 			} while (results.size() != maxCount && allResults.size() == blockSize);
 			/* failing lucene retrieval calls clean up before throwing */
-			lucene.freeSearcher(last);
+			lucene.freeSearcher(uid);
 		}
 		if (logRequests.contains("R")) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1485,6 +1487,7 @@ public class EntityBeanManager {
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
 			LuceneSearchResult last = null;
+			Long uid = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
@@ -1495,15 +1498,15 @@ public class EntityBeanManager {
 			do {
 				if (last == null) {
 					last = lucene.investigations(user, text, lower, upper, parms, samples, userFullName, blockSize);
+					uid = last.getUid();
 				} else {
-					last = lucene.investigationsAfter(user, text, lower, upper, parms, samples, userFullName, blockSize,
-							last);
+					last = lucene.investigationsAfter(uid, blockSize);
 				}
 				allResults = last.getResults();
 				filterReadAccess(results, allResults, maxCount, userName, manager, Investigation.class);
 			} while (results.size() != maxCount && allResults.size() == blockSize);
 			/* failing lucene retrieval calls clean up before throwing */
-			lucene.freeSearcher(last);
+			lucene.freeSearcher(uid);
 		}
 		if (logRequests.contains("R")) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();

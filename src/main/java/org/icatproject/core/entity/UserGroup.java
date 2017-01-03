@@ -1,7 +1,6 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
-import java.security.InvalidParameterException;
 
 import javax.json.stream.JsonGenerator;
 import javax.persistence.Entity;
@@ -10,6 +9,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.LuceneApi;
 
 @Comment("Many to many relationship between user and group")
 @SuppressWarnings("serial")
@@ -46,15 +47,10 @@ public class UserGroup extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator java) {
-		// TODO Document doc = new Document();
-		// if (user.getFullName() != null) {
-		// doc.add(new TextField("text", user.getFullName(), Store.NO));
-		// }
-		// doc.add(new StringField("user", user.getName(), Store.NO));
-		// doc.add(new SortedDocValuesField("grouping", new
-		// BytesRef(Long.toString(grouping.id))));
-		throw new InvalidParameterException("UserGroup.java needs fixing");
+	public void getDoc(JsonGenerator gen) {
+		LuceneApi.encodeTextfield(gen, "text", user.getFullName());
+		LuceneApi.encodeStringField(gen, "user", user.getName());
+		LuceneApi.encodeSortedDocValuesField(gen, "grouping", grouping.id);
 	}
 
 }

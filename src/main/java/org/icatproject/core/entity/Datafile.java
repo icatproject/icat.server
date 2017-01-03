@@ -20,6 +20,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.icatproject.core.manager.LuceneApi;
+
 @Comment("A data file")
 @SuppressWarnings("serial")
 @Entity
@@ -203,36 +205,15 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		if (datafileFormat != null) {
 			sb.append(" " + datafileFormat.getName());
 		}
-
-		// doc.add(new TextField("text", sb.toString(), Store.NO));
-		gen.writeStartObject().write("type", "TextField").write("name", "text").write("value", sb.toString())
-				.writeEnd();
+		LuceneApi.encodeTextfield(gen, "text", sb.toString());
 		if (datafileModTime != null) {
-			// doc.add(new StringField("date",
-			// DateTools.dateToString(datafileModTime, Resolution.MINUTE),
-			// Store.NO));
-			gen.writeStartObject().write("type", "StringField").write("name", "date")
-					.write("date", datafileModTime.getTime()).writeEnd();
+			LuceneApi.encodeStringField(gen, "date", datafileModTime);
 		} else if (datafileCreateTime != null) {
-			// doc.add(new StringField("date",
-			// DateTools.dateToString(datafileCreateTime,
-			// Resolution.MINUTE), Store.NO));
-			gen.writeStartObject().write("type", "StringField").write("name", "date")
-					.write("date", datafileCreateTime.getTime()).writeEnd();
+			LuceneApi.encodeStringField(gen, "date", datafileCreateTime);
 		} else {
-			// doc.add(new StringField("date",
-			// DateTools.dateToString(modTime, Resolution.MINUTE),
-			// Store.NO));
-			gen.writeStartObject().write("type", "StringField").write("name", "date").write("date", modTime.getTime())
-					.writeEnd();
+			LuceneApi.encodeStringField(gen, "date", modTime);
 		}
-		// doc.add(new StringField("id", Long.toString(id), Store.YES));
-		gen.writeStartObject().write("type", "StringField").write("name", "id").write("value", Long.toString(id))
-				.write("store", true).writeEnd();
-		// doc.add(new StringField("dataset", Long.toString(dataset.id),
-		// Store.NO));
-		gen.writeStartObject().write("type", "StringField").write("name", "dataset")
-				.write("value", Long.toString(dataset.id)).writeEnd();
-
+		LuceneApi.encodeStoredId(gen, id);
+		LuceneApi.encodeStringField(gen, "dataset", dataset.id);
 	}
 }
