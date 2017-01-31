@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -102,6 +103,7 @@ public class EntityInfoHandler {
 		public Map<String, Method> gettersFromName;
 		public Map<String, Relationship> relationshipsByName;
 		public Set<Field> relInKey;
+		private boolean hasLuceneDoc;
 
 		public PrivateEntityInfo(Set<Relationship> rels, List<Field> notNullableFields, Map<Field, Method> getters,
 				Map<String, Method> gettersFromName, Map<Field, Integer> stringFields, Map<Field, Method> setters,
@@ -109,7 +111,7 @@ public class EntityInfoHandler {
 				Map<Field, String> fieldComments, Set<Relationship> ones, Set<Field> attributes,
 				Constructor<? extends EntityBaseBean> constructor, Map<String, Field> fieldByName, String exportHeader,
 				String exportNull, List<Field> fields, String exportHeaderAll,
-				Map<String, Relationship> relationshipsByName, Set<Field> relInKey) {
+				Map<String, Relationship> relationshipsByName, Set<Field> relInKey, boolean hasLuceneDoc) {
 			this.relatedEntities = rels;
 			this.notNullableFields = notNullableFields;
 			this.getters = getters;
@@ -130,6 +132,7 @@ public class EntityInfoHandler {
 			this.exportHeaderAll = exportHeaderAll;
 			this.relationshipsByName = relationshipsByName;
 			this.relInKey = relInKey;
+			this.hasLuceneDoc = hasLuceneDoc;
 		}
 	}
 
@@ -217,6 +220,13 @@ public class EntityInfoHandler {
 		Collections.sort(alphabeticEntityNames);
 	}
 
+	private final static Comparator<? super Field> fieldComparator = new Comparator<Field>() {
+		@Override
+		public int compare(Field o1, Field o2) {
+			return o1.getName().compareTo(o2.getName());
+		}
+	};
+
 	public static Set<String> getAlphabeticEntityNames() {
 		return entityNames;
 	}
@@ -240,7 +250,7 @@ public class EntityInfoHandler {
 
 	public static List<String> getEntityNamesList() {
 		return alphabeticEntityNames;
-	}
+	};
 
 	public static List<String> getExportEntityNames() {
 		return exportEntityNames;
@@ -248,16 +258,9 @@ public class EntityInfoHandler {
 
 	public static synchronized EntityInfoHandler getInstance() {
 		return instance;
-	};
+	}
 
 	private final HashMap<Class<? extends EntityBaseBean>, PrivateEntityInfo> map = new HashMap<Class<? extends EntityBaseBean>, PrivateEntityInfo>();
-
-	private final static Comparator<? super Field> fieldComparator = new Comparator<Field>() {
-		@Override
-		public int compare(Field o1, Field o2) {
-			return o1.getName().compareTo(o2.getName());
-		}
-	};
 
 	private EntityInfoHandler() {
 	}
@@ -588,10 +591,17 @@ public class EntityInfoHandler {
 			}
 		}
 
+		boolean hasLuceneDoc = true;
+		try {
+			objectClass.getDeclaredMethod("getDoc", JsonGenerator.class);
+		} catch (NoSuchMethodException e) {
+			hasLuceneDoc = false;
+		}
+
 		return new PrivateEntityInfo(rels, notNullableFields, getters, gettersFromName, stringFields, setters, updaters,
 				constraintFields, commentString, comments, ones, attributes, constructor, fieldsByName,
 				exportHeader.toString(), exportNull.toString(), fields, exportHeaderAll.toString(), relationshipsByName,
-				relInKey);
+				relInKey, hasLuceneDoc);
 	}
 
 	/**
@@ -744,23 +754,20 @@ public class EntityInfoHandler {
 		}
 	}
 
-	private List<Field> getNormalFields(Class<?> cobj) {
-		List<Field> fields = new ArrayList<Field>(Arrays.asList(cobj.getDeclaredFields()));
-		final Iterator<Field> iter = fields.iterator();
-		while (iter.hasNext()) {
-			final Field f = iter.next();
-			int modifier = f.getModifiers();
-			if (f.getName().startsWith("_")) {
-				iter.remove();
-			} else if (Modifier.isStatic(modifier)) {
-				iter.remove();
-			} else if (Modifier.isTransient(modifier)) {
-				iter.remove();
-			} else if (f.isAnnotationPresent(XmlTransient.class)) {
-				iter.remove();
+	/**
+	 * Returns all user settable fields (not id, createId, modId, createTime nor
+	 * modTime
+	 */
+	public List<Field> getFields(Class<? extends EntityBaseBean> objectClass) throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
 			}
+			return ei.fields;
 		}
-		return fields;
 	}
 
 	public Map<String, Field> getFieldsByName(Class<? extends EntityBaseBean> objectClass) throws IcatException {
@@ -772,24 +779,6 @@ public class EntityInfoHandler {
 				this.map.put(objectClass, ei);
 			}
 			return ei.fieldsByName;
-		}
-	}
-
-	/**
-	 * Map from field name to relationship
-	 * 
-	 * @throws IcatException
-	 */
-	public Map<String, Relationship> getRelationshipsByName(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.relationshipsByName;
 		}
 	}
 
@@ -821,6 +810,25 @@ public class EntityInfoHandler {
 			}
 			return ei.gettersFromName;
 		}
+	}
+
+	private List<Field> getNormalFields(Class<?> cobj) {
+		List<Field> fields = new ArrayList<Field>(Arrays.asList(cobj.getDeclaredFields()));
+		final Iterator<Field> iter = fields.iterator();
+		while (iter.hasNext()) {
+			final Field f = iter.next();
+			int modifier = f.getModifiers();
+			if (f.getName().startsWith("_")) {
+				iter.remove();
+			} else if (Modifier.isStatic(modifier)) {
+				iter.remove();
+			} else if (Modifier.isTransient(modifier)) {
+				iter.remove();
+			} else if (f.isAnnotationPresent(XmlTransient.class)) {
+				iter.remove();
+			}
+		}
+		return fields;
 	}
 
 	public List<Field> getNotNullableFields(Class<? extends EntityBaseBean> objectClass) throws IcatException {
@@ -856,6 +864,36 @@ public class EntityInfoHandler {
 				this.map.put(objectClass, ei);
 			}
 			return ei.relatedEntities;
+		}
+	}
+
+	/**
+	 * Map from field name to relationship
+	 * 
+	 * @throws IcatException
+	 */
+	public Map<String, Relationship> getRelationshipsByName(Class<? extends EntityBaseBean> objectClass)
+			throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.relationshipsByName;
+		}
+	}
+
+	public Set<Field> getRelInKey(Class<? extends EntityBaseBean> objectClass) throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.relInKey;
 		}
 	}
 
@@ -906,11 +944,8 @@ public class EntityInfoHandler {
 		}
 	}
 
-	/**
-	 * Returns all user settable fields (not id, createId, modId, createTime nor
-	 * modTime
-	 */
-	public List<Field> getFields(Class<? extends EntityBaseBean> objectClass) throws IcatException {
+	/** Return true if getDoc() method exists else false */
+	public boolean hasLuceneDoc(Class<? extends EntityBaseBean> objectClass) throws IcatException {
 		PrivateEntityInfo ei = null;
 		synchronized (this.map) {
 			ei = this.map.get(objectClass);
@@ -918,7 +953,7 @@ public class EntityInfoHandler {
 				ei = this.buildEi(objectClass);
 				this.map.put(objectClass, ei);
 			}
-			return ei.fields;
+			return ei.hasLuceneDoc;
 		}
 	}
 
@@ -982,18 +1017,6 @@ public class EntityInfoHandler {
 		}
 
 		return n;
-	}
-
-	public Set<Field> getRelInKey(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.relInKey;
-		}
 	}
 
 }
