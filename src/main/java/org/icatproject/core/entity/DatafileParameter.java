@@ -1,7 +1,6 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
-import java.security.InvalidParameterException;
 
 import javax.json.stream.JsonGenerator;
 import javax.persistence.Entity;
@@ -15,6 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.manager.LuceneApi;
 
 @Comment("A parameter associated with a data file")
 @SuppressWarnings("serial")
@@ -56,9 +56,7 @@ public class DatafileParameter extends Parameter implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		super.getDoc(gen);
-		// TODO doc.add(new SortedDocValuesField("datafile", new
-		// BytesRef(Long.toString(datafile.id))));
-		throw new InvalidParameterException("Datafile parameter.java need attention");
+		LuceneApi.encodeSortedDocValuesField(gen, "datafile", datafile.id);
 	}
 
 }

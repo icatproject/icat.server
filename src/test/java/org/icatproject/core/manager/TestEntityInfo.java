@@ -6,12 +6,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.DataCollection;
 import org.icatproject.core.entity.DataCollectionDatafile;
@@ -39,6 +41,23 @@ public class TestEntityInfo {
 	@Test(expected = IcatException.class)
 	public void testBadname() throws Exception {
 		eiHandler.getEntityInfo("Fred");
+	}
+
+	@Test
+	public void testHasLuceneDoc() throws Exception {
+		Set<String> docdbeans = new HashSet<>(
+				Arrays.asList("Investigation", "Dataset", "Datafile", "InvestigationParameter", "DatasetParameter",
+						"DatafileParameter", "InvestigationUser", "Sample", "SampleParameter", "UserGroup"));
+		for (String beanName : EntityInfoHandler.getEntityNamesList()) {
+			@SuppressWarnings("unchecked")
+			Class<? extends EntityBaseBean> bean = (Class<? extends EntityBaseBean>) Class
+					.forName(Constants.ENTITY_PREFIX + beanName);
+			if (docdbeans.contains(beanName)) {
+				assertTrue(eiHandler.hasLuceneDoc(bean));
+			} else {
+				assertFalse(eiHandler.hasLuceneDoc(bean));
+			}
+		}
 	}
 
 	@Test

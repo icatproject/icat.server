@@ -10,6 +10,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.icatproject.core.manager.LuceneApi;
+
 @Comment("Many to many relationship between investigation and user. It is expected that this will show the association of "
 		+ "individual users with an investigation which might be derived from the proposal. It may also be used as the "
 		+ "basis of authorization rules. See InvestigationGroup if you wish to separate authorization rules from who is "
@@ -35,24 +37,13 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 	public InvestigationUser() {
 	}
 
-	// private static final FieldType STRING_FIELD_TYPE_STORED_SORTED = new
-	// FieldType(StringField.TYPE_STORED);
-	//
-	// TODO static {
-	// STRING_FIELD_TYPE_STORED_SORTED.setNumericType(FieldType.NumericType.DOUBLE);
-	// STRING_FIELD_TYPE_STORED_SORTED.freeze();
-	// }
-
 	@Override
 	public void getDoc(JsonGenerator gen) {
-		// TODO Document doc = new Document();
-		// if (user.getFullName() != null) {
-		// doc.add(new TextField("text", user.getFullName(), Store.NO));
-		// }
-		// doc.add(new StringField("name", user.getName(), Store.NO));
-		// doc.add(new SortedDocValuesField("investigation", new
-		// BytesRef(Long.toString(investigation.id))));
-		throw new IllegalArgumentException("InvestigationUser.java needs updating");
+		if (user.getFullName() != null) {
+			LuceneApi.encodeTextfield(gen, "text", user.getFullName());
+		}
+		LuceneApi.encodeStringField(gen, "name", user.getName());
+		LuceneApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
 	}
 
 	public String getRole() {

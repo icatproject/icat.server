@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
@@ -13,6 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.manager.LuceneApi;
 
 @Comment("A parameter associated with a sample")
 @SuppressWarnings("serial")
@@ -49,6 +51,12 @@ public class SampleParameter extends Parameter implements Serializable {
 
 	public void setSample(Sample sample) {
 		this.sample = sample;
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		super.getDoc(gen);
+		LuceneApi.encodeSortedDocValuesField(gen, "sample", sample.id);
 	}
 
 }

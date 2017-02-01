@@ -2,15 +2,12 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
-import javax.json.stream.JsonGenerator;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.icatproject.core.manager.LuceneApi;
 
 @Comment("Many to many relationship between user and group")
 @SuppressWarnings("serial")
@@ -44,13 +41,6 @@ public class UserGroup extends EntityBaseBean implements Serializable {
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-	@Override
-	public void getDoc(JsonGenerator gen) {
-		LuceneApi.encodeTextfield(gen, "text", user.getFullName());
-		LuceneApi.encodeStringField(gen, "user", user.getName());
-		LuceneApi.encodeSortedDocValuesField(gen, "grouping", grouping.id);
 	}
 
 }

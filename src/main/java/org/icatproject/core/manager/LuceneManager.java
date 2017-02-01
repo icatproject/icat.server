@@ -47,18 +47,21 @@ import org.slf4j.MarkerFactory;
 @Singleton
 public class LuceneManager {
 
+	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
+
 	public class IndexSome implements Callable<Void> {
 
 		private List<Long> ids;
 		private EntityManager manager;
-		private Class<?> klass;
+		private Class<? extends EntityBaseBean> klass;
 		private String entityName;
 
+		@SuppressWarnings("unchecked")
 		public IndexSome(String entityName, List<Long> ids, EntityManagerFactory entityManagerFactory)
 				throws IcatException {
 			try {
 				this.entityName = entityName;
-				klass = Class.forName(Constants.ENTITY_PREFIX + entityName);
+				klass = (Class<? extends EntityBaseBean>) Class.forName(Constants.ENTITY_PREFIX + entityName);
 				this.ids = ids;
 				manager = entityManagerFactory.createEntityManager();
 			} catch (Exception e) {
@@ -69,33 +72,36 @@ public class LuceneManager {
 
 		@Override
 		public Void call() throws Exception {
+			if (eiHandler.hasLuceneDoc(klass)) {
 
-			URI uri = new URIBuilder(luceneApi.server).setPath(LuceneApi.basePath + "/addNow/" + entityName).build();
-			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-				HttpPost httpPost = new HttpPost(uri);
-				PipedOutputStream beanDocs = new PipedOutputStream();
-				httpPost.setEntity(new InputStreamEntity(new PipedInputStream(beanDocs)));
-				getBeanDocExecutor.submit(() -> {
-					try (JsonGenerator gen = Json.createGenerator(beanDocs)) {
-						gen.writeStartArray();
-						for (Long id : ids) {
-							EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
-							if (bean != null) {
-								bean.getDoc(gen);
+				URI uri = new URIBuilder(luceneApi.server).setPath(LuceneApi.basePath + "/addNow/" + entityName)
+						.build();
+				try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+					HttpPost httpPost = new HttpPost(uri);
+					PipedOutputStream beanDocs = new PipedOutputStream();
+					httpPost.setEntity(new InputStreamEntity(new PipedInputStream(beanDocs)));
+					getBeanDocExecutor.submit(() -> {
+						try (JsonGenerator gen = Json.createGenerator(beanDocs)) {
+							gen.writeStartArray();
+							for (Long id : ids) {
+								EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
+								if (bean != null) {
+									bean.getDoc(gen);
+								}
 							}
+							gen.writeEnd();
+							return null;
+						} catch (Exception e) {
+							logger.error("About to throw internal exception because of", e);
+							throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+						} finally {
+							manager.close();
 						}
-						gen.writeEnd();
-						return null;
-					} catch (Exception e) {
-						logger.error("About to throw internal exception because of", e);
-						throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
-					} finally {
-						manager.close();
-					}
-				});
+					});
 
-				try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-					LuceneApi.checkStatus(response);
+					try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+						LuceneApi.checkStatus(response);
+					}
 				}
 			}
 			return null;
@@ -231,15 +237,17 @@ public class LuceneManager {
 	private boolean active;
 
 	public void addDocument(EntityBaseBean bean) throws IcatException {
-		String entityName = bean.getClass().getSimpleName();
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (JsonGenerator gen = Json.createGenerator(baos)) {
-			gen.writeStartArray();
-			bean.getDoc(gen);
-			gen.writeEnd();
+		if (eiHandler.hasLuceneDoc(bean.getClass())) {
+			String entityName = bean.getClass().getSimpleName();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos)) {
+				gen.writeStartArray();
+				bean.getDoc(gen);
+				gen.writeEnd();
+			}
+			luceneApi.addDocument(entityName, baos.toString());
+			logger.trace("Added to {} lucene index", entityName);
 		}
-		luceneApi.addDocument(entityName, baos.toString());
-		logger.trace("Added to {} lucene index", entityName);
 	}
 
 	public void clear() throws IcatException {
@@ -280,9 +288,11 @@ public class LuceneManager {
 	}
 
 	public void deleteDocument(EntityBaseBean bean) throws IcatException {
-		String entityName = bean.getClass().getSimpleName();
-		Long id = bean.getId();
-		luceneApi.delete(entityName, id);
+		if (eiHandler.hasLuceneDoc(bean.getClass())) {
+			String entityName = bean.getClass().getSimpleName();
+			Long id = bean.getId();
+			luceneApi.delete(entityName, id);
+		}
 	}
 
 	@PreDestroy
@@ -365,15 +375,17 @@ public class LuceneManager {
 	}
 
 	public void updateDocument(EntityBaseBean bean) throws IcatException {
-		String entityName = bean.getClass().getSimpleName();
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (JsonGenerator gen = Json.createGenerator(baos)) {
-			gen.writeStartArray();
-			bean.getDoc(gen);
-			gen.writeEnd();
+		if (eiHandler.hasLuceneDoc(bean.getClass())) {
+			String entityName = bean.getClass().getSimpleName();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos)) {
+				gen.writeStartArray();
+				bean.getDoc(gen);
+				gen.writeEnd();
+			}
+			luceneApi.update(entityName, baos.toString(), bean.getId());
+			logger.trace("Updated {} lucene index", entityName);
 		}
-		luceneApi.update(entityName, baos.toString(), bean.getId());
-		logger.trace("Updated {} lucene index", entityName);
 	}
 
 }

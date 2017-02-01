@@ -424,7 +424,9 @@ public class PropertyHandler {
 			/* Lucene Host */
 			if (props.has("lucene.url")) {
 				luceneUrl = props.getURL("lucene.url");
+				formattedProps.add("lucene.url" + " " + luceneUrl);
 				lucenePopulateBlockSize = props.getPositiveInt("lucene.populateBlockSize");
+				formattedProps.add("lucene.populateBlockSize" + " " + lucenePopulateBlockSize);
 			}
 
 			/*

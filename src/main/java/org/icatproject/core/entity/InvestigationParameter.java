@@ -1,7 +1,6 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
-import java.security.InvalidParameterException;
 
 import javax.json.stream.JsonGenerator;
 import javax.persistence.Entity;
@@ -15,6 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.manager.LuceneApi;
 
 @Comment("A parameter associated with an investigation")
 @SuppressWarnings("serial")
@@ -57,8 +57,6 @@ public class InvestigationParameter extends Parameter implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		super.getDoc(gen);
-		// doc.add(new SortedDocValuesField("investigation", new
-		// BytesRef(Long.toString(investigation.id))));
-		throw new InvalidParameterException("InvestigationParameter.java needs fixing");
+		LuceneApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
 	}
 }

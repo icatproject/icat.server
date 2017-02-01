@@ -1,7 +1,6 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.LuceneApi;
 
 @Comment("A sample to be used in an investigation")
 @SuppressWarnings("serial")
@@ -85,14 +86,9 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void getDoc(JsonGenerator gen) {
-		// TODO Document doc = new Document();
-		// StringBuilder sb = new StringBuilder(name);
-		// if (type != null) {
-		// sb.append(" " + type.getName());
-		// }
-		// doc.add(new TextField("text", sb.toString(), Store.NO));
-		// doc.add(new SortedDocValuesField("investigation", new
-		// BytesRef(Long.toString(investigation.id))));
-		throw new InvalidParameterException("Bad sample.java");
+		if (type != null) {
+			LuceneApi.encodeTextfield(gen, "text", type.getName());
+		}
+		LuceneApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
 	}
 }

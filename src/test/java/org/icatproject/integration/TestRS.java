@@ -218,8 +218,8 @@ public class TestRS {
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
-		// parameters.add(new ParameterForLucene("birthday", "date", dft
-		// .parse("2014-05-16T16:58:26.12Z"),
+		// parameters.add(new ParameterForLucene("birthday", "date",
+		// dft.parse("2014-05-16T16:58:26.12Z"),
 		// dft.parse("2014-05-16T16:58:26.12Z")));
 		parameters.add(new ParameterForLucene("current", "amps", 140, 165));
 
@@ -243,6 +243,12 @@ public class TestRS {
 
 		// Try a bad user
 		searchDatasets(session, "db/fred", null, null, null, null, 20, 0);
+
+		// Try text
+		array = searchDatasets(session, null, "gamma AND ds3", null, null, null, 20, 1);
+
+		// Try parameters
+		array = searchDatasets(session, null, null, null, null, parameters, 20, 1);
 
 		array = searchDatasets(session, null, "gamma AND ds3", dft.parse("2014-05-16T06:09:03"),
 				dft.parse("2014-05-16T06:15:26"), parameters, 20, 1);
@@ -338,7 +344,6 @@ public class TestRS {
 		rootSession.luceneCommit();
 		List<String> props = wSession.getProperties();
 		System.out.println(props);
-		assertTrue(props.contains("lucene.commitSeconds 5"));
 
 		// Get known configuration
 		wSession.clear();
@@ -1119,7 +1124,7 @@ public class TestRS {
 			fail("Should have thrown an exception");
 		} catch (IcatException e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
-			assertEquals("Unexpected char=r in json rubbish", e.getMessage());
+			assertEquals("Unexpected char 114 at (line no=1, column no=1, offset=0) in json rubbish", e.getMessage());
 			assertEquals(0, e.getOffset());
 		}
 

@@ -103,6 +103,11 @@ public class LuceneApi {
 				.writeEnd();
 	}
 
+	public static void encodeStringField(JsonGenerator gen, String name, Double value) {
+		gen.writeStartObject().write("type", "StringField").write("name", "id").write("value", Double.toString(value))
+		.write("store", true).writeEnd();
+	}
+
 	public static void encodeStringField(JsonGenerator gen, String name, Long value) {
 		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", Long.toString(value))
 				.writeEnd();
@@ -236,7 +241,7 @@ public class LuceneApi {
 		} catch (IOException | URISyntaxException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
-	}
+	};
 
 	public LuceneSearchResult datasets(Long uid, int maxResults) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
@@ -247,7 +252,7 @@ public class LuceneApi {
 		} catch (IOException | URISyntaxException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
-	};
+	}
 
 	public LuceneSearchResult datasets(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
 			int maxResults) throws IcatException {

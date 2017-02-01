@@ -1980,7 +1980,7 @@ public class TestWS {
 		}
 
 		ip.setStringValue("good1");
-		ip.setId((Long) session.create(ip));
+		ip.setId(session.create(ip));
 
 		try {
 			ip.setStringValue("worse");
