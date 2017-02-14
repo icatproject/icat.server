@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,6 +38,7 @@ import javax.json.stream.JsonGenerator;
 
 import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
+import org.icatproject.core.manager.LuceneApi;
 import org.icatproject.icat.client.ICAT;
 import org.icatproject.icat.client.IcatException;
 import org.icatproject.icat.client.IcatException.IcatExceptionType;
@@ -214,14 +216,7 @@ public class TestRS {
 
 		Session session = setupLuceneTest();
 
-		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-		List<ParameterForLucene> parameters = new ArrayList<>();
-		parameters.add(new ParameterForLucene("colour", "name", "green"));
-		// parameters.add(new ParameterForLucene("birthday", "date",
-		// dft.parse("2014-05-16T16:58:26.12Z"),
-		// dft.parse("2014-05-16T16:58:26.12Z")));
-		parameters.add(new ParameterForLucene("current", "amps", 140, 165));
+		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 		// All datasets
 		searchDatasets(session, null, null, null, null, null, 20, 5);
@@ -248,10 +243,16 @@ public class TestRS {
 		array = searchDatasets(session, null, "gamma AND ds3", null, null, null, 20, 1);
 
 		// Try parameters
+		List<ParameterForLucene> parameters = new ArrayList<>();
+		parameters.add(new ParameterForLucene("colour", "name", "green"));
+		parameters.add(new ParameterForLucene("birthday", "date", dft.parse("2014-05-16T16:58:26+0000"),
+				dft.parse("2014-05-16T16:58:26+0000")));
+		parameters.add(new ParameterForLucene("current", "amps", 140, 165));
+
 		array = searchDatasets(session, null, null, null, null, parameters, 20, 1);
 
-		array = searchDatasets(session, null, "gamma AND ds3", dft.parse("2014-05-16T06:09:03"),
-				dft.parse("2014-05-16T06:15:26"), parameters, 20, 1);
+		array = searchDatasets(session, null, "gamma AND ds3", dft.parse("2014-05-16T05:09:03+0000"),
+				dft.parse("2014-05-16T05:15:26+0000"), parameters, 20, 1);
 		checkResultFromLuceneSearch(session, "gamma", array, "Dataset", "description");
 	}
 
@@ -259,15 +260,15 @@ public class TestRS {
 	public void testLuceneInvestigations() throws Exception {
 		Session session = setupLuceneTest();
 
-		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 		searchInvestigations(session, null, null, null, null, null, null, null, 20, 3);
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
 
-		JsonArray array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
-				dft.parse("2011-12-31T23:59:59"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
+		JsonArray array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
+				dft.parse("2011-12-31T23:59:59+0000"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
 				"Professor", 20, 1);
 		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
@@ -278,35 +279,35 @@ public class TestRS {
 		searchInvestigations(session, "db/tr", "title AND two", null, null, parameters, null, null, 20, 0);
 
 		// Only working to a minute
-		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:01"),
-				dft.parse("2011-12-31T23:59:59"), parameters, null, null, 20, 1);
+		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:01+0000"),
+				dft.parse("2011-12-31T23:59:59+0000"), parameters, null, null, 20, 1);
 		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
-		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
-				dft.parse("2011-12-31T23:59:58"), parameters, null, null, 20, 1);
+		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
+				dft.parse("2011-12-31T23:59:58+0000"), parameters, null, null, 20, 1);
 		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
-		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:01:00"),
-				dft.parse("2011-12-31T23:59:59"), parameters, null, null, 20, 0);
+		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:01:00+0000"),
+				dft.parse("2011-12-31T23:59:59+0000"), parameters, null, null, 20, 0);
 
-		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
-				dft.parse("2011-12-31T23:58:00"), parameters, null, null, 20, 0);
+		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
+				dft.parse("2011-12-31T23:58:00+0000"), parameters, null, null, 20, 0);
 
 		// Change parameters
 		List<ParameterForLucene> badParameters = new ArrayList<>();
 		badParameters.add(new ParameterForLucene("color", "name", "green"));
-		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
-				dft.parse("2011-12-31T23:59:59"), badParameters, Arrays.asList("ford + rust", "koh + diamond"), null,
-				20, 0);
+		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
+				dft.parse("2011-12-31T23:59:59+0000"), badParameters, Arrays.asList("ford + rust", "koh + diamond"),
+				null, 20, 0);
 
 		// Change samples
-		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
-				dft.parse("2011-12-31T23:59:59"), parameters, Arrays.asList("ford AND rust", "kog* AND diamond"), null,
-				20, 0);
+		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
+				dft.parse("2011-12-31T23:59:59+0000"), parameters, Arrays.asList("ford AND rust", "kog* AND diamond"),
+				null, 20, 0);
 
 		// Change userFullName
-		searchInvestigations(session, "db/tr", "title + one", dft.parse("2011-01-01T00:00:00"),
-				dft.parse("2011-12-31T23:59:59"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
+		searchInvestigations(session, "db/tr", "title + one", dft.parse("2011-01-01T00:00:00+0000"),
+				dft.parse("2011-12-31T23:59:59+0000"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
 				"Doctor", 20, 0);
 
 		// Try provoking an error
@@ -339,9 +340,13 @@ public class TestRS {
 		credentials.put("password", "password");
 		Session rootSession = icat.login("db", credentials);
 
-		// Clear lucene - just in case
-		rootSession.luceneClear();
-		rootSession.luceneCommit();
+		rootSession.luceneClear(); // Stop populating
+
+		String urlString = System.getProperty("luceneUrl");
+		URI uribase = new URI(urlString);
+		LuceneApi luceneApi = new LuceneApi(uribase);
+		luceneApi.clear(); // Really empty the db
+
 		List<String> props = wSession.getProperties();
 		System.out.println(props);
 
@@ -1550,6 +1555,34 @@ public class TestRS {
 		assertEquals(userName, facility.getCreateId());
 		assertEquals((Integer) 90, facility.getDaysUntilRelease());
 		ts("Import with check after edit and overwrite");
+
+	}
+
+	@Test
+	public void testLucenePopulate() throws Exception {
+		createAndPopulate();
+
+		Map<String, String> credentials = new HashMap<>();
+
+		credentials.put("username", "root");
+		credentials.put("password", "password");
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Session session = icat.login("db", credentials);
+
+		session.luceneClear(); // Stop populating
+
+		String urlString = System.getProperty("luceneUrl");
+		URI uribase = new URI(urlString);
+		LuceneApi luceneApi = new LuceneApi(uribase);
+		luceneApi.clear(); // Really empty the db
+
+//		List<String> res = session.luceneGetPopulating();
+//		assertTrue(res.isEmpty());
+
+		session.lucenePopulate("Dataset", -1);
+		session.lucenePopulate("Datafile", -1);
+		session.lucenePopulate("Investigation", -1);
+		System.out.println(session.luceneGetPopulating());
 
 	}
 

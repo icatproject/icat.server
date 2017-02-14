@@ -891,6 +891,8 @@ public class TestWS {
 				fail("Neither S1 nor S2");
 			}
 		}
+		
+		session.setAuthz();
 	}
 
 	@Test

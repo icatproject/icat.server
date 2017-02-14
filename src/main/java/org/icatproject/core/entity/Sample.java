@@ -86,9 +86,11 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void getDoc(JsonGenerator gen) {
+		StringBuilder sb = new StringBuilder(name);
 		if (type != null) {
-			LuceneApi.encodeTextfield(gen, "text", type.getName());
+			sb.append(" " + type.getName());
 		}
+		LuceneApi.encodeTextfield(gen, "text", sb.toString());
 		LuceneApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
 	}
 }

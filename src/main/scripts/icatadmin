@@ -153,26 +153,36 @@ def populate(args):
     parser.set_usage(usagebase + "populate [<name>]")
     parser.set_description("Populate lucene (for that entry name)")
     options, args = parser.parse_args(args)
-
+    
     if len(args) == 0: 
         try:
             sessionId = getService() 
             parameters = {"sessionId": sessionId}
-            for entity in "Datafile", "DatafileParameter", "Dataset", "DatasetParameter", "Investigation", "InvestigationParameter", "InvestigationUser", "Sample", "UserGroup":
+            for entity in "Datafile", "DatafileParameter", "Dataset", "DatasetParameter", "Investigation", "InvestigationParameter", "InvestigationUser", "Sample":
                 print entity
-                _process("lucene/db/" + entity, parameters, "POST")
+                _process("lucene/db/" + entity + "/-1", parameters, "POST")
         except Exception, e:
             fatal(e)
         return    
         
-    if len(args) != 1:
-        fatal("Must have zero arguments after the operation 'populate' or one - the name of the entity")
+    if len(args) == 1:
+        try:
+            sessionId = getService()
+            parameters = {"sessionId": sessionId}
+            entity = args[0]
+            _process("lucene/db/" + entity + "/-1", parameters, "POST")
+        except Exception, e:
+            fatal(e)
+        return
+        
+    if len(args) > 2:
+        fatal("Must have zero arguments after the operation 'populate' or one - the name of the entity or two with the name of the entity and minid")
  
     try:
         sessionId = getService()
         parameters = {"sessionId": sessionId}
         entity = args[0]
-        _process("lucene/db/" + entity, parameters, "POST")
+        _process("lucene/db/" + entity + "/" + args[1], parameters, "POST")
     except Exception, e:
         fatal(e)
 

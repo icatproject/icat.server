@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -89,6 +91,24 @@ public class ICATRest {
 	private static Logger logger = LoggerFactory.getLogger(ICATRest.class);
 
 	private final static DateFormat df8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+
+	private static SimpleDateFormat df;
+
+	static {
+		df = new SimpleDateFormat("yyyyMMddHHmm");
+		TimeZone tz = TimeZone.getTimeZone("GMT");
+		df.setTimeZone(tz);
+	}
+
+	private static Date dec(String value) throws java.text.ParseException {
+		if (value == null) {
+			return null;
+		} else {
+			synchronized (df) {
+				return df.parse(value);
+			}
+		}
+	}
 
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
@@ -1002,8 +1022,10 @@ public class ICATRest {
 					if (parm.containsKey("stringValue")) {
 						parms.add(new ParameterPOJO(name, units, parm.getString("stringValue")));
 					} else if (parm.containsKey("lowerDateValue") && parm.containsKey("upperDateValue")) {
-						parms.add(new ParameterPOJO(name, units, parm.getString("lowerDateValue"),
-								parm.getString("upperDateValue")));
+						synchronized (df) {
+							parms.add(new ParameterPOJO(name, units, df.parse(parm.getString("lowerDateValue")),
+									df.parse(parm.getString("upperDateValue"))));
+						}
 					} else if (parm.containsKey("lowerNumericValue") && parm.containsKey("upperNumericValue")) {
 						parms.add(new ParameterPOJO(name, units, parm.getJsonNumber("lowerNumericValue").doubleValue(),
 								parm.getJsonNumber("upperNumericValue").doubleValue()));
@@ -1013,8 +1035,8 @@ public class ICATRest {
 				}
 			}
 			List<ScoredEntityBaseBean> objects;
-			if (target.equals("Investigation")) {
 
+			if (target.equals("Investigation")) {
 				List<String> samples = new ArrayList<>();
 				if (jo.containsKey("samples")) {
 					for (JsonValue val : jo.getJsonArray("samples")) {
@@ -1023,17 +1045,16 @@ public class ICATRest {
 					}
 				}
 				String userFullName = jo.getString("userFullName", null);
-
-				objects = beanManager.luceneInvestigations(userName, user, text, lower, upper, parms, samples,
+				objects = beanManager.luceneInvestigations(userName, user, text, dec(lower), dec(upper), parms, samples,
 						userFullName, maxCount, manager, request.getRemoteAddr());
 
 			} else if (target.equals("Dataset")) {
-				objects = beanManager.luceneDatasets(userName, user, text, lower, upper, parms, maxCount, manager,
-						request.getRemoteAddr());
+				objects = beanManager.luceneDatasets(userName, user, text, dec(lower), dec(upper), parms, maxCount,
+						manager, request.getRemoteAddr());
 
 			} else if (target.equals("Datafile")) {
-				objects = beanManager.luceneDatafiles(userName, user, text, lower, upper, parms, maxCount, manager,
-						request.getRemoteAddr());
+				objects = beanManager.luceneDatafiles(userName, user, text, dec(lower), dec(upper), parms, maxCount,
+						manager, request.getRemoteAddr());
 
 			} else {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
@@ -1051,11 +1072,13 @@ public class ICATRest {
 			return baos.toString();
 		} catch (JsonException e) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "JsonException " + e.getMessage());
+		} catch (ParseException e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "ParserException " + e.getMessage());
 		}
 	}
 
 	/**
-	 * Clear the lucene database
+	 * Stop population of the lucene database if it is running.
 	 * 
 	 * @summary Lucene Clear
 	 * 
@@ -1131,17 +1154,17 @@ public class ICATRest {
 	 *             when something is wrong
 	 */
 	@POST
-	@Path("lucene/db/{entityName}")
-	public void lucenePopulate(@FormParam("sessionId") String sessionId, @PathParam("entityName") String entityName)
-			throws IcatException {
+	@Path("lucene/db/{entityName}/{minid}")
+	public void lucenePopulate(@FormParam("sessionId") String sessionId, @PathParam("entityName") String entityName,
+			@PathParam("minid") long minid) throws IcatException {
 		checkRoot(sessionId);
-		beanManager.lucenePopulate(entityName, manager);
+		beanManager.lucenePopulate(entityName, minid, manager);
 	}
 
 	/**
 	 * Refresh session
 	 * 
-	 * @summary Lucene Refresh
+	 * @summary Refresh
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form

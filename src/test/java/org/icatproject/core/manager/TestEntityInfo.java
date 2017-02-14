@@ -45,9 +45,8 @@ public class TestEntityInfo {
 
 	@Test
 	public void testHasLuceneDoc() throws Exception {
-		Set<String> docdbeans = new HashSet<>(
-				Arrays.asList("Investigation", "Dataset", "Datafile", "InvestigationParameter", "DatasetParameter",
-						"DatafileParameter", "InvestigationUser", "Sample", "SampleParameter", "UserGroup"));
+		Set<String> docdbeans = new HashSet<>(Arrays.asList("Investigation", "Dataset", "Datafile",
+				"InvestigationParameter", "DatasetParameter", "DatafileParameter", "InvestigationUser", "Sample"));
 		for (String beanName : EntityInfoHandler.getEntityNamesList()) {
 			@SuppressWarnings("unchecked")
 			Class<? extends EntityBaseBean> bean = (Class<? extends EntityBaseBean>) Class

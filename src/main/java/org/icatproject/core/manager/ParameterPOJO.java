@@ -1,6 +1,7 @@
 package org.icatproject.core.manager;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @SuppressWarnings("serial")
 public class ParameterPOJO implements Serializable {
@@ -8,8 +9,8 @@ public class ParameterPOJO implements Serializable {
 	String name;
 	String units;
 	String stringValue;
-	String lowerDateValue;
-	String upperDateValue;
+	Date lowerDateValue;
+	Date upperDateValue;
 	Double lowerNumericValue;
 	Double upperNumericValue;
 
@@ -19,7 +20,7 @@ public class ParameterPOJO implements Serializable {
 		this.stringValue = stringValue;
 	}
 
-	public ParameterPOJO(String name, String units, String lower, String upper) {
+	public ParameterPOJO(String name, String units, Date lower, Date upper) {
 		this.name = name;
 		this.units = units;
 		lowerDateValue = lower;

@@ -1384,9 +1384,8 @@ public class EntityBeanManager {
 		}
 	}
 
-	public List<ScoredEntityBaseBean> luceneDatafiles(String userName, String user, String text, String lower,
-			String upper, List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip)
-			throws IcatException {
+	public List<ScoredEntityBaseBean> luceneDatafiles(String userName, String user, String text, Date lower, Date upper,
+			List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip) throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
@@ -1428,9 +1427,8 @@ public class EntityBeanManager {
 		return results;
 	}
 
-	public List<ScoredEntityBaseBean> luceneDatasets(String userName, String user, String text, String lower,
-			String upper, List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip)
-			throws IcatException {
+	public List<ScoredEntityBaseBean> luceneDatasets(String userName, String user, String text, Date lower, Date upper,
+			List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip) throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
@@ -1479,10 +1477,9 @@ public class EntityBeanManager {
 		}
 	}
 
-	public List<ScoredEntityBaseBean> luceneInvestigations(String userName, String user, String text, String lower,
-			String upper, List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxCount,
+	public List<ScoredEntityBaseBean> luceneInvestigations(String userName, String user, String text, Date lower,
+			Date upper, List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxCount,
 			EntityManager manager, String ip) throws IcatException {
-
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
@@ -1523,14 +1520,14 @@ public class EntityBeanManager {
 		return results;
 	}
 
-	public void lucenePopulate(String entityName, EntityManager manager) throws IcatException {
+	public void lucenePopulate(String entityName, long minid, EntityManager manager) throws IcatException {
 		if (luceneActive) {
 			try {
 				Class.forName(Constants.ENTITY_PREFIX + entityName);
 			} catch (ClassNotFoundException e) {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
 			}
-			lucene.populate(entityName);
+			lucene.populate(entityName, minid);
 		}
 	}
 

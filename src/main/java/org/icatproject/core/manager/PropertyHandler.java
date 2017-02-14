@@ -330,8 +330,8 @@ public class PropertyHandler {
 					} catch (IcatException e) {
 						abend(e.getClass() + " " + e.getMessage());
 					}
-					logger.error(key + " " + urls);
-					formattedProps.add(key + " " + urls);
+					logger.debug(key + " " + urls);
+					formattedProps.add(key + " = " + urls);
 				}
 
 				key = "authn." + mnemonic + ".friendly";

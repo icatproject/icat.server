@@ -5,8 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.json.Json;
 import javax.json.stream.JsonGenerator;
@@ -98,14 +100,25 @@ public class LuceneApi {
 				.write("store", true).writeEnd();
 	}
 
-	public static void encodeStringField(JsonGenerator gen, String name, Date value) {
-		gen.writeStartObject().write("type", "StringField").write("name", name).write("date", value.getTime())
-				.writeEnd();
+	private static SimpleDateFormat df;
+
+	static {
+		df = new SimpleDateFormat("yyyyMMddHHmm");
+		TimeZone tz = TimeZone.getTimeZone("GMT");
+		df.setTimeZone(tz);
 	}
 
-	public static void encodeStringField(JsonGenerator gen, String name, Double value) {
-		gen.writeStartObject().write("type", "StringField").write("name", "id").write("value", Double.toString(value))
-		.write("store", true).writeEnd();
+	public static void encodeStringField(JsonGenerator gen, String name, Date value) {
+		String timeString;
+		synchronized (df) {
+			timeString = df.format(value);
+		}
+		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", timeString).writeEnd();
+	}
+
+	public static void encodeDoubleField(JsonGenerator gen, String name, Double value) {
+		gen.writeStartObject().write("type", "DoubleField").write("name", name).write("value", value)
+				.write("store", true).writeEnd();
 	}
 
 	public static void encodeStringField(JsonGenerator gen, String name, Long value) {
@@ -159,7 +172,7 @@ public class LuceneApi {
 
 	}
 
-	void commit() throws IcatException {
+	public void commit() throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/commit").build();
 			logger.trace("Making call {}", uri);
@@ -183,7 +196,7 @@ public class LuceneApi {
 		}
 	}
 
-	public LuceneSearchResult datafiles(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+	public LuceneSearchResult datafiles(String user, String text, Date lower, Date upper, List<ParameterPOJO> parms,
 			int maxResults) throws IcatException {
 
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
@@ -201,10 +214,10 @@ public class LuceneApi {
 					gen.write("text", text);
 				}
 				if (lower != null) {
-					gen.write("lower", lower);
+					gen.write("lower", enc(lower));
 				}
 				if (upper != null) {
-					gen.write("upper", upper);
+					gen.write("upper", enc(upper));
 				}
 				if (parms != null && !parms.isEmpty()) {
 					gen.writeStartArray("params");
@@ -220,10 +233,10 @@ public class LuceneApi {
 							gen.write("stringValue", parm.stringValue);
 						}
 						if (parm.lowerDateValue != null) {
-							gen.write("lowerDateValue", parm.lowerDateValue);
+							gen.write("lowerDateValue", enc(parm.lowerDateValue));
 						}
 						if (parm.upperDateValue != null) {
-							gen.write("upperDateValue", parm.upperDateValue);
+							gen.write("upperDateValue", enc(parm.upperDateValue));
 						}
 						if (parm.lowerNumericValue != null) {
 							gen.write("lowerNumericValue", parm.lowerNumericValue);
@@ -243,6 +256,12 @@ public class LuceneApi {
 		}
 	};
 
+	private String enc(Date dateValue) {
+		synchronized (df) {
+			return df.format(dateValue);
+		}
+	}
+
 	public LuceneSearchResult datasets(Long uid, int maxResults) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/datasets/" + uid)
@@ -254,7 +273,7 @@ public class LuceneApi {
 		}
 	}
 
-	public LuceneSearchResult datasets(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+	public LuceneSearchResult datasets(String user, String text, Date lower, Date upper, List<ParameterPOJO> parms,
 			int maxResults) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/datasets")
@@ -271,10 +290,10 @@ public class LuceneApi {
 					gen.write("text", text);
 				}
 				if (lower != null) {
-					gen.write("lower", lower);
+					gen.write("lower", enc(lower));
 				}
 				if (upper != null) {
-					gen.write("upper", upper);
+					gen.write("upper", enc(upper));
 				}
 				if (parms != null && !parms.isEmpty()) {
 					gen.writeStartArray("params");
@@ -290,10 +309,10 @@ public class LuceneApi {
 							gen.write("stringValue", parm.stringValue);
 						}
 						if (parm.lowerDateValue != null) {
-							gen.write("lowerDateValue", parm.lowerDateValue);
+							gen.write("lowerDateValue", enc(parm.lowerDateValue));
 						}
 						if (parm.upperDateValue != null) {
-							gen.write("upperDateValue", parm.upperDateValue);
+							gen.write("upperDateValue", enc(parm.upperDateValue));
 						}
 						if (parm.lowerNumericValue != null) {
 							gen.write("lowerNumericValue", parm.lowerNumericValue);
@@ -434,7 +453,7 @@ public class LuceneApi {
 		}
 	}
 
-	public LuceneSearchResult investigations(String user, String text, String lower, String upper,
+	public LuceneSearchResult investigations(String user, String text, Date lower, Date upper,
 			List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxResults) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/investigations")
@@ -451,10 +470,10 @@ public class LuceneApi {
 					gen.write("text", text);
 				}
 				if (lower != null) {
-					gen.write("lower", lower);
+					gen.write("lower", enc(lower));
 				}
 				if (upper != null) {
-					gen.write("upper", upper);
+					gen.write("upper", enc(upper));
 				}
 				if (parms != null && !parms.isEmpty()) {
 					gen.writeStartArray("params");
@@ -470,10 +489,10 @@ public class LuceneApi {
 							gen.write("stringValue", parm.stringValue);
 						}
 						if (parm.lowerDateValue != null) {
-							gen.write("lowerDateValue", parm.lowerDateValue);
+							gen.write("lowerDateValue", enc(parm.lowerDateValue));
 						}
 						if (parm.upperDateValue != null) {
-							gen.write("upperDateValue", parm.upperDateValue);
+							gen.write("upperDateValue", enc(parm.upperDateValue));
 						}
 						if (parm.lowerNumericValue != null) {
 							gen.write("lowerNumericValue", parm.lowerNumericValue);
@@ -482,6 +501,13 @@ public class LuceneApi {
 							gen.write("upperNumericValue", parm.upperNumericValue);
 						}
 						gen.writeEnd(); // object
+					}
+					gen.writeEnd(); // array
+				}
+				if (samples != null && !samples.isEmpty()) {
+					gen.writeStartArray("samples");
+					for (String sample : samples) {
+						gen.write(sample);
 					}
 					gen.writeEnd(); // array
 				}
@@ -526,7 +552,7 @@ public class LuceneApi {
 		}
 	}
 
-	public void update(String entityName, String json, Long id) throws IcatException {
+	public void updateDocument(String entityName, String json, Long id) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/update/" + entityName + "/" + id).build();
 			HttpPost httpPost = new HttpPost(uri);

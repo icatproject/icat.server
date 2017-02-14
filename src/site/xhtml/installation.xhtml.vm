@@ -328,10 +328,13 @@
 		</dd>
 	</dl>
 
-	<h2>The icat.properties and logback.xml files</h2>
+	<h2>The logback.xml file</h2>
 
 	<p>If you wish to modify the provided logging levels then rename
-		logback.xml.example to logback.xml.</p>
+		logback.xml.example to logback.xml and edit to suit your needs.</p>
+
+	<h2>The icat.properties file</h2>
+
 	<dl>
 		<dt>lifetimeMinutes</dt>
 		<dd>Defines the lifetime of an ICAT sessionid. You should avoid
@@ -420,33 +423,13 @@
 			log via JMS calls. The types are specified by a space separated list
 			of values taken from READ, WRITE, SESSION, INFO.</dd>
 
-		<dt>lucene.directory</dt>
-		<dd>This is optional. It is the path to a directory (whose parent
-			must exist) in which to store the lucene index. If this is specified
-			then lucene.commitSeconds and lucene.commitCount must both be
-			specified. If it is omitted and lucene.hostPort is also omitted then
-			lucene indices will not be created and the searchText() call will
-			return nothing.</dd>
+		<dt>lucene.url</dt>
+		<dd>This is optional. It is the machine url of the icat.lucene
+			server if needed. It is needed for TopCAT to work.</dd>
 
-		<dt>lucene.commitSeconds</dt>
-		<dd>the interval in seconds between committing lucene changes to
-			disk and updating the index. If you set it to 300 then searchText()
-			calls will see what was available at some time in the past (up to 5
-			minutes ago) and which is also currently present.</dd>
-
-		<dt>lucene.commitCount</dt>
-		<dd>the number of changes to accumulate before committing them to
-			disk. If the number is too high there can be memory problems.
-			Currently this is only used by the call to lucenePopulate.</dd>
-
-		<dt>lucene.hostPort</dt>
-		<dd>
-			This is optional and if set any other lucene settings will be
-			ignored. It should only be specified on satellite machines when you
-			have a group of machines working together as described at <a
-				href="#cluster">Installing a group of ICATs</a> The value takes the
-			form machine:port where the port will normally be 3700.
-		</dd>
+		<dt>lucene.populateBlockSize</dt>
+		<dd>This is ignored if lucene.url is not set. The number of
+			entries to batch off to the lucene server when using lucenePopulate.</dd>
 
 		<dt>key</dt>
 		<dd>This is optional but if there is an IDS server in use and it

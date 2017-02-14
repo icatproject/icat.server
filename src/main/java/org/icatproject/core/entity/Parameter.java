@@ -168,7 +168,7 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 		if (stringValue != null) {
 			LuceneApi.encodeStringField(gen, "stringValue", stringValue);
 		} else if (numericValue != null) {
-			LuceneApi.encodeStringField(gen, "numericValue", numericValue);
+			LuceneApi.encodeDoubleField(gen, "numericValue", numericValue);
 		} else if (dateTimeValue != null) {
 			LuceneApi.encodeStringField(gen, "dateTimeValue", dateTimeValue);
 		}
