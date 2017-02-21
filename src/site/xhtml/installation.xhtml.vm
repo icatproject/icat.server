@@ -431,6 +431,14 @@
 		<dd>This is ignored if lucene.url is not set. The number of
 			entries to batch off to the lucene server when using lucenePopulate.</dd>
 
+
+		<dt>lucene.backlogHandlerFile</dt>
+		<dd>path relative to the config directory to hold data that was
+			temporarily rejected by the lucene server</dd>
+
+		<dt>lucene.backlogHandlerIntervalSeconds</dt>
+		<dd>how often to check the backlog file</dd>
+
 		<dt>key</dt>
 		<dd>This is optional but if there is an IDS server in use and it
 			has a key for digest protection of Datafile.location then this key

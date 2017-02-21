@@ -45,7 +45,9 @@ log.list = SESSION WRITE READ INFO
 # Lucene
 lucene.url = https://localhost:8181
 lucene.populateBlockSize = 10000
-
+lucene.backlogHandlerFile = ../data/icat/luceneBacklogHandlerFile
+lucene.backlogHandlerIntervalSeconds = 60
+				
 # JMS - uncomment and edit if needed
 !jms.topicConnectionFactory = java:comp/DefaultJMSConnectionFactory
 

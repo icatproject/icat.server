@@ -56,12 +56,6 @@ import org.slf4j.MarkerFactory;
 @Singleton
 public class LuceneManager {
 
-	public enum Operation {
-		ADD, UPDATE, DELETE
-	}
-
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	public class IndexSome implements Callable<Long> {
 
 		private List<Long> ids;
@@ -126,6 +120,70 @@ public class LuceneManager {
 		}
 	}
 
+	public enum Operation {
+		ADD, UPDATE, DELETE
+	}
+
+	private class PendingLuceneRequestHandler extends TimerTask {
+
+		private EntityManager manager;
+
+		public PendingLuceneRequestHandler(EntityManagerFactory entityManagerFactory) {
+			manager = entityManagerFactory.createEntityManager();
+		}
+
+		@Override
+		public void run() {
+			synchronized (lock) {
+				if (backlogHandlerFile.length() != 0) {
+					logger.debug("Will attempt to process {}", backlogHandlerFile);
+					try (BufferedReader reader = new BufferedReader(new FileReader(backlogHandlerFile))) {
+						String line;
+						while ((line = reader.readLine()) != null) {
+							String[] bits = line.split(" ");
+							Operation operation = Operation.valueOf(bits[0]);
+							String entityName = bits[1];
+							@SuppressWarnings("unchecked")
+							Class<? extends EntityBaseBean> klass = (Class<? extends EntityBaseBean>) Class
+									.forName(Constants.ENTITY_PREFIX + entityName);
+							Long id = Long.parseLong(bits[2]);
+							EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
+
+							if (bean != null) {
+								ByteArrayOutputStream baos = new ByteArrayOutputStream();
+								try (JsonGenerator gen = Json.createGenerator(baos)) {
+									gen.writeStartArray();
+									bean.getDoc(gen);
+									gen.writeEnd();
+								}
+								if (operation == Operation.ADD) {
+									luceneApi.addDocument(entityName, baos.toString());
+								} else if (operation == Operation.UPDATE) {
+									luceneApi.updateDocument(entityName, baos.toString(), id);
+								}
+							} else {
+								if (operation == Operation.DELETE) {
+									luceneApi.delete(entityName, id);
+								}
+							}
+						}
+						backlogHandlerFile.delete();
+						logger.info("Pending lucene records now all inserted");
+					} catch (IOException e) {
+						logger.error("Problems reading from {} : {}", backlogHandlerFile, e.getMessage());
+					} catch (ClassNotFoundException e) {
+						logger.error("Odd problem : {}", e.getMessage());
+					} catch (IcatException e) {
+						logger.error("Failed to put previously failed entries into lucene " + e.getMessage());
+					} catch (Throwable e) {
+						logger.error("Something unexpected happened " + e.getClass() + " " + e.getMessage());
+					}
+					logger.debug("finish processing");
+				}
+			}
+		}
+	}
+
 	private enum PopState {
 		STOPPING, STOPPED
 	}
@@ -169,7 +227,7 @@ public class LuceneManager {
 							List<Long> ids = manager
 									.createQuery("SELECT e.id from " + populatingClassEntry.getKey()
 											+ " e WHERE e.id > " + start + " ORDER BY e.id", Long.class)
-									.setMaxResults(lucenePopulateBlockSize).getResultList();
+									.setMaxResults(populateBlockSize).getResultList();
 							if (ids.size() == 0) {
 								break;
 							}
@@ -179,7 +237,7 @@ public class LuceneManager {
 							while ((fut = threads.poll()) != null) {
 								Long s = fut.get();
 								if (s.equals(tasks.first())) {
-//									populatingClassEntry.setValue(s);
+									populateMap.put(populatingClassEntry.getKey(), s);
 								}
 								tasks.remove(s);
 							}
@@ -189,7 +247,7 @@ public class LuceneManager {
 								fut = threads.take();
 								Long s = fut.get();
 								if (s.equals(tasks.first())) {
-//									populatingClassEntry.setValue(s);
+									populateMap.put(populatingClassEntry.getKey(), s);
 								}
 								tasks.remove(s);
 							}
@@ -209,7 +267,7 @@ public class LuceneManager {
 							fut = threads.take();
 							Long s = fut.get();
 							if (s.equals(tasks.first())) {
-//								populatingClassEntry.setValue(s);
+								populateMap.put(populatingClassEntry.getKey(), s);
 							}
 							tasks.remove(s);
 						}
@@ -230,6 +288,8 @@ public class LuceneManager {
 		}
 	}
 
+	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
+
 	final static Logger logger = LoggerFactory.getLogger(LuceneManager.class);
 
 	final static Marker fatal = MarkerFactory.getMarker("FATAL");
@@ -238,22 +298,22 @@ public class LuceneManager {
 	 * The Set of classes for which population is requested
 	 */
 	private ConcurrentSkipListMap<String, Long> populateMap = new ConcurrentSkipListMap<>();
-
 	/** The thread which does the population */
 	private PopulateThread populateThread;
+
 	private Entry<String, Long> populatingClassEntry;
 
 	@PersistenceUnit(unitName = "icat")
 	private EntityManagerFactory entityManagerFactory;
 
-	private int lucenePopulateBlockSize;
+	private int populateBlockSize;
 
 	private ExecutorService getBeanDocExecutor;
 
 	@EJB
 	PropertyHandler propertyHandler;
-
 	private PopState popState = PopState.STOPPED;
+
 	private ExecutorService populateExecutor;
 
 	private int maxThreads;
@@ -261,6 +321,17 @@ public class LuceneManager {
 	private LuceneApi luceneApi;
 
 	private boolean active;
+
+	private Long lock = 0L;
+
+	private Timer timer;
+
+	private File backlogHandlerFile;
+
+	/*
+	 * This writes to a file rather than the database because of difficulties
+	 * with transactions. It is simple and safe if not elegant.
+	 */
 
 	public void addDocument(EntityBaseBean bean) throws IcatException {
 		if (eiHandler.hasLuceneDoc(bean.getClass())) {
@@ -279,28 +350,6 @@ public class LuceneManager {
 				logger.trace("Will add to {} lucene index when server is back", entityName);
 			}
 
-		}
-	}
-
-	private Long lock = 0L;
-
-	private Timer timer;
-
-	/*
-	 * This writes to a file rather than the database because of difficulties
-	 * with transactions. It is simple and safe if not elegant.
-	 */
-	private static String fname = "fred";
-
-	private void holdLuceneOp(Operation operation, String entityName, Long id) {
-		synchronized (lock) {
-			try {
-				FileWriter output = new FileWriter(fname, true);
-				output.write(operation + " " + entityName + " " + id + "\n");
-				output.close();
-			} catch (IOException e) {
-				logger.error("Problems writing to {} : {}", fname, e.getMessage());
-			}
 		}
 	}
 
@@ -347,7 +396,6 @@ public class LuceneManager {
 				luceneApi.delete(entityName, id);
 			} catch (IcatException e) {
 				holdLuceneOp(Operation.DELETE, entityName, id);
-				logger.error("Added a DELETE plop");
 			}
 		}
 	}
@@ -380,63 +428,14 @@ public class LuceneManager {
 		return result;
 	}
 
-	private class PendingLuceneRequestHandler extends TimerTask {
-
-		private EntityManager manager;
-
-		public PendingLuceneRequestHandler(EntityManagerFactory entityManagerFactory) {
-			manager = entityManagerFactory.createEntityManager();
-		}
-
-		@Override
-		public void run() {
-			synchronized (lock) {
-				File f = new File(fname);
-				if (f.length() != 0) {
-					logger.debug("Will attempt to process {}", f);
-					try (BufferedReader reader = new BufferedReader(new FileReader(fname))) {
-						String line;
-						while ((line = reader.readLine()) != null) {
-							String[] bits = line.split(" ");
-							Operation operation = Operation.valueOf(bits[0]);
-							String entityName = bits[1];
-							@SuppressWarnings("unchecked")
-							Class<? extends EntityBaseBean> klass = (Class<? extends EntityBaseBean>) Class
-									.forName(Constants.ENTITY_PREFIX + entityName);
-							Long id = Long.parseLong(bits[2]);
-							EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
-
-							if (bean != null) {
-								ByteArrayOutputStream baos = new ByteArrayOutputStream();
-								try (JsonGenerator gen = Json.createGenerator(baos)) {
-									gen.writeStartArray();
-									bean.getDoc(gen);
-									gen.writeEnd();
-								}
-								if (operation == Operation.ADD) {
-									luceneApi.addDocument(entityName, baos.toString());
-								} else if (operation == Operation.UPDATE) {
-									luceneApi.updateDocument(entityName, baos.toString(), id);
-								}
-							} else {
-								if (operation == Operation.DELETE) {
-									luceneApi.delete(entityName, id);
-								}
-							}
-						}
-						f.delete();
-						logger.info("Pending lucene records now all inserted");
-					} catch (IOException e) {
-						logger.error("Problems reading from {} : {}", fname, e.getMessage());
-					} catch (ClassNotFoundException e) {
-						logger.error("Odd problem : {}", e.getMessage());
-					} catch (IcatException e) {
-						logger.error("Failed to put previously failed entries into lucene " + e.getMessage());
-					} catch (Throwable e) {
-						logger.error("Something unexpected happened " + e.getClass() + " " + e.getMessage());
-					}
-					logger.debug("finish processing");
-				}
+	private void holdLuceneOp(Operation operation, String entityName, Long id) {
+		synchronized (lock) {
+			try {
+				FileWriter output = new FileWriter(backlogHandlerFile, true);
+				output.write(operation + " " + entityName + " " + id + "\n");
+				output.close();
+			} catch (IOException e) {
+				logger.error("Problems writing to {} : {}", backlogHandlerFile, e.getMessage());
 			}
 		}
 	}
@@ -449,12 +448,14 @@ public class LuceneManager {
 		if (active) {
 			try {
 				luceneApi = new LuceneApi(new URI(propertyHandler.getLuceneUrl().toString()));
-				lucenePopulateBlockSize = propertyHandler.getLucenePopulateBlockSize();
+				populateBlockSize = propertyHandler.getLucenePopulateBlockSize();
+				backlogHandlerFile = propertyHandler.getLuceneBacklogHandlerFile();
 				maxThreads = Runtime.getRuntime().availableProcessors();
 				populateExecutor = Executors.newWorkStealingPool(maxThreads);
 				getBeanDocExecutor = Executors.newCachedThreadPool();
 				timer = new Timer();
-				timer.schedule(new PendingLuceneRequestHandler(entityManagerFactory), 0L, 60000L);
+				timer.schedule(new PendingLuceneRequestHandler(entityManagerFactory), 0L,
+						propertyHandler.getLuceneBacklogHandlerIntervalMillis());
 				logger.info("Initialised LuceneManager at {}", url);
 			} catch (Exception e) {
 				logger.error(fatal, "Problem setting up LuceneManager", e);

@@ -477,7 +477,10 @@ public class EntityBeanManager {
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 
-				List<EntityBaseBean> allBeansToDelete = new ArrayList<>();
+				// A set is used because investigations have datasets - but also
+				// have samples that have datasets. This is an easy way to deal
+				// with this odd example.
+				Set<EntityBaseBean> allBeansToDelete = new HashSet<>();
 				for (EntityBaseBean bean : beans) {
 					List<EntityBaseBean> beansToDelete = new ArrayList<>();
 					EntityBaseBean beanManaged = find(bean, manager);

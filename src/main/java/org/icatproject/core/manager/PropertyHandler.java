@@ -2,6 +2,7 @@ package org.icatproject.core.manager;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -288,6 +289,8 @@ public class PropertyHandler {
 	private String digestKey;
 	private URL luceneUrl;
 	private int lucenePopulateBlockSize;
+	private File luceneBacklogHandlerFile;
+	private long luceneBacklogHandlerIntervalMillis;
 
 	@PostConstruct
 	private void init() {
@@ -425,8 +428,16 @@ public class PropertyHandler {
 			if (props.has("lucene.url")) {
 				luceneUrl = props.getURL("lucene.url");
 				formattedProps.add("lucene.url" + " " + luceneUrl);
+
 				lucenePopulateBlockSize = props.getPositiveInt("lucene.populateBlockSize");
 				formattedProps.add("lucene.populateBlockSize" + " " + lucenePopulateBlockSize);
+
+				luceneBacklogHandlerFile = props.getFile("lucene.backlogHandlerFile");
+				formattedProps.add("lucene.backlogHandlerFile" + " " + luceneBacklogHandlerFile);
+
+				luceneBacklogHandlerIntervalMillis = props.getPositiveLong("lucene.backlogHandlerIntervalSeconds");
+				formattedProps.add("lucene.backlogHandlerIntervalSeconds" + " " + luceneBacklogHandlerIntervalMillis);
+				luceneBacklogHandlerIntervalMillis *= 1000;
 			}
 
 			/*
@@ -518,6 +529,14 @@ public class PropertyHandler {
 
 	public int getLucenePopulateBlockSize() {
 		return lucenePopulateBlockSize;
+	}
+
+	public long getLuceneBacklogHandlerIntervalMillis() {
+		return luceneBacklogHandlerIntervalMillis;
+	}
+
+	public File getLuceneBacklogHandlerFile() {
+		return luceneBacklogHandlerFile;
 	}
 
 }

@@ -821,7 +821,6 @@ public class ICATRest {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String login(@Context HttpServletRequest request, @FormParam("json") String jsonString)
 			throws IcatException {
-		logger.debug(jsonString);
 		if (jsonString == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "json must not be null");
 		}

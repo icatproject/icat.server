@@ -1576,13 +1576,16 @@ public class TestRS {
 		LuceneApi luceneApi = new LuceneApi(uribase);
 		luceneApi.clear(); // Really empty the db
 
-//		List<String> res = session.luceneGetPopulating();
-//		assertTrue(res.isEmpty());
+		assertTrue(session.luceneGetPopulating().isEmpty());
 
 		session.lucenePopulate("Dataset", -1);
 		session.lucenePopulate("Datafile", -1);
 		session.lucenePopulate("Investigation", -1);
-		System.out.println(session.luceneGetPopulating());
+		assertFalse(session.luceneGetPopulating().isEmpty());
+
+		do {
+			Thread.sleep(1000);
+		} while (!session.luceneGetPopulating().isEmpty());
 
 	}
 
