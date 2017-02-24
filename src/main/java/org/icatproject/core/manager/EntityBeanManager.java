@@ -1900,7 +1900,7 @@ public class EntityBeanManager {
 					transmitter.processMessage("update", ip, baos.toString(), startMillis);
 				}
 				if (luceneActive) {
-					beanManaged.updateInLucene(lucene);
+					lucene.updateDocument(beanManaged);
 				}
 				return notification;
 			} catch (IcatException e) {

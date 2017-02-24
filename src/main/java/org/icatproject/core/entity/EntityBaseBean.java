@@ -429,31 +429,6 @@ public abstract class EntityBaseBean implements Serializable {
 		this.modTime = modTime;
 	}
 
-	public void updateInLucene(LuceneManager lucene) throws IcatException {
-		lucene.updateDocument(this);
-		Class<? extends EntityBaseBean> klass = this.getClass();
-		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		for (Relationship r : rs) {
-			if (r.isCollection()) {
-				Method m = getters.get(r.getField());
-				try {
-					@SuppressWarnings("unchecked")
-					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
-					if (!collection.isEmpty()) {
-						for (EntityBaseBean bean : collection) {
-							bean.updateInLucene(lucene);
-						}
-					}
-				} catch (Exception e) {
-					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
-				}
-			}
-
-		}
-
-	}
-
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + ":" + id;

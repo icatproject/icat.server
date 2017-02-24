@@ -167,6 +167,61 @@ public class TestWS {
 		session.createJob(application, input, output);
 	}
 
+	@Test
+	public void testDatasetUpdate() throws Exception {
+		session.clear();
+		create();
+
+		String investigationName = "A";
+		String instrumentName = "42";
+		String datasetType = "GQ";
+
+		System.out.println("Iteration   Update");
+
+		List<Object> fs = session.search("SELECT f.id FROM Facility f");
+		String facilityId = "" + (Long) fs.get(0);
+
+		/** Dataset type **/
+		List<Object> datasetTypes = session
+				.search(String.format("SELECT ds FROM DatasetType ds WHERE ds.name = '%s'", datasetType));
+
+		DatasetType type = (DatasetType) datasetTypes.get(0);
+
+		GregorianCalendar date = new GregorianCalendar();
+		date.setTime(new Date());
+
+		List<Object> response = session.search("Investigation INCLUDE 1 [name ='" + investigationName
+				+ "' AND visitId = '" + instrumentName + "' AND facility.id = '" + facilityId + "']");
+		Investigation investigation = (Investigation) response.get(0);
+
+		for (int i = 0; i < 200; i++) {
+
+			/** Creating datasets **/
+			Dataset dataset = new Dataset();
+			dataset.setInvestigation(investigation);
+			dataset.setName("ds_" + new Random().nextInt(5000000) + i);
+			dataset.setStartDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
+			dataset.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
+
+			/** Set data set Type **/
+			dataset.setType(type);
+
+			/** Storing dataset **/
+			final long id = session.create(dataset);
+			dataset.setId(id);
+
+			/** Updating endDate of investigation **/
+			investigation.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
+
+			long updateTime = System.currentTimeMillis();
+			session.update(investigation);
+			long finalTime = System.currentTimeMillis();
+			if (i % 10 == 0) {
+				System.out.println(i + " " + (finalTime - updateTime));
+			}
+		}
+	}
+
 	private Datafile addDatafile(Dataset dataset, String name, DatafileFormat format) {
 		Datafile datafile = new Datafile();
 		datafile.setDatafileFormat(format);
@@ -891,7 +946,7 @@ public class TestWS {
 				fail("Neither S1 nor S2");
 			}
 		}
-		
+
 		session.setAuthz();
 	}
 
