@@ -172,53 +172,46 @@ public class TestWS {
 		session.clear();
 		create();
 
-		String investigationName = "A";
-		String instrumentName = "42";
-		String datasetType = "GQ";
-
-		System.out.println("Iteration   Update");
-
-		List<Object> fs = session.search("SELECT f.id FROM Facility f");
-		String facilityId = "" + (Long) fs.get(0);
-
-		/** Dataset type **/
-		List<Object> datasetTypes = session
-				.search(String.format("SELECT ds FROM DatasetType ds WHERE ds.name = '%s'", datasetType));
+		List<Object> datasetTypes = session.search("SELECT ds FROM DatasetType ds");
 
 		DatasetType type = (DatasetType) datasetTypes.get(0);
 
 		GregorianCalendar date = new GregorianCalendar();
 		date.setTime(new Date());
 
-		List<Object> response = session.search("Investigation INCLUDE 1 [name ='" + investigationName
-				+ "' AND visitId = '" + instrumentName + "' AND facility.id = '" + facilityId + "']");
+		List<Object> response = session.search("Investigation INCLUDE 1");
 		Investigation investigation = (Investigation) response.get(0);
 
-		for (int i = 0; i < 200; i++) {
+		List<Long> times = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
 
-			/** Creating datasets **/
 			Dataset dataset = new Dataset();
 			dataset.setInvestigation(investigation);
 			dataset.setName("ds_" + new Random().nextInt(5000000) + i);
 			dataset.setStartDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
 			dataset.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
-
-			/** Set data set Type **/
 			dataset.setType(type);
 
-			/** Storing dataset **/
-			final long id = session.create(dataset);
-			dataset.setId(id);
+			session.create(dataset);
 
-			/** Updating endDate of investigation **/
 			investigation.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
 
 			long updateTime = System.currentTimeMillis();
 			session.update(investigation);
 			long finalTime = System.currentTimeMillis();
-			if (i % 10 == 0) {
-				System.out.println(i + " " + (finalTime - updateTime));
-			}
+			times.add(finalTime - updateTime);
+
+		}
+		long tot = 0;
+		int n = 0;
+		for (long time : times) {
+			tot += time;
+			n++;
+		}
+		double fac = 1.5;
+		double limit = tot * fac / n;
+		for (long time : times) {
+			assertTrue("Time " + time + " much greater than average " + limit, time < limit);
 		}
 	}
 
