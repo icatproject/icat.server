@@ -208,10 +208,11 @@ public class TestWS {
 			tot += time;
 			n++;
 		}
-		double fac = 1.5;
+		double fac = 2.0;
 		double limit = tot * fac / n;
+		System.out.println(times);
 		for (long time : times) {
-			assertTrue("Time " + time + " much greater than average " + limit, time < limit);
+			assertTrue("Time " + time + " should not be greater than " + limit, time < limit);
 		}
 	}
 

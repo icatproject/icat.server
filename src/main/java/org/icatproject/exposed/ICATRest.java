@@ -646,7 +646,7 @@ public class ICATRest {
 	 * 
 	 * <dt>ALL</dt>
 	 * <dd>all field values specified will be respected. This option is only
-	 * available to those specified in the rootUserNames in the icat.properties
+	 * available to those specified in the rootUserNames in the run.properties
 	 * file.</dd>
 	 * </dl>
 	 * 

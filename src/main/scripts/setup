@@ -15,11 +15,11 @@ def uninstall():
     actions.deleteJMSResource("jms/ICAT/Synch")
     actions.deleteJMSResource("jms/ICAT/log")
     
-actions, arg, props = getActions("icat-setup.properties", ["db.driver", "db.url", "db.username", "db.password"], binDir=True)
+actions, arg, props = getActions("setup.properties", ["db.driver", "db.url", "db.username", "db.password"], binDir=True)
 
 binDir = actions.getBinDir();
 files = ["testicat", "icatadmin"]
-prop_name = "icat.properties"
+prop_name = "run.properties"
 prop_list = ["lifetimeMinutes", "rootUserNames", "authn.list", "notification.list", "log.list"]
 
 if arg in ["CONFIGURE", "INSTALL"]: actions.configure(prop_name, prop_list) 
@@ -37,8 +37,6 @@ if arg == "INSTALL":
         for v in icatProperties["notification.list"].split():
             if "notification." + v not in icatProperties:
                 abort ("notification.list included " + v + " but notification." + v + " is not defined") 
-               
-    actions.installFile("icat.properties")
     
     try:           
         uninstall()
@@ -61,7 +59,7 @@ if arg == "INSTALL":
             actions.asadmin("set resources.connector-connection-pool.jms/ICAT/CentralConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             actions.asadmin("set resources.connector-connection-pool.jms/ICAT/TopicConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             
-        ovfiles = []
+        ovfiles = [[prop_name, "WEB-INF/classes"]]
         if os.path.exists("logback.xml"): ovfiles.append(["logback.xml", "WEB-INF/classes"])
         actions.deploy(deploymentorder=100, files=ovfiles, jmsTopicConnectionFactory=icatProperties.get("jms.topicConnectionFactory"), target=props.get("db.target"), logging=props.get("db.logging"))
         
@@ -73,14 +71,9 @@ if arg == "INSTALL":
         abort(str(e))
                 
 if arg == "UNINSTALL":        
-    actions.removeFile(prop_name)
- 
     try:
         uninstall()
         for file in files:
             actions.removeFile(file, binDir) 
     except Exception, e:
-        abort(str(e))       
-    
-            
-    
+        abort(str(e))

@@ -296,14 +296,9 @@ public class PropertyHandler {
 	private void init() {
 		CheckedProperties props = new CheckedProperties();
 		try {
-			props.loadFromFile("icat.properties");
-			logger.info("Property file icat.properties loaded");
-			/* log4j.properties */
-			String key = "log4j.properties";
-			if (props.has(key)) {
-				String path = props.getString("log4j.properties");
-				formattedProps.add("log4j.properties " + path);
-			}
+			props.loadFromResource("run.properties");
+			logger.info("Property file run.properties loaded");
+			String key;
 
 			/* The authn.list */
 			String authnList = props.getString("authn.list");
@@ -317,7 +312,7 @@ public class PropertyHandler {
 					formattedProps.add(key + " " + jndi);
 					key = "authn." + mnemonic + ".hostPort";
 					if (props.has(key)) {
-						abend("Key  '" + key + " specified in icat.properties is no longer permitted");
+						abend("Key  '" + key + " specified in run.properties is no longer permitted");
 					}
 					try {
 						authen = (Authenticator) new InitialContext().lookup(jndi);

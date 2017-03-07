@@ -14,7 +14,9 @@
 		<li>Add SOAP call getAuthenticatorInfo</li>
 		<li>Add SOAP call getVersion() which is identical to
 			getApiVersion()</li>
-		<li>icat.properties no longer has the logback.xml property. Any
+		<li>Updated property file names to run.properties and
+			setup.properties</li>
+		<li>run.properties no longer has the logback.xml property. Any
 			logback.xml file in the installation directory will be applied but
 			will not be copied to the config directory. There is a
 			logback.xml.example file in the distribution which can be copied to
@@ -27,6 +29,8 @@
 			server.</li>
 		<li>Fix bug in update which was making it very slow when lucene
 			was enabled</li>
+
+		<li>Works with Payara</li>
 	</ul>
 
 	<h2>4.8.0</h2>

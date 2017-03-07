@@ -21,8 +21,8 @@
 		</li>
 		<li>Java 8</li>
 		<li>A suitable deployed container. The installation scripts
-			support Glassfish and to a lesser extent WildFly. Testing has been
-			carried out with Glassfish 4.0. <a
+			support Glassfish/Payara and to a lesser extent WildFly. Testing has
+			been carried out with Glassfish 4.0 and Payara. <a
 			href="https://icatproject.org/installation/glassfish/">Glassfish
 				installation instructions</a> are available.
 		</li>
@@ -94,7 +94,7 @@
 		authentication the authenticators must, unfortunately still be
 		installed on the satellites. Glassfish seems to get confused if the
 		JNDI resources are not recognised locally on the satellites. To enable
-		central authentication you need a line in the icat.properties file on
+		central authentication you need a line in the run.properties file on
 		each satellite machine for each authenticator of the form:
 		authn.XXX.hostPort = &lt;central machine&gt;:3700 where XXX is one of
 		the values listed in the authn.list property.</p>
@@ -277,7 +277,7 @@
 	"icat". This can be done be done while icat.server 4.7.0 is running as
 	the old code is unaware of the addition of the new column.
 
-	<h2>The icat-setup.properties file</h2>
+	<h2>The setup.properties file</h2>
 	<dl>
 		<dt>container</dt>
 		<dd>
@@ -333,7 +333,7 @@
 	<p>If you wish to modify the provided logging levels then rename
 		logback.xml.example to logback.xml and edit to suit your needs.</p>
 
-	<h2>The icat.properties file</h2>
+	<h2>The run.properties file</h2>
 
 	<dl>
 		<dt>lifetimeMinutes</dt>
