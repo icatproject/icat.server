@@ -167,55 +167,6 @@ public class TestWS {
 		session.createJob(application, input, output);
 	}
 
-	@Test
-	public void testDatasetUpdate() throws Exception {
-		session.clear();
-		create();
-
-		List<Object> datasetTypes = session.search("SELECT ds FROM DatasetType ds");
-
-		DatasetType type = (DatasetType) datasetTypes.get(0);
-
-		GregorianCalendar date = new GregorianCalendar();
-		date.setTime(new Date());
-
-		List<Object> response = session.search("Investigation INCLUDE 1");
-		Investigation investigation = (Investigation) response.get(0);
-
-		List<Long> times = new ArrayList<>();
-		for (int i = 0; i < 100; i++) {
-
-			Dataset dataset = new Dataset();
-			dataset.setInvestigation(investigation);
-			dataset.setName("ds_" + new Random().nextInt(5000000) + i);
-			dataset.setStartDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
-			dataset.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
-			dataset.setType(type);
-
-			session.create(dataset);
-
-			investigation.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(date));
-
-			long updateTime = System.currentTimeMillis();
-			session.update(investigation);
-			long finalTime = System.currentTimeMillis();
-			times.add(finalTime - updateTime);
-
-		}
-		long tot = 0;
-		int n = 0;
-		for (long time : times) {
-			tot += time;
-			n++;
-		}
-		double fac = 2.0;
-		double limit = tot * fac / n;
-		System.out.println(times);
-		for (long time : times) {
-			assertTrue("Time " + time + " should not be greater than " + limit, time < limit);
-		}
-	}
-
 	private Datafile addDatafile(Dataset dataset, String name, DatafileFormat format) {
 		Datafile datafile = new Datafile();
 		datafile.setDatafileFormat(format);
@@ -365,10 +316,7 @@ public class TestWS {
 
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
-		Rule rule = new Rule();
-		rule.setCrudFlags("R");
-		rule.setWhat("Investigation <-> InvestigationUser <-> User [name = :user]");
-		session.create(rule);
+		session.addRule(null, "Investigation <-> InvestigationUser <-> User [name = :user]", "R");
 
 		User piOne = new User();
 		piOne.setName("db/piOne");
@@ -421,11 +369,8 @@ public class TestWS {
 		userGroup.setGrouping(oneControllers);
 		session.create(userGroup);
 
-		rule = new Rule();
-		rule.setCrudFlags("CRUD");
-		rule.setGrouping(oneControllers);
-		rule.setWhat("InvestigationUser <-> Investigation [name = 'InvestigationOne']");
-		session.create(rule);
+		session.addRule(oneControllers.getName(), "InvestigationUser <-> Investigation [name = 'InvestigationOne']",
+				"CRUD");
 
 		try {
 			InvestigationUser iuaone = new InvestigationUser();
@@ -450,12 +395,7 @@ public class TestWS {
 		// Create a simple rule allowing oneControllers full access to
 		// InvestigationUser and ensure
 		// that reading works.
-
-		rule = new Rule();
-		rule.setCrudFlags("CRUD");
-		rule.setGrouping(oneControllers);
-		rule.setWhat("InvestigationUser");
-		session.create(rule);
+		session.addRule(oneControllers.getName(), "InvestigationUser", "CRUD");
 
 		assertEquals(3, (piOneSession.search("InvestigationUser")).size());
 
@@ -498,31 +438,22 @@ public class TestWS {
 
 		List<Object> objects = session.search("Rule [bean='Investigation']<-> Grouping[name='root']");
 		for (Object o : objects) {
-			session.delete((Rule) o);
+			Rule r = (Rule) o;
+			Grouping g = r.getGrouping();
+			String gname = (g == null) ? null : g.getName();
+			session.delRule(gname, r.getWhat(), r.getCrudFlags());
 		}
 
 		Grouping rootG = (Grouping) session.search("Grouping [name='root']").get(0);
 
-		Rule rule = new Rule();
-		rule.setCrudFlags("C");
-		rule.setGrouping(rootG);
-		rule.setWhat("Investigation");
-		session.create(rule);
-
-		rule = new Rule();
-		rule.setCrudFlags("R");
-		rule.setWhat("Investigation <-> InvestigationUser <-> User [name = :user]");
-		session.create(rule);
+		session.addRule(rootG.getName(), "Investigation", "C");
+		session.addRule(null, "Investigation <-> InvestigationUser <-> User [name = :user]", "R");
 
 		session.createInvestigation(facility, "InvestigationOne", "Investigation one", investigationType);
 
 		session.createInvestigation(facility, "InvestigationTwo", "Investigation two", investigationType);
 
-		rule = new Rule();
-		rule.setCrudFlags("CRUD");
-		rule.setGrouping(rootG);
-		rule.setWhat("Investigation");
-		session.create(rule);
+		session.addRule(rootG.getName(), "Investigation", "CRUD");
 
 		assertEquals(2, (session.search("Investigation")).size());
 
@@ -530,12 +461,9 @@ public class TestWS {
 	}
 
 	@Test
-	public void badRule() {
+	public void badRule() throws Exception {
 		try {
-			Rule rule = new Rule();
-			rule.setCrudFlags("C");
-			rule.setWhat("SELECT i FROM Investigation i where i.investigationInstrument IS NULL");
-			session.create(rule);
+			session.addRule(null, "SELECT i FROM Investigation i where i.investigationInstrument IS NULL", "C");
 			fail("Should have thrown exception");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
@@ -547,49 +475,49 @@ public class TestWS {
 
 	@Test
 	public void goodRuleWithTime() throws Exception {
-		Rule rule = new Rule();
-		rule.setCrudFlags("C");
-		rule.setWhat("SELECT i FROM Investigation i where i.modTime = {ts 1950-01-21 06:00:00}");
-		rule.setId(session.create(rule));
-		session.delete(rule);
+		session.addRule(null, "SELECT i FROM Investigation i where i.modTime = {ts 1950-01-21 06:00:00}", "C");
+		session.delRule(null, "SELECT i FROM Investigation i where i.modTime = {ts 1950-01-21 06:00:00}", "C");
 	}
 
 	@Test
 	public void authz4() throws Exception {
 		// Samples - via investigation
-		Rule isSampleInv = new Rule();
-		isSampleInv.setCrudFlags("CRU");
-		isSampleInv.setWhat(
-				"SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
-		isSampleInv.setId(session.create(isSampleInv));
+
+		session.addRule(null,
+				"SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
+				"CRU");
 
 		// Samples - via dataset
-		Rule isSampleDs = new Rule();
-		isSampleDs.setCrudFlags("CRU");
-		isSampleDs.setWhat(
-				"SELECT s FROM Sample AS s JOIN s.datasets AS ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst JOIN inst.instrumentScientists AS instSci JOIN instSci.user user WHERE user.name = :user");
-		isSampleDs.setId(session.create(isSampleDs));
+		session.addRule(null,
+				"SELECT s FROM Sample AS s JOIN s.datasets AS ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst JOIN inst.instrumentScientists AS instSci JOIN instSci.user user WHERE user.name = :user",
+				"CRU");
 
 		// Test
 		session.search(
 				"SELECT COUNT(s) FROM Sample AS s JOIN s.datasets as ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst WHERE (inst.name = 'WISH')");
-		session.delete(isSampleInv);
-		session.delete(isSampleDs);
+
+		// Clean up
+		session.delRule(null,
+				"SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
+				"CRU");
+		session.delRule(null,
+				"SELECT s FROM Sample AS s JOIN s.datasets AS ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst JOIN inst.instrumentScientists AS instSci JOIN instSci.user user WHERE user.name = :user",
+				"CRU");
 	}
 
 	@Test
 	public void authz5() throws Exception {
 		session.delRule("notroot", "SELECT x FROM Investigation x", "CRUD");
 		try {
-			Rule isInv = new Rule();
-			isInv.setCrudFlags("CRU");
-			isInv.setWhat(
-					"SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
-			isInv.setId(session.create(isInv));
+			session.addRule(null,
+					"SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
+					"CRU");
 
 			session.search(
 					"SELECT COUNT(i) FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst WHERE inst.name='WISH'");
-			session.delete(isInv);
+			session.delRule(null,
+					"SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
+					"CRU");
 		} finally {
 			session.addRule("notroot", "SELECT x FROM Investigation x", "CRUD");
 		}
@@ -603,11 +531,9 @@ public class TestWS {
 		try {
 			// Create a rule for me as an Instrument Scientist on WISH
 			System.out.println("Adding InstrumentScientist Rule");
-			Rule isInv = new Rule();
-			isInv.setCrudFlags("CRU");
-			isInv.setWhat(
-					"SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
-			isInv.setId(session.create(isInv));
+			session.addRule(null,
+					"SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
+					"CRU");
 
 			assertEquals(2L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
 			checkInvestigationNames("Investigation ORDER BY name", "A", "B");
@@ -618,14 +544,13 @@ public class TestWS {
 					"Investigation ORDER BY name <-> InvestigationInstrument <-> Instrument[name='WISH']", "A", "B");
 
 			// Delete the rule
-			session.delete(isInv);
+			session.delRule(null,
+					"SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
+					"CRU");
 
 			// Create a rule so I can see 'My' Investigations (those where I am
 			// an investigator)
-			Rule invUserinv = new Rule();
-			invUserinv.setCrudFlags("R");
-			invUserinv.setWhat("Investigation <-> InvestigationUser <-> User [name = :user]");
-			invUserinv.setId(session.create(invUserinv));
+			session.addRule(null, "Investigation <-> InvestigationUser <-> User [name = :user]", "R");
 
 			assertEquals(2L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
 			checkInvestigationNames("Investigation ORDER BY name", "A", "C");
@@ -638,20 +563,25 @@ public class TestWS {
 			checkInvestigationNames("Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A");
 
 			// Add the InstrumentScientist rule back in.
-			isInv.setId(session.create(isInv));
+			session.addRule(null,
+					"SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
+					"CRU");
 
 			assertEquals(3L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
 			checkInvestigationNames("Investigation ORDER BY name", "A", "B", "C");
 
 			assertEquals(2L, session
 					.search("COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']").get(0));
-			checkInvestigationNames("Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A", "B");
+			checkInvestigationNames(
+					"Investigation  ORDER BY name<-> InvestigationInstrument <-> Instrument[name='WISH']", "A", "B");
 
 			assertEquals(2L, session.search("COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(0));
 			checkInvestigationNames("Investigation ORDER BY name <-> InvestigationUser <-> User[name=:user]", "A", "C");
 
-			session.delete(isInv);
-			session.delete(invUserinv);
+			session.delRule(null,
+					"SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
+					"CRU");
+			session.delRule(null, "Investigation <-> InvestigationUser <-> User [name = :user]", "R");
 		} finally {
 			session.addRule("notroot", "SELECT x FROM Investigation x", "CRUD");
 		}
@@ -1306,26 +1236,23 @@ public class TestWS {
 		List<?> results = session.search("Dataset.id order by id");
 
 		assertEquals("Count", 4, results.size());
-		Long dsid = (Long) results.get(0);
 
-		results = session.search("Dataset [id = " + dsid + "]");
+		results = session.search("Dataset [name = 'Wibble']");
 		assertEquals("Count", 1, results.size());
 		Dataset ds = (Dataset) results.get(0);
-		assertEquals("Value", dsid, ds.getId());
 		assertEquals("No files", 0, ds.getDatafiles().size());
 		assertEquals("No params", 0, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
-		results = session.search("Dataset INCLUDE Datafile [id = " + dsid + "]");
+		results = session.search("Dataset INCLUDE Datafile[name = 'Wibble']");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
-		assertEquals("Value", dsid, ds.getId());
 		assertEquals("Files", 2, ds.getDatafiles().size());
 		assertEquals("No params", 0, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
 		try {
-			results = session.search("Dataset INCLUDE 1, Datafile [id = " + dsid + "]");
+			results = session.search("Dataset INCLUDE 1, Datafile [name = 'Wibble']");
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
@@ -1336,43 +1263,39 @@ public class TestWS {
 		}
 
 		try {
-			results = session.search("Dataset INCLUDE Datafile, 1 [id = " + dsid + "]");
+			results = session.search("Dataset INCLUDE Datafile, 1 [name = 'Wibble']");
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
 			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
-			assertEquals("Expected token from types [NAME] at token 1 in Datafile , < 1 > [ id ", e.getMessage());
+			assertEquals("Expected token from types [NAME] at token 1 in Datafile , < 1 > [ name ", e.getMessage());
 		}
 
-		results = session.search("Dataset INCLUDE 1 [id = " + dsid + "]");
+		results = session.search("Dataset INCLUDE 1 [name = 'Wibble']");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
-		assertEquals("Value", dsid, ds.getId());
 		assertEquals("No files", 0, ds.getDatafiles().size());
 		assertEquals("No params", 0, ds.getParameters().size());
 		assertNotNull("Inv", ds.getInvestigation());
 
-		results = session.search("Dataset INCLUDE DatasetParameter [id = " + dsid + "]");
+		results = session.search("Dataset INCLUDE DatasetParameter [name = 'Wibble']");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
-		assertEquals("Value", dsid, ds.getId());
 		assertEquals("No Files", 0, ds.getDatafiles().size());
 		assertEquals("Params", 1, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
-		results = session.search("Dataset INCLUDE Datafile, DatasetParameter [id = " + dsid + "]");
+		results = session.search("Dataset INCLUDE Datafile, DatasetParameter [name = 'Wibble']");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
-		assertEquals("Value", dsid, ds.getId());
 		assertEquals("Files", 2, ds.getDatafiles().size());
 		assertEquals("Params", 1, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
-		results = session.search("Dataset INCLUDE Datafile, DatasetParameter, Investigation [id = " + dsid + "]");
+		results = session.search("Dataset INCLUDE Datafile, DatasetParameter, Investigation [name = 'Wibble']");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
-		assertEquals("Value", dsid, ds.getId());
 		assertEquals("Files", 2, ds.getDatafiles().size());
 		assertEquals("Params", 1, ds.getParameters().size());
 		assertNotNull("Inv", ds.getInvestigation());
@@ -1695,30 +1618,30 @@ public class TestWS {
 		assertEquals("Count", 1, results.size());
 		assertEquals("TIMESTAMP", results.get(0));
 
-		results = session.search("Datafile.name ORDER BY id");
+		results = session.search("Datafile.name ORDER BY name");
 		assertEquals("Count", 6, results.size());
-		assertEquals("Result", "wib1", results.get(0));
-		assertEquals("Result", "wib2", results.get(1));
+		assertEquals("Result", "bill", results.get(0));
+		assertEquals("Result", "fred", results.get(1));
 
-		results = session.search(",1 Datafile.name ORDER BY id");
+		results = session.search(",1 Datafile.name ORDER BY name");
 		assertEquals("Count", 1, results.size());
-		assertEquals("Result", "wib1", results.get(0));
+		assertEquals("Result", "bill", results.get(0));
 
-		results = session.search("1, Datafile.name ORDER BY id");
+		results = session.search("1, Datafile.name ORDER BY name");
 		assertEquals("Count", 5, results.size());
-		assertEquals("Result", "wib2", results.get(0));
+		assertEquals("Result", "fred", results.get(0));
 
-		results = session.search("1,1 Datafile.name ORDER BY id");
+		results = session.search("1,1 Datafile.name ORDER BY name");
 		assertEquals("Count", 1, results.size());
-		assertEquals("Result", "wib2", results.get(0));
+		assertEquals("Result", "fred", results.get(0));
 
-		results = session.search("100,1 Datafile.name ORDER BY id");
+		results = session.search("100,1 Datafile.name ORDER BY name");
 		assertEquals("Count", 0, results.size());
 
-		results = session.search("0,100 Datafile.name ORDER BY id");
+		results = session.search("0,100 Datafile.name ORDER BY name");
 		assertEquals("Count", 6, results.size());
-		assertEquals("Result", "wib1", results.get(0));
-		assertEquals("Result", "wib2", results.get(1));
+		assertEquals("Result", "bill", results.get(0));
+		assertEquals("Result", "fred", results.get(1));
 
 		results = session.search("Facility");
 		Facility facility = (Facility) results.get(0);
@@ -1874,30 +1797,30 @@ public class TestWS {
 		assertEquals("Count", 1, results.size());
 		assertEquals("TIMESTAMP", results.get(0));
 
-		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id");
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name");
 		assertEquals("Count", 6, results.size());
-		assertEquals("Result", "wib1", results.get(0));
-		assertEquals("Result", "wib2", results.get(1));
+		assertEquals("Result", "bill", results.get(0));
+		assertEquals("Result", "fred", results.get(1));
 
-		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 0,1");
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 0,1");
 		assertEquals("Count", 1, results.size());
-		assertEquals("Result", "wib1", results.get(0));
+		assertEquals("Result", "bill", results.get(0));
 
-		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 1,100");
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 1,100");
 		assertEquals("Count", 5, results.size());
-		assertEquals("Result", "wib2", results.get(0));
+		assertEquals("Result", "fred", results.get(0));
 
-		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 1,1");
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 1,1");
 		assertEquals("Count", 1, results.size());
-		assertEquals("Result", "wib2", results.get(0));
+		assertEquals("Result", "fred", results.get(0));
 
-		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 100,1");
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 100,1");
 		assertEquals("Count", 0, results.size());
 
-		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 0,100");
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 0,100");
 		assertEquals("Count", 6, results.size());
-		assertEquals("Result", "wib1", results.get(0));
-		assertEquals("Result", "wib2", results.get(1));
+		assertEquals("Result", "bill", results.get(0));
+		assertEquals("Result", "fred", results.get(1));
 
 		results = session.search("SELECT ds.name from Dataset ds JOIN ds.datafiles df1 JOIN ds.datafiles df2 "
 				+ "WHERE df1.name = 'fred' AND df2.name = 'bill'");
@@ -2108,11 +2031,7 @@ public class TestWS {
 		userGroup.setGrouping(ones);
 		session.create(userGroup);
 
-		Rule rule = new Rule();
-		rule.setGrouping(ones);
-		rule.setCrudFlags("CRUD");
-		rule.setWhat("Facility");
-		session.create(rule);
+		session.addRule(ones.getName(), "Facility", "CRUD");
 
 		WSession piOneSession = session.getSession("db", "username", "piOne", "password", "piOne");
 		WSession piTwoSession = session.getSession("db", "username", "piTwo", "password", "piTwo");

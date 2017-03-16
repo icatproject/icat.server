@@ -1043,20 +1043,24 @@ public class EntityBeanManager {
 			logger.debug("One result only - look for bad return types");
 			Object obj = result.get(0);
 			if (obj != null) {
-				logger.debug("Type is " + obj.getClass());
 				if (obj.getClass() == BigDecimal.class) {
 					String typeQueryString = q.typeQuery();
-					logger.debug("Type query: " + typeQueryString);
-					Query typeQuery = manager.createQuery(typeQueryString).setMaxResults(1);
-					Class<? extends Object> klass = typeQuery.getSingleResult().getClass();
-					logger.debug("Class is " + klass);
+					logger.debug("Type query for BigDecimal: " + typeQueryString);
+					Class<? extends Object> klass = null;
+					try {
+						Query typeQuery = manager.createQuery(typeQueryString).setMaxResults(1);
+						klass = typeQuery.getSingleResult().getClass();
+					} catch (Exception e) {
+						throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+								"Unable to handle query " + q + " with Oracle DB");
+					}
 					if (klass == Long.class) {
 						result.set(0, ((BigDecimal) obj).longValue());
 					} else if (klass == Double.class) {
 						result.set(0, ((BigDecimal) obj).doubleValue());
 					} else
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								"Type " + klass + " neither Long nor Double");
+						throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+								"Unable to handle query " + q + " with Oracle DB");
 				}
 			}
 		}
@@ -2100,13 +2104,13 @@ public class EntityBeanManager {
 			logger.trace(bean + " flushed.");
 		} catch (Throwable e) {
 			/*
-			 * Clear transaction so can use database again then start new
-			 * transaction to put things into expected state
+			 * Clear transaction so can use database again.
 			 */
 			logger.debug("Problem shows up with persist/flush will rollback and check: {} {}", e.getClass(),
 					e.getMessage());
 			try {
 				userTransaction.rollback();
+				bean.setId(null);
 			} catch (IllegalStateException | SecurityException | SystemException e1) {
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						e1.getClass() + " " + e1.getMessage());
@@ -2146,14 +2150,12 @@ public class EntityBeanManager {
 				if (!constraint.isEmpty()) {
 					for (EntityBaseBean bean1 : beans) {
 						for (EntityBaseBean bean2 : beans) {
-							if (bean1.getId() == null && bean2.getId() != null) {
+							if (bean1 != bean2) {
 								boolean diff = false;
 								for (Field f : constraint) {
 									Object value1 = getValue(getters, f, bean1);
 									Object value2 = getValue(getters, f, bean2);
 									if (!value1.equals(value2)) {
-										logger.debug("No problem with objects {} and {} as {} have values {} and {}",
-												bean1, bean2, f.getName(), value1, value2);
 										diff = true;
 										break;
 									}

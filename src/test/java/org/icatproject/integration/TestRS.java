@@ -458,14 +458,25 @@ public class TestRS {
 				"SELECT df.dataset.name, AVG(df.fileSize) FROM Datafile df GROUP BY df.dataset ORDER BY AVG(df.fileSize)",
 				1);
 		assertEquals("ds2", array.getJsonArray(0).getString(0));
-		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(), 0);
+		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(), 0.0001);
 
 		array = search(session,
 				"SELECT df.dataset.name, AVG(df.fileSize) FROM Datafile df GROUP BY df.dataset HAVING AVG(df.fileSize) > 4 ORDER BY AVG(df.fileSize)",
 				1);
 		assertEquals("ds2", array.getJsonArray(0).getString(0));
-		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(), 0);
+		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(), 0.0001);
+	}
 
+	@Test
+	public void testWait() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "root");
+		credentials.put("password", "password");
+		Session rootSession = icat.login("db", credentials);
+		long t = System.currentTimeMillis();
+		rootSession.waitMillis(1000L);
+		System.out.println(System.currentTimeMillis() - t);
 	}
 
 	@Test
@@ -1581,7 +1592,6 @@ public class TestRS {
 		session.lucenePopulate("Dataset", -1);
 		session.lucenePopulate("Datafile", -1);
 		session.lucenePopulate("Investigation", -1);
-		assertFalse(session.luceneGetPopulating().isEmpty());
 
 		do {
 			Thread.sleep(1000);

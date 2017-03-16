@@ -214,7 +214,11 @@ public class SearchQuery {
 	}
 
 	public String typeQuery() {
-		String s = selectClause.toString().substring(11, selectClause.toString().length() - 1).replace("DISTINCT ", "");
+		logger.debug("Select clause is: {}", selectClause);
+		String s = selectClause.toString();
+		int n = s.indexOf('(');
+		s = s.substring(n + 1, s.length() - 1).replace("DISTINCT ", "");
+		logger.debug("Result is {}", "SELECT " + s + " FROM" + fromClause + " WHERE " + s + " IS NOT NULL");
 		return "SELECT " + s + " FROM" + fromClause + " WHERE " + s + " IS NOT NULL";
 	}
 

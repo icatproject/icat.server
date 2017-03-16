@@ -112,7 +112,7 @@ public class LuceneManager {
 					});
 
 					try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-						LuceneApi.checkStatus(response);
+						Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 					}
 				}
 			}

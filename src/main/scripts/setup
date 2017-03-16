@@ -42,22 +42,7 @@ if arg == "INSTALL":
         uninstall()
         actions.registerDB("icat", props["db.driver"], props["db.url"], props["db.username"], props["db.password"])
         actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Topic")
-        actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Synch")
         actions.createJMSResource("javax.jms.Topic", "jms/ICAT/log")
-        
-        jmsHostPort = props.get("jmsHostPort")
-        if jmsHostPort:
-            bits = jmsHostPort.split(":")
-            if len(bits) != 2: abort("jmsHostPort must contain a colon separator")
-            jmsHost = bits[0].strip()
-            jmsPort = bits[1].strip()
-            if socket.getfqdn() == socket.getfqdn(jmsHost): 
-                jmsHostPort = None
-            else:
-                jmsHostPort = jmsHost + ":" + jmsPort
-        if jmsHostPort:
-            actions.asadmin("set resources.connector-connection-pool.jms/ICAT/CentralConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
-            actions.asadmin("set resources.connector-connection-pool.jms/ICAT/TopicConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             
         ovfiles = [[prop_name, "WEB-INF/classes"]]
         if os.path.exists("logback.xml"): ovfiles.append(["logback.xml", "WEB-INF/classes"])

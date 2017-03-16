@@ -1,9 +1,11 @@
 package org.icatproject.core.manager;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,20 +26,17 @@ import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
@@ -70,10 +73,6 @@ public class GateKeeper {
 	private final static Pattern tsRegExp = Pattern
 			.compile("\\{\\s*ts\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s*\\}");
 
-	private TopicConnection topicConnection;
-
-	private Topic topic;
-
 	@PersistenceContext(unitName = "icat")
 	private EntityManager gateKeeperManager;
 	private final Logger logger = LoggerFactory.getLogger(GateKeeper.class);
@@ -90,9 +89,17 @@ public class GateKeeper {
 
 	private Set<String> rootUserNames;
 
-	private boolean stalePublicSteps;
+	private boolean publicStepsStale;
 
-	private boolean stalePublicTables;
+	private boolean publicTablesStale;
+
+	private Map<String, String> cluster;
+
+	private String basePath = "/icat";
+
+	private ExecutorService executor;
+
+	private Map<String, Future<?>> msgs = new HashMap<>();
 
 	/**
 	 * Return true if allowed because destination table is public or because
@@ -104,7 +111,7 @@ public class GateKeeper {
 			return true;
 		}
 		String originBeanName = r.getOriginBean().getSimpleName();
-		if (stalePublicSteps) {
+		if (publicStepsStale) {
 			updatePublicSteps();
 		}
 		Set<String> fieldNames = publicSteps.get(originBeanName);
@@ -136,18 +143,22 @@ public class GateKeeper {
 
 	@PreDestroy()
 	private void exit() {
+		logger.info("GateKeeper closing down");
+		executor.shutdown();
 		try {
-			if (topicConnection != null) {
-				topicConnection.close();
+			if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+				executor.shutdownNow();
+				if (!executor.awaitTermination(60, TimeUnit.SECONDS))
+					logger.error("Execution Pool did not terminate");
 			}
-			logger.info("GateKeeper closing down");
-		} catch (JMSException e) {
-			throw new IllegalStateException(e.getMessage());
+		} catch (InterruptedException ie) {
+			executor.shutdownNow();
+			Thread.currentThread().interrupt();
 		}
 	}
 
 	public Set<String> getPublicTables() {
-		if (stalePublicTables) {
+		if (publicTablesStale) {
 			updatePublicTables();
 		}
 		return publicTables;
@@ -243,48 +254,16 @@ public class GateKeeper {
 		logger.info("Creating GateKeeper singleton");
 		maxIdsInQuery = propertyHandler.getMaxIdsInQuery();
 		rootUserNames = propertyHandler.getRootUserNames();
+		cluster = propertyHandler.getCluster();
 
 		SingletonFinder.setGateKeeper(this);
-
-		try {
-			InitialContext ic = new InitialContext();
-			TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) ic
-					.lookup(propertyHandler.getJmsTopicConnectionFactory());
-			topicConnection = topicConnectionFactory.createTopicConnection();
-			topic = (Topic) ic.lookup("jms/ICAT/Synch");
-		} catch (JMSException | NamingException e) {
-			logger.error(fatal, "Problem with JMS " + e);
-			throw new IllegalStateException(e.getMessage());
-		}
 
 		updatePublicTables();
 		updatePublicSteps();
 
+		executor = Executors.newCachedThreadPool();
+
 		logger.info("Created GateKeeper singleton");
-	}
-
-	public void markStalePublicSteps() {
-		stalePublicSteps = true;
-
-	}
-
-	public void markStalePublicTables() {
-		stalePublicTables = true;
-
-	}
-
-	/**
-	 * Perform authorization check for any object
-	 * 
-	 * @throws IcatException
-	 */
-	public void performAuthorisation(String user, EntityBaseBean object, AccessType access, EntityManager manager)
-			throws IcatException {
-
-		if (!isAccessAllowed(user, object, access, manager)) {
-			throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
-					access + " access to this " + object.getClass().getSimpleName() + " is not allowed.");
-		}
 	}
 
 	/**
@@ -354,59 +333,27 @@ public class GateKeeper {
 			}
 		}
 		return false;
-
 	}
 
-	public void requestUpdatePublicSteps() throws JMSException {
-		Session session = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageProducer jmsProducer = session.createProducer(topic);
-		TextMessage jmsg = session.createTextMessage("updatePublicSteps");
-		logger.debug("Sending jms message: updatePublicSteps");
-		jmsProducer.send(jmsg);
-		session.close();
+	public void markPublicStepsStale() {
+		publicStepsStale = true;
 	}
 
-	public void requestUpdatePublicTables() throws JMSException {
-		Session session = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageProducer jmsProducer = session.createProducer(topic);
-		TextMessage jmsg = session.createTextMessage("updatePublicTables");
-		logger.debug("Sending jms message: updatePublicTables");
-		jmsProducer.send(jmsg);
-		session.close();
+	public void markPublicTablesStale() {
+		publicTablesStale = true;
 	}
 
-	public void updateCache() throws JMSException {
-		requestUpdatePublicTables();
-		requestUpdatePublicSteps();
-	}
+	/**
+	 * Perform authorization check for any object
+	 * 
+	 * @throws IcatException
+	 */
+	public void performAuthorisation(String user, EntityBaseBean object, AccessType access, EntityManager manager)
+			throws IcatException {
 
-	public void updatePublicSteps() {
-		List<PublicStep> steps = gateKeeperManager.createNamedQuery(PublicStep.GET_ALL_QUERY, PublicStep.class)
-				.getResultList();
-		publicSteps.clear();
-		for (PublicStep step : steps) {
-			Set<String> fieldNames = publicSteps.get(step.getOrigin());
-			if (fieldNames == null) {
-				fieldNames = new ConcurrentSkipListSet<>();
-				publicSteps.put(step.getOrigin(), fieldNames);
-			}
-			fieldNames.add(step.getField());
-		}
-		stalePublicSteps = false;
-		logger.debug("There are " + steps.size() + " publicSteps");
-	}
-
-	public void updatePublicTables() {
-		try {
-			List<String> tableNames = gateKeeperManager.createNamedQuery(Rule.PUBLIC_QUERY, String.class)
-					.getResultList();
-			publicTables.clear();
-			publicTables.addAll(tableNames);
-			stalePublicTables = false;
-			logger.debug("There are " + publicTables.size() + " publicTables");
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Unexpected exception", e);
+		if (!isAccessAllowed(user, object, access, manager)) {
+			throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
+					access + " access to this " + object.getClass().getSimpleName() + " is not allowed.");
 		}
 	}
 
@@ -479,6 +426,86 @@ public class GateKeeper {
 
 		}
 
+	}
+
+	/** Do it locally and send requests to other icats */
+	public void requestUpdatePublicSteps() throws JMSException {
+		markPublicStepsStale();
+		for (Entry<String, String> entry : cluster.entrySet()) {
+			sendMsg(entry.getValue(), "gatekeeper/markPublicStepsStale");
+		}
+	}
+
+	/** Do it locally and send requests to other icats */
+	public void requestUpdatePublicTables() {
+		markPublicTablesStale();
+		for (Entry<String, String> entry : cluster.entrySet()) {
+			sendMsg(entry.getValue(), "gatekeeper/markPublicTablesStale");
+		}
+	}
+
+	private void sendMsg(String url, String action) {
+		String key = url + " " + action;
+		Future<?> f = msgs.get(key);
+		if (f != null) {
+			f.cancel(true);
+		}
+		f = executor.submit(() -> {
+			while (true) {
+				try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+					URI uri = new URIBuilder(url).setPath(basePath + "/" + action).build();
+					HttpPost httpPost = new HttpPost(uri);
+					try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+						logger.debug("Sending message {} to {}", action, url);
+						Rest.checkStatus(response, IcatExceptionType.INTERNAL);
+						return;
+					}
+				} catch (Exception e) {
+					try {
+						logger.warn("Sending message {} to {} reports {}", action, url, e.getMessage());
+						TimeUnit.SECONDS.sleep(30);
+					} catch (InterruptedException e1) {
+						return;
+					}
+				}
+			}
+		});
+		msgs.put(key, f);
+	}
+
+	public void updateCache() throws JMSException {
+		requestUpdatePublicTables();
+		requestUpdatePublicSteps();
+	}
+
+	public void updatePublicSteps() {
+		List<PublicStep> steps = gateKeeperManager.createNamedQuery(PublicStep.GET_ALL_QUERY, PublicStep.class)
+				.getResultList();
+		publicSteps.clear();
+		for (PublicStep step : steps) {
+			Set<String> fieldNames = publicSteps.get(step.getOrigin());
+			if (fieldNames == null) {
+				fieldNames = new ConcurrentSkipListSet<>();
+				publicSteps.put(step.getOrigin(), fieldNames);
+			}
+			fieldNames.add(step.getField());
+		}
+		publicStepsStale = false;
+		logger.debug("There are " + steps.size() + " publicSteps");
+	}
+
+	public void updatePublicTables() {
+		try {
+			List<String> tableNames = gateKeeperManager.createNamedQuery(Rule.PUBLIC_QUERY, String.class)
+					.getResultList();
+			publicTables.clear();
+			publicTables.addAll(tableNames);
+			publicTablesStale = false;
+			logger.debug("There are " + publicTables.size() + " publicTables");
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Unexpected exception", e);
+		}
 	}
 
 }

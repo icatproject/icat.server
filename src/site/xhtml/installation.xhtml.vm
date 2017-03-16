@@ -22,7 +22,7 @@
 		<li>Java 8</li>
 		<li>A suitable deployed container. The installation scripts
 			support Glassfish/Payara and to a lesser extent WildFly. Testing has
-			been carried out with Glassfish 4.0 and Payara. <a
+			been carried out with Payara41 and Glassfish 4.0<a
 			href="https://icatproject.org/installation/glassfish/">Glassfish
 				installation instructions</a> are available.
 		</li>
@@ -31,16 +31,9 @@
 				installation instructions</a> installed on the server
 		</li>
 		<li>Deployed ICAT authenticators.</li>
+		<li>A deployed icat.lucene server it you plan to use TopCAT</li>
 		<li>Python (version 2.4 to 2.7) and the python-suds package
 			installed on the server.</li>
-		<li>MySQL-python must be installed if you have an MySQL 4.2.x
-			schema you need to upgrade.</li>
-		<li>cx_Oracle must be installed (in addition to an Oracle client)
-			if you have an Oracle 4.2.x schema you need to upgrade.</li>
-		<li><a
-			href="http://www.icatproject.org/mvn/site/tools/icat-setup/">icat-setup</a>
-			version 1.1.x or higher must be installed if you have a 4.2.x schema
-			you need to upgrade and you wish to preserve existing rules.</li>
 	</ul>
 
 	<h2>Summary of steps</h2>
@@ -66,52 +59,28 @@
 		ingestion of data can be held up by a user making an expensive query.</p>
 
 	<p>To avoid this it is suggested that you install multiple servers
-		each running a Glassfish with an ICAT but all sharing one database.
-		However there are a number of opportunities to get things wrong in the
-		setup so it is recommended that you install the central machine first
-		and make sure that it works before adding in the satellites. Ingestion
-		can be directed to one node and the other nodes can be load balanced
-		for user access by, for example, an Apache web server. In this
-		documentation one machine is referred to as the central one and the
-		others are referred to as satellites.</p>
+		each running a Glassfish with an ICAT but all sharing one database and
+		one icat.lucene server. It is recommended that you install the
+		machines individually first and make sure that each works before tying
+		them together. Finally ingestion can be directed to one node and the
+		other nodes can be load balanced for user access by, for example, an
+		Apache web server.</p>
 
-	<p>All machines must use the same database. If the central machine
-		is running the database then ports must be opened to the satellite
-		machines. By default this is 3306 for MySQL and 1521 for Oracle. Ports
-		must also be opened on the central machine for JMS and IIOP which are
-		by default 7676 and 3700 and respectively. In addition it seems that
-		the ORB (IIOP) makes unusual use of the ephemeral ports which require
-		that they are also open on the central machine. The set of ephemeral
-		ports is large - and for unix may be found at
-		/proc/sys/net/ipv4/ip_local_port_range. Security is not enabled for
-		either JMS or IIOP communication so the firewalls should normally be
-		configured to only allow traffic from the set of satellite machines.</p>
+	<p>All machines must use the same database and icat.lucene server</p>
 
-	<p>Authentication can either be carried out on the central machine
-		- which has the advantage that you only have authenticator logs
-		building up on that machine or it can be handled by the satellites so
-		distributing the load better. Even if you choose to use central
-		authentication the authenticators must, unfortunately still be
-		installed on the satellites. Glassfish seems to get confused if the
-		JNDI resources are not recognised locally on the satellites. To enable
-		central authentication you need a line in the run.properties file on
-		each satellite machine for each authenticator of the form:
-		authn.XXX.hostPort = &lt;central machine&gt;:3700 where XXX is one of
-		the values listed in the authn.list property.</p>
+	<p>Authentication can either be carried out on one machine - which
+		has the advantage that you only have authenticator logs building up on
+		that machine or each machine can host its own authenticators. If an
+		icat.server is configured with the new style restful authenticators
+		then more than one equivalent authenticator server may be specified to
+		make the system more robust. If you use the old style where JNDI
+		settings must be specified it is recommended for each icat.server to
+		have its own authenticators.</p>
 
-	<p>Lucene calls must also be directed to the central machine with a
-		line in each satellite's icat.properties file of the form:
-		lucene.hostPort = &lt;central machine&gt;:3700. This is the only
-		lucene property that should be set on the satellites. It is essential
-		that this property is set otherwise each node will only see changes
-		made via that machine.</p>
-
-	<p>JMS messages must all be sent to the central machine. This is
-		important otherwise cache refresh messages may be missed. All machines
-		may produce these messages and all machines are listening for them. To
-		configure this an entry is added to the icat-setup.properties file
-		(not the icat.properties file) of the satellite machines of the form
-		jmsHostPort = &lt;central machine&gt;:7676</p>
+	<p>The icat.servers are linked by specifying a cluster parameter in
+		the run.properties file for each machine. This parameter may be the
+		same for each machine as the software tries to avoid sending messages
+		to itself.</p>
 
 	<p>
 		You could then set up an Apache front end to do load balancing. This
@@ -122,9 +91,9 @@
 	</p>
 
 	<h2>Schema upgrade</h2>
-	<p>Any existing lucene database should be removed. See the
-		icat.properties file for the value of lucene.directory and ensure that
-		the directory specified there is empty.</p>
+	<p>Any existing lucene database should be removed. The location of
+		this would have been specified in the previous icat.properties file.
+		Ensure that the directory specified there is empty.</p>
 	<p>The database schema must be upgraded in steps depending upon how
 		old your icat installation is</p>
 	<h3>Upgrade 4.2.5 schema to 4.3.x</h3>
@@ -319,13 +288,6 @@
 				Link logging.level</a> controls the logging of JPA generated SQL
 			statements.
 		</dd>
-		<dt>jmsHostPort</dt>
-		<dd>
-			This is optional. It should only be specified on satellite machines
-			when you have a group of machines working together as described at <a
-				href="#cluster">Installing a group of ICATs</a> . It takes the form
-			machine:port where the port will normally be 7676.
-		</dd>
 	</dl>
 
 	<h2>The logback.xml file</h2>
@@ -438,6 +400,10 @@
 
 		<dt>lucene.backlogHandlerIntervalSeconds</dt>
 		<dd>how often to check the backlog file</dd>
+
+		<dt>jms.topicConnectionFactory</dt>
+		<dd>This is optional and may be used to override the default
+			value of java:comp/DefaultJMSConnectionFactory</dd>
 
 		<dt>key</dt>
 		<dd>This is optional but if there is an IDS server in use and it

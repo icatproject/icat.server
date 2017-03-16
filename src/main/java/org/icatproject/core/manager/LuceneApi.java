@@ -1,6 +1,5 @@
 package org.icatproject.core.manager;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -14,13 +13,8 @@ import javax.json.Json;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
-import javax.json.stream.JsonParsingException;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -29,7 +23,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.slf4j.Logger;
@@ -42,53 +35,6 @@ public class LuceneApi {
 
 	static String basePath = "/icat.lucene";
 	final static Logger logger = LoggerFactory.getLogger(LuceneApi.class);
-
-	static void checkStatus(HttpResponse response) throws IcatException {
-		StatusLine status = response.getStatusLine();
-		if (status == null) {
-			throw new IcatException(IcatExceptionType.INTERNAL, "Status line in response is empty");
-		}
-		int rc = status.getStatusCode();
-		if (rc / 100 != 2) {
-			HttpEntity entity = response.getEntity();
-			String error;
-			if (entity == null) {
-				throw new IcatException(IcatExceptionType.INTERNAL, "No http entity returned in response");
-			} else {
-				try {
-					error = EntityUtils.toString(entity);
-				} catch (ParseException | IOException e) {
-					throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-				}
-			}
-			try (JsonParser parser = Json.createParser(new ByteArrayInputStream(error.getBytes()))) {
-				String code = null;
-				String message = null;
-				String key = "";
-				while (parser.hasNext()) {
-					JsonParser.Event event = parser.next();
-					if (event == Event.KEY_NAME) {
-						key = parser.getString();
-					} else if (event == Event.VALUE_STRING) {
-						if (key.equals("code")) {
-							code = parser.getString();
-						} else if (key.equals("message")) {
-							message = parser.getString();
-						}
-					}
-				}
-
-				if (code == null || message == null) {
-					throw new IcatException(IcatExceptionType.INTERNAL, error);
-				}
-				throw new IcatException(IcatExceptionType.INTERNAL, message);
-
-			} catch (JsonParsingException e) {
-				throw new IcatException(IcatExceptionType.INTERNAL, error);
-			}
-		}
-
-	}
 
 	public static void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value) {
 		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
@@ -152,7 +98,7 @@ public class LuceneApi {
 			httpPost.setEntity(input);
 
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				checkStatus(response);
+				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 			}
 		} catch (IOException | URISyntaxException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
@@ -164,7 +110,7 @@ public class LuceneApi {
 			URI uri = new URIBuilder(server).setPath(basePath + "/clear").build();
 			HttpPost httpPost = new HttpPost(uri);
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				checkStatus(response);
+				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 			}
 		} catch (IOException | URISyntaxException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
@@ -178,7 +124,7 @@ public class LuceneApi {
 			logger.trace("Making call {}", uri);
 			HttpPost httpPost = new HttpPost(uri);
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				checkStatus(response);
+				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 			}
 		} catch (URISyntaxException | IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
@@ -339,7 +285,7 @@ public class LuceneApi {
 			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 				HttpDelete httpDelete = new HttpDelete(uri);
 				try (CloseableHttpResponse response = httpclient.execute(httpDelete)) {
-					checkStatus(response);
+					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 				}
 			}
 		} catch (URISyntaxException | IOException e) {
@@ -354,7 +300,7 @@ public class LuceneApi {
 			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 				HttpDelete httpDelete = new HttpDelete(uri);
 				try (CloseableHttpResponse response = httpclient.execute(httpDelete)) {
-					checkStatus(response);
+					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 				}
 			}
 		} catch (URISyntaxException | IOException e) {
@@ -368,7 +314,7 @@ public class LuceneApi {
 		List<ScoredEntityBaseBean> results = lsr.getResults();
 		ParserState state = ParserState.None;
 		try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
-			checkStatus(response);
+			Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 			try (JsonParser p = Json.createParser(response.getEntity().getContent())) {
 				String key = null;
 				while (p.hasNext()) {
@@ -409,7 +355,7 @@ public class LuceneApi {
 			List<ScoredEntityBaseBean> results = lsr.getResults();
 			ParserState state = ParserState.None;
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				checkStatus(response);
+				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 				try (JsonParser p = Json.createParser(response.getEntity().getContent())) {
 					String key = null;
 					while (p.hasNext()) {
@@ -529,7 +475,7 @@ public class LuceneApi {
 			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 				HttpPost httpPost = new HttpPost(uri);
 				try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-					checkStatus(response);
+					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 				}
 			}
 		} catch (URISyntaxException | IOException e) {
@@ -544,7 +490,7 @@ public class LuceneApi {
 			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 				HttpPost httpPost = new HttpPost(uri);
 				try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-					checkStatus(response);
+					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 				}
 			}
 		} catch (URISyntaxException | IOException e) {
@@ -561,7 +507,7 @@ public class LuceneApi {
 			httpPost.setEntity(input);
 
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				checkStatus(response);
+				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 			}
 		} catch (IOException | URISyntaxException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());

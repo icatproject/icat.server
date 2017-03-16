@@ -140,6 +140,8 @@ public class ICATRest {
 
 	private ContainerType containerType;
 
+	private Map<String, String> cluster;
+
 	private void checkRoot(String sessionId) throws IcatException {
 		String userId = beanManager.getUserName(sessionId, manager);
 		if (!rootUserNames.contains(userId)) {
@@ -701,6 +703,7 @@ public class ICATRest {
 		rootUserNames = propertyHandler.getRootUserNames();
 		maxEntities = propertyHandler.getMaxEntities();
 		containerType = propertyHandler.getContainerType();
+		cluster = propertyHandler.getCluster();
 	}
 
 	private void jsonise(EntityBaseBean bean, JsonGenerator gen) throws IcatException {
@@ -1077,6 +1080,40 @@ public class ICATRest {
 	}
 
 	/**
+	 * This is an internal call made by one icat instance to another in the same
+	 * cluster
+	 * 
+	 * @summary markPublicTablesStale
+	 */
+	@POST
+	@Path("gatekeeper/markPublicTablesStale")
+	public void gatekeeperMarkPublicTablesStale(@Context HttpServletRequest request) {
+		logger.debug("Call to gatekeeper/markPublicTablesStale requested from {}", request.getRemoteAddr());
+		if (!cluster.containsKey(request.getRemoteAddr())) {
+			logger.warn("Call to gatekeeper/markPublicTablesStale made from {} is not allowed",
+					request.getRemoteAddr());
+		}
+		gatekeeper.markPublicTablesStale();
+
+	}
+
+	/**
+	 * This is an internal call made by one icat instance to another in the same
+	 * cluster
+	 * 
+	 * @summary markPublicTablesStale
+	 */
+	@POST
+	@Path("gatekeeper/markPublicStepsStale")
+	public void gatekeeperMarkPublicStepsStale(@Context HttpServletRequest request) {
+		logger.debug("Call to gatekeeper/markPublicStepsStale requested from {}", request.getRemoteAddr());
+		if (!cluster.containsKey(request.getRemoteAddr())) {
+			logger.warn("Call to gatekeeper/markPublicStepsStale made from {} is not allowed", request.getRemoteAddr());
+		}
+		gatekeeper.markPublicStepsStale();
+	}
+
+	/**
 	 * Stop population of the lucene database if it is running.
 	 * 
 	 * @summary Lucene Clear
@@ -1137,6 +1174,28 @@ public class ICATRest {
 		}
 		gen.writeEnd().close();
 		return baos.toString();
+	}
+
+	/**
+	 * Call for testing only. The call will take the time specified and then
+	 * returns.
+	 * 
+	 * @summary wait
+	 * 
+	 * @param sessionId
+	 *            a sessionId of a user listed in rootUserNames
+	 * @throws IcatException
+	 *             when something is wrong
+	 */
+	@POST
+	@Path("waitMillis")
+	public void waitMillis(@FormParam("sessionId") String sessionId, @FormParam("ms") long ms) throws IcatException {
+		checkRoot(sessionId);
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			// Ignore
+		}
 	}
 
 	/**

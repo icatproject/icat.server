@@ -130,6 +130,7 @@ public class WSession {
 		rule.setWhat(what);
 		rule.setCrudFlags(crudFlags);
 		this.icat.create(this.rootsessionId, rule);
+		snooze();
 	}
 
 	public void delRule(String groupName, String what, String crudFlags) throws Exception {
@@ -149,6 +150,12 @@ public class WSession {
 		} else {
 			throw new Exception(rules.size() + " rules match " + groupName + ", " + what + ", " + crudFlags);
 		}
+		snooze();
+	}
+
+	private void snooze() throws InterruptedException {
+		// System.out.println("Taking a snooze");
+		// Thread.sleep(5000);
 	}
 
 	public void addUserGroupMember(String groupName, String userName) throws Exception {
@@ -212,6 +219,7 @@ public class WSession {
 
 	public void clearAuthz() throws Exception {
 		deleteAll(Arrays.asList("Rule", "UserGroup", "User", "Grouping", "PublicStep"));
+		snooze();
 	}
 
 	public Application createApplication(Facility facility, String name, String version)
@@ -337,39 +345,50 @@ public class WSession {
 				throw e;
 			}
 		}
-		this.addRule("notroot", "SELECT x FROM Rule x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM User x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM Grouping x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM UserGroup x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM DatafileFormat x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM DatasetType x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM Facility x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM Investigation x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM InvestigationUser x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM InvestigationType x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM ParameterType x", "CRUD");
-		this.addRule("notroot", "Dataset", "CRUD");
-		this.addRule("notroot", "SELECT x FROM ParameterType x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM DatasetParameter x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM Datafile x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM DatafileParameter x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM DatafileFormat x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM DatasetType x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM Application x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM Job x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM DataCollection x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM DataCollectionParameter x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM DataCollectionDataset x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM DataCollectionDatafile x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM InvestigationParameter x", "CRUD");
-		this.addRule("notroot", "Instrument", "CRUD");
-		this.addRule("notroot", "InvestigationInstrument", "CRUD");
-		this.addRule("notroot", "InstrumentScientist", "CRUD");
-		this.addRule("notroot", "SampleType", "CRUD");
-		this.addRule("notroot", "Sample", "CRUD");
-		this.addRule("notroot", "PublicStep", "CRUD");
-		this.addRule("notroot", "Study", "CRUD");
-		this.addRule("notroot", "StudyInvestigation", "CRUD");
+		this.addFastRule("SELECT x FROM Rule x", "CRUD");
+		this.addFastRule("SELECT x FROM User x", "CRUD");
+		this.addFastRule("SELECT x FROM Grouping x", "CRUD");
+		this.addFastRule("SELECT x FROM UserGroup x", "CRUD");
+		this.addFastRule("SELECT x FROM DatafileFormat x", "CRUD");
+		this.addFastRule("SELECT x FROM DatasetType x", "CRUD");
+		this.addFastRule("SELECT x FROM Facility x", "CRUD");
+		this.addFastRule("SELECT x FROM Investigation x", "CRUD");
+		this.addFastRule("SELECT x FROM InvestigationUser x", "CRUD");
+		this.addFastRule("SELECT x FROM InvestigationType x", "CRUD");
+		this.addFastRule("SELECT x FROM ParameterType x", "CRUD");
+		this.addFastRule("Dataset", "CRUD");
+		this.addFastRule("SELECT x FROM ParameterType x", "CRUD");
+		this.addFastRule("SELECT x FROM DatasetParameter x", "CRUD");
+		this.addFastRule("SELECT x FROM Datafile x", "CRUD");
+		this.addFastRule("SELECT x FROM DatafileParameter x", "CRUD");
+		this.addFastRule("SELECT x FROM DatafileFormat x", "CRUD");
+		this.addFastRule("SELECT x FROM DatasetType x", "CRUD");
+		this.addFastRule("SELECT x FROM Application x", "CRUD");
+		this.addFastRule("SELECT x FROM Job x", "CRUD");
+		this.addFastRule("SELECT x FROM DataCollection x", "CRUD");
+		this.addFastRule("SELECT x FROM DataCollectionParameter x", "CRUD");
+		this.addFastRule("SELECT x FROM DataCollectionDataset x", "CRUD");
+		this.addFastRule("SELECT x FROM DataCollectionDatafile x", "CRUD");
+		this.addFastRule("SELECT x FROM InvestigationParameter x", "CRUD");
+		this.addFastRule("Instrument", "CRUD");
+		this.addFastRule("InvestigationInstrument", "CRUD");
+		this.addFastRule("InstrumentScientist", "CRUD");
+		this.addFastRule("SampleType", "CRUD");
+		this.addFastRule("Sample", "CRUD");
+		this.addFastRule("PublicStep", "CRUD");
+		this.addFastRule("Study", "CRUD");
+		this.addFastRule("StudyInvestigation", "CRUD");
+		snooze();
+	}
+
+	private void addFastRule(String what, String crudFlags) throws IcatException_Exception {
+		String groupName = "notroot";
+		Rule rule = new Rule();
+		Grouping g = (Grouping) icat.search(rootsessionId, "Grouping [name= '" + groupName + "']").get(0);
+		rule.setGrouping(g);
+		rule.setWhat(what);
+		rule.setCrudFlags(crudFlags);
+		this.icat.create(this.rootsessionId, rule);
 	}
 
 	public void update(EntityBaseBean df) throws IcatException_Exception {

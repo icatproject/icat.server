@@ -4,9 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -119,6 +122,7 @@ public class PropertyHandler {
 						HttpPost httpPost = new HttpPost(uri);
 						httpPost.setEntity(new UrlEncodedFormEntity(formparams));
 						try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+							Rest.checkStatus(response, IcatExceptionType.SESSION);
 							try (JsonReader r = Json
 									.createReader(new ByteArrayInputStream(getString(response).getBytes()))) {
 								JsonObject o = r.readObject();
@@ -131,9 +135,8 @@ public class PropertyHandler {
 							}
 						}
 					}
-				} catch (URISyntaxException | IOException | IcatException e) {
-					throw new IcatException(IcatExceptionType.INTERNAL,
-							"No authenticator of type " + mnemonic + " is working");
+				} catch (URISyntaxException | IOException e) {
+					logger.error("Authenticator of type", mnemonic, "reports", e.getClass().getName(), e.getMessage());
 				}
 			}
 			throw new IcatException(IcatExceptionType.INTERNAL, "No authenticator of type " + mnemonic + " is working");
@@ -291,6 +294,7 @@ public class PropertyHandler {
 	private int lucenePopulateBlockSize;
 	private File luceneBacklogHandlerFile;
 	private long luceneBacklogHandlerIntervalMillis;
+	private Map<String, String> cluster = new HashMap<>();
 
 	@PostConstruct
 	private void init() {
@@ -456,6 +460,43 @@ public class PropertyHandler {
 				logger.info("Key is " + (digestKey == null ? "not set" : "set"));
 			}
 
+			key = "cluster";
+			if (props.has(key)) {
+				String clusterString = props.getString(key);
+				formattedProps.add(key + " " + clusterString);
+				cluster = new HashMap<>();
+				for (String urlString : clusterString.split("\\s+")) {
+					URL url = null;
+					try {
+						url = new URL(urlString);
+					} catch (MalformedURLException e) {
+						abend("Url in cluster " + urlString + " is not a valid URL");
+					}
+					String host = url.getHost();
+					InetAddress address = null;
+					try {
+						address = InetAddress.getByName(host);
+					} catch (UnknownHostException e) {
+						abend("Host " + host + " in cluster specification is not known");
+					}
+					String hostAddress = address.getHostAddress();
+					try {
+						if (hostAddress.equals(InetAddress.getLocalHost().getHostAddress())) {
+							continue;
+						}
+					} catch (UnknownHostException e) {
+						// Ignore
+					}
+
+					if (Arrays.asList("localhost.localdomain", "localhost", "127.0.0.1").contains(host)) {
+						continue;
+					}
+
+					cluster.put(address.getHostAddress(), url.toExternalForm());
+					logger.info("Cluster includes " + url.toExternalForm() + " " + hostAddress);
+				}
+			}
+
 			/* JMS stuff */
 			jmsTopicConnectionFactory = props.getString("jms.topicConnectionFactory",
 					"java:comp/DefaultJMSConnectionFactory");
@@ -471,6 +512,10 @@ public class PropertyHandler {
 			abend(e.getMessage());
 		}
 
+	}
+
+	public Map<String, String> getCluster() {
+		return cluster;
 	}
 
 	private void abend(String msg) {

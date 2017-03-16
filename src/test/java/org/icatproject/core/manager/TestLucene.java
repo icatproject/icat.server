@@ -85,7 +85,7 @@ public class TestLucene {
 			httpPost.setEntity(input);
 
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				LuceneApi.checkStatus(response);
+				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 			}
 		} catch (IOException | URISyntaxException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
