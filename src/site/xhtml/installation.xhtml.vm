@@ -215,6 +215,8 @@
 		the rootUserNames list in icat.properties. This will redirect the dump
 		into a file called rules.ie. Then undeploy the existing icat
 		<kbd>./setup uninstall -v</kbd>
+		. Edit the rules.ie file to remove rules (probably two of them)
+		referring to the Log table.
 	</p>
 	<p>
 		Then for MySQL run
