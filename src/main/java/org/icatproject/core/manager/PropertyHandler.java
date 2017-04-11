@@ -310,13 +310,17 @@ public class PropertyHandler {
 
 			for (String mnemonic : authnList.split("\\s+")) {
 				Authenticator authen = null;
-				key = "authn." + mnemonic + ".jndi";
-				if (props.has(key)) {
-					String jndi = props.getString(key);
-					formattedProps.add(key + " " + jndi);
-					key = "authn." + mnemonic + ".hostPort";
-					if (props.has(key)) {
-						abend("Key  '" + key + " specified in run.properties is no longer permitted");
+				String keyJndi = "authn." + mnemonic + ".jndi";
+				String keyUrl = "authn." + mnemonic + ".url";
+				if (props.has(keyJndi) && props.has(keyUrl)) {
+					abend("Both " + keyJndi + " and " + keyUrl + " have been specified in run.properties");
+				}
+				if (props.has(keyJndi)) {
+					String jndi = props.getString(keyJndi);
+					formattedProps.add(keyJndi + " " + jndi);
+					String hpKey = "authn." + mnemonic + ".hostPort";
+					if (props.has(hpKey)) {
+						abend("Key  '" + hpKey + " specified in run.properties is no longer permitted");
 					}
 					try {
 						authen = (Authenticator) new InitialContext().lookup(jndi);
@@ -325,15 +329,13 @@ public class PropertyHandler {
 					}
 					logger.debug("Found Authenticator: " + mnemonic + " with jndi " + jndi);
 				} else {
-					key = "authn." + mnemonic + ".url";
-					String urls = props.getString(key);
+					String urls = props.getString(keyUrl);
 					try {
 						authen = new RestAuthenticator(mnemonic, urls);
 					} catch (IcatException e) {
 						abend(e.getClass() + " " + e.getMessage());
 					}
-					logger.debug(key + " " + urls);
-					formattedProps.add(key + " = " + urls);
+					formattedProps.add(keyUrl + " = " + urls);
 				}
 
 				key = "authn." + mnemonic + ".friendly";

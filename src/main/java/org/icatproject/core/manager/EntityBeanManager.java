@@ -891,7 +891,6 @@ public class EntityBeanManager {
 	}
 
 	private List<EntityBaseBean> getDependentBeans(EntityBaseBean bean) throws IcatException {
-		logger.trace("Get dependent beans for {}", bean);
 		Class<? extends EntityBaseBean> klass = bean.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
 		Map<Field, Method> getters = eiHandler.getGetters(klass);

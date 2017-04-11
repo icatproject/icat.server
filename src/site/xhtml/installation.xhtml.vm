@@ -22,8 +22,8 @@
 		<li>Java 8</li>
 		<li>A suitable deployed container. The installation scripts
 			support Glassfish/Payara and to a lesser extent WildFly. Testing has
-			been carried out with Payara41 and Glassfish 4.0<a
-			href="https://icatproject.org/installation/glassfish/">Glassfish
+			been carried out with Payara41.<a
+			href="https://icatproject.org/installation/glassfish/">Glassfish/Payara
 				installation instructions</a> are available.
 		</li>
 		<li>A database as described in <a
@@ -345,25 +345,27 @@
 		<dt>authn.list</dt>
 		<dd>is a space separated set of mnemonics for a user to select
 			the authenticator in the login call. Authenticators are separate
-			applications which may be "Remote EJBs" if installed in the same
-			container or they may be restful services. The list must not
-			reference Remote EJBs which are not installed as these are checked
-			when ICAT performs its initialisation; their absence will cause ICAT
-			to not start.</dd>
+			applications which may be "Remote EJBs", identified by jndi, if
+			installed in the same container or they may be restful services
+			identified by url. The list must not reference Remote EJBs which are
+			not installed as these are checked when ICAT performs its
+			initialisation; their absence will cause ICAT to not start.</dd>
 		<dt>authn.&lt;mnemonic&gt;.url</dt>
 		<dd>is a space separated list of the urls of machines with a
 			restful authenticator service. This will take the form:
 			https://example.com:443 There must be one such entry for each restful
 			authenticator. If more than one url is provided the services
 			referenced must be functionally equivalent. An invalid URL syntax
-			will cause the ICAT server not to start.</dd>
+			will cause the ICAT server not to start. This must not be set for an
+			EJB Authenticator.</dd>
 		<dt>authn.&lt;mnemonic&gt;.jndi</dt>
 		<dd>
 			is the jndi name to locate an EJB authenticator. When you installed
 			the authenticator a message would have appeared in the server.log
 			stating the JNDI names. The name will start:
 			<code>java:global/</code>
-			There must be one such entry for each EJB authenticator.
+			There must be one such entry for each EJB authenticator. This must
+			not be set for a restful Authenticator.
 		</dd>
 		<dt>authn.&lt;mnemonic&gt;.friendly</dt>
 		<dd>is optional. It gives a name that a tool might use to label
