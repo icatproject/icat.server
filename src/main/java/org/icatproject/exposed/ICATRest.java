@@ -2,6 +2,7 @@ package org.icatproject.exposed;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -69,8 +70,10 @@ import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
+import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.ParameterValueType;
+import org.icatproject.core.manager.AccessType;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
@@ -365,6 +368,87 @@ public class ICATRest {
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response exportData(@QueryParam("json") String jsonString) throws IcatException {
 		return porter.exportData(jsonString, manager, userTransaction);
+	}
+
+	@GET
+	@Path("list")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String list(@QueryParam("sessionId") String sessionId, @QueryParam("path") String wholePath)
+			throws IcatException {
+
+		List<String> files = null;
+		List<String> dirs = null;
+		if (wholePath.isEmpty()) {
+			files = manager
+					.createQuery("SELECT p.name FROM Path p where p.parent is null and p.file = true", String.class)
+					.getResultList();
+
+			dirs = manager
+					.createQuery("SELECT p.name FROM Path p where p.parent is null and p.file = false", String.class)
+					.getResultList();
+		} else {
+			org.icatproject.core.entity.Path path = null;
+			for (java.nio.file.Path name : (new File(wholePath)).toPath()) {
+				List<org.icatproject.core.entity.Path> paths;
+				if (path == null) {
+					paths = manager
+							.createQuery("SELECT p FROM Path p where p.parent is null and p.name = :name",
+									org.icatproject.core.entity.Path.class)
+							.setParameter("name", name.toString()).getResultList();
+				} else {
+					paths = manager
+							.createQuery("SELECT p FROM Path p where p.parent =:parent and p.name = :name",
+									org.icatproject.core.entity.Path.class)
+							.setParameter("parent", path).setParameter("name", name.toString()).getResultList();
+				}
+				if (paths.size() == 0) {
+					throw new IcatException(IcatExceptionType.NO_SUCH_OBJECT_FOUND, "path not found");
+				} else {
+					path = paths.get(0);
+				}
+			}
+			if (path.isFile()) {
+				throw new IcatException(IcatExceptionType.NO_SUCH_OBJECT_FOUND, "path not found");
+			}
+			files = manager
+					.createQuery("SELECT p.name FROM Path p where p.parent = :parent and p.file = true", String.class)
+					.setParameter("parent", path).getResultList();
+			dirs = manager
+					.createQuery("SELECT p.name FROM Path p where p.parent = :parent and p.file = false", String.class)
+					.setParameter("parent", path).getResultList();
+		}
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonGenerator gen = Json.createGenerator(baos);
+
+		gen.writeStartObject();
+		gen.writeStartArray("files");
+		String userName = beanManager.getUserName(sessionId, manager);
+		java.nio.file.Path basePath = (new File(wholePath)).toPath();
+
+		for (String file : files) {
+			try {
+				EntityBaseBean bean = manager
+						.createQuery("SELECT df from Datafile df where df.location = :location", Datafile.class)
+						.setParameter("location", basePath.resolve(file)).getSingleResult();
+				gatekeeper.performAuthorisation(userName, bean, AccessType.READ, manager);
+			} catch (Exception e) {
+				// May fail because not there or not readable
+			}
+			gen.write(file);
+		}
+		gen.writeEnd();
+		gen.writeStartArray("directories");
+		for (String dir : dirs) {
+			gen.write(dir);
+		}
+		gen.writeEnd();
+
+		gen.writeEnd();
+
+		gen.close();
+		return baos.toString();
+
 	}
 
 	/**
@@ -1268,8 +1352,7 @@ public class ICATRest {
 	 *         <code>SELECT f.id, f.name FROM Facility f</code> might return:
 	 *         <samp> [[126, "another fred"],[185, "a fred"]]</samp>. If an id
 	 *         value is specified then only one object can be returned so
-	 *         <em>the outer square brackets are
-	 *         omitted.</em>.
+	 *         <em>the outer square brackets are omitted.</em>.
 	 * 
 	 * @throws IcatException
 	 *             when something is wrong

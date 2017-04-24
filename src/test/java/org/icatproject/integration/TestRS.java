@@ -70,6 +70,44 @@ public class TestRS {
 		}
 	}
 
+	@Test
+	public void testPath() throws Exception {
+		Session session = createAndPopulate();
+		long dsid = search(session, "SELECT ds.id FROM Dataset ds", 5).getJsonNumber(0).longValueExact();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+			jw.writeStartObject().writeStartObject("Datafile").write("name", "test1").write("location", "a/b/c")
+					.writeStartObject("dataset").write("id", dsid).writeEnd().writeEnd().writeEnd();
+			jw.writeStartObject().writeStartObject("Datafile").write("name", "test2").write("location", "a/b/d/e")
+					.writeStartObject("dataset").write("id", dsid).writeEnd().writeEnd().writeEnd();
+			jw.writeStartObject().writeStartObject("Datafile").write("name", "test3").write("location", "a/b/d/f")
+					.writeStartObject("dataset").write("id", dsid).writeEnd().writeEnd().writeEnd();
+			jw.writeEnd();
+		}
+		List<Long> dfids = session.write(baos.toString());
+		assertEquals(3, dfids.size());
+
+		assertEquals("{\"files\":[\"here\"],\"directories\":[\"a\"]}", session.list(""));
+		assertEquals("{\"files\":[],\"directories\":[\"b\"]}", session.list("a"));
+		assertEquals("{\"files\":[\"c\"],\"directories\":[\"d\"]}", session.list("a/b"));
+		assertEquals("{\"files\":[\"e\",\"f\"],\"directories\":[]}", session.list("a/b/d"));
+
+		try {
+			session.list("a/b/d/e");
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getType());
+		}
+		try {
+			session.list("a/z");
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getType());
+		}
+	}
+
 	@Ignore("Test fails because of bug in eclipselink")
 	@Test
 	public void testDistinctBehaviour() throws Exception {

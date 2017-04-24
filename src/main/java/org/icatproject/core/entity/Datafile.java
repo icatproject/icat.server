@@ -1,5 +1,6 @@
 package org.icatproject.core.entity;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,6 +10,7 @@ import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
@@ -20,7 +22,12 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityBeanManager.PersistMode;
+import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.LuceneApi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Comment("A data file")
 @SuppressWarnings("serial")
@@ -29,6 +36,8 @@ import org.icatproject.core.manager.LuceneApi;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATASET_ID", "NAME" }) }, indexes = {
 		@Index(columnList = "location") })
 public class Datafile extends EntityBaseBean implements Serializable {
+
+	private final static Logger logger = LoggerFactory.getLogger(Datafile.class);
 
 	@Comment("Checksum of file represented as a string")
 	private String checksum;
@@ -215,5 +224,52 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		}
 		LuceneApi.encodeStoredId(gen, id);
 		LuceneApi.encodeStringField(gen, "dataset", dataset.id);
+	}
+
+	@Override
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
+			throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, persistMode);
+
+		if (location != null && manager.isJoinedToTransaction()) {
+
+			try {
+				// String key = propertyHandler.getKey();
+				String key = "wombat";
+				String loc = location;
+				if (key != null) {
+					int i = loc.lastIndexOf(' ');
+					if (i >= 0) {
+						loc = loc.substring(0, i);
+					}
+				}
+				Path path = null;
+				for (java.nio.file.Path name : (new File(loc)).toPath()) {
+					List<Path> roots = null;
+					// At least with MySQL it seems to be necessary to treat
+					// null as a special case
+					if (path == null) {
+						roots = manager.createQuery("SELECT p FROM Path p where p.parent is null and p.name = :name",
+								Path.class).setParameter("name", name.toString()).getResultList();
+					} else {
+						roots = manager
+								.createQuery("SELECT p FROM Path p where p.parent =:parent and p.name = :name",
+										Path.class)
+								.setParameter("parent", path).setParameter("name", name.toString()).getResultList();
+					}
+					if (roots.size() == 0) {
+						path = new Path(path, name);
+						manager.persist(path);
+					} else {
+						path = roots.get(0);
+					}
+				}
+				path.setFile(true);
+
+			} catch (Exception e) {
+				logger.error(e.getClass() + " " + e.getMessage());
+			}
+
+		}
 	}
 }

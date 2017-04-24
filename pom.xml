@@ -225,6 +225,7 @@
 					</excludes>
 					<systemPropertyVariables>
 						<luceneUrl>${luceneUrl}</luceneUrl>
+						<javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
 					</systemPropertyVariables>
 					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>

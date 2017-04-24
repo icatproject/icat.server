@@ -19,8 +19,10 @@
 		</encoder>
 	</appender>
 
-	<root level="INFO">
+	<root level="ERROR">
 		<appender-ref ref="FILE" />
 	</root>
+
+	<logger name="org.icatproject.core.entity.Datafile" level="TRACE" />
 
 </configuration>
