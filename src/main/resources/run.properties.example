@@ -8,11 +8,11 @@ exportCacheSize = 50
 authn.list = db ldap simple anon
 authn.db.url       = https://smfisher:8181
 
-authn.ldap.jndi     = java:global/authn.ldap-1.2.1-SNAPSHOT/LDAP_Authenticator
+authn.ldap.jndi     = java:global/authn.ldap-1.2.1/LDAP_Authenticator
 authn.ldap.admin    = true
 authn.ldap.friendly = Federal Id
 
-authn.simple.jndi = java:global/authn.simple-1.2.0-SNAPSHOT/SIMPLE_Authenticator
+authn.simple.jndi = java:global/authn.simple-1.2.0/SIMPLE_Authenticator
 
 authn.anon.url     = https://smfisher:8181
 authn.anon.friendly = Anonymous

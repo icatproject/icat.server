@@ -23,4 +23,8 @@
 		<appender-ref ref="FILE" />
 	</root>
 
+	<!-- <logger name="org.icatproject.core.manager.EntityBeanManager" level="TRACE" 
+		/> -->
+
+
 </configuration>
