@@ -1077,7 +1077,8 @@ public class TestRS {
 	public void testBug() throws Exception {
 		Session session = createAndPopulate();
 		ByteArrayOutputStream baos;
-		JsonArray ds = search(session, "SELECT ds.id, ds.modTime FROM Dataset ds LIMIT 0, 1", 1).getJsonArray(0);
+		JsonArray ds = search(session, "SELECT ds.id, ds.modTime FROM Dataset ds WHERE ds.name = 'ds1' LIMIT 0, 1", 1)
+				.getJsonArray(0);
 		Long dsid = ds.getJsonNumber(0).longValueExact();
 		LocalDateTime modTime = LocalDateTime.parse(ds.getJsonString(1).getString(),
 				DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -1107,7 +1108,8 @@ public class TestRS {
 		}
 		session.write(baos.toString());
 
-		ds = search(session, "SELECT ds.description, ds.modTime FROM Dataset ds LIMIT 0, 1", 1).getJsonArray(0);
+		ds = search(session, "SELECT ds.description, ds.modTime FROM Dataset ds  WHERE ds.name = 'ds1' LIMIT 0, 1", 1)
+				.getJsonArray(0);
 		assertEquals("Attempt to update", ds.getJsonString(0).getString());
 		LocalDateTime newModTime = LocalDateTime.parse(ds.getJsonString(1).getString(),
 				DateTimeFormatter.ISO_OFFSET_DATE_TIME);
