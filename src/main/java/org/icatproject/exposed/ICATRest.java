@@ -1184,6 +1184,8 @@ public class ICATRest {
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
+	 * @param ms
+	 *            how many milliseconds to wait
 	 * @throws IcatException
 	 *             when something is wrong
 	 */
@@ -1207,6 +1209,8 @@ public class ICATRest {
 	 *            a sessionId of a user listed in rootUserNames
 	 * @param entityName
 	 *            the name of the entity
+	 * @param minid
+	 *            only process entities with id values greater than this value
 	 * 
 	 * @throws IcatException
 	 *             when something is wrong
@@ -1268,8 +1272,7 @@ public class ICATRest {
 	 *         <code>SELECT f.id, f.name FROM Facility f</code> might return:
 	 *         <samp> [[126, "another fred"],[185, "a fred"]]</samp>. If an id
 	 *         value is specified then only one object can be returned so
-	 *         <em>the outer square brackets are
-	 *         omitted.</em>.
+	 *         <em>the outer square brackets are omitted.</em>.
 	 * 
 	 * @throws IcatException
 	 *             when something is wrong

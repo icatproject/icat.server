@@ -159,12 +159,12 @@
 				<artifactId>miredot-plugin</artifactId>
 				<version>1.6.2</version>
 				<executions>
-					<!-- <execution> -->
-					<!-- <id>miredot</id> -->
-					<!-- <goals> -->
-					<!-- <goal>restdoc</goal> -->
-					<!-- </goals> -->
-					<!-- </execution> -->
+					<execution>
+						<id>miredot</id>
+						<goals>
+							<goal>restdoc</goal>
+						</goals>
+					</execution>
 				</executions>
 				<configuration>
 					<licence>cHJvamVjdHxvcmcuaWNhdHByb2plY3QuaWNhdC5zZXJ2ZXJ8MjAxOC0wOS0xNXx0cnVlfC0xI01DMENGRzRQaDRMdlpvZlRwK0xsMmdENHFrZGR1VGtGQWhVQWk0eGh5cld4b25PTEJjWUhHS0pBbTcxa3VwST0=</licence>

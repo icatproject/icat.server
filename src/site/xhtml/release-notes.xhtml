@@ -6,6 +6,12 @@
 
 	<h1>ICAT Server Release Notes</h1>
 
+	<h2>4.9.1</h2>
+	<p>Bug fixes</p>
+	<ul>
+		<li>Restore the documentation for the RESTful API</li>
+	</ul>
+
 	<h2>4.9.0</h2>
 	<p>Add SOAP call getAuthenticatorInfo, support of authenticator and
 		lucene services and bug fixes</p>
@@ -29,7 +35,8 @@
 			server.</li>
 		<li>Fix bug in update which was making it very slow when lucene
 			was enabled</li>
-		<li>Works with Payara but has intermittent problems with Glassfish 4.0 and 4.1.1 so please use payara41.</li>
+		<li>Works with Payara but has intermittent problems with
+			Glassfish 4.0 and 4.1.1 so please use payara41.</li>
 		<li>Synchronization of public tables and public steps is now done
 			by restful calls rather than JMS. This means that the run.properties
 			file needs a list of other servers to synchronize with.</li>
