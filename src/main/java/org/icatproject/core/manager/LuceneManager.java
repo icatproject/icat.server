@@ -10,6 +10,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -55,6 +56,51 @@ import org.slf4j.MarkerFactory;
 @Startup
 @Singleton
 public class LuceneManager {
+
+	public class EnqueuedLuceneRequestHandler extends TimerTask {
+
+		@Override
+		public void run() {
+
+			synchronized (queueFileLock) {
+				if (queueFile.length() != 0) {
+					logger.debug("Will attempt to process {}", queueFile);
+					StringBuilder sb = new StringBuilder("[");
+					try (BufferedReader reader = new BufferedReader(new FileReader(queueFile))) {
+						String line;
+						while ((line = reader.readLine()) != null) {
+							if (sb.length() != 1) {
+								sb.append(',');
+							}
+							sb.append(line);
+						}
+					} catch (IOException e) {
+						logger.error("Problems reading from {} : {}", queueFile, e.getMessage());
+						return;
+					}
+					sb.append(']');
+
+					try {
+						luceneApi.modify(sb.toString());
+					} catch (IcatException e) {
+						// Record failures in a flat file to be examined
+						// periodically
+						synchronized (backlogHandlerFileLock) {
+							try {
+								FileWriter output = new FileWriter(backlogHandlerFile, true);
+								output.write(sb.toString() + "\n");
+								output.close();
+							} catch (IOException e2) {
+								logger.error("Problems writing to {} : {}", backlogHandlerFile, e2.getMessage());
+							}
+						}
+					} finally {
+						queueFile.delete();
+					}
+				}
+			}
+		}
+	}
 
 	public class IndexSome implements Callable<Long> {
 
@@ -120,59 +166,22 @@ public class LuceneManager {
 		}
 	}
 
-	public enum Operation {
-		ADD, UPDATE, DELETE
-	}
-
 	private class PendingLuceneRequestHandler extends TimerTask {
-
-		private EntityManager manager;
-
-		public PendingLuceneRequestHandler(EntityManagerFactory entityManagerFactory) {
-			manager = entityManagerFactory.createEntityManager();
-		}
 
 		@Override
 		public void run() {
-			synchronized (lock) {
+			synchronized (backlogHandlerFileLock) {
 				if (backlogHandlerFile.length() != 0) {
 					logger.debug("Will attempt to process {}", backlogHandlerFile);
 					try (BufferedReader reader = new BufferedReader(new FileReader(backlogHandlerFile))) {
 						String line;
 						while ((line = reader.readLine()) != null) {
-							String[] bits = line.split(" ");
-							Operation operation = Operation.valueOf(bits[0]);
-							String entityName = bits[1];
-							@SuppressWarnings("unchecked")
-							Class<? extends EntityBaseBean> klass = (Class<? extends EntityBaseBean>) Class
-									.forName(Constants.ENTITY_PREFIX + entityName);
-							Long id = Long.parseLong(bits[2]);
-							EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
-
-							if (bean != null) {
-								ByteArrayOutputStream baos = new ByteArrayOutputStream();
-								try (JsonGenerator gen = Json.createGenerator(baos)) {
-									gen.writeStartArray();
-									bean.getDoc(gen);
-									gen.writeEnd();
-								}
-								if (operation == Operation.ADD) {
-									luceneApi.addDocument(entityName, baos.toString());
-								} else if (operation == Operation.UPDATE) {
-									luceneApi.updateDocument(entityName, baos.toString(), id);
-								}
-							} else {
-								if (operation == Operation.DELETE) {
-									luceneApi.delete(entityName, id);
-								}
-							}
+							luceneApi.modify(line);
 						}
 						backlogHandlerFile.delete();
 						logger.info("Pending lucene records now all inserted");
 					} catch (IOException e) {
 						logger.error("Problems reading from {} : {}", backlogHandlerFile, e.getMessage());
-					} catch (ClassNotFoundException e) {
-						logger.error("Odd problem : {}", e.getMessage());
 					} catch (IcatException e) {
 						logger.error("Failed to put previously failed entries into lucene " + e.getMessage());
 					} catch (Throwable e) {
@@ -322,16 +331,15 @@ public class LuceneManager {
 
 	private boolean active;
 
-	private Long lock = 0L;
+	private Long backlogHandlerFileLock = 0L;
+
+	private Long queueFileLock = 0L;
 
 	private Timer timer;
 
 	private File backlogHandlerFile;
 
-	/*
-	 * This writes to a file rather than the database because of difficulties
-	 * with transactions. It is simple and safe if not elegant.
-	 */
+	private File queueFile;
 
 	public void addDocument(EntityBaseBean bean) throws IcatException {
 		if (eiHandler.hasLuceneDoc(bean.getClass())) {
@@ -342,15 +350,38 @@ public class LuceneManager {
 				bean.getDoc(gen);
 				gen.writeEnd();
 			}
-			try {
-				luceneApi.addDocument(entityName, baos.toString());
-				logger.trace("Added to {} lucene index", entityName);
-			} catch (IcatException e) {
-				holdLuceneOp(Operation.ADD, entityName, bean.getId());
-				logger.trace("Will add to {} lucene index when server is back", entityName);
-			}
-
+			enqueue(entityName, baos.toString(), null);
 		}
+	}
+
+	public void enqueue(String entityName, String json, Long id) throws IcatException {
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("[\"").append(entityName).append('"');
+		if (id != null) {
+			sb.append(',').append(id);
+		} else {
+			sb.append(",null");
+		}
+		if (json != null) {
+			sb.append(',').append(json);
+		} else {
+			sb.append(",null");
+		}
+		sb.append(']');
+
+		synchronized (queueFileLock) {
+			try {
+				FileWriter output = new FileWriter(queueFile, true);
+				output.write(sb.toString() + "\n");
+				output.close();
+			} catch (IOException e) {
+				String msg = "Problems writing to " + queueFile + " " + e.getMessage();
+				logger.error(msg);
+				throw new IcatException(IcatExceptionType.INTERNAL, msg);
+			}
+		}
+
 	}
 
 	public void clear() throws IcatException {
@@ -367,6 +398,7 @@ public class LuceneManager {
 	}
 
 	public void commit() throws IcatException {
+		pushPendingCalls();
 		luceneApi.commit();
 	}
 
@@ -392,10 +424,17 @@ public class LuceneManager {
 		if (eiHandler.hasLuceneDoc(bean.getClass())) {
 			String entityName = bean.getClass().getSimpleName();
 			Long id = bean.getId();
+			enqueue(entityName, null, id);
+		}
+	}
+
+	private void pushPendingCalls() {
+		timer.schedule(new EnqueuedLuceneRequestHandler(), 0L);
+		while (queueFile.length() != 0) {
 			try {
-				luceneApi.delete(entityName, id);
-			} catch (IcatException e) {
-				holdLuceneOp(Operation.DELETE, entityName, id);
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// Ignore
 			}
 		}
 	}
@@ -407,6 +446,7 @@ public class LuceneManager {
 			try {
 				populateExecutor.shutdown();
 				getBeanDocExecutor.shutdown();
+				pushPendingCalls();
 				timer.cancel();
 				timer = null;
 				logger.info("Closed down LuceneManager");
@@ -428,18 +468,6 @@ public class LuceneManager {
 		return result;
 	}
 
-	private void holdLuceneOp(Operation operation, String entityName, Long id) {
-		synchronized (lock) {
-			try {
-				FileWriter output = new FileWriter(backlogHandlerFile, true);
-				output.write(operation + " " + entityName + " " + id + "\n");
-				output.close();
-			} catch (IOException e) {
-				logger.error("Problems writing to {} : {}", backlogHandlerFile, e.getMessage());
-			}
-		}
-	}
-
 	@PostConstruct
 	private void init() {
 		logger.info("Initialising LuceneManager");
@@ -449,13 +477,17 @@ public class LuceneManager {
 			try {
 				luceneApi = new LuceneApi(new URI(propertyHandler.getLuceneUrl().toString()));
 				populateBlockSize = propertyHandler.getLucenePopulateBlockSize();
-				backlogHandlerFile = propertyHandler.getLuceneBacklogHandlerFile();
+				Path luceneDirectory = propertyHandler.getLuceneDirectory();
+				backlogHandlerFile = luceneDirectory.resolve("backLog").toFile();
+				queueFile =  luceneDirectory.resolve("queue").toFile();
 				maxThreads = Runtime.getRuntime().availableProcessors();
 				populateExecutor = Executors.newWorkStealingPool(maxThreads);
 				getBeanDocExecutor = Executors.newCachedThreadPool();
 				timer = new Timer();
-				timer.schedule(new PendingLuceneRequestHandler(entityManagerFactory), 0L,
+				timer.schedule(new PendingLuceneRequestHandler(), 0L,
 						propertyHandler.getLuceneBacklogHandlerIntervalMillis());
+				timer.schedule(new EnqueuedLuceneRequestHandler(), 0L,
+						propertyHandler.getLuceneEnqueuedRequestIntervalMillis());
 				logger.info("Initialised LuceneManager at {}", url);
 			} catch (Exception e) {
 				logger.error(fatal, "Problem setting up LuceneManager", e);
@@ -510,12 +542,7 @@ public class LuceneManager {
 				bean.getDoc(gen);
 				gen.writeEnd();
 			}
-			try {
-				luceneApi.updateDocument(entityName, baos.toString(), bean.getId());
-			} catch (IcatException e) {
-				holdLuceneOp(Operation.UPDATE, entityName, bean.getId());
-			}
-			logger.trace("Updated {} lucene index", entityName);
+			enqueue(entityName, baos.toString(), bean.getId());
 		}
 	}
 

@@ -45,8 +45,9 @@ log.list = SESSION WRITE READ INFO
 # Lucene
 lucene.url = https://localhost:8181
 lucene.populateBlockSize = 10000
-lucene.backlogHandlerFile = ../data/icat/luceneBacklogHandlerFile
+lucene.directory = ${HOME}/data/icat/lucene
 lucene.backlogHandlerIntervalSeconds = 60
+lucene.enqueuedRequestIntervalSeconds = 5
 
 # List members of cluster
 !cluster = http://vm200.nubes.stfc.ac.uk:8080 https://smfisher:8181				

@@ -397,13 +397,18 @@
 		<dd>This is ignored if lucene.url is not set. The number of
 			entries to batch off to the lucene server when using lucenePopulate.</dd>
 
-
-		<dt>lucene.backlogHandlerFile</dt>
-		<dd>path relative to the config directory to hold data that was
-			temporarily rejected by the lucene server</dd>
+		<dt>lucene.directory</dt>
+		<dd>This is ignored if lucene.url is not set. Path of a directory
+			holding files for requests that are queued to go the icat.lucene
+			server.</dd>
 
 		<dt>lucene.backlogHandlerIntervalSeconds</dt>
-		<dd>how often to check the backlog file</dd>
+		<dd>This is ignored if lucene.url is not set. How often to check
+			the backlog file.</dd>
+
+		<dt>lucene.enqueuedRequestIntervalSecond</dt>
+		<dd>This is ignored if lucene.url is not set. How often to
+			transmit lucene requests to the icat.lucene server.</dd>
 
 		<dt>jms.topicConnectionFactory</dt>
 		<dd>This is optional and may be used to override the default

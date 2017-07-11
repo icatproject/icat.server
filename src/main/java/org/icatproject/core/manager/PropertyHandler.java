@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -292,9 +293,10 @@ public class PropertyHandler {
 	private String digestKey;
 	private URL luceneUrl;
 	private int lucenePopulateBlockSize;
-	private File luceneBacklogHandlerFile;
+	private Path luceneDirectory;
 	private long luceneBacklogHandlerIntervalMillis;
 	private Map<String, String> cluster = new HashMap<>();
+	private long luceneEnqueuedRequestIntervalMillis;
 
 	@PostConstruct
 	private void init() {
@@ -433,12 +435,21 @@ public class PropertyHandler {
 				lucenePopulateBlockSize = props.getPositiveInt("lucene.populateBlockSize");
 				formattedProps.add("lucene.populateBlockSize" + " " + lucenePopulateBlockSize);
 
-				luceneBacklogHandlerFile = props.getFile("lucene.backlogHandlerFile");
-				formattedProps.add("lucene.backlogHandlerFile" + " " + luceneBacklogHandlerFile);
+				luceneDirectory = props.getPath("lucene.directory");
+				if (!luceneDirectory.toFile().isDirectory()) {
+					String msg = luceneDirectory + " is not a directory";
+					logger.error(fatal, msg);
+					throw new IllegalStateException(msg);
+				}
+				formattedProps.add("lucene.directory" + " " + luceneDirectory);
 
 				luceneBacklogHandlerIntervalMillis = props.getPositiveLong("lucene.backlogHandlerIntervalSeconds");
 				formattedProps.add("lucene.backlogHandlerIntervalSeconds" + " " + luceneBacklogHandlerIntervalMillis);
 				luceneBacklogHandlerIntervalMillis *= 1000;
+
+				luceneEnqueuedRequestIntervalMillis = props.getPositiveLong("lucene.enqueuedRequestIntervalSeconds");
+				formattedProps.add("lucene.enqueuedRequestIntervalSeconds" + " " + luceneEnqueuedRequestIntervalMillis);
+				luceneEnqueuedRequestIntervalMillis *= 1000;
 			}
 
 			/*
@@ -577,8 +588,12 @@ public class PropertyHandler {
 		return luceneBacklogHandlerIntervalMillis;
 	}
 
-	public File getLuceneBacklogHandlerFile() {
-		return luceneBacklogHandlerFile;
+	public long getLuceneEnqueuedRequestIntervalMillis() {
+		return luceneEnqueuedRequestIntervalMillis;
+	}
+
+	public Path getLuceneDirectory() {
+		return luceneDirectory;
 	}
 
 }

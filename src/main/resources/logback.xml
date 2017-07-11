@@ -19,12 +19,14 @@
 		</encoder>
 	</appender>
 
-	<root level="INFO">
+	<root level="OFF">
 		<appender-ref ref="FILE" />
 	</root>
 
 	<!-- <logger name="org.icatproject.core.manager.EntityBeanManager" level="TRACE" 
 		/> -->
+
+	<logger name="org.icatproject.core.manager.LuceneManager" level="trace" />
 
 
 </configuration>

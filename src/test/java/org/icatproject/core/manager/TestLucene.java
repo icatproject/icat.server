@@ -12,8 +12,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.json.Json;
 import javax.json.stream.JsonGenerator;
@@ -61,8 +64,24 @@ public class TestLucene {
 
 	int NUMSAMP = 15;
 
+	private class QueueItem {
+
+		private String entityName;
+		private Long id;
+		private String json;
+
+		public QueueItem(String entityName, Long id, String json) {
+			this.entityName = entityName;
+			this.id = id;
+			this.json = json;
+		}
+
+	}
+
 	@Test
-	public void addDocument() throws IcatException {
+	public void modify() throws IcatException {
+		Queue<QueueItem> queue = new ConcurrentLinkedQueue<>();
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 			gen.writeStartArray();
@@ -73,7 +92,45 @@ public class TestLucene {
 			LuceneApi.encodeStringField(gen, "dataset", 2001L);
 			gen.writeEnd();
 		}
-		luceneApi.addDocument("Datafile", baos.toString());
+
+		String json = baos.toString();
+
+		queue.add(new QueueItem("Datafile", null, json));
+
+		queue.add(new QueueItem("Datafile", 42L, json));
+
+		queue.add(new QueueItem("Datafile", 42L, null));
+		queue.add(new QueueItem("Datafile", 42L, null));
+
+		Iterator<QueueItem> qiter = queue.iterator();
+		if (qiter.hasNext()) {
+			StringBuilder sb = new StringBuilder("[");
+
+			while (qiter.hasNext()) {
+				QueueItem item = qiter.next();
+				if (sb.length() != 1) {
+					sb.append(',');
+				}
+				sb.append("[\"").append(item.entityName).append('"');
+				if (item.id != null) {
+					sb.append(',').append(item.id);
+				} else {
+					sb.append(",null");
+				}
+				if (item.json != null) {
+					sb.append(',').append(item.json);
+				} else {
+					sb.append(",null");
+				}
+				sb.append(']');
+				qiter.remove();
+			}
+			sb.append(']');
+			logger.debug("XXX " + sb.toString());
+
+			luceneApi.modify(sb.toString());
+		}
+
 	}
 
 	private void addDocuments(String entityName, String json) throws IcatException {

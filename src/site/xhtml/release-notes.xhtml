@@ -10,6 +10,10 @@
 	<p>Bug fixes</p>
 	<ul>
 		<li>Restore the documentation for the RESTful API</li>
+		<li>Add to run.properties: lucene.directory,
+			lucene.backlogHandlerIntervalSeconds and
+			lucene.enqueuedRequestIntervalSecond to deal with batching requests
+			to icat.lucene. This greatly improves ingest performance.</li>
 	</ul>
 
 	<h2>4.9.0</h2>

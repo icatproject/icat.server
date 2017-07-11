@@ -89,22 +89,6 @@ public class LuceneApi {
 		this.server = server;
 	}
 
-	public void addDocument(String entityName, String json) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/add/" + entityName).build();
-			HttpPost httpPost = new HttpPost(uri);
-			StringEntity input = new StringEntity(json);
-			input.setContentType(MediaType.APPLICATION_JSON);
-			httpPost.setEntity(input);
-
-			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-			}
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
 	public void clear() throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/clear").build();
@@ -274,21 +258,6 @@ public class LuceneApi {
 			}
 			return getLsr(uri, httpclient, baos);
 		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	public void delete(String entityName, Long id) throws IcatException {
-		try {
-			URI uri = new URIBuilder(server).setPath(basePath + "/delete/" + entityName + "/" + id).build();
-			logger.trace("Making call {}", uri);
-			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-				HttpDelete httpDelete = new HttpDelete(uri);
-				try (CloseableHttpResponse response = httpclient.execute(httpDelete)) {
-					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-				}
-			}
-		} catch (URISyntaxException | IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
@@ -498,9 +467,9 @@ public class LuceneApi {
 		}
 	}
 
-	public void updateDocument(String entityName, String json, Long id) throws IcatException {
+	public void modify(String json) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/update/" + entityName + "/" + id).build();
+			URI uri = new URIBuilder(server).setPath(basePath + "/modify").build();
 			HttpPost httpPost = new HttpPost(uri);
 			StringEntity input = new StringEntity(json);
 			input.setContentType(MediaType.APPLICATION_JSON);
