@@ -25,13 +25,13 @@ authn.list = db ldap simple anon
 # Parameters for each of the four plugins
 authn.db.url       = https://localhost:8181
 
-authn.ldap.jndi     = java:global/authn.ldap-1.2.0/LDAP_Authenticator
+authn.ldap.url       = https://localhost:8181
 authn.ldap.admin    = true
 authn.ldap.friendly = Federal Id
 
-authn.simple.jndi = java:global/authn.simple-1.1.0/SIMPLE_Authenticator
+authn.simple.url       = https://localhost:8181
 
-authn.anon.jndi     = java:global/authn.anon-1.1.1/ANON_Authenticator
+authn.anon.url       = https://localhost:8181
 authn.anon.friendly = Anonymous
 
 # Notification setup

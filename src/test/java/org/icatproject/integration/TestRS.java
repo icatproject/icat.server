@@ -354,7 +354,7 @@ public class TestRS {
 		wSession.clear();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		
+
 		rootSession.luceneCommit();
 		return session;
 	}
