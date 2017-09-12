@@ -207,7 +207,7 @@ public abstract class EntityBaseBean implements Serializable {
 	public long getDescendantCount(long maxEntities) throws IcatException {
 		if (descendantCount > maxEntities) {
 			throw new IcatException(IcatExceptionType.VALIDATION,
-					"attempt to return more than " + maxEntities + " entitities");
+					"attempt to return more than " + maxEntities + " entities");
 		}
 		return descendantCount;
 	}
