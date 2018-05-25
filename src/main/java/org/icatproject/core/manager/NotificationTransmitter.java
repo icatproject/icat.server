@@ -33,6 +33,10 @@ public class NotificationTransmitter {
 
 	private TopicConnection topicConnection;
 
+        private Session jmsSession;
+
+        private MessageProducer jmsProducer;
+
 	@PostConstruct
 	private void init() {
 
@@ -42,6 +46,8 @@ public class NotificationTransmitter {
 					.lookup(propertyHandler.getJmsTopicConnectionFactory());
 			topicConnection = topicConnectionFactory.createTopicConnection();
 			topic = (Topic) ic.lookup("jms/ICAT/Topic");
+			jmsSession = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			jmsProducer = jmsSession.createProducer(topic);
 			logger.info("Transmitter created");
 		} catch (JMSException | NamingException e) {
 			logger.error(fatal, "Problem with JMS " + e);
@@ -53,6 +59,12 @@ public class NotificationTransmitter {
 	@PreDestroy()
 	private void exit() {
 		try {
+                        if (jmsProducer != null) {
+			        jmsProducer.close();
+                        }
+                        if (jmsSession != null) {
+			        jmsSession.close();
+                        }
 			if (topicConnection != null) {
 				topicConnection.close();
 			}
@@ -65,8 +77,6 @@ public class NotificationTransmitter {
 	public void processMessage(NotificationMessage notificationMessage) throws JMSException {
 		Message message = notificationMessage.getMessage();
 		if (message != null) {
-			Session jmsSession = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			MessageProducer jmsProducer = jmsSession.createProducer(topic);
 			ObjectMessage jmsg = jmsSession.createObjectMessage();
 			jmsg.setStringProperty("entity", message.getEntityName());
 			jmsg.setStringProperty("operation", message.getOperation());
@@ -74,7 +84,6 @@ public class NotificationTransmitter {
 			jmsProducer.send(jmsg);
 			logger.debug("Sent jms message " + message.getOperation() + " " + message.getEntityName() + " "
 					+ message.getEntityId());
-			jmsSession.close();
 		}
 
 	}
