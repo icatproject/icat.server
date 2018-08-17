@@ -348,7 +348,7 @@ public class TestEntityInfo {
 		testSF(Dataset.class, "name 255", "description 255", "location 255", "doi 255");
 		testSF(Keyword.class, "name 255");
 		testSF(InvestigationUser.class, "role 255");
-		testSF(User.class, "name 255", "fullName 255", "email 255", "orcidId 255");
+		testSF(User.class, "name 255", "fullName 255", "givenName 255", "familyName 255", "affiliation 255", "email 255", "orcidId 255");
 		testSF(ParameterType.class, "pid 255", "description 255", "unitsFullName 255", "units 255", "name 255");
 		testSF(Job.class, "arguments 255");
 
@@ -373,7 +373,7 @@ public class TestEntityInfo {
 		testGetters(Dataset.class, 18);
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
-		testGetters(User.class, 13);
+		testGetters(User.class, 16);
 		testGetters(ParameterType.class, 27);
 		testGetters(Job.class, 9);
 	}
@@ -384,7 +384,7 @@ public class TestEntityInfo {
 		testSetters(Dataset.class, 14);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);
-		testSetters(User.class, 9);
+		testSetters(User.class, 12);
 		testSetters(ParameterType.class, 23);
 		testSetters(Job.class, 5);
 	}
@@ -395,7 +395,7 @@ public class TestEntityInfo {
 		testSettersForUpdate(Dataset.class, 10);
 		testSettersForUpdate(Keyword.class, 2);
 		testSettersForUpdate(InvestigationUser.class, 3);
-		testSettersForUpdate(User.class, 4);
+		testSettersForUpdate(User.class, 7);
 		testSettersForUpdate(ParameterType.class, 16);
 		testSettersForUpdate(Job.class, 4);
 		testSettersForUpdate(Facility.class, 5);

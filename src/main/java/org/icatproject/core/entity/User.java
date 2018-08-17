@@ -24,6 +24,15 @@ public class User extends EntityBaseBean implements Serializable {
 	@Comment("May include title")
 	private String fullName;
 
+	@Comment("The given name of the user")
+	private String givenName;
+
+	@Comment("The family name of the user")
+	private String familyName;
+
+	@Comment("The home institute or other affiliation of the user")
+	private String affiliation;
+
 	@Comment("An email address for the user")
 	private String email;
 
@@ -51,6 +60,18 @@ public class User extends EntityBaseBean implements Serializable {
 
 	public String getFullName() {
 		return fullName;
+	}
+
+	public String getGivenName() {
+		return givenName;
+	}
+
+	public String getFamilyName() {
+		return familyName;
+	}
+
+	public String getAffiliation() {
+		return affiliation;
 	}
 
 	public List<InstrumentScientist> getInstrumentScientists() {
@@ -83,6 +104,18 @@ public class User extends EntityBaseBean implements Serializable {
 
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
+	}
+
+	public void setGivenName(String givenName) {
+		this.givenName = givenName;
+	}
+
+	public void setFamilyName(String familyName) {
+		this.familyName = familyName;
+	}
+
+	public void setAffiliation(String affiliation) {
+		this.affiliation = affiliation;
 	}
 
 	public void setInstrumentScientists(List<InstrumentScientist> instrumentScientists) {
