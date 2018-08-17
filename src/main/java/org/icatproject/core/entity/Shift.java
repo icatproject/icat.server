@@ -5,6 +5,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -33,6 +34,10 @@ public class Shift extends EntityBaseBean implements Serializable {
 
 	@Column(name = "\"COMMENT\"")
 	private String comment;
+
+	@Comment("The instrument, if this shift is associated to one")
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Instrument instrument;
 
 	/* Needed for JPA */
 	public Shift() {
@@ -68,6 +73,14 @@ public class Shift extends EntityBaseBean implements Serializable {
 
 	public void setInvestigation(Investigation investigation) {
 		this.investigation = investigation;
+	}
+
+	public Instrument getInstrument() {
+		return instrument;
+	}
+
+	public void setInstrument(Instrument instrument) {
+		this.instrument = instrument;
 	}
 
 }

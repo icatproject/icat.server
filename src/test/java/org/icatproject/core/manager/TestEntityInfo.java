@@ -266,7 +266,8 @@ public class TestEntityInfo {
 
 		testRel(Instrument.class, "From Instrument to Facility by facility one",
 				"From Instrument to InstrumentScientist by instrumentScientists many setInstrument",
-				"From Instrument to InvestigationInstrument by investigationInstruments many setInstrument");
+				"From Instrument to InvestigationInstrument by investigationInstruments many setInstrument",
+				"From Instrument to Shift by shifts many setInstrument");
 	}
 
 	private void testRel(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {

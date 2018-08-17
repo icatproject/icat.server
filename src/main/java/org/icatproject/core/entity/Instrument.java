@@ -48,6 +48,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	@Comment("A URL associated with this instrument")
 	private String url;
 
+	@Comment("Shifts associated with this instrument")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
+	private List<Shift> shifts = new ArrayList<Shift>();
+
 	private String type;
 
 	public String getPid() {
@@ -98,6 +102,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
 		return this.type;
 	}
 
+	public List<Shift> getShifts() {
+		return this.shifts;
+	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
@@ -124,6 +132,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public void setShifts(List<Shift> shifts) {
+		this.shifts = shifts;
 	}
 
 }
