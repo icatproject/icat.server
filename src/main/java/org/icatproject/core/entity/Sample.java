@@ -23,6 +23,9 @@ import org.icatproject.core.manager.LuceneApi;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "INVESTIGATION_ID", "NAME" }) })
 public class Sample extends EntityBaseBean implements Serializable {
 
+	@Comment("A persistent identifier attributed to this sample")
+	private String pid;
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
 	private List<Dataset> datasets = new ArrayList<>();
 
@@ -42,6 +45,14 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public Sample() {
+	}
+
+	public String getPid() {
+		return pid;
+	}
+
+	public void setPid(String pid) {
+		this.pid = pid;
 	}
 
 	public List<Dataset> getDatasets() {

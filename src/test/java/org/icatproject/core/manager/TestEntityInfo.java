@@ -85,8 +85,8 @@ public class TestEntityInfo {
 				eiHandler.getExportHeader(DatasetParameter.class));
 		assertEquals("ParameterType(applicableToDataCollection:0,applicableToDatafile:1,applicableToDataset:2,"
 				+ "applicableToInvestigation:3,applicableToSample:4,description:5,enforced:6,facility(name:7),"
-				+ "maximumNumericValue:8,minimumNumericValue:9,name:10,units:11,unitsFullName:12,"
-				+ "valueType:13,verified:14)", eiHandler.getExportHeader(ParameterType.class));
+				+ "maximumNumericValue:8,minimumNumericValue:9,name:10,pid:11,units:12,unitsFullName:13,"
+				+ "valueType:14,verified:15)", eiHandler.getExportHeader(ParameterType.class));
 		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals("Rule(?:0,crudFlags:1,grouping(name:2),what:3)", eiHandler.getExportHeader(Rule.class));
 		assertEquals(
@@ -134,8 +134,8 @@ public class TestEntityInfo {
 						+ "applicableToDataCollection:4,applicableToDatafile:5,"
 						+ "applicableToDataset:6,applicableToInvestigation:7,"
 						+ "applicableToSample:8,description:9,enforced:10,facility(name:11),"
-						+ "maximumNumericValue:12,minimumNumericValue:13,name:14,units:15,"
-						+ "unitsFullName:16,valueType:17,verified:18)",
+						+ "maximumNumericValue:12,minimumNumericValue:13,name:14,pid:15,"
+						+ "units:16,unitsFullName:17,valueType:18,verified:19)",
 				eiHandler.getExportHeaderAll(ParameterType.class));
 		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals("Rule(?:0,createId:1,createTime:2,modId:3,modTime:4," + "crudFlags:5,grouping(name:6),what:7)",
@@ -179,7 +179,7 @@ public class TestEntityInfo {
 		testField("dataset,dateTimeValue,error,numericValue,rangeBottom,rangeTop,stringValue,type",
 				DatasetParameter.class);
 		testField(
-				"applicableToDataCollection,applicableToDatafile,applicableToDataset,applicableToInvestigation,applicableToSample,dataCollectionParameters,datafileParameters,datasetParameters,description,enforced,facility,investigationParameters,maximumNumericValue,minimumNumericValue,name,permissibleStringValues,sampleParameters,units,unitsFullName,valueType,verified",
+				"applicableToDataCollection,applicableToDatafile,applicableToDataset,applicableToInvestigation,applicableToSample,dataCollectionParameters,datafileParameters,datasetParameters,description,enforced,facility,investigationParameters,maximumNumericValue,minimumNumericValue,name,permissibleStringValues,pid,sampleParameters,units,unitsFullName,valueType,verified",
 				ParameterType.class);
 	}
 
@@ -348,7 +348,7 @@ public class TestEntityInfo {
 		testSF(Keyword.class, "name 255");
 		testSF(InvestigationUser.class, "role 255");
 		testSF(User.class, "name 255", "fullName 255", "email 255", "orcidId 255");
-		testSF(ParameterType.class, "description 255", "unitsFullName 255", "units 255", "name 255");
+		testSF(ParameterType.class, "pid 255", "description 255", "unitsFullName 255", "units 255", "name 255");
 		testSF(Job.class, "arguments 255");
 
 	}
@@ -373,7 +373,7 @@ public class TestEntityInfo {
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
 		testGetters(User.class, 13);
-		testGetters(ParameterType.class, 26);
+		testGetters(ParameterType.class, 27);
 		testGetters(Job.class, 9);
 	}
 
@@ -384,7 +384,7 @@ public class TestEntityInfo {
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);
 		testSetters(User.class, 9);
-		testSetters(ParameterType.class, 22);
+		testSetters(ParameterType.class, 23);
 		testSetters(Job.class, 5);
 	}
 
@@ -395,7 +395,7 @@ public class TestEntityInfo {
 		testSettersForUpdate(Keyword.class, 2);
 		testSettersForUpdate(InvestigationUser.class, 3);
 		testSettersForUpdate(User.class, 4);
-		testSettersForUpdate(ParameterType.class, 15);
+		testSettersForUpdate(ParameterType.class, 16);
 		testSettersForUpdate(Job.class, 4);
 		testSettersForUpdate(Facility.class, 5);
 		testSettersForUpdate(InvestigationType.class, 3);

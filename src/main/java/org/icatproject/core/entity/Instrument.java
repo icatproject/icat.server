@@ -20,6 +20,9 @@ import javax.persistence.UniqueConstraint;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME" }) })
 public class Instrument extends EntityBaseBean implements Serializable {
 
+	@Comment("A persistent identifier attributed to this instrument")
+	private String pid;
+
 	@Comment("A description of this instrument")
 	@Column(length = 4000)
 	private String description;
@@ -46,6 +49,14 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	private String url;
 
 	private String type;
+
+	public String getPid() {
+		return pid;
+	}
+
+	public void setPid(String pid) {
+		this.pid = pid;
+	}
 
 	public String getUrl() {
 		return url;
