@@ -355,6 +355,7 @@ public class WSession {
 		this.addFastRule("SELECT x FROM Investigation x", "CRUD");
 		this.addFastRule("SELECT x FROM InvestigationUser x", "CRUD");
 		this.addFastRule("SELECT x FROM InvestigationType x", "CRUD");
+		this.addFastRule("SELECT x FROM Shift x", "CRUD");
 		this.addFastRule("SELECT x FROM ParameterType x", "CRUD");
 		this.addFastRule("Dataset", "CRUD");
 		this.addFastRule("SELECT x FROM ParameterType x", "CRUD");
