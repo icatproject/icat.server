@@ -395,9 +395,9 @@ public class TestRS {
 
 		// Get known configuration
 		wSession.clear();
+		wSession.setAuthz();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
 
 		long fid = search(session, "Facility.id", 1).getJsonNumber(0).longValueExact();
 
@@ -429,9 +429,9 @@ public class TestRS {
 
 		// Get known configuration
 		wSession.clear();
+		wSession.setAuthz();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
 
 		JsonArray array;
 
@@ -489,11 +489,23 @@ public class TestRS {
 
 		// Get known configuration
 		wSession.clear();
+		wSession.setAuthz();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
 
 		JsonArray array;
+
+		JsonObject user = search(session, "SELECT u FROM User u WHERE u.name = 'db/lib'", 1).getJsonObject(0).getJsonObject("User");
+		assertEquals("Horace", user.getString("givenName"));
+		assertEquals("Worblehat", user.getString("familyName"));
+		assertEquals("Unseen University", user.getString("affiliation"));
+
+		String query = "SELECT inv FROM Investigation inv JOIN inv.shifts AS s "
+			+ "WHERE s.instrument.pid = 'ig:0815' AND s.comment = 'beamtime' "
+			+ "AND s.startDate <= '2014-01-01 12:00:00' AND s.endDate >= '2014-01-01 12:00:00'";
+		JsonObject inv = search(session, query, 1).getJsonObject(0).getJsonObject("Investigation");
+		assertEquals("expt1", inv.getString("name"));
+		assertEquals("zero", inv.getString("visitId"));
 
 		// Make sure that fetching a non-id Double gives no problems
 		assertEquals(73.0, search(session, "SELECT MIN(pt.minimumNumericValue) FROM ParameterType pt", 1)
@@ -507,7 +519,7 @@ public class TestRS {
 						.doubleValue(),
 				0.001);
 
-		JsonObject inv = search(session, "SELECT inv FROM Investigation inv WHERE inv.visitId = 'zero'", 1)
+		inv = search(session, "SELECT inv FROM Investigation inv WHERE inv.visitId = 'zero'", 1)
 				.getJsonObject(0).getJsonObject("Investigation");
 		Pattern p = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}");
 		for (String name : Arrays.asList("createTime", "modTime", "startDate", "endDate")) {
@@ -1258,9 +1270,9 @@ public class TestRS {
 
 		// Get known configuration
 		wSession.clear();
+		wSession.setAuthz();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
 
 		return session;
 	}
@@ -1392,8 +1404,8 @@ public class TestRS {
 		Session rootSession = icat.login("db", rootCredentials);
 
 		// Get known configuration
-		rootSession.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
 		wSession.setAuthz();
+		rootSession.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
 
 		Path dump1 = Files.createTempFile("dump1", ".tmp");
 		Path dump2 = Files.createTempFile("dump2", ".tmp");
@@ -1427,8 +1439,8 @@ public class TestRS {
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 
 		// Get known configuration
-		session.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
 		wSession.setAuthz();
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
 
 		Path dump = Files.createTempFile("dump1", ".tmp");
 		start = System.currentTimeMillis();
