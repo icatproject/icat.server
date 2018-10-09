@@ -68,7 +68,7 @@ import org.junit.Test;
  */
 public class TestWS {
 
-	private static final String version = "4.9.";
+	private static final String version = "4.10.";
 	private static Random random;
 	private static WSession session;
 
