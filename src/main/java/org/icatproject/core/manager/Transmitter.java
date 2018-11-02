@@ -29,6 +29,10 @@ public class Transmitter {
 
 	private TopicConnection topicConnection;
 
+        private Session jmsSession;
+
+        private MessageProducer jmsProducer;
+
 	@EJB
 	PropertyHandler propertyHandler;
 
@@ -41,6 +45,8 @@ public class Transmitter {
 					.lookup(propertyHandler.getJmsTopicConnectionFactory());
 			topicConnection = topicConnectionFactory.createTopicConnection();
 			topic = (Topic) ic.lookup("jms/ICAT/log");
+			jmsSession = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			jmsProducer = jmsSession.createProducer(topic);
 			logger.info("Transmitter created");
 		} catch (JMSException | NamingException e) {
 			logger.error(fatal, "Problem with JMS " + e);
@@ -52,6 +58,12 @@ public class Transmitter {
 	@PreDestroy()
 	private void exit() {
 		try {
+                        if (jmsProducer != null) {
+                                jmsProducer.close();
+                        }
+                        if (jmsSession != null) {
+                                jmsSession.close();
+                        }
 			if (topicConnection != null) {
 				topicConnection.close();
 			}
@@ -63,16 +75,13 @@ public class Transmitter {
 
 	public void processMessage(String operation, String ip, String body, long startMillis) {
 		try {
-			Session jmsSession = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			TextMessage jmsg = jmsSession.createTextMessage(body);
 			jmsg.setStringProperty("operation", operation);
 			jmsg.setStringProperty("ip", ip);
 			jmsg.setLongProperty("millis", System.currentTimeMillis() - startMillis);
 			jmsg.setLongProperty("start", startMillis);
-			MessageProducer jmsProducer = jmsSession.createProducer(topic);
 			jmsProducer.send(jmsg);
 			logger.debug("Sent jms message " + operation + " " + ip);
-			jmsSession.close();
 		} catch (JMSException e) {
 			logger.error("Failed to send jms message " + operation + " " + ip);
 		}
