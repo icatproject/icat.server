@@ -410,6 +410,9 @@
 		<dd>This is ignored if lucene.url is not set. How often to
 			transmit lucene requests to the icat.lucene server.</dd>
 
+		<dt>lucene.entitiesToIndex = Datafile Dataset Investigation InvestigationUser DatafileParameter DatasetParameter InvestigationParameter Sample</dt>
+		<dd>The entities to index with Lucene. For example, remove 'Datafile' and 'DatafileParameter' if the number of datafiles exceeds lucene's limit of 2^32 entries in an index</dd>
+
 		<dt>jms.topicConnectionFactory</dt>
 		<dd>This is optional and may be used to override the default
 			value of java:comp/DefaultJMSConnectionFactory</dd>
