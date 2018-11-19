@@ -42,7 +42,7 @@ public class NotificationTransmitter {
 					.lookup(propertyHandler.getJmsTopicConnectionFactory());
 			topicConnection = topicConnectionFactory.createTopicConnection();
 			topic = (Topic) ic.lookup("jms/ICAT/Topic");
-			logger.info("Transmitter created");
+			logger.info("Notification Transmitter created");
 		} catch (JMSException | NamingException e) {
 			logger.error(fatal, "Problem with JMS " + e);
 			throw new IllegalStateException(e.getMessage());
@@ -56,7 +56,7 @@ public class NotificationTransmitter {
 			if (topicConnection != null) {
 				topicConnection.close();
 			}
-			logger.info("Transmitter closing down");
+			logger.info("Notification Transmitter closing down");
 		} catch (JMSException e) {
 			throw new IllegalStateException(e.getMessage());
 		}
@@ -65,16 +65,19 @@ public class NotificationTransmitter {
 	public void processMessage(NotificationMessage notificationMessage) throws JMSException {
 		Message message = notificationMessage.getMessage();
 		if (message != null) {
-			Session jmsSession = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			MessageProducer jmsProducer = jmsSession.createProducer(topic);
-			ObjectMessage jmsg = jmsSession.createObjectMessage();
-			jmsg.setStringProperty("entity", message.getEntityName());
-			jmsg.setStringProperty("operation", message.getOperation());
-			jmsg.setObject(message.getEntityId());
-			jmsProducer.send(jmsg);
-			logger.debug("Sent jms message " + message.getOperation() + " " + message.getEntityName() + " "
+			try ( Session jmsSession = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE) )
+			{
+				MessageProducer jmsProducer = jmsSession.createProducer(topic);
+				ObjectMessage jmsg = jmsSession.createObjectMessage();
+				jmsg.setStringProperty("entity", message.getEntityName());
+				jmsg.setStringProperty("operation", message.getOperation());
+				jmsg.setObject(message.getEntityId());
+				jmsProducer.send(jmsg);
+				logger.debug("Sent jms notification message " + message.getOperation() + " " + message.getEntityName() + " "
 					+ message.getEntityId());
-			jmsSession.close();
+			} catch (JMSException e) {
+				logger.error("Failed to send jms notification message ");
+			}
 		}
 
 	}

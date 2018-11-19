@@ -62,8 +62,8 @@ public class Transmitter {
 	}
 
 	public void processMessage(String operation, String ip, String body, long startMillis) {
-		try {
-			Session jmsSession = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		try ( Session jmsSession = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE) )
+		{
 			TextMessage jmsg = jmsSession.createTextMessage(body);
 			jmsg.setStringProperty("operation", operation);
 			jmsg.setStringProperty("ip", ip);
@@ -72,7 +72,6 @@ public class Transmitter {
 			MessageProducer jmsProducer = jmsSession.createProducer(topic);
 			jmsProducer.send(jmsg);
 			logger.debug("Sent jms message " + operation + " " + ip);
-			jmsSession.close();
 		} catch (JMSException e) {
 			logger.error("Failed to send jms message " + operation + " " + ip);
 		}
