@@ -16,6 +16,16 @@
 			(Issue 201).</li>
 	</ul>
 
+	<h2>4.9.2</h2>
+	<p>Bug fixes</p>
+	<ul>
+		<li>Create a new option to configure which entities are included in the Lucene index.
+		For example, remove 'Datafile' and 'DatafileParameter' if the number of datafiles exceeds lucene's limit of 2^32 entries in an index
+		lucene.entitiesToIndex = Datafile Dataset Investigation InvestigationUser DatafileParameter DatasetParameter InvestigationParameter Sample</li>
+		<li>Upgrade the Apache HttpClient from 4.3.4 to 4.3.6 because of a security vulnerability (<a href="https://nvd.nist.gov/vuln/detail/CVE-2015-5262">CVE-2015-5262</a>).</li>
+		<li>Changes to tests and the default developer configuration to remove references to Steve Fisher's computer.</li>
+	</ul>
+
 	<h2>4.9.1</h2>
 	<p>Bug fixes</p>
 	<ul>

@@ -273,6 +273,16 @@ public class PropertyHandler {
 		return rootUserNames;
 	}
 
+	
+	/**
+	 * Configure which entities will be indexed by lucene on ingest
+	 */
+	private Set<String> entitiesToIndex = new HashSet<String>();
+	
+	public Set<String> getEntitiesToIndex() {
+		return entitiesToIndex;
+	}
+	
 	public int getLifetimeMinutes() {
 		return lifetimeMinutes;
 	}
@@ -368,6 +378,25 @@ public class PropertyHandler {
 			}
 			formattedProps.add("rootUserNames " + names);
 
+			/* entitiesToIndex */
+			key = "lucene.entitiesToIndex";
+			if (props.has(key)) {
+				String indexableEntities = props.getString(key);
+				for (String indexableEntity : indexableEntities.split("\\s+")) {
+					entitiesToIndex.add(indexableEntity);
+				}
+				logger.info("lucene.entitiesToIndex: {}", entitiesToIndex.toString());
+			} else {
+				/* If the property is not specified, we default to all the entities which
+				 * currently override the EntityBaseBean.getDoc() method. This should
+				 * result in no change to behaviour if the property is not specified.
+				 */
+				entitiesToIndex.addAll(Arrays.asList("Datafile", "Dataset", "Investigation", "InvestigationUser", 
+						"DatafileParameter", "DatasetParameter", "InvestigationParameter", "Sample"));
+				logger.info("lucene.entitiesToIndex not set. Defaulting to: {}", entitiesToIndex.toString());
+			}
+			formattedProps.add("lucene.entitiesToIndex " + entitiesToIndex.toString());
+			
 			/* notification.list */
 			key = "notification.list";
 			if (props.has(key)) {

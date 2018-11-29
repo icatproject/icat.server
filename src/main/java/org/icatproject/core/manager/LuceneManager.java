@@ -13,8 +13,10 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -336,14 +338,16 @@ public class LuceneManager {
 	private Long queueFileLock = 0L;
 
 	private Timer timer;
+	
+	private Set<String> entitiesToIndex;
 
 	private File backlogHandlerFile;
 
 	private File queueFile;
 
 	public void addDocument(EntityBaseBean bean) throws IcatException {
-		if (eiHandler.hasLuceneDoc(bean.getClass())) {
-			String entityName = bean.getClass().getSimpleName();
+		String entityName = bean.getClass().getSimpleName();
+		if (eiHandler.hasLuceneDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (JsonGenerator gen = Json.createGenerator(baos)) {
 				gen.writeStartArray();
@@ -488,6 +492,7 @@ public class LuceneManager {
 						propertyHandler.getLuceneBacklogHandlerIntervalMillis());
 				timer.schedule(new EnqueuedLuceneRequestHandler(), 0L,
 						propertyHandler.getLuceneEnqueuedRequestIntervalMillis());
+				entitiesToIndex = propertyHandler.getEntitiesToIndex();
 				logger.info("Initialised LuceneManager at {}", url);
 			} catch (Exception e) {
 				logger.error(fatal, "Problem setting up LuceneManager", e);
@@ -534,8 +539,8 @@ public class LuceneManager {
 	}
 
 	public void updateDocument(EntityBaseBean bean) throws IcatException {
-		if (eiHandler.hasLuceneDoc(bean.getClass())) {
-			String entityName = bean.getClass().getSimpleName();
+		String entityName = bean.getClass().getSimpleName();
+		if (eiHandler.hasLuceneDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (JsonGenerator gen = Json.createGenerator(baos)) {
 				gen.writeStartArray();
