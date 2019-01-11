@@ -1,0 +1,21 @@
+language: java
+jdk:
+  - openjdk8
+  - openjdk11
+
+dist: xenial
+
+cache:
+  directories:
+    - $HOME/.m2
+
+install:
+ - sudo pip install wheel ansible pycrypto
+ - sudo add-apt-repository universe
+ - sudo apt-get update
+ - git clone -b icat-dev-install-role https://github.com/louise-davies/icat-ansible.git
+ - echo -e "[icat-dev-base-hosts]\nlocalhost ansible_connection=local" > hosts
+ - echo -e $ANSIBLE_VAULT_PASSWORD > vault_pass.txt
+ - mv vault.yml icat-ansible/group_vars/all
+ - 'sed -i -e "s/^payara_user: ''glassfish''/payara_user: ''travis''/" icat-ansible/group_vars/all/vars.yml'
+ - ansible-playbook --vault-password-file ./vault_pass.txt --inventory ./hosts icat-ansible/icat-dev-base-hosts.yml
