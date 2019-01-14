@@ -20,5 +20,9 @@ install:
  - 'sed -i -e "s/^payara_user: ''glassfish''/payara_user: ''travis''/" icat-ansible/group_vars/all/vars.yml'
  - ansible-playbook --vault-password-file ./vault_pass.txt --inventory ./hosts icat-ansible/icat-dev-base-hosts.yml
 
+before_script:
+ - grep payara ~/.bash_profile > payara_path_command
+ - source payara_path_command
+
 script:
  - mvn install -B
