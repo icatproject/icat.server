@@ -23,6 +23,8 @@ install:
 before_script:
  - grep payara ~/.bash_profile > payara_path_command
  - source payara_path_command
+ - HOSTNAME=$(hostname)
+ - 'sed -i -e "s/localhost\.localdomain/${HOSTNAME}/" src/main/resources/run.properties'
 
 script:
  - mvn install -B
@@ -31,3 +33,4 @@ after_failure:
  - cat /home/travis/logs/lucene.log
  - cat /home/travis/logs/icat.log
  - cat /home/travis/payara*/glassfish/domains/domain1/logs/server.log
+
