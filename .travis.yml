@@ -26,3 +26,8 @@ before_script:
 
 script:
  - mvn install -B
+
+after_failure:
+ - cat logs/lucene.log
+ - cat logs/icat.log
+ - cat payara*/glassfish/domains/domain1/logs/server.log
