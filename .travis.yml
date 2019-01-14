@@ -28,6 +28,6 @@ script:
  - mvn install -B
 
 after_failure:
- - cat logs/lucene.log
- - cat logs/icat.log
- - cat payara*/glassfish/domains/domain1/logs/server.log
+ - cat /home/travis/logs/lucene.log
+ - cat /home/travis/logs/icat.log
+ - cat /home/travis/payara*/glassfish/domains/domain1/logs/server.log
