@@ -1,5 +1,6 @@
-icat.server
------------
+# icat.server
+
+[![Build Status](https://travis-ci.org/icatproject/icat.server.svg?branch=master)](https://travis-ci.org/icatproject/icat.server)
 
 General installation instructions are at https://icatproject.org/installation/component
 
