@@ -49,6 +49,8 @@ import org.icatproject.icat.client.Session.DuplicateAction;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  * These tests are for those aspects that cannot be tested by the core tests. In
@@ -70,10 +72,20 @@ public class TestRS {
 		}
 	}
 
+	@Before
+	public void initializeSession() throws Exception {
+		wSession.setAuthz();
+	}
+
+	@After
+	public void clearSession() throws Exception {
+		wSession.clear();
+		wSession.clearAuthz();
+	}
+
 	@Ignore("Test fails because of bug in eclipselink")
 	@Test
 	public void testDistinctBehaviour() throws Exception {
-		wSession.clear();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "root");
@@ -329,7 +341,6 @@ public class TestRS {
 	}
 
 	private Session setupLuceneTest() throws Exception {
-		wSession.setAuthz();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
@@ -351,7 +362,6 @@ public class TestRS {
 		System.out.println(props);
 
 		// Get known configuration
-		wSession.clear();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
@@ -394,8 +404,6 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		wSession.clear();
-		wSession.setAuthz();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
@@ -428,8 +436,6 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		wSession.clear();
-		wSession.setAuthz();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
@@ -488,8 +494,6 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		wSession.clear();
-		wSession.setAuthz();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
@@ -608,7 +612,6 @@ public class TestRS {
 
 	@Test
 	public void authzForUpdateAttribute() throws Exception {
-		wSession.setAuthz();
 		Session session = createAndPopulate();
 
 		// Just start with Facility, two InvestigationTypes and Investigation
@@ -750,7 +753,6 @@ public class TestRS {
 
 	@Test
 	public void authzForUpdate() throws Exception {
-		wSession.setAuthz();
 		Session session = createAndPopulate();
 
 		// Make sure that fetching a non-id Double gives no problems
@@ -1261,7 +1263,6 @@ public class TestRS {
 	}
 
 	private Session createAndPopulate() throws Exception {
-		wSession.setAuthz();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
@@ -1269,8 +1270,6 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		wSession.clear();
-		wSession.setAuthz();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
@@ -1393,7 +1392,6 @@ public class TestRS {
 	}
 
 	private void exportMetaDataDump(Map<String, String> credentials) throws Exception {
-		wSession.clear();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Session session = icat.login("db", credentials);
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
@@ -1404,7 +1402,6 @@ public class TestRS {
 		Session rootSession = icat.login("db", rootCredentials);
 
 		// Get known configuration
-		wSession.setAuthz();
 		rootSession.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
 
 		Path dump1 = Files.createTempFile("dump1", ".tmp");
@@ -1431,7 +1428,6 @@ public class TestRS {
 	@Ignore("Test fails - appears brittle to differences in timezone")
 	@Test
 	public void exportMetaDataQuery() throws Exception {
-		wSession.clear();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "root");
@@ -1440,7 +1436,6 @@ public class TestRS {
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 
 		// Get known configuration
-		wSession.setAuthz();
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
 
 		Path dump = Files.createTempFile("dump1", ".tmp");
@@ -1483,7 +1478,6 @@ public class TestRS {
 	}
 
 	private void importMetaData(Attributes attributes, String userName) throws Exception {
-		wSession.clear();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "root");

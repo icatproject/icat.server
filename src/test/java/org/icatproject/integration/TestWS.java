@@ -61,6 +61,8 @@ import org.icatproject.utils.ContainerGetter.ContainerType;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  * These tests are for those aspects that cannot be tested by the core tests. In
@@ -72,23 +74,26 @@ public class TestWS {
 	private static Random random;
 	private static WSession session;
 
-	// @AfterClass
-	public static void afterClass() throws Exception {
-		session.clear();
-		session.clearAuthz();
-	}
-
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		try {
 			random = new Random();
 			session = new WSession();
-			session.setAuthz();
-			session.clear();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
+	}
+
+	@Before
+	public void initializeSession() throws Exception {
+		session.setAuthz();
+	}
+
+	@After
+	public void clearSession() throws Exception {
+		session.clear();
+		session.clearAuthz();
 	}
 
 	private static void create() throws Exception {
@@ -257,8 +262,6 @@ public class TestWS {
 
 	@Test
 	public void authz() throws Exception {
-		session.clear();
-
 		Facility facility = session.createFacility("Test Facility", 90);
 
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
@@ -310,8 +313,6 @@ public class TestWS {
 
 	@Test
 	public void authz2() throws Exception {
-		session.clear();
-
 		Facility facility = session.createFacility("Test Facility", 90);
 
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
@@ -418,9 +419,6 @@ public class TestWS {
 		results = piTwoSession.search("SELECT COUNT(i) FROM DataCollection i");
 		assertEquals(1, results.size());
 		assertEquals(0L, results.get(0));
-
-		session.setAuthz();
-
 	}
 
 	/**
@@ -430,8 +428,6 @@ public class TestWS {
 	 */
 	@Test
 	public void authz3() throws Exception {
-		session.clear();
-
 		Facility facility = session.createFacility("Test Facility", 90);
 
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
@@ -456,8 +452,6 @@ public class TestWS {
 		session.addRule(rootG.getName(), "Investigation", "CRUD");
 
 		assertEquals(2, (session.search("Investigation")).size());
-
-		session.setAuthz();
 	}
 
 	@Test
@@ -525,7 +519,6 @@ public class TestWS {
 
 	@Test
 	public void authz6() throws Exception {
-		session.clear();
 		create();
 		session.delRule("notroot", "SELECT x FROM Investigation x", "CRUD");
 		try {
@@ -594,7 +587,6 @@ public class TestWS {
 	@Test
 	public void authz7() throws Exception {
 		try {
-			session.clear();
 			create();
 
 			session.addRule(null,
@@ -638,9 +630,6 @@ public class TestWS {
 
 	@Test
 	public void authzForUpdate() throws Exception {
-
-		session.clear();
-
 		Facility facility = session.createFacility("Test Facility", 90);
 
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
@@ -653,85 +642,80 @@ public class TestWS {
 
 		Dataset ds = session.createDataset("A1", dstX, invA);
 
+		/* Initially can read datasets from investigations A and B */
+		session.delRule("notroot", "Dataset", "CRUD");
+		session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "R");
+		session.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "R");
+		ds = (Dataset) session.search("SELECT ds FROM Dataset ds WHERE ds.investigation.name = 'A' INCLUDE 1")
+				.get(0);
+		ds.setName("A2");
 		try {
-			/* Initially can read datasets from investigations A and B */
-			session.delRule("notroot", "Dataset", "CRUD");
-			session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "R");
-			session.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "R");
-			ds = (Dataset) session.search("SELECT ds FROM Dataset ds WHERE ds.investigation.name = 'A' INCLUDE 1")
-					.get(0);
-			ds.setName("A2");
-			try {
-				session.update(ds);
-				fail();
-			} catch (IcatException_Exception e) {
-				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-				assertEquals("UPDATE access to this Dataset is not allowed.", e.getMessage());
-			}
-
-			/*
-			 * Permissions were insufficient to change an attribute value so
-			 * change to allow update for data sets from investigation A
-			 */
-			session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "R");
-			session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "U");
 			session.update(ds);
-
-			/*
-			 * Check that non-defining relationship fields can also be updated
-			 */
-			ds.setType(dstY);
-			session.update(ds);
-
-			/* Changing a defining relationship field will fail however */
-
-			ds.setInvestigation(invB);
-			try {
-				session.update(ds);
-				fail();
-			} catch (IcatException_Exception e) {
-				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-				assertEquals("DELETE access to this Dataset is not allowed.", e.getMessage());
-			}
-
-			/*
-			 * This effectively does a delete from investigation A so permit
-			 * this
-			 */
-			session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "U");
-			session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
-			try {
-				session.update(ds);
-				fail();
-			} catch (IcatException_Exception e) {
-				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-				assertEquals("CREATE access to this Dataset is not allowed.", e.getMessage());
-			}
-
-			/*
-			 * But it also is effectively a create in investigation B. So add
-			 * create to A - which won't work of course
-			 */
-			session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
-			session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "CUD");
-			try {
-				session.update(ds);
-				fail();
-			} catch (IcatException_Exception e) {
-				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-				assertEquals("CREATE access to this Dataset is not allowed.", e.getMessage());
-			}
-
-			/* So now add create to B - and it works */
-			session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "CUD");
-			session.delRule("notroot", "Dataset <-> Investigation [name = 'B']", "R");
-			session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
-			session.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "C");
-			session.update(ds);
-		} finally {
-			session.setAuthz();
+			fail();
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("UPDATE access to this Dataset is not allowed.", e.getMessage());
 		}
 
+		/*
+		 * Permissions were insufficient to change an attribute value so
+		 * change to allow update for data sets from investigation A
+		 */
+		session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "R");
+		session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "U");
+		session.update(ds);
+
+		/*
+		 * Check that non-defining relationship fields can also be updated
+		 */
+		ds.setType(dstY);
+		session.update(ds);
+
+		/* Changing a defining relationship field will fail however */
+
+		ds.setInvestigation(invB);
+		try {
+			session.update(ds);
+			fail();
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("DELETE access to this Dataset is not allowed.", e.getMessage());
+		}
+
+		/*
+		 * This effectively does a delete from investigation A so permit
+		 * this
+		 */
+		session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "U");
+		session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+		try {
+			session.update(ds);
+			fail();
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("CREATE access to this Dataset is not allowed.", e.getMessage());
+		}
+
+		/*
+		 * But it also is effectively a create in investigation B. So add
+		 * create to A - which won't work of course
+		 */
+		session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+		session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "CUD");
+		try {
+			session.update(ds);
+			fail();
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("CREATE access to this Dataset is not allowed.", e.getMessage());
+		}
+
+		/* So now add create to B - and it works */
+		session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "CUD");
+		session.delRule("notroot", "Dataset <-> Investigation [name = 'B']", "R");
+		session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+		session.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "C");
+		session.update(ds);
 	}
 
 	private void checkInvestigationNames(String query, String... names) throws IcatException_Exception {
@@ -746,7 +730,6 @@ public class TestWS {
 	@Ignore
 	@Test
 	public void manyBigGets() throws Exception {
-		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
@@ -792,7 +775,6 @@ public class TestWS {
 
 	@Test
 	public void bigCreate() throws Exception {
-		session.clear();
 		session.delRule("notroot", "SampleType", "CRUD");
 		session.delRule("notroot", "Sample", "CRUD");
 		session.delRule("notroot", "PublicStep", "CRUD");
@@ -870,13 +852,10 @@ public class TestWS {
 				fail("Neither S1 nor S2");
 			}
 		}
-
-		session.setAuthz();
 	}
 
 	@Test
 	public void createCascade() throws Exception {
-		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
@@ -903,8 +882,6 @@ public class TestWS {
 
 	@Test
 	public void duplicates() throws Exception {
-		session.clear();
-
 		Facility f = new Facility();
 		f.setName("TestDuplicates");
 		session.create(f);
@@ -921,8 +898,6 @@ public class TestWS {
 
 	@Test
 	public void duplicatesMany() throws Exception {
-		session.clear();
-
 		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
 		Facility f = new Facility();
 		f.setName("One");
@@ -952,8 +927,6 @@ public class TestWS {
 
 	@Test
 	public void duplicatesMany2() throws Exception {
-		session.clear();
-
 		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
 		Facility f = new Facility();
 		f.setName("One");
@@ -986,7 +959,6 @@ public class TestWS {
 
 	@Test
 	public void duplicatesMany3() throws Exception {
-		session.clear();
 		Facility f = new Facility();
 		f.setName("Two");
 		f.setId(session.create(f));
@@ -1025,130 +997,114 @@ public class TestWS {
 	@Ignore("Needs Oracle for this test to be useful")
 	@Test
 	public void getInvestigationWithVeryManyDatasets() throws Exception {
+		WSession piOneSession = session.getSession("db", "username", "piOne", "password", "piOne");
 
-		try {
-			session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
 
-			WSession piOneSession = session.getSession("db", "username", "piOne", "password", "piOne");
+		SampleType sampleType = new SampleType();
+		sampleType.setFacility(facility);
+		sampleType.setName("somename");
+		sampleType.setMolecularFormula("Someformula");
+		session.create(sampleType);
 
-			Facility facility = session.createFacility("Test Facility", 90);
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
-			SampleType sampleType = new SampleType();
-			sampleType.setFacility(facility);
-			sampleType.setName("somename");
-			sampleType.setMolecularFormula("Someformula");
-			session.create(sampleType);
+		DatasetType dst = session.createDatasetType(facility, "GQ");
 
-			InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
-			DatasetType dst = session.createDatasetType(facility, "GQ");
+		session.addRule(null, "Investigation <-> InvestigationUser <-> User [name = :user]", "R");
+		session.addRule(null, "Dataset <-> Investigation <-> InvestigationUser <-> User [name = :user]", "R");
 
-			Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
+		User piOne = new User();
+		piOne.setName("db/piOne");
+		piOne.setId(session.create(piOne));
 
-			session.addRule(null, "Investigation <-> InvestigationUser <-> User [name = :user]", "R");
-			session.addRule(null, "Dataset <-> Investigation <-> InvestigationUser <-> User [name = :user]", "R");
+		InvestigationUser iuOne = new InvestigationUser();
+		iuOne.setInvestigation(inv);
+		iuOne.setUser(piOne);
+		iuOne.setRole("Principal Investigator");
+		iuOne.setId(session.create(iuOne));
 
-			User piOne = new User();
-			piOne.setName("db/piOne");
-			piOne.setId(session.create(piOne));
+		int ndataset = 1500;
+		for (int i = 0; i < ndataset; i++) {
+			session.createDataset("Wibble" + i, dst, inv);
+		}
 
-			InvestigationUser iuOne = new InvestigationUser();
-			iuOne.setInvestigation(inv);
-			iuOne.setUser(piOne);
-			iuOne.setRole("Principal Investigator");
-			iuOne.setId(session.create(iuOne));
-
-			int ndataset = 1500;
-			for (int i = 0; i < ndataset; i++) {
-				session.createDataset("Wibble" + i, dst, inv);
-			}
-
-			for (Object o : piOneSession.search("Investigation INCLUDE Dataset")) {
-				inv = (Investigation) o;
-				assertEquals("A", inv.getName());
-				assertEquals(ndataset, inv.getDatasets().size());
-			}
-
-		} finally {
-			session.setAuthz();
+		for (Object o : piOneSession.search("Investigation INCLUDE Dataset")) {
+			inv = (Investigation) o;
+			assertEquals("A", inv.getName());
+			assertEquals(ndataset, inv.getDatasets().size());
 		}
 	}
 
 	@Test
 	public void groupAuthz() throws Exception {
-		try {
-			session.clear();
-			session.clearAuthz();
-			session.addUserGroupMember("notroot", "db/notroot");
+		session.clearAuthz();
+		session.addUserGroupMember("notroot", "db/notroot");
 
-			session.addUserGroupMember("investigation_test_owner", "db/piOne");
-			session.addUserGroupMember("investigation_test_reader", null);
-			session.addUserGroupMember("investigation_test_writer", "db/CIC");
-			session.addUserGroupMember("investigation_test_writer", "db/piOne");
+		session.addUserGroupMember("investigation_test_owner", "db/piOne");
+		session.addUserGroupMember("investigation_test_reader", null);
+		session.addUserGroupMember("investigation_test_writer", "db/CIC");
+		session.addUserGroupMember("investigation_test_writer", "db/piOne");
 
-			session.addUserGroupMember("root", "root");
-			session.addUserGroupMember("root", "useroffice");
+		session.addUserGroupMember("root", "root");
+		session.addUserGroupMember("root", "useroffice");
 
-			for (String t : EntityInfoHandler.getAlphabeticEntityNames()) {
-				session.addRule("root", "SELECT x FROM " + t + " x", "CRUD");
-				session.addRule("notroot", "SELECT x FROM " + t + " x", "CRUD");
-			}
-
-			for (String t : Arrays.asList("DatafileFormat", "DatasetType", "Facility")) {
-				session.addRule(null, "SELECT x FROM " + t + " x", "R");
-			}
-
-			session.addRule(null, "Dataset <-> Investigation <-> InvestigationGroup [role='writer'] "
-					+ "<-> Grouping <-> UserGroup <-> User [name=:user]", "CRUD");
-
-			session.addRule(null, "Dataset <-> Investigation <-> InvestigationGroup <-> Grouping "
-					+ "<-> UserGroup <-> User [name=:user]", "R");
-
-			session.addRule(null,
-					" Investigation <-> InvestigationGroup <-> Grouping <-> UserGroup " + "<-> User [name=:user]", "R");
-
-			Facility facility = session.createFacility("Test Facility", 90);
-
-			InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
-
-			Investigation invA = session.createInvestigation(facility, "A", "Not null", investigationType);
-
-			DatasetType dst = session.createDatasetType(facility, "GQ");
-
-			session.createDataset("DS1", dst, invA);
-
-			session.createInvestigationGroup(invA, "investigation_test_owner", "owner");
-			session.createInvestigationGroup(invA, "investigation_test_reader", "reader");
-			session.createInvestigationGroup(invA, "investigation_test_writer", "writer");
-
-			WSession aSession = session.getSession("db", "username", "piOne", "password", "piOne");
-
-			Long invId = ((Investigation) aSession.search("Investigation [name='A']").get(0)).getId();
-			System.out.println(invId);
-
-			List<Object> dss = aSession
-					.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = " + invId + "]");
-			assertEquals(1, dss.size());
-			Investigation inv = ((Dataset) dss.get(0)).getInvestigation();
-			assertNotNull(inv);
-			assertEquals(invId, inv.getId());
-
-			aSession = session.getSession("db", "username", "CIC", "password", "password");
-			dss = aSession.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = " + invId + "]");
-			assertEquals(1, dss.size());
-			inv = ((Dataset) dss.get(0)).getInvestigation();
-			assertNotNull(inv);
-			assertEquals(invId, inv.getId());
-
-		} finally {
-			session.setAuthz();
+		for (String t : EntityInfoHandler.getAlphabeticEntityNames()) {
+			session.addRule("root", "SELECT x FROM " + t + " x", "CRUD");
+			session.addRule("notroot", "SELECT x FROM " + t + " x", "CRUD");
 		}
 
+		for (String t : Arrays.asList("DatafileFormat", "DatasetType", "Facility")) {
+			session.addRule(null, "SELECT x FROM " + t + " x", "R");
+		}
+
+		session.addRule(null, "Dataset <-> Investigation <-> InvestigationGroup [role='writer'] "
+				+ "<-> Grouping <-> UserGroup <-> User [name=:user]", "CRUD");
+
+		session.addRule(null, "Dataset <-> Investigation <-> InvestigationGroup <-> Grouping "
+				+ "<-> UserGroup <-> User [name=:user]", "R");
+
+		session.addRule(null,
+				" Investigation <-> InvestigationGroup <-> Grouping <-> UserGroup " + "<-> User [name=:user]", "R");
+
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
+
+		Investigation invA = session.createInvestigation(facility, "A", "Not null", investigationType);
+
+		DatasetType dst = session.createDatasetType(facility, "GQ");
+
+		session.createDataset("DS1", dst, invA);
+
+		session.createInvestigationGroup(invA, "investigation_test_owner", "owner");
+		session.createInvestigationGroup(invA, "investigation_test_reader", "reader");
+		session.createInvestigationGroup(invA, "investigation_test_writer", "writer");
+
+		WSession aSession = session.getSession("db", "username", "piOne", "password", "piOne");
+
+		Long invId = ((Investigation) aSession.search("Investigation [name='A']").get(0)).getId();
+		System.out.println(invId);
+
+		List<Object> dss = aSession
+				.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = " + invId + "]");
+		assertEquals(1, dss.size());
+		Investigation inv = ((Dataset) dss.get(0)).getInvestigation();
+		assertNotNull(inv);
+		assertEquals(invId, inv.getId());
+
+		aSession = session.getSession("db", "username", "CIC", "password", "password");
+		dss = aSession.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = " + invId + "]");
+		assertEquals(1, dss.size());
+		inv = ((Dataset) dss.get(0)).getInvestigation();
+		assertNotNull(inv);
+		assertEquals(invId, inv.getId());
 	}
 
 	@Test
 	public void gets() throws Exception {
-		session.clear();
 		create();
 		Long dsId = (Long) session.search("Dataset.id [name = 'Wibble']").get(0);
 
@@ -1201,7 +1157,6 @@ public class TestWS {
 
 	@Test
 	public void inapplicableParameterType() throws Exception {
-		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
@@ -1230,7 +1185,6 @@ public class TestWS {
 
 	@Test
 	public void includes() throws Exception {
-		session.clear();
 		create();
 
 		List<?> results = session.search("Dataset.id order by id");
@@ -1455,7 +1409,6 @@ public class TestWS {
 
 	@Test
 	public void noDuplicates() throws Exception {
-		session.clear();
 		Facility f = new Facility();
 		f.setName("Two");
 		f.setId(session.create(f));
@@ -1490,7 +1443,6 @@ public class TestWS {
 
 	@Test
 	public void numericParameterRanges() throws Exception {
-		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
@@ -1536,7 +1488,6 @@ public class TestWS {
 
 	@Test
 	public void oldGets() throws Exception {
-		session.clear();
 		create();
 		Long dsId = (Long) session.search("Dataset.id [name = 'Wibble']").get(0);
 
@@ -1576,7 +1527,6 @@ public class TestWS {
 
 	@Test
 	public void oldSearches() throws Exception {
-		session.clear();
 		create();
 
 		assertEquals(4L, session.search("COUNT(Dataset)").get(0));
@@ -1663,7 +1613,6 @@ public class TestWS {
 
 	@Test
 	public void performance() throws Exception {
-		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
@@ -1734,7 +1683,6 @@ public class TestWS {
 
 	@Test
 	public void searches() throws Exception {
-		session.clear();
 		create();
 
 		List<?> results = session.search("select investigation from Investigation investigation, "
@@ -1903,7 +1851,6 @@ public class TestWS {
 
 	@Test
 	public void duplicateIds() throws Exception {
-		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 		Investigation inv1 = session.createInvestigation(facility, "inv1", "Not null", investigationType);
@@ -1920,7 +1867,6 @@ public class TestWS {
 
 	@Test
 	public void stringParameterRanges() throws Exception {
-		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
@@ -2011,8 +1957,6 @@ public class TestWS {
 
 	@Test
 	public void testTestCalls() throws Exception {
-		session.clear();
-
 		/* Create user and rules */
 		User piOne = new User();
 		piOne.setName("db/piOne");
@@ -2081,14 +2025,10 @@ public class TestWS {
 			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
 			assertEquals("Investigation: facility cannot be null.", e.getMessage());
 		}
-
-		session.setAuthz();
 	}
 
 	@Test
 	public void updates() throws Exception {
-		session.clear();
-
 		Facility facility = session.createFacility("Test Facility", 90);
 
 		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
