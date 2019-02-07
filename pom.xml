@@ -316,13 +316,11 @@
 
 						<configuration>
 							<skip>${maven.install.skip}</skip>
-							<executable>asadmin</executable>
+							<executable>python</executable>
 							<arguments>
-								<argument>--echo</argument>
-								<argument>--port=4848</argument>
-								<argument>deploy</argument>
-								<argument>--force=true</argument>
-								<argument>${project.build.directory}/${project.build.finalName}.war</argument>
+								<argument>src/test/scripts/prepare_test.py</argument>
+								<argument>${containerHome}</argument>
+								<argument>${serverUrl}</argument>
 							</arguments>
 						</configuration>
 						<goals>

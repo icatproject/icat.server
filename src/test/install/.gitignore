@@ -1,0 +1,6 @@
+*.war
+setup*
+testicat
+icatadmin
+run*
+logback.xml
