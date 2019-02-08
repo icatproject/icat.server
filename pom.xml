@@ -321,6 +321,7 @@
 								<argument>src/test/scripts/prepare_test.py</argument>
 								<argument>${containerHome}</argument>
 								<argument>${serverUrl}</argument>
+								<argument>${luceneUrl}</argument>
 							</arguments>
 						</configuration>
 						<goals>

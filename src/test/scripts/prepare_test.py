@@ -8,11 +8,12 @@ import shutil
 from zipfile import ZipFile
 import subprocess
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 4:
     raise RuntimeError("Wrong number of arguments")
 
 containerHome = sys.argv[1]
-url = sys.argv[2]
+icat_url = sys.argv[2]
+lucene_url = sys.argv[3]
 
 subst = dict(os.environ)
 
@@ -32,13 +33,13 @@ if not os.path.exists("src/test/install/run.properties"):
             "importCacheSize = 50",
             "exportCacheSize = 50",
             "authn.list = db simple",
-            "authn.db.url = %s" % url,
-            "authn.simple.url = %s" % url,
+            "authn.db.url = %s" % icat_url,
+            "authn.simple.url = %s" % icat_url,
             "notification.list = Dataset Datafile",
             "notification.Dataset = CU",
             "notification.Datafile = CU",
             "log.list = SESSION WRITE READ INFO",
-            "lucene.url = %s" % url,
+            "lucene.url = %s" % lucene_url,
             "lucene.populateBlockSize = 10000",
             "lucene.directory = %s/data/lucene" % subst["HOME"],
             "lucene.backlogHandlerIntervalSeconds = 60",
@@ -52,6 +53,7 @@ if not os.path.exists("src/test/install/setup.properties"):
         contents = [
             "# Glassfish",
             "secure         = true",
+            "container      = Glassfish",
             "home           = %s" % containerHome,
             "port           = 4848",
             "# MySQL",
@@ -77,6 +79,10 @@ if not os.path.exists("src/test/install/logback.xml"):
         with open("src/test/install/logback.xml", "wt") as f:
             t = Template(s.read()).substitute(subst)
             f.write(t)
+
+binDir = subst["HOME"] + "/bin"
+if not os.path.exists(binDir):
+    os.mkdir(binDir)
 
 p = subprocess.Popen(["./setup", "install"], cwd="src/test/install")
 p.wait()
