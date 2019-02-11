@@ -22,10 +22,6 @@ install:
 before_script:
  - grep payara ~/.bash_profile > payara_path_command
  - source payara_path_command
- - HOSTNAME=$(hostname)
- - 'sed -i -e "s/localhost\.localdomain/${HOSTNAME}/" src/main/resources/run.properties'
- - ICAT_SERVER_VERSION=$(grep 'icat_server=[0-9].[0-9].[0-9]' /etc/ansible/facts.d/local.fact | grep -o '[0-9].[0-9].[0-9]')
- - asadmin undeploy icat.server-$ICAT_SERVER_VERSION
 
 script:
  - mvn install -B
