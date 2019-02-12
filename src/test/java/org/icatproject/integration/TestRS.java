@@ -499,6 +499,18 @@ public class TestRS {
 
 		JsonArray array;
 
+		JsonObject user = search(session, "SELECT u FROM User u WHERE u.name = 'db/lib'", 1).getJsonObject(0).getJsonObject("User");
+		assertEquals("Horace", user.getString("givenName"));
+		assertEquals("Worblehat", user.getString("familyName"));
+		assertEquals("Unseen University", user.getString("affiliation"));
+
+		String query = "SELECT inv FROM Investigation inv JOIN inv.shifts AS s "
+			+ "WHERE s.instrument.pid = 'ig:0815' AND s.comment = 'beamtime' "
+			+ "AND s.startDate <= '2014-01-01 12:00:00' AND s.endDate >= '2014-01-01 12:00:00'";
+		JsonObject inv = search(session, query, 1).getJsonObject(0).getJsonObject("Investigation");
+		assertEquals("expt1", inv.getString("name"));
+		assertEquals("zero", inv.getString("visitId"));
+
 		// Make sure that fetching a non-id Double gives no problems
 		assertEquals(73.0, search(session, "SELECT MIN(pt.minimumNumericValue) FROM ParameterType pt", 1)
 				.getJsonNumber(0).doubleValue(), 0.001);
@@ -511,7 +523,7 @@ public class TestRS {
 						.doubleValue(),
 				0.001);
 
-		JsonObject inv = search(session, "SELECT inv FROM Investigation inv WHERE inv.visitId = 'zero'", 1)
+		inv = search(session, "SELECT inv FROM Investigation inv WHERE inv.visitId = 'zero'", 1)
 				.getJsonObject(0).getJsonObject("Investigation");
 		Pattern p = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}");
 		for (String name : Arrays.asList("createTime", "modTime", "startDate", "endDate")) {

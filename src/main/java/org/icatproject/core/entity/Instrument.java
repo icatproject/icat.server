@@ -20,6 +20,9 @@ import javax.persistence.UniqueConstraint;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME" }) })
 public class Instrument extends EntityBaseBean implements Serializable {
 
+	@Comment("A persistent identifier attributed to this instrument")
+	private String pid;
+
 	@Comment("A description of this instrument")
 	@Column(length = 4000)
 	private String description;
@@ -45,7 +48,19 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	@Comment("A URL associated with this instrument")
 	private String url;
 
+	@Comment("Shifts associated with this instrument")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
+	private List<Shift> shifts = new ArrayList<Shift>();
+
 	private String type;
+
+	public String getPid() {
+		return pid;
+	}
+
+	public void setPid(String pid) {
+		this.pid = pid;
+	}
 
 	public String getUrl() {
 		return url;
@@ -87,6 +102,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
 		return this.type;
 	}
 
+	public List<Shift> getShifts() {
+		return this.shifts;
+	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
@@ -113,6 +132,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public void setShifts(List<Shift> shifts) {
+		this.shifts = shifts;
 	}
 
 }

@@ -20,6 +20,9 @@ import javax.persistence.UniqueConstraint;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME", "UNITS" }) })
 public class ParameterType extends EntityBaseBean implements Serializable {
 
+	@Comment("A persistent identifier attributed to this parameter type")
+	private String pid;
+
 	@Comment("If a parameter of this type may be applied to a DataCollection")
 	private boolean applicableToDataCollection;
 
@@ -90,6 +93,14 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public ParameterType() {
+	}
+
+	public String getPid() {
+		return pid;
+	}
+
+	public void setPid(String pid) {
+		this.pid = pid;
 	}
 
 	public List<DataCollectionParameter> getDataCollectionParameters() {

@@ -1,24 +1,28 @@
 # Version of file format
 1.0
 
-User (name:0, fullName:1)
-"db/tr", "Professor Tap Root"
-"db/minion", "Mr Minion"
-"db/fred","Professor Fred Brown"
+User (name:0, fullName:1, familyName:2, givenName:3, affiliation:4)
+"db/tr", "Professor Tap Root", null, null, null
+"db/minion", "Mr Minion", null, null, null
+"db/fred", "Professor Fred Brown", "Brown", "Fred", null
+"db/lib","Dr. Horace Worblehat", "Worblehat", "Horace", "Unseen University"
 
 Facility ( name:0, daysUntilRelease:1, createId:2, createTime:3)
 "Test port facility", 90, "Zorro", 1920-05-16T16:58:26.12Z
+
+Instrument(facility(name:0), name:1, fullName:2, pid:3)
+"Test port facility", "EDDI", "EDDI - Energy Dispersive Diffraction", "ig:0815"
 
 InvestigationType (facility(name:0), name:1)
 "Test port facility", "atype"
 "Test port facility", "btype"
 
-ParameterType(facility(name:0),name:1, units:2, minimumNumericValue:3, applicableToInvestigation:4, applicableToDataset:5, applicableToDatafile:6 valueType:7)
-"Test port facility", "temp", "degrees Kelvin", 73.4, true, true, true, NUMERIC
-"Test port facility", "pressure", "kPa", 73, null, true, true, numERIC
-"Test port facility", "colour", "name", null, true,true, true, STRING
-"Test port facility", "current", "amps", null, true,true, true, NUMERIC
-"Test port facility", "birthday", "date", null, true,true, true, DATE_AND_TIME
+ParameterType(facility(name:0), name:1, units:2, minimumNumericValue:3, applicableToInvestigation:4, applicableToDataset:5, applicableToDatafile:6, valueType:7, pid:8)
+"Test port facility", "temp", "degrees Kelvin", 73.4, true, true, true, NUMERIC, "pt:25c"
+"Test port facility", "pressure", "kPa", 73, null, true, true, numERIC, "pt:17a"
+"Test port facility", "colour", "name", null, true,true, true, STRING, null
+"Test port facility", "current", "amps", null, true,true, true, NUMERIC, null
+"Test port facility", "birthday", "date", null, true,true, true, DATE_AND_TIME, null
 
 Investigation(facility(name:0), name:1, visitId:2, type(facility(name:0), name:3),title:4,startDate:5,endDate:6)
 "Test port facility", "expt1", "zero", "atype", "a title at the beginning", 2010-01-01T00:00:00Z, 2010-12-31T23:59:59Z
@@ -31,14 +35,19 @@ InvestigationUser(investigation(facility(name:0), name:1, visitId:2),user(name:3
 "Test port facility", "expt1", "two", "db/minion", "PI"
 "Test port facility", "expt1", "one", "db/minion", "PI"
 
+Shift(investigation(facility(name:0), name:1, visitId:2), startDate:3, endDate:4, comment:5, instrument(facility(name:0), name:6))
+"Test port facility", "expt1", "zero", 2013-12-31T12:00:00+01:00, 2013-12-31T23:59:59+01:00, "waiting", null
+"Test port facility", "expt1", "zero", 2014-01-01T00:00:00+01:00, 2014-01-01T18:00:00+01:00, "beamtime", "EDDI"
+"Test port facility", "expt1", "two", 2014-04-29T14:00:00+02:00, 2014-04-30T18:15:00+02:00, "preparing", null
+
 SampleType(facility(name:0), name:1, molecularFormula:2, safetyInformation:3)
 "Test port facility", "diamond", "C", "fairly harmless"
 "Test port facility", "graphite", "C", "bit messy"
 "Test port facility", "rust", "Fe3O4", "messy"
 
-Sample(investigation(facility(name:0), name:1, visitId:2), type(facility(name:0), name:3, molecularFormula:4), name:5)
-"Test port facility", "expt1", "one", "diamond", "C", "Koh-I-Noor"
-"Test port facility", "expt1", "one", "rust",  "Fe3O4", "Ford\t\"Anglia\""
+Sample(investigation(facility(name:0), name:1, visitId:2), type(facility(name:0), name:3, molecularFormula:4), name:5, pid:6)
+"Test port facility", "expt1", "one", "diamond", "C", "Koh-I-Noor", "sdb:374717"
+"Test port facility", "expt1", "one", "rust",  "Fe3O4", "Ford\t\"Anglia\"", null
 
 InvestigationParameter(investigation(facility(name:0), name:1, visitId:2), type(facility(name:0), name:3 , units:4),stringValue:5)
 "Test port facility", "expt1", "one", "colour" , "name", "green"
@@ -81,8 +90,4 @@ DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, 
 
 Job(application(facility(name:0), name:1, version:2), inputDataCollection(?:3), outputDataCollection(?:4))
 "Test port facility", "aprog", "1.2.3", "a", "b"
-
-
-
-
 

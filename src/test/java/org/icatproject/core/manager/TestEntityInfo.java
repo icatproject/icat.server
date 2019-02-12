@@ -31,6 +31,7 @@ import org.icatproject.core.entity.Keyword;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.Rule;
 import org.icatproject.core.entity.User;
+import org.icatproject.core.entity.Study;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.junit.Test;
 
@@ -78,6 +79,8 @@ public class TestEntityInfo {
 		assertEquals(
 				"Job(?:0,application(facility(name:1),name:2,version:3),arguments:4,inputDataCollection(?:5),outputDataCollection(?:6))",
 				eiHandler.getExportHeader(Job.class));
+		assertEquals( "Study(?:0,description:1,name:2,pid:3,startDate:4,status:5,user(name:6))",
+				eiHandler.getExportHeader(Study.class));
 		assertEquals(
 				"DatasetParameter(dataset(investigation(facility(name:0),name:1,visitId:2),name:3),"
 						+ "dateTimeValue:4,error:5,numericValue:6,rangeBottom:7,rangeTop:8,stringValue:9,"
@@ -85,8 +88,8 @@ public class TestEntityInfo {
 				eiHandler.getExportHeader(DatasetParameter.class));
 		assertEquals("ParameterType(applicableToDataCollection:0,applicableToDatafile:1,applicableToDataset:2,"
 				+ "applicableToInvestigation:3,applicableToSample:4,description:5,enforced:6,facility(name:7),"
-				+ "maximumNumericValue:8,minimumNumericValue:9,name:10,units:11,unitsFullName:12,"
-				+ "valueType:13,verified:14)", eiHandler.getExportHeader(ParameterType.class));
+				+ "maximumNumericValue:8,minimumNumericValue:9,name:10,pid:11,units:12,unitsFullName:13,"
+				+ "valueType:14,verified:15)", eiHandler.getExportHeader(ParameterType.class));
 		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals("Rule(?:0,crudFlags:1,grouping(name:2),what:3)", eiHandler.getExportHeader(Rule.class));
 		assertEquals(
@@ -123,6 +126,8 @@ public class TestEntityInfo {
 						+ "application(facility(name:5),name:6,version:7),arguments:8,"
 						+ "inputDataCollection(?:9),outputDataCollection(?:10))",
 				eiHandler.getExportHeaderAll(Job.class));
+		assertEquals( "Study(?:0,description:1,name:2,pid:3,startDate:4,status:5,user(name:6))",
+				eiHandler.getExportHeader(Study.class));
 		assertEquals(
 				"DatasetParameter(createId:0,createTime:1,modId:2,modTime:3,"
 						+ "dataset(investigation(facility(name:4),name:5,visitId:6),name:7),"
@@ -134,8 +139,8 @@ public class TestEntityInfo {
 						+ "applicableToDataCollection:4,applicableToDatafile:5,"
 						+ "applicableToDataset:6,applicableToInvestigation:7,"
 						+ "applicableToSample:8,description:9,enforced:10,facility(name:11),"
-						+ "maximumNumericValue:12,minimumNumericValue:13,name:14,units:15,"
-						+ "unitsFullName:16,valueType:17,verified:18)",
+						+ "maximumNumericValue:12,minimumNumericValue:13,name:14,pid:15,"
+						+ "units:16,unitsFullName:17,valueType:18,verified:19)",
 				eiHandler.getExportHeaderAll(ParameterType.class));
 		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals("Rule(?:0,createId:1,createTime:2,modId:3,modTime:4," + "crudFlags:5,grouping(name:6),what:7)",
@@ -176,10 +181,11 @@ public class TestEntityInfo {
 		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
+		testField( "description,name,pid,startDate,status,studyInvestigations,user",Study.class);
 		testField("dataset,dateTimeValue,error,numericValue,rangeBottom,rangeTop,stringValue,type",
 				DatasetParameter.class);
 		testField(
-				"applicableToDataCollection,applicableToDatafile,applicableToDataset,applicableToInvestigation,applicableToSample,dataCollectionParameters,datafileParameters,datasetParameters,description,enforced,facility,investigationParameters,maximumNumericValue,minimumNumericValue,name,permissibleStringValues,sampleParameters,units,unitsFullName,valueType,verified",
+				"applicableToDataCollection,applicableToDatafile,applicableToDataset,applicableToInvestigation,applicableToSample,dataCollectionParameters,datafileParameters,datasetParameters,description,enforced,facility,investigationParameters,maximumNumericValue,minimumNumericValue,name,permissibleStringValues,pid,sampleParameters,units,unitsFullName,valueType,verified",
 				ParameterType.class);
 	}
 
@@ -266,7 +272,8 @@ public class TestEntityInfo {
 
 		testRel(Instrument.class, "From Instrument to Facility by facility one",
 				"From Instrument to InstrumentScientist by instrumentScientists many setInstrument",
-				"From Instrument to InvestigationInstrument by investigationInstruments many setInstrument");
+				"From Instrument to InvestigationInstrument by investigationInstruments many setInstrument",
+				"From Instrument to Shift by shifts many setInstrument");
 	}
 
 	private void testRel(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
@@ -302,6 +309,8 @@ public class TestEntityInfo {
 		testOne(User.class);
 
 		testOne(Job.class, "Application", "DataCollection", "DataCollection");
+
+		testOne(Study.class, "User");
 	}
 
 	private void testOne(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
@@ -326,6 +335,7 @@ public class TestEntityInfo {
 		testNNF(User.class, "name");
 		testNNF(ParameterType.class, "valueType", "name", "facility", "units");
 		testNNF(Job.class, "application");
+		testNNF(Study.class, "name");
 	}
 
 	private void testNNF(Class<? extends EntityBaseBean> klass, String... nnfs) throws Exception {
@@ -347,9 +357,10 @@ public class TestEntityInfo {
 		testSF(Dataset.class, "name 255", "description 255", "location 255", "doi 255");
 		testSF(Keyword.class, "name 255");
 		testSF(InvestigationUser.class, "role 255");
-		testSF(User.class, "name 255", "fullName 255", "email 255", "orcidId 255");
-		testSF(ParameterType.class, "description 255", "unitsFullName 255", "units 255", "name 255");
+		testSF(User.class, "name 255", "fullName 255", "givenName 255", "familyName 255", "affiliation 255", "email 255", "orcidId 255");
+		testSF(ParameterType.class, "pid 255", "description 255", "unitsFullName 255", "units 255", "name 255");
 		testSF(Job.class, "arguments 255");
+		testSF(Study.class, "name 255", "description 4000", "pid 255");
 
 	}
 
@@ -372,9 +383,10 @@ public class TestEntityInfo {
 		testGetters(Dataset.class, 18);
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
-		testGetters(User.class, 13);
-		testGetters(ParameterType.class, 26);
+		testGetters(User.class, 16);
+		testGetters(ParameterType.class, 27);
 		testGetters(Job.class, 9);
+		testGetters(Study.class, 12);
 	}
 
 	@Test
@@ -383,9 +395,10 @@ public class TestEntityInfo {
 		testSetters(Dataset.class, 14);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);
-		testSetters(User.class, 9);
-		testSetters(ParameterType.class, 22);
+		testSetters(User.class, 12);
+		testSetters(ParameterType.class, 23);
 		testSetters(Job.class, 5);
+		testSetters(Study.class, 8);
 	}
 
 	@Test
@@ -394,11 +407,12 @@ public class TestEntityInfo {
 		testSettersForUpdate(Dataset.class, 10);
 		testSettersForUpdate(Keyword.class, 2);
 		testSettersForUpdate(InvestigationUser.class, 3);
-		testSettersForUpdate(User.class, 4);
-		testSettersForUpdate(ParameterType.class, 15);
+		testSettersForUpdate(User.class, 7);
+		testSettersForUpdate(ParameterType.class, 16);
 		testSettersForUpdate(Job.class, 4);
 		testSettersForUpdate(Facility.class, 5);
 		testSettersForUpdate(InvestigationType.class, 3);
+		testSettersForUpdate(Study.class, 6);
 	}
 
 	@Test

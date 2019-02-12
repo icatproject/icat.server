@@ -46,6 +46,9 @@ public class Study extends EntityBaseBean implements Serializable {
 	@Comment("The status of the study. Possible values are: NEW, IN_PROGRESS, COMPLETE, CANCELLED")
 	private StudyStatus status;
 
+	@Comment("A persistent identifier attributed to this study")
+	private String pid;
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
 	private List<StudyInvestigation> studyInvestigations = new ArrayList<>();;
 
@@ -91,6 +94,14 @@ public class Study extends EntityBaseBean implements Serializable {
 
 	public void setStudyInvestigations(List<StudyInvestigation> studyInvestigations) {
 		this.studyInvestigations = studyInvestigations;
+	}
+
+	public String getPid() {
+		return pid;
+	}
+
+	public void setPid(String pid) {
+		this.pid = pid;
 	}
 
 }
