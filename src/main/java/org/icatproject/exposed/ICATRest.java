@@ -8,6 +8,8 @@ import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -71,6 +73,7 @@ import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.ParameterValueType;
+import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
@@ -706,6 +709,19 @@ public class ICATRest {
 		cluster = propertyHandler.getCluster();
 	}
 
+	/**
+	 * Converts an EntityBaseBean into a JSON-friendly form
+	 * <p>
+	 * Expected to be called inside of an object context eg:
+	 * <code>
+	 * gen.writeStartObject();
+	 * for (EntityBaseBean bean : beans) {
+	 * 	jsonise(bean, gen);
+	 * }
+	 * gen.writeEnd();
+	 * </code>
+	 * </p>
+	 **/
 	private void jsonise(EntityBaseBean bean, JsonGenerator gen) throws IcatException {
 		synchronized (df8601) {
 			gen.write("id", bean.getId()).write("createId", bean.getCreateId())
@@ -733,6 +749,10 @@ public class ICATRest {
 					gen.write(field.getName(), (String) value);
 				} else if (type.equals("Integer")) {
 					gen.write(field.getName(), (Integer) value);
+				} else if (type.equals("BigInteger")) {
+					gen.write(field.getName(), (BigInteger) value);
+				} else if (type.equals("BigDecimal")) {
+					gen.write(field.getName(), (BigDecimal) value);
 				} else if (type.equals("Double")) {
 					gen.write(field.getName(), (Double) value);
 				} else if (type.equals("Long")) {
@@ -741,6 +761,8 @@ public class ICATRest {
 					gen.write(field.getName(), (Boolean) value);
 				} else if (type.equals("ParameterValueType")) {
 					gen.write(field.getName(), ((ParameterValueType) value).name());
+				} else if (type.equals("StudyStatus")) {
+					gen.write(field.getName(), ((StudyStatus) value).name());
 				} else if (type.equals("Date")) {
 					synchronized (df8601) {
 						gen.write(field.getName(), df8601.format((Date) value));
@@ -767,6 +789,19 @@ public class ICATRest {
 		}
 	}
 
+	/**
+	 * Converts a Java Object into a JSON-friendly form
+	 * <p>
+	 * Expected to be called inside of an array context eg:
+	 * <code>
+	 * gen.writeStartArray();
+	 * for (Object item : items) {
+	 * 	jsonise(item, gen);
+	 * }
+	 * gen.writeEnd();
+	 * </code>
+	 * </p>
+	 **/
 	private void jsonise(Object result, JsonGenerator gen) throws IcatException {
 		if (result == null) {
 			gen.writeNull();
@@ -784,12 +819,20 @@ public class ICATRest {
 			} else {
 				gen.write((Double) result);
 			}
+		} else if (result instanceof Integer) {
+			gen.write((Integer) result);
+		} else if (result instanceof BigInteger) {
+			gen.write((BigInteger) result);
+		} else if (result instanceof BigDecimal) {
+			gen.write((BigDecimal) result);
 		} else if (result instanceof String) {
 			gen.write((String) result);
 		} else if (result instanceof Boolean) {
 			gen.write((Boolean) result);
 		} else if (result instanceof ParameterValueType) {
 			gen.write(((ParameterValueType) result).name());
+		} else if (result instanceof StudyStatus) {
+			gen.write(((StudyStatus) result).name());
 		} else if (result instanceof Date) {
 			synchronized (df8601) {
 				gen.write(df8601.format((Date) result));
