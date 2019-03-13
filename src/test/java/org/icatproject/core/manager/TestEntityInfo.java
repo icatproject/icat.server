@@ -79,7 +79,7 @@ public class TestEntityInfo {
 		assertEquals(
 				"Job(?:0,application(facility(name:1),name:2,version:3),arguments:4,inputDataCollection(?:5),outputDataCollection(?:6))",
 				eiHandler.getExportHeader(Job.class));
-		assertEquals( "Study(?:0,description:1,name:2,pid:3,startDate:4,status:5,user(name:6))",
+		assertEquals( "Study(?:0,description:1,endDate:2,name:3,pid:4,startDate:5,status:6,user(name:7))",
 				eiHandler.getExportHeader(Study.class));
 		assertEquals(
 				"DatasetParameter(dataset(investigation(facility(name:0),name:1,visitId:2),name:3),"
@@ -126,7 +126,7 @@ public class TestEntityInfo {
 						+ "application(facility(name:5),name:6,version:7),arguments:8,"
 						+ "inputDataCollection(?:9),outputDataCollection(?:10))",
 				eiHandler.getExportHeaderAll(Job.class));
-		assertEquals( "Study(?:0,description:1,name:2,pid:3,startDate:4,status:5,user(name:6))",
+		assertEquals( "Study(?:0,description:1,endDate:2,name:3,pid:4,startDate:5,status:6,user(name:7))",
 				eiHandler.getExportHeader(Study.class));
 		assertEquals(
 				"DatasetParameter(createId:0,createTime:1,modId:2,modTime:3,"
@@ -181,7 +181,7 @@ public class TestEntityInfo {
 		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
-		testField( "description,name,pid,startDate,status,studyInvestigations,user",Study.class);
+		testField( "description,endDate,name,pid,startDate,status,studyInvestigations,user",Study.class);
 		testField("dataset,dateTimeValue,error,numericValue,rangeBottom,rangeTop,stringValue,type",
 				DatasetParameter.class);
 		testField(
@@ -386,7 +386,7 @@ public class TestEntityInfo {
 		testGetters(User.class, 16);
 		testGetters(ParameterType.class, 27);
 		testGetters(Job.class, 9);
-		testGetters(Study.class, 12);
+		testGetters(Study.class, 13);
 	}
 
 	@Test
@@ -398,7 +398,7 @@ public class TestEntityInfo {
 		testSetters(User.class, 12);
 		testSetters(ParameterType.class, 23);
 		testSetters(Job.class, 5);
-		testSetters(Study.class, 8);
+		testSetters(Study.class, 9);
 	}
 
 	@Test
@@ -412,7 +412,7 @@ public class TestEntityInfo {
 		testSettersForUpdate(Job.class, 4);
 		testSettersForUpdate(Facility.class, 5);
 		testSettersForUpdate(InvestigationType.class, 3);
-		testSettersForUpdate(Study.class, 6);
+		testSettersForUpdate(Study.class, 7);
 	}
 
 	@Test
