@@ -27,7 +27,6 @@ public class TestICATRest {
 
 	private static ICATRest icatRest = new ICATRest();
 	private static Method jsoniseArray;
-	private static Method jsoniseBean;
 
 	private final static DateFormat df8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 

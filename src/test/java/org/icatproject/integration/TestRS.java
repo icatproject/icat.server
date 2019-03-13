@@ -108,7 +108,7 @@ public class TestRS {
 	}
 
 	@org.junit.Rule
-        public ErrorCollector collector = new ErrorCollector();
+	public ErrorCollector collector = new ErrorCollector();
 
 	@Test
 	public void TestJsoniseBean() throws Exception {
