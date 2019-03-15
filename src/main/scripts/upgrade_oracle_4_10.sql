@@ -7,6 +7,7 @@ alter table SHIFT add (
 	foreign key (INSTRUMENT_ID) references INSTRUMENT (ID)
 );
 alter table STUDY add PID VARCHAR2(255);
+alter table STUDY add ENDDATE DATETIME;
 alter table USER_ add (
 	GIVENNAME VARCHAR2(255),
 	FAMILYNAME VARCHAR2(255),

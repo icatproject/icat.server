@@ -31,6 +31,10 @@ public class Study extends EntityBaseBean implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
 
+	@Comment("The end date of this study")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date endDate;
+
 	@Comment("The user responsible for the study")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
@@ -74,6 +78,14 @@ public class Study extends EntityBaseBean implements Serializable {
 
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 
 	public void setName(String name) {
