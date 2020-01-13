@@ -10,21 +10,21 @@ def check(r):
         if r.status_code / 100 != 2:
             json = r.json()
             if json.get("offset"):
-                print >> sys.stderr, json["code"], json["message"], json["offset"]
+                print(json["code"], json["message"], json["offset"], file=sys.stderr)
             else:
-                print >> sys.stderr, json["code"], json["message"]
+                print(json["code"], json["message"], file=sys.stderr)
             sys.exit(1)
 
 args = sys.argv
 if len(args) < 3 or len(args) % 2 != 1:
-    print >> sys.stderr, "\nThis must have two fixed arguments: url and plugin mnemonic\nfollowed by pairs of arguments to represent the credentials. For example\n\n    ", args[0], "https://example.com:8181 db username root password guess\n"
+    print("\nThis must have two fixed arguments: url and plugin mnemonic\nfollowed by pairs of arguments to represent the credentials. For example\n\n    ", args[0], "https://example.com:8181 db username root password guess\n", file=sys.stderr)
     sys.exit(1)
     
 url = args[1]
 
 r = requests.get(url + "/icat/version", verify=False)
 check(r)
-print "ICAT version", r.json()["version"]
+print(r.json()["version"], file=sys.stderr)
 
 plugin = args[2]
 
@@ -49,13 +49,13 @@ sessionId = r.json()["sessionId"]
 
 r = requests.get(url + "/icat/session/" + sessionId, verify=False)
 check(r)
-print "Logged in as", r.json()["userName"], "with", r.json()["remainingMinutes"], "minutes to go"
+print("Logged in as", r.json()["userName"], "with", r.json()["remainingMinutes"], "minutes to go")
 
 r = requests.get(url + "/icat/entityManager", params = {"sessionId":sessionId, "query" : "SELECT g.id FROM Grouping g WHERE g.name='annoying animals'"}, verify = False)
 check(r)
 groupIds = r.json()
 if len(groupIds): 
-    print "Grouping 'annoying animals' already exist - they will be deleted"
+    print("Grouping 'annoying animals' already exist - they will be deleted")
     for groupId in groupIds:
         g = {"Grouping": {"id" : groupId}}
         r = requests.delete(url + "/icat/entityManager", params={"sessionId":sessionId, "entities" : json.dumps(g)}, verify=False)
@@ -71,7 +71,7 @@ check(r)
 groupIds = r.json()
 
 if len(groupIds) != 1:
-    print >> sys.stderr, "There are now", len(groupIds), "groupings instead of 1 - something is wrong"
+    print("There are now", len(groupIds), "groupings instead of 1 - something is wrong", file=sys.stderr)
     sys.exit(1)
        
 for groupId in groupIds:
@@ -83,12 +83,12 @@ r = requests.get(url + "/icat/entityManager", params = {"sessionId":sessionId, "
 check(r)
 groupIds = r.json()
 if len(groupIds):
-    print >> sys.stderr, "There are now", len(groupIds), "groupings instead of 0 - something is wrong"
+    print("There are now", len(groupIds), "groupings instead of 0 - something is wrong", file=sys.stderr)
     sys.exit(1)
     
 r = requests.delete(url + "/icat/session/" + sessionId, verify=False)
 check(r)
 
-print "Login, search, create, delete and logout operations were all successful."
+print("Login, search, create, delete and logout operations were all successful.")
     
 
