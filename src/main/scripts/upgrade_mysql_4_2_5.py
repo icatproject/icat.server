@@ -1,8 +1,12 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import MySQLdb as mdb
 from optparse import OptionParser
 import sys
+
+if sys.version_info[0] > 2:
+    long = int              # Python 3 does not have a long type as all ints a 'big'
 
 username = 'icat'
 password = 'icat'
@@ -19,7 +23,7 @@ opts, args = parser.parse_args()
 facility_name = opts.facility
 
 def abort(msg):
-    print >> sys.stderr, msg
+    print(msg, file=sys.stderr)
     sys.exit(1)
     
 def change():
@@ -43,7 +47,7 @@ def change():
     cur.execute("SELECT CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, INSTRUMENT_ID FROM INVESTIGATION WHERE INSTRUMENT_ID IS NOT NULL")
     rowsout = []
     rows = cur.fetchall()
-    ID = 0L
+    ID = long(0)
     if rows:
         for CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, INVESTIGATION_ID, INSTRUMENT_ID in rows:
             rowsout.append((ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, INVESTIGATION_ID, INSTRUMENT_ID))
@@ -60,9 +64,9 @@ def change():
     cur.execute("SELECT ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME FROM JOB")
     jobs = cur.fetchall();
 
-    ID = 0L
-    IDS = 0L
-    IDF = 0L
+    ID = long(0)
+    IDS = long(0)
+    IDF = long(0)
     for job in jobs:
         jobId, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME = job
         cur.execute("SELECT DATASET_ID FROM INPUTDATASET WHERE JOB_ID =" + str(jobId))
@@ -124,7 +128,7 @@ def dropKeys():
         table = row[0]
         if table in tables:
             query = "ALTER TABLE " + table + " DROP FOREIGN KEY " + row[1]
-            print query
+            print(query)
             cur.execute(query)
                        
     for table in tables:
@@ -136,7 +140,7 @@ def dropKeys():
         del names["PRIMARY"]
         for index in names.keys():          
             query = "ALTER TABLE " + table + " DROP INDEX " + index
-            print query
+            print(query)
             cur.execute(query)
             
     for table in tables:
@@ -146,7 +150,7 @@ def dropKeys():
             create = row[1]
             if not "InnoDB" in create:
                 query = "ALTER TABLE " + table + " ENGINE InnoDB"
-                print query
+                print(query)
                 cur.execute(query)
                            
 def check():
@@ -177,50 +181,50 @@ def checkUnique(table, *column):
     global fail
     columns = ",".join(column)
     query = "SELECT " + columns + ",count(*) FROM " + table + " GROUP BY " + columns + " HAVING COUNT(*) > 1"
-    print "Looking for duplicates with", query
+    print("Looking for duplicates with", query)
     count = cur.execute(query)
     if count:
         fail = True
-        print "Please eliminate duplicates:"
+        print("Please eliminate duplicates:")
         rows = cur.fetchall()
         for row in rows:
-            print row
+            print(row)
       
 def checkNotNull(table, column, replace=None): 
     global fail
     query = "SELECT * FROM " + table + " WHERE " + column + " IS NULL"
-    print "Looking for nulls with", query
+    print("Looking for nulls with", query)
     count = cur.execute(query) 
     rows = cur.fetchall()
     if rows:
         fail = True
-        print "There are" , len(rows), "entries in table", table, "with null values for", column + ". Some are shown below:"
+        print("There are" , len(rows), "entries in table", table, "with null values for", column + ". Some are shown below:")
         for row in rows[:10]:
-            print row
+            print(row)
         if replace:
-            print "Try: UPDATE", table, "SET", column, "=", replace, "WHERE", column, "IS NULL;"
+            print("Try: UPDATE", table, "SET", column, "=", replace, "WHERE", column, "IS NULL;")
   
   
 cur = con.cursor()
     
 cur.execute("SELECT VERSION()")
-print "Database version", cur.fetchone()[0]
+print("Database version", cur.fetchone()[0])
 
 facility_id = None
 count = cur.execute("SELECT ID, NAME FROM FACILITY")
 if count == 1 and not facility_name:
     facility = cur.fetchone()
     facility_id = facility[0]
-    print "Existing applications will be associated with Facility:", facility[1]
+    print("Existing applications will be associated with Facility:", facility[1])
 elif count == 0:
     abort("No Facilities defined - why are you you migrating this?")
 else:
     facilities = cur.fetchall()
     if not facility_name:
-        print "Available facilities are:",
+        print("Available facilities are:",)
         for facility in facilities:
-            print " '" + facility[1] + "'",
-        print
+            print(" '" + facility[1] + "'",)
+        print()
         abort ("More than one facility exists please specify one")
     else:
         for facility in facilities:
@@ -236,13 +240,13 @@ tables = ["APPLICATION", "DATAFILE", "DATAFILEFORMAT", "DATAFILEPARAMETER", "DAT
           "RELATEDDATAFILE", "RULE", "SAMPLE", "SAMPLEPARAMETER", "SAMPLETYPE", "SEQUENCE", "SESSION_", "SHIFT", "STUDY",
           "STUDYINVESTIGATION", "USERGROUP", "USER_"]
 
-print "Will now start checking"
+print("Will now start checking")
 fail = False
 check()
 if fail:
-    print "Please fix above errors and try again ;-)"
+    print("Please fix above errors and try again ;-)")
 if not fail: 
-    print "All checks passed"
+    print("All checks passed")
     dropKeys()
     change()
     dropTables()
@@ -250,11 +254,11 @@ if not fail:
     for line in f:
         line = line.strip()
         if line:
-            print line
+            print(line)
             cur.execute(line)
     f.close()
 
-    print "Upgrade complete"
+    print("Upgrade complete")
 
 
 
