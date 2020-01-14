@@ -1,12 +1,19 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import os
 import json
-import httplib
-from urllib import urlencode
+try:
+    import httplib                                  # Python 2
+except ModuleNotFoundError:
+    import http.client as httplib                   # Python 3
+try:
+    from urllib.parse import urlparse, urlencode    # Python 3
+except ImportError:
+    from urllib import urlencode                    # Python 2
+    from urlparse import urlparse                   # Python 2
 import sys
 from optparse import OptionParser
-from urlparse import urlparse
 import ssl
 import logging
 import getpass
@@ -54,7 +61,7 @@ def clear(args):
         sessionId = getService()
         parameters = {"sessionId": sessionId}
         _process("lucene/db/", parameters, "DELETE")
-    except Exception, e:
+    except Exception as e:
         fatal(e)
 
 def commit(args): 
@@ -69,7 +76,7 @@ def commit(args):
         sessionId = getService()
         parameters = {"sessionId": sessionId}
         _process("lucene/db/", parameters, "POST")
-    except Exception, e:
+    except Exception as e:
         fatal(e)
         
 def _process(relativeUrl, parameters, method, headers=None, body=None):
@@ -145,8 +152,8 @@ def getPopulating(args):
     try:
         sessionId = getService()
         parameters = {"sessionId": sessionId}
-        print _process("lucene/db", parameters, "GET").read()
-    except Exception, e:
+        print(_process("lucene/db", parameters, "GET").read())
+    except Exception as e:
         fatal(e)
 
 def populate(args):
@@ -159,9 +166,9 @@ def populate(args):
             sessionId = getService() 
             parameters = {"sessionId": sessionId}
             for entity in "Datafile", "DatafileParameter", "Dataset", "DatasetParameter", "Investigation", "InvestigationParameter", "InvestigationUser", "Sample":
-                print entity
+                print(entity)
                 _process("lucene/db/" + entity + "/-1", parameters, "POST")
-        except Exception, e:
+        except Exception as e:
             fatal(e)
         return    
         
@@ -171,7 +178,7 @@ def populate(args):
             parameters = {"sessionId": sessionId}
             entity = args[0]
             _process("lucene/db/" + entity + "/-1", parameters, "POST")
-        except Exception, e:
+        except Exception as e:
             fatal(e)
         return
         
@@ -183,7 +190,7 @@ def populate(args):
         parameters = {"sessionId": sessionId}
         entity = args[0]
         _process("lucene/db/" + entity + "/" + args[1], parameters, "POST")
-    except Exception, e:
+    except Exception as e:
         fatal(e)
 
 def help(args):
@@ -205,7 +212,7 @@ subcommands["-h"] = help
 subcommands["--help"] = help
 
 def fatal(msg):
-    print >> sys.stderr, msg
+    print(msg, file=sys.stderr)
     sys.exit(1)
 
 parser = OptionParser()
@@ -232,10 +239,10 @@ if len(start) > 2:
     if not end:
         try:
             sessionId = getService()
-        except Exception, e:
+        except Exception as e:
             fatal(e)
        
-        print "Use CTRL-D or 'exit' to exit"
+        print("Use CTRL-D or 'exit' to exit")
         run = True
         while run:
             try:
@@ -247,11 +254,11 @@ if len(start) > 2:
                     tokens = shlex.split(command)
                     op = subcommands.get(tokens[0])
                     if not op:
-                        print "First argument must be one of " + str(subcommands.keys())
+                        print("First argument must be one of " + str(subcommands.keys()))
                     else:
                         op(tokens[1:])
             except EOFError:
-                print
+                print()
                 sys.exit()
             except:
                 pass
