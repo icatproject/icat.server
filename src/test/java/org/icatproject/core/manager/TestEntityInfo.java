@@ -167,7 +167,7 @@ public class TestEntityInfo {
 	@Test
 	public void testFields() throws Exception {
 		testField(
-				"applications,datafileFormats,datasetTypes,daysUntilRelease,description,facilityCycles,"
+				"applications,dataPublications,datafileFormats,datasetTypes,daysUntilRelease,description,facilityCycles,"
 						+ "fullName,instruments,investigationTypes,investigations,name,parameterTypes,sampleTypes,url",
 				Facility.class);
 		testField("description,facility,investigations,name", InvestigationType.class);
@@ -178,7 +178,7 @@ public class TestEntityInfo {
 				Investigation.class);
 		testField("complete,dataCollectionDatasets,datafiles,description,doi,endDate,investigation,location,"
 				+ "name,parameters,sample,startDate,type", Dataset.class);
-		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
+		testField("dataCollectionDatafiles,dataCollectionDatasets,dataPublications,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
 		testField( "description,endDate,name,pid,startDate,status,studyInvestigations,user",Study.class);
