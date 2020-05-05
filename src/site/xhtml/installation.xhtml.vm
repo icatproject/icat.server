@@ -259,6 +259,14 @@
 	where in both cases it is assumed that the tables are owned by
 	user "icat".  This can be done be done while the older
 	icat.server is running as the changes are purely additive.
+	<h3>Upgrade 4.10.0 to 4.11.0</h3>
+	New tables for data publications and some related entities have been added.
+	The corresponding tables and constraints must be added to the database.
+	This can be done for MySQL or MariaDB by running <kbd>mysql -u icat -p icat
+	&lt; upgrade_mysql_4_11.sql</kbd>, or for Oracle run <kbd>sqlplus icat
+	@upgrade_oracle_4_11.sql</kbd> where in both cases it is assumed that the
+	tables are owned by user "icat".  This can be done while the older
+	icat.server is running as the changes are purely additive.
 
 	<h2>The setup.properties file</h2>
 	<dl>
