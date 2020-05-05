@@ -256,7 +256,7 @@ public class TestWS {
 	@Test
 	public void entities() throws Exception {
 		List<String> entities = session.getEntityNames();
-		assertEquals(38, entities.size());
+		assertEquals(43, entities.size());
 		assertTrue(entities.contains("Application"));
 	}
 
