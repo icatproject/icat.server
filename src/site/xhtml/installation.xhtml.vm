@@ -239,34 +239,41 @@
 		any information from it that you need.
 	</p>
 	<h3>Upgrade 4.7.0 schema to 4.8.0</h3>
-	A column must be added to the RULE_ table. This can be done or MySQL or
-	MariaDB by
-	<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_8.sql</kbd>
-	or for Oracle run
-	<kbd>sqlplus icat @upgrade_oracle_4_8.sql</kbd>
-	where in both cases it is assumed that the tables are owned by user
-	"icat". This can be done be done while icat.server 4.7.0 is running as
-	the old code is unaware of the addition of the new column.
+	<p>
+		A column must be added to the RULE_ table. This can be done for MySQL or
+		MariaDB by
+		<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_8.sql</kbd>
+		or for Oracle run
+		<kbd>sqlplus icat @upgrade_oracle_4_8.sql</kbd>
+		where in both cases it is assumed that the tables are owned by user
+		"icat". This can be done be done while icat.server 4.7.0 is running as
+		the old code is unaware of the addition of the new column.
+	</p>
 	<h3>Upgrade 4.8.x or 4.9.x schema to 4.10.0</h3>
-	Some attributes have been added to Instrument, ParameterType,
-	Sample, Study and User and a many-to-one relationship from Shift to
-	Instrument.  So, the corresponding columns and constraints
-	must be added to the database tables.  This can be done or
-	MySQL or MariaDB by
-	<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_10.sql</kbd>
-	or for Oracle run
-	<kbd>sqlplus icat @upgrade_oracle_4_10.sql</kbd>
-	where in both cases it is assumed that the tables are owned by
-	user "icat".  This can be done be done while the older
-	icat.server is running as the changes are purely additive.
-	<h3>Upgrade 4.10.0 to 4.11.0</h3>
-	New tables for data publications and some related entities have been added.
-	The corresponding tables and constraints must be added to the database.
-	This can be done for MySQL or MariaDB by running <kbd>mysql -u icat -p icat
-	&lt; upgrade_mysql_4_11.sql</kbd>, or for Oracle run <kbd>sqlplus icat
-	@upgrade_oracle_4_11.sql</kbd> where in both cases it is assumed that the
-	tables are owned by user "icat".  This can be done while the older
-	icat.server is running as the changes are purely additive.
+	<p>
+		Some attributes have been added to Instrument, ParameterType, Sample,
+		Study and User and a many-to-one relationship from Shift to Instrument.
+		So, the corresponding columns and constraints must be added to the
+		database tables.  This can be done for MySQL or MariaDB by
+		<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_10.sql</kbd>
+		or for Oracle run
+		<kbd>sqlplus icat @upgrade_oracle_4_10.sql</kbd>
+		where in both cases it is assumed that the tables are owned by user
+		"icat".  This can be done while the older icat.server is running as the
+		changes are purely additive.
+	</p>
+	<h3>Upgrade 4.10.0 schema to 5.0.0</h3>
+	<p>
+		New tables for data publications and some related entities have been
+		added.  The corresponding tables and constraints must be added to the
+		database.  This can be done for MySQL or MariaDB by running
+		<kbd>mysql -u icat -p icat &lt; upgrade_mysql_5_0.sql</kbd>
+		or for Oracle run
+		<kbd>sqlplus icat @upgrade_oracle_5_0.sql</kbd>
+		where in both cases it is assumed that the tables are owned by user
+		"icat".  This can be done while the older icat.server is running as the
+		changes are purely additive.
+	</p>
 
 	<h2>The setup.properties file</h2>
 	<dl>
