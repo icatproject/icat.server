@@ -52,7 +52,6 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 
 	@Comment("Date when the data was made publicly available")
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(nullable = false)
 	private Date publicationDate;
 
 	@Comment("List of keywords")
