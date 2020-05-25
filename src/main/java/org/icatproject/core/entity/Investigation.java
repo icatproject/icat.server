@@ -29,6 +29,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Dataset> datasets = new ArrayList<>();
 
+	@Comment("The cumulated sizes of the datasets within this investigation")
+	private Long investigationSize;
+
 	@Comment("The Digital Object Identifier associated with this investigation")
 	private String doi;
 
@@ -99,6 +102,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public List<Dataset> getDatasets() {
 		return datasets;
+	}
+
+	public Long getInvestigationSize() {
+		return investigationSize;
 	}
 
 	public String getDoi() {
@@ -179,6 +186,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setDatasets(List<Dataset> datasets) {
 		this.datasets = datasets;
+	}
+
+	public void setInvestigationSize(Long investigationSize) {
+		this.investigationSize = investigationSize;
 	}
 
 	public void setDoi(String doi) {
