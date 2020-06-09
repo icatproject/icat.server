@@ -41,6 +41,9 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
 	private List<InvestigationInstrument> investigationInstruments = new ArrayList<InvestigationInstrument>();
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
+	private List<InstrumentDataset> instrumentDatasets = new ArrayList<InstrumentDataset>();
+
 	@Comment("A short name identifying this instrument within the facility")
 	@Column(name = "NAME", nullable = false)
 	private String name;
@@ -94,6 +97,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
 		return investigationInstruments;
 	}
 
+	public List<InstrumentDataset> getInstrumentDatasets() {
+		return instrumentDatasets;
+	}
+
 	public String getName() {
 		return this.name;
 	}
@@ -124,6 +131,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
 
 	public void setInvestigationInstruments(List<InvestigationInstrument> investigationInstruments) {
 		this.investigationInstruments = investigationInstruments;
+	}
+
+	public void setInstrumentDatasets(List<InstrumentDataset> instrumentDatasets) {
+		this.instrumentDatasets = instrumentDatasets;
 	}
 
 	public void setName(String name) {
