@@ -44,6 +44,7 @@ import org.icatproject.core.entity.DatafileFormat;
 import org.icatproject.core.entity.DatafileParameter;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.DatasetParameter;
+import org.icatproject.core.entity.DatasetTechnique;
 import org.icatproject.core.entity.DatasetType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Facility;
@@ -71,6 +72,7 @@ import org.icatproject.core.entity.SampleType;
 import org.icatproject.core.entity.Shift;
 import org.icatproject.core.entity.Study;
 import org.icatproject.core.entity.StudyInvestigation;
+import org.icatproject.core.entity.Technique;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
 import org.slf4j.Logger;
@@ -198,9 +200,10 @@ public class EntityInfoHandler {
 			Investigation.class, Sample.class, Dataset.class, Datafile.class, FacilityCycle.class, DataCollection.class,
 			DataCollectionDatafile.class, DataCollectionDataset.class, DataCollectionParameter.class,
 			DatafileParameter.class, DatasetParameter.class, InvestigationParameter.class, Job.class, Keyword.class,
-			PermissibleStringValue.class, Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class,
-			Study.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class,
-			InvestigationInstrument.class, InstrumentScientist.class);
+			Technique.class, DatasetTechnique.class, PermissibleStringValue.class, Publication.class,
+			RelatedDatafile.class, SampleParameter.class, Shift.class, Study.class, InvestigationUser.class,
+			InvestigationGroup.class, StudyInvestigation.class, InvestigationInstrument.class,
+			InstrumentScientist.class);
 	private static Set<String> entityNames = new HashSet<>();
 
 	private static String[] systemAttributes = { "createId", "createTime", "modId", "modTime" };
