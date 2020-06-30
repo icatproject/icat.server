@@ -20,7 +20,7 @@ import javax.persistence.UniqueConstraint;
 @Comment("A curated data publication")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "DOI" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "PID" }) })
 public class DataPublication extends EntityBaseBean implements Serializable {
 
 	@JoinColumn(name = "FACILITY_ID", nullable = false)
@@ -43,8 +43,8 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "publication")
 	private List<FundingReference> fundingReferences = new ArrayList<>();
 
-	@Column(name = "DOI", nullable = false)
-	private String doi;
+	@Column(name = "PID", nullable = false)
+	private String pid;
 
 	@Comment("Title of the publication")
 	@Column(nullable = false)
@@ -90,8 +90,8 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 		return fundingReferences;
 	}
 
-	public String getDoi() {
-		return doi;
+	public String getPid() {
+		return pid;
 	}
 
 	public String getTitle() {
@@ -134,8 +134,8 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 		this.fundingReferences = fundingReferences;
 	}
 
-	public void setDoi(String doi) {
-		this.doi = doi;
+	public void setPid(String pid) {
+		this.pid = pid;
 	}
 
 	public void setTitle(String title) {
