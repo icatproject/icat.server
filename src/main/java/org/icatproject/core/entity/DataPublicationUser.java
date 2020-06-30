@@ -44,6 +44,8 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 	@Column(length = 1023)
 	private String affiliation;
 
+	private String affiliationIdentifier;
+
 	/* Needed for JPA */
 	public DataPublicationUser() {
 	}
@@ -80,6 +82,10 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 		return affiliation;
 	}
 
+	public String getAffiliationIdentifier() {
+		return affiliationIdentifier;
+	}
+
 	public void setPublication(DataPublication publication) {
 		this.publication = publication;
 	}
@@ -110,5 +116,9 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 
 	public void setAffiliation(String affiliation) {
 		this.affiliation = affiliation;
+	}
+
+	public void setAffiliationIdentifier(String affiliationIdentifier) {
+		this.affiliationIdentifier = affiliationIdentifier;
 	}
 }
