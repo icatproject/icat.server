@@ -32,6 +32,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@Comment("The cumulated sizes of the datasets within this investigation")
 	private Long investigationSize;
 
+	@Comment("The total number of datafiles within this investigation")
+	private Long fileCount;
+
 	@Comment("The Digital Object Identifier associated with this investigation")
 	private String doi;
 
@@ -106,6 +109,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public Long getInvestigationSize() {
 		return investigationSize;
+	}
+
+	public Long getFileCount() {
+		return fileCount;
 	}
 
 	public String getDoi() {
@@ -190,6 +197,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setInvestigationSize(Long investigationSize) {
 		this.investigationSize = investigationSize;
+	}
+
+	public void setFileCount(Long fileCount) {
+		this.fileCount = fileCount;
 	}
 
 	public void setDoi(String doi) {

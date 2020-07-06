@@ -67,13 +67,13 @@ public class TestEntityInfo {
 		assertEquals("InvestigationType(description:0,facility(name:1),name:2)",
 				eiHandler.getExportHeader(InvestigationType.class));
 		assertEquals(
-				"Investigation(doi:0,endDate:1,facility(name:2),investigationSize:3,name:4,releaseDate:5,"
-						+ "startDate:6,summary:7,title:8,type(facility(name:9),name:10),visitId:11)",
+				"Investigation(doi:0,endDate:1,facility(name:2),fileCount:3,investigationSize:4,name:5,releaseDate:6,"
+						+ "startDate:7,summary:8,title:9,type(facility(name:10),name:11),visitId:12)",
 				eiHandler.getExportHeader(Investigation.class));
 		assertEquals(
-				"Dataset(complete:0,datasetSize:1,description:2,doi:3,endDate:4,investigation(facility(name:5),"
-						+ "name:6,visitId:7),location:8,name:9,sample(investigation(facility(name:10),"
-						+ "name:11,visitId:12),name:13),startDate:14,type(facility(name:15),name:16))",
+				"Dataset(complete:0,datasetSize:1,description:2,doi:3,endDate:4,fileCount:5,investigation(facility(name:6),"
+						+ "name:7,visitId:8),location:9,name:10,sample(investigation(facility(name:11),"
+						+ "name:12,visitId:13),name:14),startDate:15,type(facility(name:16),name:17))",
 				eiHandler.getExportHeader(Dataset.class));
 		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals(
@@ -109,15 +109,15 @@ public class TestEntityInfo {
 				eiHandler.getExportHeaderAll(InvestigationType.class));
 		assertEquals(
 				"Investigation(createId:0,createTime:1,modId:2,modTime:3,"
-						+ "doi:4,endDate:5,facility(name:6),investigationSize:7,name:8,releaseDate:9,"
-						+ "startDate:10,summary:11,title:12,type(facility(name:13),name:14),visitId:15)",
+						+ "doi:4,endDate:5,facility(name:6),fileCount:7,investigationSize:8,name:9,releaseDate:10,"
+						+ "startDate:11,summary:12,title:13,type(facility(name:14),name:15),visitId:16)",
 				eiHandler.getExportHeaderAll(Investigation.class));
 		assertEquals(
 				"Dataset(createId:0,createTime:1,modId:2,modTime:3,"
-						+ "complete:4,datasetSize:5,description:6,doi:7,endDate:8,investigation(facility(name:9),"
-						+ "name:10,visitId:11),location:12,name:13,"
-						+ "sample(investigation(facility(name:14),name:15,visitId:16),"
-						+ "name:17),startDate:18,type(facility(name:19),name:20))",
+						+ "complete:4,datasetSize:5,description:6,doi:7,endDate:8,fileCount:9,"
+						+ "investigation(facility(name:10),name:11,visitId:12),location:13,name:14,"
+						+ "sample(investigation(facility(name:15),name:16,visitId:17),"
+						+ "name:18),startDate:19,type(facility(name:20),name:21))",
 				eiHandler.getExportHeaderAll(Dataset.class));
 		assertEquals("DataCollection(?:0,createId:1,createTime:2,modId:3,modTime:4,doi:5)",
 				eiHandler.getExportHeaderAll(DataCollection.class));
@@ -172,12 +172,12 @@ public class TestEntityInfo {
 				Facility.class);
 		testField("description,facility,investigations,name", InvestigationType.class);
 		testField(
-				"datasets,doi,endDate,facility,investigationGroups,investigationInstruments,investigationSize,"
+				"datasets,doi,endDate,facility,fileCount,investigationGroups,investigationInstruments,investigationSize,"
 						+ "investigationUsers,keywords,name,parameters,publications,releaseDate,samples,shifts,"
 						+ "startDate,studyInvestigations,summary,title,type,visitId",
 				Investigation.class);
-		testField("complete,dataCollectionDatasets,datafiles,datasetSize,description,doi,endDate,investigation,"
-				+ "location,name,parameters,sample,startDate,type", Dataset.class);
+		testField("complete,dataCollectionDatasets,datafiles,datasetSize,description,doi,endDate,fileCount,"
+				+ "investigation,location,name,parameters,sample,startDate,type", Dataset.class);
 		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
@@ -379,8 +379,8 @@ public class TestEntityInfo {
 
 	@Test
 	public void getters() throws Exception {
-		testGetters(Investigation.class, 26);
-		testGetters(Dataset.class, 19);
+		testGetters(Investigation.class, 27);
+		testGetters(Dataset.class, 20);
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
 		testGetters(User.class, 16);
@@ -391,8 +391,8 @@ public class TestEntityInfo {
 
 	@Test
 	public void setters() throws Exception {
-		testSetters(Investigation.class, 22);
-		testSetters(Dataset.class, 15);
+		testSetters(Investigation.class, 23);
+		testSetters(Dataset.class, 16);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);
 		testSetters(User.class, 12);
@@ -403,8 +403,8 @@ public class TestEntityInfo {
 
 	@Test
 	public void updaters() throws Exception {
-		testSettersForUpdate(Investigation.class, 11);
-		testSettersForUpdate(Dataset.class, 11);
+		testSettersForUpdate(Investigation.class, 12);
+		testSettersForUpdate(Dataset.class, 12);
 		testSettersForUpdate(Keyword.class, 2);
 		testSettersForUpdate(InvestigationUser.class, 3);
 		testSettersForUpdate(User.class, 7);
