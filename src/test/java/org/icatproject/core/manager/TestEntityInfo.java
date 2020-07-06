@@ -176,7 +176,7 @@ public class TestEntityInfo {
 						+ "name,parameters,publications,releaseDate,samples,shifts,startDate,studyInvestigations,"
 						+ "summary,title,type,visitId",
 				Investigation.class);
-		testField("complete,dataCollectionDatasets,datafiles,description,doi,endDate,datasetInstruments,investigation,"
+		testField("complete,dataCollectionDatasets,datafiles,datasetInstruments,description,doi,endDate,investigation,"
 				+ "location,name,parameters,sample,startDate,type", Dataset.class);
 		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
