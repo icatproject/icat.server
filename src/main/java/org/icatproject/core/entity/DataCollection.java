@@ -31,6 +31,9 @@ public class DataCollection extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "outputDataCollection")
 	private List<Job> jobsAsOutput = new ArrayList<Job>();
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "content")
+	private List<DataPublication> dataPublications = new ArrayList<DataPublication>();
+
 	@Comment("The Digital Object Identifier associated with this data file")
 	private String doi;
 
@@ -52,6 +55,10 @@ public class DataCollection extends EntityBaseBean implements Serializable {
 
 	public List<Job> getJobsAsOutput() {
 		return jobsAsOutput;
+	}
+
+	public List<DataPublication> getDataPublications() {
+		return dataPublications;
 	}
 
 	public List<DataCollectionParameter> getParameters() {
@@ -76,6 +83,10 @@ public class DataCollection extends EntityBaseBean implements Serializable {
 
 	public void setJobsAsOutput(List<Job> jobsAsOutput) {
 		this.jobsAsOutput = jobsAsOutput;
+	}
+
+	public void setDataPublications(List<DataPublication> dataPublications) {
+		this.dataPublications = dataPublications;
 	}
 
 	public void setParameters(List<DataCollectionParameter> parameters) {

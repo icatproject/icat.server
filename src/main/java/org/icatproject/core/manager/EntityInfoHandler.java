@@ -39,6 +39,9 @@ import org.icatproject.core.entity.DataCollection;
 import org.icatproject.core.entity.DataCollectionDatafile;
 import org.icatproject.core.entity.DataCollectionDataset;
 import org.icatproject.core.entity.DataCollectionParameter;
+import org.icatproject.core.entity.DataPublication;
+import org.icatproject.core.entity.DataPublicationDate;
+import org.icatproject.core.entity.DataPublicationUser;
 import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.DatafileFormat;
 import org.icatproject.core.entity.DatafileParameter;
@@ -48,6 +51,7 @@ import org.icatproject.core.entity.DatasetType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Facility;
 import org.icatproject.core.entity.FacilityCycle;
+import org.icatproject.core.entity.FundingReference;
 import org.icatproject.core.entity.Grouping;
 import org.icatproject.core.entity.Instrument;
 import org.icatproject.core.entity.InstrumentScientist;
@@ -64,6 +68,7 @@ import org.icatproject.core.entity.PermissibleStringValue;
 import org.icatproject.core.entity.PublicStep;
 import org.icatproject.core.entity.Publication;
 import org.icatproject.core.entity.RelatedDatafile;
+import org.icatproject.core.entity.RelatedIdentifier;
 import org.icatproject.core.entity.Rule;
 import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.SampleParameter;
@@ -199,8 +204,9 @@ public class EntityInfoHandler {
 			DataCollectionDatafile.class, DataCollectionDataset.class, DataCollectionParameter.class,
 			DatafileParameter.class, DatasetParameter.class, InvestigationParameter.class, Job.class, Keyword.class,
 			PermissibleStringValue.class, Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class,
-			Study.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class,
-			InvestigationInstrument.class, InstrumentScientist.class);
+			Study.class, DataPublication.class, DataPublicationDate.class, DataPublicationUser.class,
+			RelatedIdentifier.class, FundingReference.class, InvestigationUser.class, InvestigationGroup.class,
+			StudyInvestigation.class, InvestigationInstrument.class, InstrumentScientist.class);
 	private static Set<String> entityNames = new HashSet<>();
 
 	private static String[] systemAttributes = { "createId", "createTime", "modId", "modTime" };

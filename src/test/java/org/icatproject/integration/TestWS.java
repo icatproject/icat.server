@@ -70,7 +70,7 @@ import org.junit.After;
  */
 public class TestWS {
 
-	private static final String version = "4.10.";
+	private static final String version = "5.0.";
 	private static Random random;
 	private static WSession session;
 
@@ -256,7 +256,7 @@ public class TestWS {
 	@Test
 	public void entities() throws Exception {
 		List<String> entities = session.getEntityNames();
-		assertEquals(38, entities.size());
+		assertEquals(43, entities.size());
 		assertTrue(entities.contains("Application"));
 	}
 
