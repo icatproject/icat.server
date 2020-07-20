@@ -1,5 +1,6 @@
 /target/
 /.settings/
+/.vscode/
 /.classpath
 /.project
 /src/site/resources/schema.html
