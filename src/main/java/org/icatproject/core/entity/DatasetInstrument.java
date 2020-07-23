@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("Represents a many-to-many relationship between an instrument and a dataset with data collected at that instrument.")
+@Comment("Represents a many-to-many relationship between an instrument and a dataset with data collected at that instrument")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATASET_ID", "INSTRUMENT_ID" }) })
