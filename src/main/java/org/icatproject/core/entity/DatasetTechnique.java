@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("Represents a many-to-many relationship between a dataset and the experimental technique being used to create that Dataset.")
+@Comment("Represents a many-to-many relationship between a dataset and the experimental technique being used to create that Dataset")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATASET_ID", "TECHNIQUE_ID" }) })
