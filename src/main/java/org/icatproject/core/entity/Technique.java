@@ -1,9 +1,13 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -23,6 +27,9 @@ public class Technique extends EntityBaseBean implements Serializable {
 	@Comment("An informal description")
 	private String description;
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "technique")
+	private List<DatasetTechnique> datasetTechniques = new ArrayList<DatasetTechnique>();
+
 	public String getName() {
 		return name;
 	}
@@ -35,6 +42,10 @@ public class Technique extends EntityBaseBean implements Serializable {
 		return description;
 	}
 
+	public List<DatasetTechnique> getDatasetTechniques() {
+		return datasetTechniques;
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -45,5 +56,9 @@ public class Technique extends EntityBaseBean implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public void setDatasetTechniques(List<DatasetTechnique> datasetTechniques) {
+		this.datasetTechniques = datasetTechniques;
 	}
 }
