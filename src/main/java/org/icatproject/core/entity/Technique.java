@@ -24,7 +24,7 @@ public class Technique extends EntityBaseBean implements Serializable {
 	@Comment("A persistent identifier attributed to the technique, ideally referring to a vocabulary term")
 	private String pid;
 
-	@Comment("An informal description")
+	@Comment("An informal description for the technique")
 	private String description;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "technique")
