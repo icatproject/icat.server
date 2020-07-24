@@ -69,6 +69,9 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	private List<DataCollectionDataset> dataCollectionDatasets = new ArrayList<DataCollectionDataset>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
+	private List<DatasetTechnique> datasetTechniques = new ArrayList<DatasetTechnique>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<DatasetParameter> parameters = new ArrayList<DatasetParameter>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -111,6 +114,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public String getName() {
 		return this.name;
+	}
+
+	public List<DatasetTechnique> getDatasetTechniques() {
+		return datasetTechniques;
 	}
 
 	public List<DatasetParameter> getParameters() {
@@ -163,6 +170,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setDatasetTechniques(List<DatasetTechnique> datasetTechniques) {
+		this.datasetTechniques = datasetTechniques;
 	}
 
 	public void setParameters(List<DatasetParameter> parameters) {
