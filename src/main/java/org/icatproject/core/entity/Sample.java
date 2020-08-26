@@ -17,23 +17,23 @@ import javax.persistence.UniqueConstraint;
 
 import org.icatproject.core.manager.LuceneApi;
 
-@Comment("A sample to be used in an investigation")
+@Comment("A sample to be used in one or more investigations")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "INVESTIGATION_ID", "NAME" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "PID" }) })
 public class Sample extends EntityBaseBean implements Serializable {
 
 	@Comment("A persistent identifier attributed to this sample")
+	@Column(nullable = false, name = "PID")
 	private String pid;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
 	private List<Dataset> datasets = new ArrayList<>();
 
-	@JoinColumn(nullable = false, name = "INVESTIGATION_ID")
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Investigation investigation;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
+	private List<InvestigationSample> investigationSamples = new ArrayList<>();
 
-	@Column(nullable = false, name = "NAME")
+	@Column(nullable = false)
 	private String name;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
@@ -59,8 +59,8 @@ public class Sample extends EntityBaseBean implements Serializable {
 		return this.datasets;
 	}
 
-	public Investigation getInvestigation() {
-		return this.investigation;
+	public List<InvestigationSample> getInvestigationSamples() {
+		return this.investigationSamples;
 	}
 
 	public String getName() {
@@ -75,8 +75,8 @@ public class Sample extends EntityBaseBean implements Serializable {
 		this.datasets = datasets;
 	}
 
-	public void setInvestigation(Investigation investigation) {
-		this.investigation = investigation;
+	public void setInvestigationSamples(List<InvestigationSample> investigationSamples) {
+		this.investigationSamples = investigationSamples;
 	}
 
 	public void setName(String name) {
@@ -97,11 +97,10 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void getDoc(JsonGenerator gen) {
-		StringBuilder sb = new StringBuilder(name);
+		StringBuilder sb = new StringBuilder(pid + " " + name);
 		if (type != null) {
 			sb.append(" " + type.getName());
 		}
 		LuceneApi.encodeTextfield(gen, "text", sb.toString());
-		LuceneApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
 	}
 }

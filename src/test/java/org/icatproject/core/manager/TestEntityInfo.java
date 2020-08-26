@@ -72,8 +72,7 @@ public class TestEntityInfo {
 				eiHandler.getExportHeader(Investigation.class));
 		assertEquals(
 				"Dataset(complete:0,description:1,doi:2,endDate:3,investigation(facility(name:4),"
-						+ "name:5,visitId:6),location:7,name:8,sample(investigation(facility(name:9),"
-						+ "name:10,visitId:11),name:12),startDate:13,type(facility(name:14),name:15))",
+						+ "name:5,visitId:6),location:7,name:8,sample(pid:9),startDate:10,type(facility(name:11),name:12))",
 				eiHandler.getExportHeader(Dataset.class));
 		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals(
@@ -116,8 +115,7 @@ public class TestEntityInfo {
 				"Dataset(createId:0,createTime:1,modId:2,modTime:3,"
 						+ "complete:4,description:5,doi:6,endDate:7,investigation(facility(name:8),"
 						+ "name:9,visitId:10),location:11,name:12,"
-						+ "sample(investigation(facility(name:13),name:14,visitId:15),"
-						+ "name:16),startDate:17,type(facility(name:18),name:19))",
+						+ "sample(pid:13),startDate:14,type(facility(name:15),name:16))",
 				eiHandler.getExportHeaderAll(Dataset.class));
 		assertEquals("DataCollection(?:0,createId:1,createTime:2,modId:3,modTime:4,doi:5)",
 				eiHandler.getExportHeaderAll(DataCollection.class));
@@ -240,7 +238,7 @@ public class TestEntityInfo {
 	public void testRels() throws Exception {
 
 		testRel(Investigation.class, "From Investigation to Keyword by keywords many setInvestigation",
-				"From Investigation to Sample by samples many setInvestigation",
+				"From Investigation to InvestigationSample by samples many setInvestigation",
 				"From Investigation to StudyInvestigation by studyInvestigations many setInvestigation",
 				"From Investigation to Shift by shifts many setInvestigation",
 				"From Investigation to Dataset by datasets many setInvestigation",

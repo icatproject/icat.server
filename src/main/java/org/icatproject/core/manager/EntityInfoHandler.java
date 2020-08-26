@@ -55,6 +55,7 @@ import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.InvestigationGroup;
 import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.InvestigationParameter;
+import org.icatproject.core.entity.InvestigationSample;
 import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Job;
@@ -199,8 +200,8 @@ public class EntityInfoHandler {
 			DataCollectionDatafile.class, DataCollectionDataset.class, DataCollectionParameter.class,
 			DatafileParameter.class, DatasetParameter.class, InvestigationParameter.class, Job.class, Keyword.class,
 			PermissibleStringValue.class, Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class,
-			Study.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class,
-			InvestigationInstrument.class, InstrumentScientist.class);
+			Study.class, InvestigationUser.class, InvestigationGroup.class, InvestigationSample.class,
+			StudyInvestigation.class, InvestigationInstrument.class, InstrumentScientist.class);
 	private static Set<String> entityNames = new HashSet<>();
 
 	private static String[] systemAttributes = { "createId", "createTime", "modId", "modTime" };
