@@ -214,7 +214,7 @@ public class ICAT {
 			@WebParam DataCollectionParameter dataCollectionParameter,
 			@WebParam DataCollectionDataset dataCollectionDataset,
 			@WebParam DataCollectionDatafile dataCollectionDatafile, @WebParam Grouping group,
-			@WebParam UserGroup userGroup, @WebParam PublicStep publicStep, @WebParam FieldSet fieldset) {
+			@WebParam UserGroup userGroup, @WebParam PublicStep publicStep, @WebParam FieldSet fieldSet) {
 	}
 
 	@WebMethod
