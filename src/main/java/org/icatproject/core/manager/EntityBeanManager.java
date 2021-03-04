@@ -1824,6 +1824,46 @@ public class EntityBeanManager {
 			}
 			logger.debug("Clones {}", clones);
 			return clones;
+		} else if (result.size() > 0 && (result.get(0) == null || result.get(0) instanceof Object[])) {
+			List<Object[]> clones = new ArrayList<Object[]>();
+			long descendantCount = 0;
+			for (Object item : result) {
+				Object[] fieldSet = (Object[]) item;
+				for (int i = 0; i < fieldSet.length; i++) {
+					if (fieldSet[i] instanceof EntityBaseBean) {
+						Object beanManaged = fieldSet[i];
+						if (beanManaged == null) {
+							if ((descendantCount += 1) > maxEntities) {
+								throw new IcatException(IcatExceptionType.VALIDATION,
+										"attempt to return more than " + maxEntities + " entities");
+							}
+							fieldSet[i] = null;
+						} else {
+							EntityBaseBean eb = ((EntityBaseBean) beanManaged).pruned(false, 0, null, maxEntities, gateKeeper,
+									userId, manager);
+							if ((descendantCount += eb.getDescendantCount(maxEntities)) > maxEntities) {
+								throw new IcatException(IcatExceptionType.VALIDATION,
+										"attempt to return more than " + maxEntities + " entities");
+							}
+							fieldSet[i] = eb;
+						}
+					}
+				}
+				clones.add(fieldSet);
+			}
+			logger.debug("Obtained " + descendantCount + " entities.");
+
+			if (logRequests.contains(CallType.READ)) {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+					gen.write("userName", userId);
+					gen.write("query", query);
+					gen.writeEnd();
+				}
+				transmitter.processMessage("search", ip, baos.toString(), startMillis);
+			}
+			logger.debug("Clones {}", clones);
+			return clones;
 		} else {
 			if (logRequests.contains(CallType.READ)) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
