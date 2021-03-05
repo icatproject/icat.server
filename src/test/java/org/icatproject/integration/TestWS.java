@@ -34,6 +34,7 @@ import org.icatproject.EntityBaseBean;
 import org.icatproject.EntityField;
 import org.icatproject.EntityInfo;
 import org.icatproject.Facility;
+import org.icatproject.FieldSet;
 import org.icatproject.Grouping;
 import org.icatproject.IcatException;
 import org.icatproject.IcatExceptionType;
@@ -1749,6 +1750,14 @@ public class TestWS {
 		assertEquals("Count", 6, results.size());
 		assertEquals("Result", "bill", results.get(0));
 		assertEquals("Result", "fred", results.get(1));
+
+		results = session.search("SELECT df.name, df.fileSize FROM Datafile df ORDER BY df.name");
+		assertEquals("Count", 6, results.size());
+
+		assertEquals("Result", "bill", ((FieldSet) results.get(0)).getFields().get(0));
+		assertEquals("Result", 17L, ((FieldSet) results.get(0)).getFields().get(1));
+		assertEquals("Result", "fred", ((FieldSet) results.get(1)).getFields().get(0));
+		assertEquals("Result", 11L, ((FieldSet) results.get(1)).getFields().get(1));
 
 		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 0,1");
 		assertEquals("Count", 1, results.size());

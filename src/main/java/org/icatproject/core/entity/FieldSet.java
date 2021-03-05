@@ -7,21 +7,21 @@ import java.io.Serializable;
 @XmlRootElement
 public class FieldSet implements Serializable {
     @XmlElement(name = "fields")
-    private Object[] items;
+    private Object[] fields;
 
     public FieldSet() {
-        items = new Object[0];
+        fields = new Object[0];
     }
 
-    public FieldSet(Object[] items) {
-        this.items = items;
+    public FieldSet(Object[] fields) {
+        this.fields = fields;
     }
 
-    public Object[] getItems() {
-        return items;
+    public Object[] getFields() {
+        return fields;
     }
 
-    public void setItems() {
-        this.items = items;
+    public void setFields() {
+        this.fields = fields;
     }
 }
