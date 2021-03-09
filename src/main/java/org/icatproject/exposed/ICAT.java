@@ -65,6 +65,7 @@ import org.icatproject.core.entity.StudyInvestigation;
 import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
+import org.icatproject.core.entity.FieldSet;
 import org.icatproject.core.manager.AccessType;
 import org.icatproject.core.manager.AuthenticatorInfo;
 import org.icatproject.core.manager.CreateResponse;
@@ -213,7 +214,7 @@ public class ICAT {
 			@WebParam DataCollectionParameter dataCollectionParameter,
 			@WebParam DataCollectionDataset dataCollectionDataset,
 			@WebParam DataCollectionDatafile dataCollectionDatafile, @WebParam Grouping group,
-			@WebParam UserGroup userGroup, @WebParam PublicStep publicStep) {
+			@WebParam UserGroup userGroup, @WebParam PublicStep publicStep, @WebParam FieldSet fieldSet) {
 	}
 
 	@WebMethod
@@ -380,7 +381,21 @@ public class ICAT {
 			String userId = getUserName(sessionId);
 			String ip = ((HttpServletRequest) webServiceContext.getMessageContext().get(MessageContext.SERVLET_REQUEST))
 					.getRemoteAddr();
-			return beanManager.search(userId, query, manager, ip);
+			List<?> result = beanManager.search(userId, query, manager, ip);
+			// special handling for fieldsets so they can be marshalled 
+			if (!result.isEmpty() && result.get(0) instanceof Object[]) {
+				List<FieldSet> newResults = new ArrayList<FieldSet>();
+				for (int i = 0; i < result.size(); i++) {
+					if (result.get(i) instanceof Object[]) {
+						FieldSet fieldSet = new FieldSet((Object[]) result.get(i));
+						newResults.add(fieldSet);
+					} else {
+						logger.warn("Something in the fieldset isn't an Object[]");
+					}
+				}
+				result = newResults;
+			}
+			return result;
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
