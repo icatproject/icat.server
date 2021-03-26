@@ -1,17 +1,24 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import json
-import httplib
-from urllib import urlencode
+try:
+    import httplib                                  # Python 2
+except ModuleNotFoundError:
+    import http.client as httplib                   # Python 3
+try:
+    from urllib.parse import urlparse, urlencode    # Python 3
+except ImportError:
+    from urllib import urlencode                    # Python 2
+    from urlparse import urlparse                   # Python 2
 import sys
-from urlparse import urlparse
 import getpass
 import sys
              
     
         
 def fatal(msg):
-    print >> sys.stderr, msg
+    print(msg, file=sys.stderr)
     sys.exit(1)
     
 def getConn(relativeUrl, method, parameters=None):
@@ -95,7 +102,7 @@ if action == "dump":
     parameters = urlencode({"json": json.dumps(jsonDump)})
     conn = getConn("port", "GET", parameters)
     conn.endheaders()
-    print getResponse(conn).read()       
+    print(getResponse(conn).read())
  
 elif action == "load":
     jsonDump = {}
