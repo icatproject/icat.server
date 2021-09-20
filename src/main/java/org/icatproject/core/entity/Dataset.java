@@ -36,6 +36,12 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<Datafile> datafiles = new ArrayList<Datafile>();
 
+	@Comment("The cumulated sizes of the data files within this dataset")
+	private Long size;
+
+	@Comment("The total number of datafiles within this dataset")
+	private Long fileCount;
+
 	@Comment("An informal description of the data set")
 	private String description;
 
@@ -93,6 +99,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public List<Datafile> getDatafiles() {
 		return datafiles;
+	}
+
+	public Long getSize() {
+		return this.size;
+	}
+
+	public Long getFileCount() {
+		return this.fileCount;
 	}
 
 	public String getDescription() {
@@ -153,6 +167,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public void setDatafiles(List<Datafile> datafiles) {
 		this.datafiles = datafiles;
+	}
+
+	public void setSize(Long size) {
+		this.size = size;
+	}
+
+	public void setFileCount(Long fileCount) {
+		this.fileCount = fileCount;
 	}
 
 	public void setDescription(String description) {
