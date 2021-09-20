@@ -176,7 +176,7 @@ public class TestEntityInfo {
 						+ "name,parameters,publications,releaseDate,samples,shifts,startDate,studyInvestigations,"
 						+ "summary,title,type,visitId",
 				Investigation.class);
-		testField("complete,dataCollectionDatasets,datafiles,datasetTechniques,description,doi,endDate,investigation,"
+		testField("complete,dataCollectionDatasets,datafiles,datasetInstruments,datasetTechniques,description,doi,endDate,investigation,"
 				+ "location,name,parameters,sample,startDate,type", Dataset.class);
 		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
@@ -255,8 +255,9 @@ public class TestEntityInfo {
 				"From Dataset to DatasetParameter by parameters many setDataset",
 				"From Dataset to DatasetTechnique by datasetTechniques many setDataset",
 				"From Dataset to Investigation by investigation one",
-				"From Dataset to Datafile by datafiles many setDataset", "From Dataset to DatasetType by type one",
-				"From Dataset to Sample by sample one");
+				"From Dataset to Datafile by datafiles many setDataset",
+				"From Dataset to DatasetInstrument by datasetInstruments many setDataset",
+				"From Dataset to DatasetType by type one", "From Dataset to Sample by sample one");
 
 		testRel(Keyword.class, "From Keyword to Investigation by investigation one");
 
@@ -274,6 +275,7 @@ public class TestEntityInfo {
 		testRel(Instrument.class, "From Instrument to Facility by facility one",
 				"From Instrument to InstrumentScientist by instrumentScientists many setInstrument",
 				"From Instrument to InvestigationInstrument by investigationInstruments many setInstrument",
+				"From Instrument to DatasetInstrument by datasetInstruments many setInstrument",
 				"From Instrument to Shift by shifts many setInstrument");
 	}
 
@@ -381,7 +383,7 @@ public class TestEntityInfo {
 	@Test
 	public void getters() throws Exception {
 		testGetters(Investigation.class, 25);
-		testGetters(Dataset.class, 19);
+		testGetters(Dataset.class, 20);
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
 		testGetters(User.class, 16);
@@ -393,7 +395,7 @@ public class TestEntityInfo {
 	@Test
 	public void setters() throws Exception {
 		testSetters(Investigation.class, 21);
-		testSetters(Dataset.class, 15);
+		testSetters(Dataset.class, 16);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);
 		testSetters(User.class, 12);
