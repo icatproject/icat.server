@@ -30,7 +30,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	private List<Dataset> datasets = new ArrayList<>();
 
 	@Comment("The cumulated sizes of the datasets within this investigation")
-	private Long investigationSize;
+	private Long size;
 
 	@Comment("The total number of datafiles within this investigation")
 	private Long fileCount;
@@ -107,8 +107,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		return datasets;
 	}
 
-	public Long getInvestigationSize() {
-		return investigationSize;
+	public Long getSize() {
+		return size;
 	}
 
 	public Long getFileCount() {
@@ -195,8 +195,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		this.datasets = datasets;
 	}
 
-	public void setInvestigationSize(Long investigationSize) {
-		this.investigationSize = investigationSize;
+	public void setSize(Long size) {
+		this.size = size;
 	}
 
 	public void setFileCount(Long fileCount) {
