@@ -264,15 +264,13 @@
 	</p>
 	<h3>Upgrade 4.10.0 schema to 5.0.0</h3>
 	<p>
-		New size and fileCount attributes must be added to the Dataset and
-		Investigation tables.  This can be done for MySQL or MariaDB by running
+		New entities and attributes must be added to the database. This can be
+		done for MySQL or MariaDB by running
 		<kbd>mysql -u icat -p icat &lt; upgrade_mysql_5_0.sql</kbd>
-		or for Oracle run
+		or for Oracle by running
 		<kbd>sqlplus icat @upgrade_oracle_5_0.sql</kbd>
 		where in both cases it is assumed that the tables are owned by user
-		"icat".  Note that ICAT should not be running while this is done to
-		avoid inconsistencies with calculating the sizes and fileCounts of
-		existing datasets and investigations.
+		"icat".
 	</p>
 	<p>
 		If you want the new attributes for size and fileCount to be updated
@@ -280,10 +278,12 @@
 		you can also set up triggers in your database.  This can be done for
 		MySQL or MariaDB by running
 		<kbd>mysql -u icat -p icat &lt; create_triggers_mysql.sql</kbd>
-		or for Oracle run
+		or for Oracle by running
 		<kbd>sqlplus icat @create_triggers_oracle.sql</kbd>
 		where in both cases it is assumed that the tables are owned by user
-		"icat".
+		"icat".  This automatically initializes the sizes and fileCounts of all
+		existing datasets and investigations.  Note that ICAT should not be
+		running while this is done to avoid inconsistencies.
 	</p>
 
 	<h2>The setup.properties file</h2>
