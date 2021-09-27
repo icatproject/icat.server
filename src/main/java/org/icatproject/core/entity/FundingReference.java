@@ -1,24 +1,27 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("Information about financial support for a data publication")
+@Comment("Information about financial support")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATAPUBLICATION_ID", "FUNDERNAME", "AWARDNUMBER" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FUNDERNAME", "AWARDNUMBER" }) })
 public class FundingReference extends EntityBaseBean implements Serializable {
 
-	@JoinColumn(name = "DATAPUBLICATION_ID", nullable = false)
-	@ManyToOne(fetch = FetchType.LAZY)
-	private DataPublication publication;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "funding")
+	private List<InvestigationFunding> investigations = new ArrayList<>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "funding")
+	private List<DataPublicationFunding> publications = new ArrayList<>();
 
 	@Column(name = "FUNDERNAME", nullable = false)
 	private String funderName;
@@ -34,8 +37,12 @@ public class FundingReference extends EntityBaseBean implements Serializable {
 	public FundingReference() {
 	}
 
-	public DataPublication getPublication() {
-		return publication;
+	public List<InvestigationFunding> getInvestigations() {
+		return investigations;
+	}
+
+	public List<DataPublicationFunding> getPublications() {
+		return publications;
 	}
 
 	public String getFunderName() {
@@ -54,8 +61,12 @@ public class FundingReference extends EntityBaseBean implements Serializable {
 		return awardTitle;
 	}
 
-	public void setPublication(DataPublication publication) {
-		this.publication = publication;
+	public void setInvestigations(List<InvestigationFunding> investigations) {
+		this.investigations = investigations;
+	}
+
+	public void setPublications(List<DataPublicationFunding> publications) {
+		this.publications = publications;
 	}
 
 	public void setFunderName(String funderName) {

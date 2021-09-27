@@ -61,6 +61,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Publication> publications = new ArrayList<>();
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
+	private List<InvestigationFunding> fundingReferences = new ArrayList<>();
+
 	@Comment("When the data will be made freely available")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date releaseDate;
@@ -141,6 +144,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		return publications;
 	}
 
+	public List<InvestigationFunding> getFundingReferences() {
+		return fundingReferences;
+	}
+
 	public Date getReleaseDate() {
 		return this.releaseDate;
 	}
@@ -219,6 +226,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setPublications(List<Publication> publications) {
 		this.publications = publications;
+	}
+
+	public void setFundingReferences(List<InvestigationFunding> fundingReferences) {
+		this.fundingReferences = fundingReferences;
 	}
 
 	public void setReleaseDate(Date releaseDate) {

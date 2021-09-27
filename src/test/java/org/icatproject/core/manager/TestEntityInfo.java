@@ -172,9 +172,9 @@ public class TestEntityInfo {
 				Facility.class);
 		testField("description,facility,investigations,name", InvestigationType.class);
 		testField(
-				"datasets,doi,endDate,facility,investigationGroups,investigationInstruments,investigationUsers,keywords,"
-						+ "name,parameters,publications,releaseDate,samples,shifts,startDate,studyInvestigations,"
-						+ "summary,title,type,visitId",
+				"datasets,doi,endDate,facility,fundingReferences,investigationGroups,investigationInstruments,"
+						+ "investigationUsers,keywords,name,parameters,publications,releaseDate,samples,shifts,startDate,"
+						+ "studyInvestigations,summary,title,type,visitId",
 				Investigation.class);
 		testField("complete,dataCollectionDatasets,datafiles,description,doi,endDate,investigation,location,"
 				+ "name,parameters,sample,startDate,type", Dataset.class);
@@ -245,6 +245,7 @@ public class TestEntityInfo {
 				"From Investigation to Shift by shifts many setInvestigation",
 				"From Investigation to Dataset by datasets many setInvestigation",
 				"From Investigation to Publication by publications many setInvestigation",
+				"From Investigation to InvestigationFunding by fundingReferences many setInvestigation",
 				"From Investigation to InvestigationUser by investigationUsers many setInvestigation",
 				"From Investigation to InvestigationGroup by investigationGroups many setInvestigation",
 				"From Investigation to InvestigationInstrument by investigationInstruments many setInvestigation",
@@ -379,7 +380,7 @@ public class TestEntityInfo {
 
 	@Test
 	public void getters() throws Exception {
-		testGetters(Investigation.class, 25);
+		testGetters(Investigation.class, 26);
 		testGetters(Dataset.class, 18);
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
@@ -391,7 +392,7 @@ public class TestEntityInfo {
 
 	@Test
 	public void setters() throws Exception {
-		testSetters(Investigation.class, 21);
+		testSetters(Investigation.class, 22);
 		testSetters(Dataset.class, 14);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);

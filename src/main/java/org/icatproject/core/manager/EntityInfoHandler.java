@@ -41,6 +41,7 @@ import org.icatproject.core.entity.DataCollectionDataset;
 import org.icatproject.core.entity.DataCollectionParameter;
 import org.icatproject.core.entity.DataPublication;
 import org.icatproject.core.entity.DataPublicationDate;
+import org.icatproject.core.entity.DataPublicationFunding;
 import org.icatproject.core.entity.DataPublicationUser;
 import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.DatafileFormat;
@@ -56,6 +57,7 @@ import org.icatproject.core.entity.Grouping;
 import org.icatproject.core.entity.Instrument;
 import org.icatproject.core.entity.InstrumentScientist;
 import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.InvestigationFunding;
 import org.icatproject.core.entity.InvestigationGroup;
 import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.InvestigationParameter;
@@ -205,8 +207,9 @@ public class EntityInfoHandler {
 			DatafileParameter.class, DatasetParameter.class, InvestigationParameter.class, Job.class, Keyword.class,
 			PermissibleStringValue.class, Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class,
 			Study.class, DataPublication.class, DataPublicationDate.class, DataPublicationUser.class,
-			RelatedIdentifier.class, FundingReference.class, InvestigationUser.class, InvestigationGroup.class,
-			StudyInvestigation.class, InvestigationInstrument.class, InstrumentScientist.class);
+			RelatedIdentifier.class, FundingReference.class, DataPublicationFunding.class, InvestigationFunding.class,
+			InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class, InvestigationInstrument.class,
+			InstrumentScientist.class);
 	private static Set<String> entityNames = new HashSet<>();
 
 	private static String[] systemAttributes = { "createId", "createTime", "modId", "modTime" };

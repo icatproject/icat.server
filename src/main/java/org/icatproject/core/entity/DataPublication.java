@@ -40,8 +40,8 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "publication")
 	private List<RelatedIdentifier> relatedIdentifiers = new ArrayList<>();
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "publication")
-	private List<FundingReference> fundingReferences = new ArrayList<>();
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataPublication")
+	private List<DataPublicationFunding> fundingReferences = new ArrayList<>();
 
 	@Column(name = "PID", nullable = false)
 	private String pid;
@@ -86,7 +86,7 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 		return relatedIdentifiers;
 	}
 
-	public List<FundingReference> getFundingReferences() {
+	public List<DataPublicationFunding> getFundingReferences() {
 		return fundingReferences;
 	}
 
@@ -130,7 +130,7 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 		this.relatedIdentifiers = relatedIdentifiers;
 	}
 
-	public void setFundingReferences(List<FundingReference> fundingReferences) {
+	public void setFundingReferences(List<DataPublicationFunding> fundingReferences) {
 		this.fundingReferences = fundingReferences;
 	}
 
