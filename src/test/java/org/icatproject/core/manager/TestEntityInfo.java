@@ -167,18 +167,18 @@ public class TestEntityInfo {
 	@Test
 	public void testFields() throws Exception {
 		testField(
-				"applications,datafileFormats,datasetTypes,daysUntilRelease,description,facilityCycles,"
+				"applications,dataPublications,datafileFormats,datasetTypes,daysUntilRelease,description,facilityCycles,"
 						+ "fullName,instruments,investigationTypes,investigations,name,parameterTypes,sampleTypes,url",
 				Facility.class);
 		testField("description,facility,investigations,name", InvestigationType.class);
 		testField(
-				"datasets,doi,endDate,facility,fileCount,investigationGroups,investigationInstruments,"
+				"datasets,doi,endDate,facility,fileCount,fundingReferences,investigationGroups,investigationInstruments,"
 						+ "investigationUsers,keywords,name,parameters,publications,releaseDate,samples,shifts,"
 						+ "size,startDate,studyInvestigations,summary,title,type,visitId",
 				Investigation.class);
 		testField("complete,dataCollectionDatasets,datafiles,datasetInstruments,datasetTechniques,description,"
 				+ "doi,endDate,fileCount,investigation,location,name,parameters,sample,size,startDate,type", Dataset.class);
-		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
+		testField("dataCollectionDatafiles,dataCollectionDatasets,dataPublications,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
 		testField( "description,endDate,name,pid,startDate,status,studyInvestigations,user",Study.class);
@@ -245,6 +245,7 @@ public class TestEntityInfo {
 				"From Investigation to Shift by shifts many setInvestigation",
 				"From Investigation to Dataset by datasets many setInvestigation",
 				"From Investigation to Publication by publications many setInvestigation",
+				"From Investigation to InvestigationFunding by fundingReferences many setInvestigation",
 				"From Investigation to InvestigationUser by investigationUsers many setInvestigation",
 				"From Investigation to InvestigationGroup by investigationGroups many setInvestigation",
 				"From Investigation to InvestigationInstrument by investigationInstruments many setInvestigation",
@@ -382,7 +383,7 @@ public class TestEntityInfo {
 
 	@Test
 	public void getters() throws Exception {
-		testGetters(Investigation.class, 27);
+		testGetters(Investigation.class, 28);
 		testGetters(Dataset.class, 22);
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
@@ -394,7 +395,7 @@ public class TestEntityInfo {
 
 	@Test
 	public void setters() throws Exception {
-		testSetters(Investigation.class, 23);
+		testSetters(Investigation.class, 24);
 		testSetters(Dataset.class, 18);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);
