@@ -1,12 +1,16 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -24,6 +28,9 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+	private List<Affiliation> affiliations = new ArrayList<>();
+
 	@Comment("See DataCite property contributorType or use \"Creator\"")
 	@Column(name = "CONTRIBUTORTYPE", nullable = false)
 	private String contributorType;
@@ -40,12 +47,6 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 	@Comment("The family name of the user")
 	private String familyName;
 
-	@Comment("The home institute or other affiliation of the user")
-	@Column(length = 1023)
-	private String affiliation;
-
-	private String affiliationIdentifier;
-
 	/* Needed for JPA */
 	public DataPublicationUser() {
 	}
@@ -56,6 +57,10 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 
 	public User getUser() {
 		return user;
+	}
+
+	public List<Affiliation> getAffiliations() {
+		return affiliations;
 	}
 
 	public String getContributorType() {
@@ -78,20 +83,16 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 		return familyName;
 	}
 
-	public String getAffiliation() {
-		return affiliation;
-	}
-
-	public String getAffiliationIdentifier() {
-		return affiliationIdentifier;
-	}
-
 	public void setPublication(DataPublication publication) {
 		this.publication = publication;
 	}
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public void setAffiliations(List<Affiliation> affiliations) {
+		this.affiliations = affiliations;
 	}
 
 	public void setContributorType(String contributorType) {
@@ -112,13 +113,5 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 
 	public void setFamilyName(String familyName) {
 		this.familyName = familyName;
-	}
-
-	public void setAffiliation(String affiliation) {
-		this.affiliation = affiliation;
-	}
-
-	public void setAffiliationIdentifier(String affiliationIdentifier) {
-		this.affiliationIdentifier = affiliationIdentifier;
 	}
 }

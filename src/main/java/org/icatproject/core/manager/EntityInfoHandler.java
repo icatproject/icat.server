@@ -33,6 +33,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.entity.Affiliation;
 import org.icatproject.core.entity.Application;
 import org.icatproject.core.entity.Comment;
 import org.icatproject.core.entity.DataCollection;
@@ -206,7 +207,7 @@ public class EntityInfoHandler {
 			DataCollectionDatafile.class, DataCollectionDataset.class, DataCollectionParameter.class,
 			DatafileParameter.class, DatasetParameter.class, InvestigationParameter.class, Job.class, Keyword.class,
 			PermissibleStringValue.class, Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class,
-			Study.class, DataPublication.class, DataPublicationDate.class, DataPublicationUser.class,
+			Study.class, DataPublication.class, DataPublicationDate.class, DataPublicationUser.class, Affiliation.class,
 			RelatedIdentifier.class, FundingReference.class, DataPublicationFunding.class, InvestigationFunding.class,
 			InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class, InvestigationInstrument.class,
 			InstrumentScientist.class);
