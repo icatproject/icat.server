@@ -37,7 +37,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	private List<Datafile> datafiles = new ArrayList<Datafile>();
 
 	@Comment("The cumulated sizes of the data files within this dataset")
-	private Long size;
+	private Long fileSize;
 
 	@Comment("The total number of datafiles within this dataset")
 	private Long fileCount;
@@ -101,8 +101,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		return datafiles;
 	}
 
-	public Long getSize() {
-		return this.size;
+	public Long getFileSize() {
+		return this.fileSize;
 	}
 
 	public Long getFileCount() {
@@ -169,8 +169,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		this.datafiles = datafiles;
 	}
 
-	public void setSize(Long size) {
-		this.size = size;
+	public void setFileSize(Long fileSize) {
+		this.fileSize = fileSize;
 	}
 
 	public void setFileCount(Long fileCount) {

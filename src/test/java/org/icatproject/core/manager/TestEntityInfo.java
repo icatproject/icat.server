@@ -67,13 +67,13 @@ public class TestEntityInfo {
 		assertEquals("InvestigationType(description:0,facility(name:1),name:2)",
 				eiHandler.getExportHeader(InvestigationType.class));
 		assertEquals(
-				"Investigation(doi:0,endDate:1,facility(name:2),fileCount:3,name:4,releaseDate:5,size:6,"
+				"Investigation(doi:0,endDate:1,facility(name:2),fileCount:3,fileSize:4,name:5,releaseDate:6,"
 						+ "startDate:7,summary:8,title:9,type(facility(name:10),name:11),visitId:12)",
 				eiHandler.getExportHeader(Investigation.class));
 		assertEquals(
-				"Dataset(complete:0,description:1,doi:2,endDate:3,fileCount:4,investigation(facility(name:5),"
-						+ "name:6,visitId:7),location:8,name:9,sample(investigation(facility(name:10),"
-						+ "name:11,visitId:12),name:13),size:14,startDate:15,type(facility(name:16),name:17))",
+				"Dataset(complete:0,description:1,doi:2,endDate:3,fileCount:4,fileSize:5,investigation(facility(name:6),"
+						+ "name:7,visitId:8),location:9,name:10,sample(investigation(facility(name:11),"
+						+ "name:12,visitId:13),name:14),startDate:15,type(facility(name:16),name:17))",
 				eiHandler.getExportHeader(Dataset.class));
 		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals(
@@ -109,15 +109,15 @@ public class TestEntityInfo {
 				eiHandler.getExportHeaderAll(InvestigationType.class));
 		assertEquals(
 				"Investigation(createId:0,createTime:1,modId:2,modTime:3,"
-						+ "doi:4,endDate:5,facility(name:6),fileCount:7,name:8,releaseDate:9,size:10,"
+						+ "doi:4,endDate:5,facility(name:6),fileCount:7,fileSize:8,name:9,releaseDate:10,"
 						+ "startDate:11,summary:12,title:13,type(facility(name:14),name:15),visitId:16)",
 				eiHandler.getExportHeaderAll(Investigation.class));
 		assertEquals(
 				"Dataset(createId:0,createTime:1,modId:2,modTime:3,"
-						+ "complete:4,description:5,doi:6,endDate:7,fileCount:8,"
-						+ "investigation(facility(name:9),name:10,visitId:11),location:12,name:13,"
-						+ "sample(investigation(facility(name:14),name:15,visitId:16),"
-						+ "name:17),size:18,startDate:19,type(facility(name:20),name:21))",
+						+ "complete:4,description:5,doi:6,endDate:7,fileCount:8,fileSize:9,"
+						+ "investigation(facility(name:10),name:11,visitId:12),location:13,name:14,"
+						+ "sample(investigation(facility(name:15),name:16,visitId:17),"
+						+ "name:18),startDate:19,type(facility(name:20),name:21))",
 				eiHandler.getExportHeaderAll(Dataset.class));
 		assertEquals("DataCollection(?:0,createId:1,createTime:2,modId:3,modTime:4,doi:5)",
 				eiHandler.getExportHeaderAll(DataCollection.class));
@@ -172,12 +172,12 @@ public class TestEntityInfo {
 				Facility.class);
 		testField("description,facility,investigations,name", InvestigationType.class);
 		testField(
-				"datasets,doi,endDate,facility,fileCount,fundingReferences,investigationGroups,investigationInstruments,"
+				"datasets,doi,endDate,facility,fileCount,fileSize,fundingReferences,investigationGroups,investigationInstruments,"
 						+ "investigationUsers,keywords,name,parameters,publications,releaseDate,samples,shifts,"
-						+ "size,startDate,studyInvestigations,summary,title,type,visitId",
+						+ "startDate,studyInvestigations,summary,title,type,visitId",
 				Investigation.class);
 		testField("complete,dataCollectionDatasets,datafiles,datasetInstruments,datasetTechniques,description,"
-				+ "doi,endDate,fileCount,investigation,location,name,parameters,sample,size,startDate,type", Dataset.class);
+				+ "doi,endDate,fileCount,fileSize,investigation,location,name,parameters,sample,startDate,type", Dataset.class);
 		testField("dataCollectionDatafiles,dataCollectionDatasets,dataPublications,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
