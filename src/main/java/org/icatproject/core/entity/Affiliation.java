@@ -21,7 +21,7 @@ public class Affiliation extends EntityBaseBean implements Serializable {
 	private DataPublicationUser user;
 
 	@Comment("Name and optionally address of the affiliation")
-	@Column(name = "NAME", nullable = false, length = 1023)
+	@Column(name = "NAME", nullable = false, length = 511)
 	private String name;
 
 	@Comment("Identifier such as ROR or ISNI")
