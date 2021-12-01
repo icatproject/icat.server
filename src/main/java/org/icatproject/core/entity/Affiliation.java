@@ -20,9 +20,13 @@ public class Affiliation extends EntityBaseBean implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private DataPublicationUser user;
 
-	@Comment("Name and optionally address of the affiliation")
-	@Column(name = "NAME", nullable = false, length = 511)
+	@Comment("An internal name for that affiliation entry, possibly the organization name")
+	@Column(name = "NAME", nullable = false, length = 255)
 	private String name;
+
+	@Comment("The full reference of the affiliation, optionally including street address and department, as it should appear in the publication")
+	@Column(length = 1023)
+	private String fullReference;
 
 	@Comment("Identifier such as ROR or ISNI")
 	private String pid;
@@ -39,6 +43,10 @@ public class Affiliation extends EntityBaseBean implements Serializable {
 		return name;
 	}
 
+	public String getFullReference() {
+		return fullReference;
+	}
+
 	public String getPid() {
 		return pid;
 	}
@@ -49,6 +57,10 @@ public class Affiliation extends EntityBaseBean implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setFullReference(String fullReference) {
+		this.fullReference = fullReference;
 	}
 
 	public void setPid(String pid) {
