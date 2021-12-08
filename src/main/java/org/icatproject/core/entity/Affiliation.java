@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("The home institute or other affiliation of a user")
+@Comment("The home institute or other affiliation of a user in the context of a data publication")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATAPUBLICATIONUSER_ID", "NAME" }) })

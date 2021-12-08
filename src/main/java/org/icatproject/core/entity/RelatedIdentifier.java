@@ -24,10 +24,11 @@ public class RelatedIdentifier extends EntityBaseBean implements Serializable {
 	@Column(name = "IDENTIFIER", nullable = false)
 	private String identifier;
 
-	@Comment("See DataCite property relationType")
+	@Comment("Description of the relationship with the related resource, see DataCite property relationType for suggested values")
 	@Column(nullable = false)
 	private String relationType;
 
+	@Comment("The full reference for the related resource as it should be displayed on the landing page")
 	@Column(length = 1023)
 	private String fullReference;
 
