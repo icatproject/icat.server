@@ -20,7 +20,7 @@ public class DataPublicationDate extends EntityBaseBean implements Serializable 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private DataPublication publication;
 
-	@Comment("See DataCite property dateType")
+	@Comment("Type of the date, see DataCite property dateType for suggested values")
 	@Column(name = "DATETYPE", nullable = false)
 	private String dateType;
 

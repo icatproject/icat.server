@@ -31,7 +31,7 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<Affiliation> affiliations = new ArrayList<>();
 
-	@Comment("See DataCite property contributorType or use \"Creator\"")
+	@Comment("Role of that user in the publication, see DataCite property contributorType for suggested values or use \"Creator\"")
 	@Column(name = "CONTRIBUTORTYPE", nullable = false)
 	private String contributorType;
 
