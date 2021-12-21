@@ -36,7 +36,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<Datafile> datafiles = new ArrayList<Datafile>();
 
-	@Comment("The cumulated sizes of the data files within this dataset")
+	@Comment("The cumulative total size of the data files within this dataset")
 	private Long fileSize;
 
 	@Comment("The total number of datafiles within this dataset")

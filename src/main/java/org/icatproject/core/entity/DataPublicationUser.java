@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("Author, e.g. creator of a or contributor to a data publication")
+@Comment("Author, e.g. creator of or contributor to a data publication")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATAPUBLICATION_ID", "USER_ID", "CONTRIBUTORTYPE" }) })

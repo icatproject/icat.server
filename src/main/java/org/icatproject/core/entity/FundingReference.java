@@ -30,7 +30,7 @@ public class FundingReference extends EntityBaseBean implements Serializable {
 	@Comment("Unique identifier of the funding entity, such as a Crossref Funder ID")
 	private String funderIdentifier;
 
-	@Comment("Code assigned by the funder to identify the grant, suggest to use \":unas\" if there is no such identifier")
+	@Comment("Code assigned by the funder to identify the grant, suggest to use \":unas\" from the Datacite schema if there is no such identifier")
 	@Column(name = "AWARDNUMBER", nullable = false)
 	private String awardNumber;
 
