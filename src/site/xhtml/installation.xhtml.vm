@@ -262,7 +262,7 @@
 		"icat".  This can be done while the older icat.server is running as the
 		changes are purely additive.
 	</p>
-	<h3>Upgrade 4.10.0 schema to 5.0.0</h3>
+	<h3>Upgrade 4.10.x or 4.11.x schema to 5.0.0</h3>
 	<p>
 		New entities and attributes must be added to the database. This can be
 		done for MySQL or MariaDB by running
@@ -273,15 +273,16 @@
 		"icat".
 	</p>
 	<p>
-		If you want the new attributes for size and fileCount to be updated
+		If you want the new attributes fileSize and fileCount
+		in Dataset and Investigation to be updated
 		automatically whenever a datafile or dataset is added/modified/deleted,
 		you can also set up triggers in your database.  This can be done for
 		MySQL or MariaDB by running
-		<kbd>mysql -u icat -p icat &lt; create_triggers_mysql.sql</kbd>
+		<kbd>mysql -u icat -p icat &lt; create_triggers_mysql_5_0.sql</kbd>
 		or for Oracle by running
-		<kbd>sqlplus icat @create_triggers_oracle.sql</kbd>
+		<kbd>sqlplus icat @create_triggers_oracle_5_0.sql</kbd>
 		where in both cases it is assumed that the tables are owned by user
-		"icat".  This automatically initializes the sizes and fileCounts of all
+		"icat".  This automatically initializes the fileSize and fileCount of all
 		existing datasets and investigations.  Note that ICAT should not be
 		running while this is done to avoid inconsistencies.
 	</p>

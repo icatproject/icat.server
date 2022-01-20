@@ -29,7 +29,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Dataset> datasets = new ArrayList<>();
 
-	@Comment("The cumulated sizes of the datasets within this investigation")
+	@Comment("The cumulative total size of the datasets within this investigation")
 	private Long fileSize;
 
 	@Comment("The total number of datafiles within this investigation")

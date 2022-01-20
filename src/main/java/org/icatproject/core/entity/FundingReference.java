@@ -23,14 +23,18 @@ public class FundingReference extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "funding")
 	private List<DataPublicationFunding> publications = new ArrayList<>();
 
+	@Comment("Name of the funding entity")
 	@Column(name = "FUNDERNAME", nullable = false)
 	private String funderName;
 
+	@Comment("Unique identifier of the funding entity, such as a Crossref Funder ID")
 	private String funderIdentifier;
 
+	@Comment("Code assigned by the funder to identify the grant, suggest to use \":unas\" from the Datacite schema if there is no such identifier")
 	@Column(name = "AWARDNUMBER", nullable = false)
 	private String awardNumber;
 
+	@Comment("Title or name of the grant")
 	private String awardTitle;
 
 	/* Needed for JPA */

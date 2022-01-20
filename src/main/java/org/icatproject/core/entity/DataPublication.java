@@ -43,6 +43,7 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataPublication")
 	private List<DataPublicationFunding> fundingReferences = new ArrayList<>();
 
+	@Comment("Persistent Identifier of the publication, such as a DOI")
 	@Column(name = "PID", nullable = false)
 	private String pid;
 

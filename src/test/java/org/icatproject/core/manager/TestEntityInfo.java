@@ -269,7 +269,8 @@ public class TestEntityInfo {
 		testRel(User.class, "From User to InvestigationUser by investigationUsers many setUser",
 				"From User to UserGroup by userGroups many setUser",
 				"From User to InstrumentScientist by instrumentScientists many setUser",
-				"From User to Study by studies many setUser");
+				"From User to Study by studies many setUser",
+				"From User to DataPublicationUser by dataPublicationUsers many setUser");
 
 		testRel(Job.class, "From Job to DataCollection by inputDataCollection one",
 				"From Job to Application by application one", "From Job to DataCollection by outputDataCollection one");
@@ -388,7 +389,7 @@ public class TestEntityInfo {
 		testGetters(Dataset.class, 22);
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
-		testGetters(User.class, 16);
+		testGetters(User.class, 17);
 		testGetters(ParameterType.class, 27);
 		testGetters(Job.class, 9);
 		testGetters(Study.class, 13);
@@ -400,7 +401,7 @@ public class TestEntityInfo {
 		testSetters(Dataset.class, 18);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);
-		testSetters(User.class, 12);
+		testSetters(User.class, 13);
 		testSetters(ParameterType.class, 23);
 		testSetters(Job.class, 5);
 		testSetters(Study.class, 9);
