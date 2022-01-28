@@ -306,7 +306,7 @@ public class TestLucene {
 		gen.writeStartArray();
 		LuceneApi.encodeStringField(gen, "name", "N" + name);
 		LuceneApi.encodeStringField(gen, "units", units);
-		LuceneApi.encodeDoubleField(gen, "numericValue", new Double(j * j));
+		LuceneApi.encodeDoublePoint(gen, "numericValue", new Double(j * j));
 		LuceneApi.encodeSortedDocValuesField(gen, rel, new Long(i));
 		gen.writeEnd();
 		System.out.println(rel + " " + i + " '" + "N" + name + "' '" + units + "' " + new Double(j * j));

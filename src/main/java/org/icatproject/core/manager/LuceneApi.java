@@ -62,8 +62,8 @@ public class LuceneApi {
 		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", timeString).writeEnd();
 	}
 
-	public static void encodeDoubleField(JsonGenerator gen, String name, Double value) {
-		gen.writeStartObject().write("type", "DoubleField").write("name", name).write("value", value)
+	public static void encodeDoublePoint(JsonGenerator gen, String name, Double value) {
+		gen.writeStartObject().write("type", "DoublePoint").write("name", name).write("value", value)
 				.write("store", true).writeEnd();
 	}
 
