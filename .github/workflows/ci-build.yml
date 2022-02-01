@@ -50,15 +50,11 @@ jobs:
       
       - name: Setup Ansible
         run: |
-          cd icat-ansible
-          echo -e "[icat-client-dev-hosts]\nlocalhost ansible_connection=local" > hosts
+          echo -e "[icat-server-dev-hosts]\nlocalhost ansible_connection=local" > hosts
           echo -e "icattravispw" > vault_pass.txt
-          mv ../vault.yml ./group_vars/all
-          mv ../icat-client-dev-hosts.yml .
-          sed -i -e "s/^payara_user: \"glassfish\"/payara_user: \"runner\"/" ./group_vars/all/vars.yml
-          sed -i -e "s/python-pip/python3-pip/" ./roles/dev-common/tasks/main.yml
-          ansible-playbook -vvvv --vault-password-file ./vault_pass.txt --inventory ./hosts ./icat-client-dev-hosts.yml
-          cd ..
+          mv vault.yml icat-ansible/group_vars/all
+          sed -i -e "s/^payara_user: \"glassfish\"/payara_user: \"runner\"/" icat-ansible/group_vars/all/vars.yml
+          ansible-playbook --vault-password-file ./vault_pass.txt --inventory ./hosts icat-ansible/icat-server-dev-hosts.yml
 
       - name: Setup Payara
         run: |
