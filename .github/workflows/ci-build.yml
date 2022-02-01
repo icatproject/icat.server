@@ -1,0 +1,76 @@
+name: CI Build
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: 8
+            experimental: false
+          - version: 11
+            experimental: true
+
+    steps:
+      - name: Checkout ICAT Server
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.version }}
+          distribution: 'temurin'
+
+      - name: Installation
+        run: |
+          sudo pip install wheel ansible pycrypto
+          sudo add-apt-repository universe
+          sudo apt-get update
+
+      - name: Setup python2
+        run: |
+          sudo apt install python2
+          curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+          sudo python2 get-pip.py
+          sudo python2 -m pip install requests requests_toolbelt
+
+      - name: Checkout ICAT Ansible
+        uses: actions/checkout@v2
+        with:
+          repository: icatproject-contrib/icat-ansible
+          path: icat-ansible
+      
+      - name: Setup Ansible
+        run: |
+          cd icat-ansible
+          echo -e "[icat-client-dev-hosts]\nlocalhost ansible_connection=local" > hosts
+          echo -e "icattravispw" > vault_pass.txt
+          mv ../vault.yml ./group_vars/all
+          mv ../icat-client-dev-hosts.yml .
+          sed -i -e "s/^payara_user: \"glassfish\"/payara_user: \"runner\"/" ./group_vars/all/vars.yml
+          sed -i -e "s/python-pip/python3-pip/" ./roles/dev-common/tasks/main.yml
+          ansible-playbook -vvvv --vault-password-file ./vault_pass.txt --inventory ./hosts ./icat-client-dev-hosts.yml
+          cd ..
+
+      - name: Setup Payara
+        run: |
+          grep payara ~/.bash_profile > payara_path_command
+          source payara_path_command
+
+      - name: Test with Maven
+        run: mvn install -B
+
+      - name: After Failure
+        if: ${{ failure() }}
+        run: |
+          cat /home/travis/logs/lucene.log
+          cat /home/travis/logs/icat.log
+          cat /home/travis/payara*/glassfish/domains/domain1/logs/server.log
