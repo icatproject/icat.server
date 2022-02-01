@@ -54,6 +54,7 @@ jobs:
           echo -e "icattravispw" > vault_pass.txt
           mv vault.yml icat-ansible/group_vars/all
           sed -i -e "s/^payara_user: \"glassfish\"/payara_user: \"runner\"/" icat-ansible/group_vars/all/vars.yml
+          sed -i -e "s/python-pip/python3-pip/" icat-ansible/roles/dev-common/tasks/main.yml
           ansible-playbook --vault-password-file ./vault_pass.txt --inventory ./hosts icat-ansible/icat-server-dev-hosts.yml
 
       - name: Setup Payara
