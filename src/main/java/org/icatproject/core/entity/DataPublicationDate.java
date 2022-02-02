@@ -25,7 +25,7 @@ public class DataPublicationDate extends EntityBaseBean implements Serializable 
 	private String dateType;
 
 	@Comment("Use ISO 8601 format, may also be a range")
-	@Column(nullable = false)
+	@Column(name = "DATE_", nullable = false)  // DATE is a reserved word in Oracle
 	private String date;
 
 	/* Needed for JPA */
