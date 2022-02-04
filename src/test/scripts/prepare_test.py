@@ -27,14 +27,13 @@ if not os.path.exists("src/test/install/run.properties"):
     with open("src/test/install/run.properties", "w") as f:
         contents = [
             "lifetimeMinutes = 120",
-            "rootUserNames = db/root simple/root",
+            "rootUserNames = db/root",
             "maxEntities = 10000",
             "maxIdsInQuery = 500",
             "importCacheSize = 50",
             "exportCacheSize = 50",
-            "authn.list = db simple",
+            "authn.list = db",
             "authn.db.url = %s" % icat_url,
-            "authn.simple.url = %s" % icat_url,
             "notification.list = Dataset Datafile",
             "notification.Dataset = CU",
             "notification.Datafile = CU",
