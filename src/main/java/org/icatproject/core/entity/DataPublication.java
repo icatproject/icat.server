@@ -31,6 +31,10 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private DataCollection content;
 
+	@JoinColumn(name = "DATAPUBLICATIONTYPE_ID")
+	@ManyToOne(fetch = FetchType.LAZY)
+	private DataPublicationType type;
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "publication")
 	private List<DataPublicationUser> users = new ArrayList<>();
 
@@ -75,6 +79,10 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 		return content;
 	}
 
+	public DataPublicationType getType() {
+		return type;
+	}
+
 	public List<DataPublicationUser> getUsers() {
 		return users;
 	}
@@ -117,6 +125,10 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 
 	public void setContent(DataCollection content) {
 		this.content = content;
+	}
+
+	public void setType(DataPublicationType type) {
+		this.type = type;
 	}
 
 	public void setUsers(List<DataPublicationUser> users) {
