@@ -39,10 +39,12 @@ import org.icatproject.core.entity.Comment;
 import org.icatproject.core.entity.DataCollection;
 import org.icatproject.core.entity.DataCollectionDatafile;
 import org.icatproject.core.entity.DataCollectionDataset;
+import org.icatproject.core.entity.DataCollectionInvestigation;
 import org.icatproject.core.entity.DataCollectionParameter;
 import org.icatproject.core.entity.DataPublication;
 import org.icatproject.core.entity.DataPublicationDate;
 import org.icatproject.core.entity.DataPublicationFunding;
+import org.icatproject.core.entity.DataPublicationType;
 import org.icatproject.core.entity.DataPublicationUser;
 import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.DatafileFormat;
@@ -207,14 +209,14 @@ public class EntityInfoHandler {
 			UserGroup.class, Rule.class, PublicStep.class, Facility.class, DatafileFormat.class, Application.class,
 			Instrument.class, InvestigationType.class, DatasetType.class, ParameterType.class, SampleType.class,
 			Investigation.class, Sample.class, Dataset.class, Datafile.class, FacilityCycle.class, DataCollection.class,
-			DataCollectionDatafile.class, DataCollectionDataset.class, DataCollectionParameter.class,
-			DatafileParameter.class, DatasetParameter.class, InvestigationParameter.class, Job.class, Keyword.class,
-			Technique.class, DatasetTechnique.class, PermissibleStringValue.class, Publication.class,
-			RelatedDatafile.class, SampleParameter.class, Shift.class, Study.class, DataPublication.class,
-			DataPublicationDate.class, DataPublicationUser.class, Affiliation.class, RelatedIdentifier.class,
-			FundingReference.class, DataPublicationFunding.class, InvestigationFunding.class, InvestigationUser.class,
-			InvestigationGroup.class, StudyInvestigation.class, InvestigationInstrument.class, InstrumentScientist.class,
-			DatasetInstrument.class);
+			DataCollectionDatafile.class, DataCollectionDataset.class, DataCollectionInvestigation.class, 
+			DataCollectionParameter.class, DatafileParameter.class, DatasetParameter.class, InvestigationParameter.class, 
+			Job.class, Keyword.class, Technique.class, DatasetTechnique.class, PermissibleStringValue.class, 
+			Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class, Study.class, 
+			DataPublication.class, DataPublicationDate.class, DataPublicationUser.class, DataPublicationType.class, 
+			Affiliation.class, RelatedIdentifier.class,	FundingReference.class, DataPublicationFunding.class, 
+			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class, 
+			InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class);
 	private static Set<String> entityNames = new HashSet<>();
 
 	private static String[] systemAttributes = { "createId", "createTime", "modId", "modTime" };
