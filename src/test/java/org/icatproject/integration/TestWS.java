@@ -1930,7 +1930,7 @@ public class TestWS {
 		for (Constraint constraint : ei.getConstraints()) {
 			assertEquals(Arrays.asList("facility", "name", "visitId"), constraint.getFieldNames());
 		}
-		assertEquals(28, ei.getFields().size());
+		assertEquals(29, ei.getFields().size());
 		int n = 0;
 		for (EntityField field : ei.getFields()) {
 			if (field.getName().equals("id")) {
@@ -1961,7 +1961,7 @@ public class TestWS {
 				n++;
 			}
 		}
-		assertEquals(24, n);
+		assertEquals(25, n);
 	}
 
 	@Test
