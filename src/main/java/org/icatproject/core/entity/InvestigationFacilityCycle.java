@@ -10,11 +10,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.icatproject.core.manager.LuceneApi;
-
-@Comment("Many to many relationship between investigation and facilityCycle. Allows investigations to belong to"
-         + "multiple cycles at once. This removes the need to calculate which cycle an investigation belongs to based on"
-         + "dates.")
+@Comment("Many to many relationship between investigation and facilityCycle. "
+        + "Allows investigations to belong to multiple cycles at once. "
+        + "This removes the need to calculate which cycle an investigation "
+        + "belongs to based on dates.")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITYCYCLE_ID", "INVESTIGATION_ID" }) })
