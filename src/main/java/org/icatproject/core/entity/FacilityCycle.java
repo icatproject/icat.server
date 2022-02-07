@@ -70,7 +70,9 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
 		return startDate;
 	}
 
-	public List<InvestigationFacilityCycle> getInvestigationFacilityCycles() { return investigationFacilityCycles; }
+	public List<InvestigationFacilityCycle> getInvestigationFacilityCycles() {
+		return investigationFacilityCycles;
+	}
 
 	public void setDescription(String description) {
 		this.description = description;
