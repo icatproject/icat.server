@@ -149,7 +149,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		return keywords;
 	}
 
-	public List<InvestigationFacilityCycle> getInvestigationFacilityCycles() { return investigationFacilityCycles; }
+	public List<InvestigationFacilityCycle> getInvestigationFacilityCycles() {
+		return investigationFacilityCycles;
+	}
 
 	public String getName() {
 		return name;
