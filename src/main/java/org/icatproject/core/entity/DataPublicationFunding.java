@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("Relation between a data publication and a funding reference")
+@Comment("Represents a many-to-many relationship between a data publication and a funding reference")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATAPUBLICATION_ID", "FUNDING_ID" }) })

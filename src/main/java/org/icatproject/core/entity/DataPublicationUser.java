@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("Author, e.g. creator of a or contributor to a data publication")
+@Comment("Author, e.g. creator of or contributor to a data publication")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATAPUBLICATION_ID", "USER_ID", "CONTRIBUTORTYPE" }) })
@@ -31,7 +31,7 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<Affiliation> affiliations = new ArrayList<>();
 
-	@Comment("See DataCite property contributorType or use \"Creator\"")
+	@Comment("Role of that user in the publication, see DataCite property contributorType for suggested values or use \"Creator\"")
 	@Column(name = "CONTRIBUTORTYPE", nullable = false)
 	private String contributorType;
 
