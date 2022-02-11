@@ -245,6 +245,84 @@ public class GateKeeper {
 		return results;
 	}
 
+	public List<Long> getReadableIds(String userId, List<Long> ids,
+			Class<? extends EntityBaseBean> objectClass, EntityManager manager) {
+		if (ids.size() == 0) {
+			return ids;
+		}
+
+		String simpleName = objectClass.getSimpleName();
+		if (rootUserNames.contains(userId)) {
+			logger.info("\"Root\" user " + userId + " is allowed READ to " + simpleName);
+			return ids;
+		}
+
+		TypedQuery<String> query = manager.createNamedQuery(Rule.INCLUDE_QUERY, String.class)
+				.setParameter("member", userId).setParameter("bean", simpleName);
+
+		List<String> restrictions = query.getResultList();
+		logger.debug("Got " + restrictions.size() + " authz queries for READ by " + userId + " to a "
+				+ objectClass.getSimpleName());
+
+		for (String restriction : restrictions) {
+			logger.debug("Query: " + restriction);
+			if (restriction == null) {
+				logger.info("Null restriction => READ permitted to " + simpleName);
+				return ids;
+			}
+		}
+
+		/*
+		 * IDs are processed in batches to avoid Oracle error: ORA-01795:
+		 * maximum number of expressions in a list is 1000
+		 */
+
+		List<String> idLists = new ArrayList<>();
+		StringBuilder sb = null;
+
+		int i = 0;
+		for (Long id : ids) {
+			if (i == 0) {
+				sb = new StringBuilder();
+				sb.append(id);
+				i = 1;
+			} else {
+				sb.append("," + id);
+				i++;
+			}
+			if (i == maxIdsInQuery) {
+				i = 0;
+				idLists.add(sb.toString());
+				sb = null;
+			}
+		}
+		if (sb != null) {
+			idLists.add(sb.toString());
+		}
+
+		logger.debug("Check readability of " + ids.size() + " beans has been divided into " + idLists.size()
+				+ " queries.");
+
+		Set<Long> readableIds = new HashSet<>();
+		for (String idList : idLists) {
+			for (String qString : restrictions) {
+				TypedQuery<Long> q = manager.createQuery(qString.replace(":pkids", idList), Long.class);
+				if (qString.contains(":user")) {
+					q.setParameter("user", userId);
+				}
+				readableIds.addAll(q.getResultList());
+			}
+		}
+
+		List<Long> results = new ArrayList<>();
+		for (Long id : ids) {
+			if (readableIds.contains(id)) {
+				results.add(id);
+			}
+		}
+		return results;
+	}
+
 	public Set<String> getRootUserNames() {
 		return rootUserNames;
 	}
