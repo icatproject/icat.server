@@ -7,8 +7,8 @@ on:
       - master
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build_and_tests:
+    runs-on: ubuntu-20.04
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
@@ -20,54 +20,67 @@ jobs:
             experimental: true
 
     steps:
-      - name: Checkout ICAT Server
-        uses: actions/checkout@v2
-
-      - name: Set up JDK
+      # Setup Java & Python
+      - name: Setup Java
         uses: actions/setup-java@v2
         with:
-          java-version: ${{ matrix.version }}
           distribution: 'temurin'
+          java-version: ${{ matrix.version }}
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9.7"
+          architecture: x64
 
-      - name: Installation
-        run: |
-          sudo pip install wheel ansible pycrypto
-          sudo add-apt-repository universe
-          sudo apt-get update
-
-      - name: Setup python2
-        run: |
-          sudo apt install python2
-          curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
-          sudo python2 get-pip.py
-          sudo python2 -m pip install requests requests_toolbelt
-
-      - name: Checkout ICAT Ansible
+      # ICAT Ansible clone and install dependencies
+      - name: Checkout icat-ansible
         uses: actions/checkout@v2
         with:
           repository: icatproject-contrib/icat-ansible
           path: icat-ansible
-      
-      - name: Setup Ansible
-        run: |
-          echo -e "[icat-server-dev-hosts]\nlocalhost ansible_connection=local" > hosts
-          echo -e "icattravispw" > vault_pass.txt
-          mv vault.yml icat-ansible/group_vars/all
-          sed -i -e "s/^payara_user: \"glassfish\"/payara_user: \"runner\"/" icat-ansible/group_vars/all/vars.yml
-          sed -i -e "s/python-pip/python3-pip/" icat-ansible/roles/dev-common/tasks/main.yml
-          ansible-playbook --vault-password-file ./vault_pass.txt --inventory ./hosts icat-ansible/icat-server-dev-hosts.yml
+      - name: Install Ansible
+        run: pip install -r icat-ansible/requirements.txt
 
-      - name: Setup Payara
+      # Prep for running the playbook
+      - name: Create Hosts File
+        run: echo -e "[icat-server-dev-hosts]\nlocalhost ansible_connection=local" > icat-ansible/hosts
+      - name: Prepare vault pass
+        run: echo -e "icattravispw" > icat-ansible/vault_pass.txt
+      - name: Move vault to directory it'll get detected by Ansible
+        run: mv icat-ansible/vault.yml icat-ansible/group_vars/all
+      - name: Replace default payara user with Actions user
+        run: |
+          sed -i -e "s/^payara_user: \"glassfish\"/payara_user: \"runner\"/" icat-ansible/group_vars/all/vars.yml
+
+      # Force hostname to localhost - bug fix for previous ICAT Ansible issues on Actions
+      - name: Change hostname to localhost
+        run: sudo hostname -b localhost
+
+      # Create local instance of ICAT
+      - name: Run ICAT Ansible Playbook
+        run: |
+          ansible-playbook icat-ansible/icat-server-dev-hosts.yml -i icat-ansible/hosts --vault-password-file icat-ansible/vault_pass.txt -vv
+
+      # The icat-server deployed by ansible needs to be undeployed so that the build can run
+      - name: Undeploy icat-server
+        run: |
+          cd /home/runner/payara*/glassfish*/bin
+          PATH=$PATH:`pwd`
+          asadmin undeploy `asadmin list-applications | grep icat.server | awk '{print $1;}'`
+
+      - name: Checkout icat-server
+        uses: actions/checkout@v2
+
+      # Payara must be sourced otherwise the Maven build command fails
+      - name: Run Build
         run: |
           grep payara ~/.bash_profile > payara_path_command
           source payara_path_command
-
-      - name: Test with Maven
-        run: mvn install -B
+          mvn install -DskipTests
 
       - name: After Failure
         if: ${{ failure() }}
         run: |
-          cat /home/travis/logs/lucene.log
-          cat /home/travis/logs/icat.log
-          cat /home/travis/payara*/glassfish/domains/domain1/logs/server.log
+          cat /home/runner/logs/lucene.log
+          cat /home/runner/logs/icat.log
+          cat /home/runner/payara*/glassfish/domains/domain1/logs/server.log
