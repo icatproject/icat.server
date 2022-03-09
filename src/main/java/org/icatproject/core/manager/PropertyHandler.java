@@ -302,6 +302,7 @@ public class PropertyHandler {
 	private String digestKey;
 	private URL luceneUrl;
 	private int lucenePopulateBlockSize;
+	private int luceneSearchBlockSize;
 	private Path luceneDirectory;
 	private long luceneBacklogHandlerIntervalMillis;
 	private Map<String, String> cluster = new HashMap<>();
@@ -460,8 +461,11 @@ public class PropertyHandler {
 				luceneUrl = props.getURL("lucene.url");
 				formattedProps.add("lucene.url" + " " + luceneUrl);
 
-				lucenePopulateBlockSize = props.getPositiveInt("lucene.populateBlockSize");
+				lucenePopulateBlockSize = props.getPositiveInt("lucene.searchBlockSize");
 				formattedProps.add("lucene.populateBlockSize" + " " + lucenePopulateBlockSize);
+
+				luceneSearchBlockSize = props.getPositiveInt("lucene.searchBlockSize");
+				formattedProps.add("lucene.searchBlockSize" + " " + luceneSearchBlockSize);
 
 				luceneDirectory = props.getPath("lucene.directory");
 				if (!luceneDirectory.toFile().isDirectory()) {
@@ -610,6 +614,10 @@ public class PropertyHandler {
 
 	public int getLucenePopulateBlockSize() {
 		return lucenePopulateBlockSize;
+	}
+
+	public int getLuceneSearchBlockSize() {
+		return luceneSearchBlockSize;
 	}
 
 	public long getLuceneBacklogHandlerIntervalMillis() {

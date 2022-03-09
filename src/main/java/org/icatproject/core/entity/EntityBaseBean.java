@@ -31,6 +31,7 @@ import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.manager.HasEntityId;
 import org.icatproject.core.manager.LuceneManager;
 import org.icatproject.core.parser.IncludeClause.Step;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 @MappedSuperclass
-public abstract class EntityBaseBean implements Serializable {
+public abstract class EntityBaseBean implements HasEntityId, Serializable {
 
 	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 

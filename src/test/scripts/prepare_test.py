@@ -41,6 +41,7 @@ if not os.path.exists("src/test/install/run.properties"):
             "log.list = SESSION WRITE READ INFO",
             "lucene.url = %s" % lucene_url,
             "lucene.populateBlockSize = 10000",
+            "lucene.searchBlockSize = 1000",
             "lucene.directory = %s/data/lucene" % subst["HOME"],
             "lucene.backlogHandlerIntervalSeconds = 60",
             "lucene.enqueuedRequestIntervalSeconds = 3",
