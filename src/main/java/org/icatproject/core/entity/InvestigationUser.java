@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("Many to many relationship between investigation and user. It is expected that this will show the association of "
 		+ "individual users with an investigation which might be derived from the proposal. It may also be used as the "
@@ -38,12 +38,12 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
 		if (user.getFullName() != null) {
-			LuceneApi.encodeTextfield(gen, "text", user.getFullName());
+			searchApi.encodeTextField(gen, "text", user.getFullName());
 		}
-		LuceneApi.encodeStringField(gen, "name", user.getName());
-		LuceneApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
+		searchApi.encodeStringField(gen, "name", user.getName());
+		searchApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
 	}
 
 	public String getRole() {

@@ -103,7 +103,7 @@ public class EntityInfoHandler {
 		public Map<String, Method> gettersFromName;
 		public Map<String, Relationship> relationshipsByName;
 		public Set<Field> relInKey;
-		private boolean hasLuceneDoc;
+		private boolean hasSearchDoc;
 
 		public PrivateEntityInfo(Set<Relationship> rels, List<Field> notNullableFields, Map<Field, Method> getters,
 				Map<String, Method> gettersFromName, Map<Field, Integer> stringFields, Map<Field, Method> setters,
@@ -111,7 +111,7 @@ public class EntityInfoHandler {
 				Map<Field, String> fieldComments, Set<Relationship> ones, Set<Field> attributes,
 				Constructor<? extends EntityBaseBean> constructor, Map<String, Field> fieldByName, String exportHeader,
 				String exportNull, List<Field> fields, String exportHeaderAll,
-				Map<String, Relationship> relationshipsByName, Set<Field> relInKey, boolean hasLuceneDoc) {
+				Map<String, Relationship> relationshipsByName, Set<Field> relInKey, boolean hasSearchDoc) {
 			this.relatedEntities = rels;
 			this.notNullableFields = notNullableFields;
 			this.getters = getters;
@@ -132,7 +132,7 @@ public class EntityInfoHandler {
 			this.exportHeaderAll = exportHeaderAll;
 			this.relationshipsByName = relationshipsByName;
 			this.relInKey = relInKey;
-			this.hasLuceneDoc = hasLuceneDoc;
+			this.hasSearchDoc = hasSearchDoc;
 		}
 	}
 
@@ -591,17 +591,17 @@ public class EntityInfoHandler {
 			}
 		}
 
-		boolean hasLuceneDoc = true;
+		boolean hasSearchDoc = true;
 		try {
-			objectClass.getDeclaredMethod("getDoc", JsonGenerator.class);
+			objectClass.getDeclaredMethod("getDoc", JsonGenerator.class, SearchApi.class);
 		} catch (NoSuchMethodException e) {
-			hasLuceneDoc = false;
+			hasSearchDoc = false;
 		}
 
 		return new PrivateEntityInfo(rels, notNullableFields, getters, gettersFromName, stringFields, setters, updaters,
 				constraintFields, commentString, comments, ones, attributes, constructor, fieldsByName,
 				exportHeader.toString(), exportNull.toString(), fields, exportHeaderAll.toString(), relationshipsByName,
-				relInKey, hasLuceneDoc);
+				relInKey, hasSearchDoc);
 	}
 
 	/**
@@ -945,7 +945,7 @@ public class EntityInfoHandler {
 	}
 
 	/** Return true if getDoc() method exists else false */
-	public boolean hasLuceneDoc(Class<? extends EntityBaseBean> objectClass) throws IcatException {
+	public boolean hasSearchDoc(Class<? extends EntityBaseBean> objectClass) throws IcatException {
 		PrivateEntityInfo ei = null;
 		synchronized (this.map) {
 			ei = this.map.get(objectClass);
@@ -953,7 +953,7 @@ public class EntityInfoHandler {
 				ei = this.buildEi(objectClass);
 				this.map.put(objectClass, ei);
 			}
-			return ei.hasLuceneDoc;
+			return ei.hasSearchDoc;
 		}
 	}
 

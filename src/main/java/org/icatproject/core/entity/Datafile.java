@@ -20,7 +20,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("A data file")
 @SuppressWarnings("serial")
@@ -194,7 +194,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
 		StringBuilder sb = new StringBuilder(name);
 		if (description != null) {
 			sb.append(" " + description);
@@ -205,15 +205,17 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		if (datafileFormat != null) {
 			sb.append(" " + datafileFormat.getName());
 		}
-		LuceneApi.encodeTextfield(gen, "text", sb.toString());
+		searchApi.encodeTextField(gen, "text", sb.toString());
 		if (datafileModTime != null) {
-			LuceneApi.encodeStringField(gen, "date", datafileModTime);
+			searchApi.encodeStringField(gen, "date", datafileModTime);
 		} else if (datafileCreateTime != null) {
-			LuceneApi.encodeStringField(gen, "date", datafileCreateTime);
+			searchApi.encodeStringField(gen, "date", datafileCreateTime);
 		} else {
-			LuceneApi.encodeStringField(gen, "date", modTime);
+			searchApi.encodeStringField(gen, "date", modTime);
 		}
-		LuceneApi.encodeStoredId(gen, id);
-		LuceneApi.encodeStringField(gen, "dataset", dataset.id);
+		searchApi.encodeStoredId(gen, id);
+		searchApi.encodeStringField(gen, "dataset", dataset.id);
+
+		// TODO User and Parameter support for Elasticsearch
 	}
 }

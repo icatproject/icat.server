@@ -11,7 +11,6 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -36,7 +34,6 @@ import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
-import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
@@ -71,13 +68,15 @@ import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
+import org.icatproject.core.entity.Datafile;
+import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.ParameterPOJO;
 import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
@@ -94,24 +93,6 @@ public class ICATRest {
 	private static Logger logger = LoggerFactory.getLogger(ICATRest.class);
 
 	private final static DateFormat df8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-
-	private static SimpleDateFormat df;
-
-	static {
-		df = new SimpleDateFormat("yyyyMMddHHmm");
-		TimeZone tz = TimeZone.getTimeZone("GMT");
-		df.setTimeZone(tz);
-	}
-
-	private static Date dec(String value) throws java.text.ParseException {
-		if (value == null) {
-			return null;
-		} else {
-			synchronized (df) {
-				return df.parse(value);
-			}
-		}
-	}
 
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
@@ -935,6 +916,7 @@ public class ICATRest {
 		beanManager.logout(sessionId, manager, userTransaction, request.getRemoteAddr());
 	}
 
+	// TODO update endpoints to be generic
 	/**
 	 * perform a lucene search
 	 * 
@@ -1037,7 +1019,7 @@ public class ICATRest {
 	@GET
 	@Path("lucene/data")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String lucene(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
+	public String search(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
 			@QueryParam("query") String query, @QueryParam("maxCount") int maxCount) throws IcatException {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
@@ -1047,63 +1029,41 @@ public class ICATRest {
 		try (JsonReader jr = Json.createReader(new ByteArrayInputStream(query.getBytes()))) {
 			JsonObject jo = jr.readObject();
 			String target = jo.getString("target", null);
-			String user = jo.getString("user", null);
-			String text = jo.getString("text", null);
-			String lower = jo.getString("lower", null);
-			String upper = jo.getString("upper", null);
-			List<ParameterPOJO> parms = new ArrayList<>();
 			if (jo.containsKey("parameters")) {
 				for (JsonValue val : jo.getJsonArray("parameters")) {
-					JsonObject parm = (JsonObject) val;
-					String name = parm.getString("name", null);
+					JsonObject parameter = (JsonObject) val;
+					String name = parameter.getString("name", null);
 					if (name == null) {
 						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "name not set in one of parameters");
 					}
-					String units = parm.getString("units", null);
+					String units = parameter.getString("units", null);
 					if (units == null) {
 						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 								"units not set in parameter '" + name + "'");
 					}
-					if (parm.containsKey("stringValue")) {
-						parms.add(new ParameterPOJO(name, units, parm.getString("stringValue")));
-					} else if (parm.containsKey("lowerDateValue") && parm.containsKey("upperDateValue")) {
-						synchronized (df) {
-							parms.add(new ParameterPOJO(name, units, df.parse(parm.getString("lowerDateValue")),
-									df.parse(parm.getString("upperDateValue"))));
-						}
-					} else if (parm.containsKey("lowerNumericValue") && parm.containsKey("upperNumericValue")) {
-						parms.add(new ParameterPOJO(name, units, parm.getJsonNumber("lowerNumericValue").doubleValue(),
-								parm.getJsonNumber("upperNumericValue").doubleValue()));
-					} else {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER, parm.toString());
+					// If we don't have either a string, pair of dates, or pair of numbers, then throw
+					if (!(parameter.containsKey("stringValue")
+							|| (parameter.containsKey("lowerDateValue")
+								&& parameter.containsKey("upperDateValue"))
+							|| (parameter.containsKey("lowerNumericValue")
+								&& parameter.containsKey("upperNumericValue")))) {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER, parameter.toString());
 					}
 				}
 			}
 			List<ScoredEntityBaseBean> objects;
+			Class<? extends EntityBaseBean> klass;
 
 			if (target.equals("Investigation")) {
-				List<String> samples = new ArrayList<>();
-				if (jo.containsKey("samples")) {
-					for (JsonValue val : jo.getJsonArray("samples")) {
-						JsonString samp = (JsonString) val;
-						samples.add(samp.getString());
-					}
-				}
-				String userFullName = jo.getString("userFullName", null);
-				objects = beanManager.luceneInvestigations(userName, user, text, dec(lower), dec(upper), parms, samples,
-						userFullName, maxCount, manager, request.getRemoteAddr());
-
+				klass = Investigation.class;
 			} else if (target.equals("Dataset")) {
-				objects = beanManager.luceneDatasets(userName, user, text, dec(lower), dec(upper), parms, maxCount,
-						manager, request.getRemoteAddr());
-
+				klass = Dataset.class;
 			} else if (target.equals("Datafile")) {
-				objects = beanManager.luceneDatafiles(userName, user, text, dec(lower), dec(upper), parms, maxCount,
-						manager, request.getRemoteAddr());
-
+				klass = Datafile.class;
 			} else {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
 			}
+			objects = beanManager.freeTextSearch(userName, jo, maxCount, manager, request.getRemoteAddr(), klass);
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartArray();
 			for (ScoredEntityBaseBean sb : objects) {
@@ -1117,8 +1077,6 @@ public class ICATRest {
 			return baos.toString();
 		} catch (JsonException e) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "JsonException " + e.getMessage());
-		} catch (ParseException e) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "ParserException " + e.getMessage());
 		}
 	}
 
@@ -1156,6 +1114,7 @@ public class ICATRest {
 		gatekeeper.markPublicStepsStale();
 	}
 
+	// TODO generalise endpoints
 	/**
 	 * Stop population of the lucene database if it is running.
 	 * 
@@ -1169,11 +1128,12 @@ public class ICATRest {
 	 */
 	@DELETE
 	@Path("lucene/db")
-	public void luceneClear(@QueryParam("sessionId") String sessionId) throws IcatException {
+	public void searchClear(@QueryParam("sessionId") String sessionId) throws IcatException {
 		checkRoot(sessionId);
-		beanManager.luceneClear();
+		beanManager.searchClear();
 	}
 
+	// TODO generalise endpoints
 	/**
 	 * Forces a commit of the lucene database
 	 * 
@@ -1187,11 +1147,12 @@ public class ICATRest {
 	 */
 	@POST
 	@Path("lucene/db")
-	public void luceneCommit(@FormParam("sessionId") String sessionId) throws IcatException {
+	public void searchCommit(@FormParam("sessionId") String sessionId) throws IcatException {
 		checkRoot(sessionId);
-		beanManager.luceneCommit();
+		beanManager.searchCommit();
 	}
 
+	// TODO generalise endpoints
 	/**
 	 * Return a list of class names for which population is going on
 	 * 
@@ -1207,12 +1168,12 @@ public class ICATRest {
 	@GET
 	@Path("lucene/db")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String luceneGetPopulating(@QueryParam("sessionId") String sessionId) throws IcatException {
+	public String searchGetPopulating(@QueryParam("sessionId") String sessionId) throws IcatException {
 		checkRoot(sessionId);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
 		gen.writeStartArray();
-		for (String name : beanManager.luceneGetPopulating()) {
+		for (String name : beanManager.searchGetPopulating()) {
 			gen.write(name);
 		}
 		gen.writeEnd().close();
@@ -1243,6 +1204,7 @@ public class ICATRest {
 		}
 	}
 
+	// TODO generalise endpoints
 	/**
 	 * Clear and repopulate lucene documents for the specified entityName
 	 * 
@@ -1260,10 +1222,10 @@ public class ICATRest {
 	 */
 	@POST
 	@Path("lucene/db/{entityName}/{minid}")
-	public void lucenePopulate(@FormParam("sessionId") String sessionId, @PathParam("entityName") String entityName,
+	public void searchPopulate(@FormParam("sessionId") String sessionId, @PathParam("entityName") String entityName,
 			@PathParam("minid") long minid) throws IcatException {
 		checkRoot(sessionId);
-		beanManager.lucenePopulate(entityName, minid, manager);
+		beanManager.searchPopulate(entityName, minid, manager);
 	}
 
 	/**

@@ -8,12 +8,13 @@ import shutil
 from zipfile import ZipFile
 import subprocess
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     raise RuntimeError("Wrong number of arguments")
 
 containerHome = sys.argv[1]
 icat_url = sys.argv[2]
 lucene_url = sys.argv[3]
+search_urls = sys.argv[4]
 
 subst = dict(os.environ)
 
@@ -39,11 +40,12 @@ if not os.path.exists("src/test/install/run.properties"):
             "notification.Dataset = CU",
             "notification.Datafile = CU",
             "log.list = SESSION WRITE READ INFO",
-            "lucene.url = %s" % lucene_url,
-            "lucene.populateBlockSize = 10000",
-            "lucene.directory = %s/data/lucene" % subst["HOME"],
-            "lucene.backlogHandlerIntervalSeconds = 60",
-            "lucene.enqueuedRequestIntervalSeconds = 3",
+            "search.engine = LUCENE",  # TODO how to allow us to test other engines?
+            "search.urls = %s" % lucene_url,
+            "search.populateBlockSize = 10000",
+            "search.directory = %s/data/search" % subst["HOME"],
+            "search.backlogHandlerIntervalSeconds = 60",
+            "search.enqueuedRequestIntervalSeconds = 3",
             "key = wombat"
         ]
         f.write("\n".join(contents))

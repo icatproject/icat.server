@@ -444,9 +444,9 @@ public class WSession {
 		icat.logout(sessionId);
 	}
 
-	// This assumes that the lucene.commitSeconds is set to 1 for testing
+	// This assumes that the search.commitSeconds is set to 1 for testing
 	// purposes
-	public void synchLucene() throws InterruptedException {
+	public void synchSearch() throws InterruptedException {
 		Thread.sleep(2000);
 	}
 

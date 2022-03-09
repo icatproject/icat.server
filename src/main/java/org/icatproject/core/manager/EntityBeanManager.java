@@ -61,9 +61,7 @@ import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.Datafile;
-import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
-import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
@@ -135,7 +133,7 @@ public class EntityBeanManager {
 	Transmitter transmitter;
 
 	@EJB
-	LuceneManager lucene;
+	SearchManager searchManager;
 
 	private boolean log;
 
@@ -145,7 +143,7 @@ public class EntityBeanManager {
 
 	private Map<String, NotificationRequest> notificationRequests;
 
-	private boolean luceneActive;
+	private boolean searchActive;
 
 	private int maxEntities;
 
@@ -252,8 +250,8 @@ public class EntityBeanManager {
 
 				long beanId = bean.getId();
 
-				if (luceneActive) {
-					bean.addToLucene(lucene);
+				if (searchActive) {
+					bean.addToSearch(searchManager);
 				}
 				userTransaction.commit();
 				if (logRequests.contains(CallType.WRITE)) {
@@ -383,9 +381,9 @@ public class EntityBeanManager {
 					transmitter.processMessage("createMany", ip, baos.toString(), startMillis);
 				}
 
-				if (luceneActive) {
+				if (searchActive) {
 					for (EntityBaseBean bean : beans) {
-						bean.addToLucene(lucene);
+						bean.addToSearch(searchManager);
 					}
 				}
 
@@ -502,9 +500,9 @@ public class EntityBeanManager {
 
 				userTransaction.commit();
 
-				if (luceneActive) {
+				if (searchActive) {
 					for (EntityBaseBean bean : allBeansToDelete) {
-						lucene.deleteDocument(bean);
+						searchManager.deleteDocument(bean);
 					}
 				}
 
@@ -785,7 +783,7 @@ public class EntityBeanManager {
 			int maxCount, String userId, EntityManager manager, Class<? extends EntityBaseBean> klass)
 			throws IcatException {
 
-		logger.debug("Got " + allResults.size() + " results from Lucene");
+		logger.debug("Got " + allResults.size() + " results from search engine");
 		for (ScoredEntityBaseBean sr : allResults) {
 			long entityId = sr.getEntityBaseBeanId();
 			EntityBaseBean beanManaged = manager.find(klass, entityId);
@@ -1152,7 +1150,7 @@ public class EntityBeanManager {
 		logRequests = propertyHandler.getLogSet();
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
-		luceneActive = lucene.isActive();
+		searchActive = searchManager.isActive();
 		maxEntities = propertyHandler.getMaxEntities();
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
@@ -1378,87 +1376,64 @@ public class EntityBeanManager {
 		return results.get(0);
 	}
 
-	public void luceneClear() throws IcatException {
-		if (luceneActive) {
-			lucene.clear();
+	public void searchClear() throws IcatException {
+		if (searchActive) {
+			searchManager.clear();
 		}
 	}
 
-	public void luceneCommit() throws IcatException {
-		if (luceneActive) {
-			lucene.commit();
+	public void searchCommit() throws IcatException {
+		if (searchActive) {
+			searchManager.commit();
 		}
 	}
 
-	public List<ScoredEntityBaseBean> luceneDatafiles(String userName, String user, String text, Date lower, Date upper,
-			List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip) throws IcatException {
+	public List<ScoredEntityBaseBean> freeTextSearch(String userName, JsonObject jo, int maxCount,
+			EntityManager manager, String ip, Class<? extends EntityBaseBean> klass) throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
-		if (luceneActive) {
-			LuceneSearchResult last = null;
-			Long uid = null;
+		if (searchActive) {
+			SearchResult last = null;
+			String uid = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to Lucene
+			 * don't make a huge number of calls to search engine
 			 */
 			int blockSize = Math.max(1000, maxCount);
 
 			do {
 				if (last == null) {
-					last = lucene.datafiles(user, text, lower, upper, parms, blockSize);
+					last = searchManager.freeTextSearch(jo, blockSize);
 					uid = last.getUid();
 				} else {
-					last = lucene.datafilesAfter(uid, blockSize);
+					last = searchManager.freeTextSearch(uid, jo, blockSize);
 				}
 				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userName, manager, Datafile.class);
+				filterReadAccess(results, allResults, maxCount, userName, manager, klass);
 			} while (results.size() != maxCount && allResults.size() == blockSize);
-			/* failing lucene retrieval calls clean up before throwing */
-			lucene.freeSearcher(uid);
-		}
+			/* failing retrieval calls clean up before throwing */
+			searchManager.freeSearcher(uid);
 
-		if (logRequests.contains("R")) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-				gen.write("userName", userName);
-				if (results.size() > 0) {
-					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+			// TODO move this to somewhere we can manually call it
+			if (results.size() > 0) {
+				/* Get facets for the filtered list of IDs */
+				String facetText = "";
+				for (ScoredEntityBaseBean result: results) {
+					facetText += " id:" + result.getEntityBaseBeanId();
 				}
-				gen.writeEnd();
+				JsonObject facetQuery = Json.createObjectBuilder()
+						.add("target", jo.getString("target"))
+						.add("text", facetText.substring(1))
+						.build();
+				List<FacetDimension> facets = searchManager.facetSearch(facetQuery, blockSize, 100); // TODO remove hardcode
+				for (FacetDimension dimension: facets) {
+					logger.debug("Facet dimension: {}", dimension.getDimension());
+					for (FacetLabel facet: dimension.getFacets()) {
+						logger.debug("{}: {}", facet.getLabel(), facet.getValue());
+					}
+				}
 			}
-			transmitter.processMessage("luceneDatafiles", ip, baos.toString(), startMillis);
-		}
-		logger.debug("Returning {} results", results.size());
-		return results;
-	}
-
-	public List<ScoredEntityBaseBean> luceneDatasets(String userName, String user, String text, Date lower, Date upper,
-			List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip) throws IcatException {
-		long startMillis = log ? System.currentTimeMillis() : 0;
-		List<ScoredEntityBaseBean> results = new ArrayList<>();
-		if (luceneActive) {
-			LuceneSearchResult last = null;
-			Long uid = null;
-			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
-			/*
-			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to Lucene
-			 */
-			int blockSize = Math.max(1000, maxCount);
-
-			do {
-				if (last == null) {
-					last = lucene.datasets(user, text, lower, upper, parms, blockSize);
-					uid = last.getUid();
-				} else {
-					last = lucene.datasetsAfter(uid, blockSize);
-				}
-				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userName, manager, Dataset.class);
-			} while (results.size() != maxCount && allResults.size() == blockSize);
-			/* failing lucene retrieval calls clean up before throwing */
-			lucene.freeSearcher(uid);
 		}
 		if (logRequests.contains("R")) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1469,71 +1444,28 @@ public class EntityBeanManager {
 				}
 				gen.writeEnd();
 			}
-			transmitter.processMessage("luceneDatasets", ip, baos.toString(), startMillis);
+			transmitter.processMessage("freeTextSearch", ip, baos.toString(), startMillis);
 		}
 		logger.debug("Returning {} results", results.size());
 		return results;
 	}
 
-	public List<String> luceneGetPopulating() {
-		if (luceneActive) {
-			return lucene.getPopulating();
+	public List<String> searchGetPopulating() {
+		if (searchActive) {
+			return searchManager.getPopulating();
 		} else {
 			return Collections.emptyList();
 		}
 	}
 
-	public List<ScoredEntityBaseBean> luceneInvestigations(String userName, String user, String text, Date lower,
-			Date upper, List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxCount,
-			EntityManager manager, String ip) throws IcatException {
-		long startMillis = log ? System.currentTimeMillis() : 0;
-		List<ScoredEntityBaseBean> results = new ArrayList<>();
-		if (luceneActive) {
-			LuceneSearchResult last = null;
-			Long uid = null;
-			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
-			/*
-			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to Lucene
-			 */
-			int blockSize = Math.max(1000, maxCount);
-
-			do {
-				if (last == null) {
-					last = lucene.investigations(user, text, lower, upper, parms, samples, userFullName, blockSize);
-					uid = last.getUid();
-				} else {
-					last = lucene.investigationsAfter(uid, blockSize);
-				}
-				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userName, manager, Investigation.class);
-			} while (results.size() != maxCount && allResults.size() == blockSize);
-			/* failing lucene retrieval calls clean up before throwing */
-			lucene.freeSearcher(uid);
-		}
-		if (logRequests.contains("R")) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-				gen.write("userName", userName);
-				if (results.size() > 0) {
-					gen.write("entityId", results.get(0).getEntityBaseBeanId());
-				}
-				gen.writeEnd();
-			}
-			transmitter.processMessage("luceneInvestigations", ip, baos.toString(), startMillis);
-		}
-		logger.debug("Returning {} results", results.size());
-		return results;
-	}
-
-	public void lucenePopulate(String entityName, long minid, EntityManager manager) throws IcatException {
-		if (luceneActive) {
+	public void searchPopulate(String entityName, long minid, EntityManager manager) throws IcatException {
+		if (searchActive) {
 			try {
 				Class.forName(Constants.ENTITY_PREFIX + entityName);
 			} catch (ClassNotFoundException e) {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
 			}
-			lucene.populate(entityName, minid);
+			searchManager.populate(entityName, minid);
 		}
 	}
 
@@ -1902,8 +1834,8 @@ public class EntityBeanManager {
 					}
 					transmitter.processMessage("update", ip, baos.toString(), startMillis);
 				}
-				if (luceneActive) {
-					lucene.updateDocument(beanManaged);
+				if (searchActive) {
+					searchManager.updateDocument(beanManaged);
 				}
 				return notification;
 			} catch (IcatException e) {
@@ -1975,7 +1907,7 @@ public class EntityBeanManager {
 				userTransaction.commit();
 
 				/*
-				 * Nothing should be able to go wrong now so log, update lucene
+				 * Nothing should be able to go wrong now so log, update
 				 * and send notification messages
 				 */
 				if (logRequests.contains(CallType.WRITE)) {
@@ -2001,12 +1933,12 @@ public class EntityBeanManager {
 					}
 				}
 
-				if (luceneActive) {
+				if (searchActive) {
 					for (EntityBaseBean eb : creates) {
-						lucene.addDocument(eb);
+						searchManager.addDocument(eb);
 					}
 					for (EntityBaseBean eb : updates) {
-						lucene.updateDocument(eb);
+						searchManager.updateDocument(eb);
 					}
 				}
 
@@ -2339,7 +2271,7 @@ public class EntityBeanManager {
 		}
 
 		/*
-		 * Nothing should be able to go wrong now so log, update lucene and send
+		 * Nothing should be able to go wrong now so log, update and send
 		 * notification messages
 		 */
 		if (logRequests.contains(CallType.WRITE)) {
@@ -2354,9 +2286,9 @@ public class EntityBeanManager {
 			transmitter.processMessage("write", ip, baos.toString(), startMillis);
 		}
 
-		if (luceneActive) {
+		if (searchActive) {
 			for (EntityBaseBean c : clonedTo.values()) {
-				lucene.addDocument(c);
+				searchManager.addDocument(c);
 			}
 		}
 

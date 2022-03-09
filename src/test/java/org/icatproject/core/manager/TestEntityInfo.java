@@ -45,7 +45,7 @@ public class TestEntityInfo {
 	}
 
 	@Test
-	public void testHasLuceneDoc() throws Exception {
+	public void testHasSearchDoc() throws Exception {
 		Set<String> docdbeans = new HashSet<>(Arrays.asList("Investigation", "Dataset", "Datafile",
 				"InvestigationParameter", "DatasetParameter", "DatafileParameter", "InvestigationUser", "Sample"));
 		for (String beanName : EntityInfoHandler.getEntityNamesList()) {
@@ -53,9 +53,9 @@ public class TestEntityInfo {
 			Class<? extends EntityBaseBean> bean = (Class<? extends EntityBaseBean>) Class
 					.forName(Constants.ENTITY_PREFIX + beanName);
 			if (docdbeans.contains(beanName)) {
-				assertTrue(eiHandler.hasLuceneDoc(bean));
+				assertTrue(eiHandler.hasSearchDoc(bean));
 			} else {
-				assertFalse(eiHandler.hasLuceneDoc(bean));
+				assertFalse(eiHandler.hasSearchDoc(bean));
 			}
 		}
 	}

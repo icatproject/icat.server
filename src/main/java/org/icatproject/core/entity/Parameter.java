@@ -17,7 +17,7 @@ import javax.persistence.TemporalType;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.manager.SearchApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,15 +162,15 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
-		LuceneApi.encodeStringField(gen, "name", type.getName());
-		LuceneApi.encodeStringField(gen, "units", type.getUnits());
+	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
+		searchApi.encodeStringField(gen, "name", type.getName());
+		searchApi.encodeStringField(gen, "units", type.getUnits());
 		if (stringValue != null) {
-			LuceneApi.encodeStringField(gen, "stringValue", stringValue);
+			searchApi.encodeStringField(gen, "stringValue", stringValue);
 		} else if (numericValue != null) {
-			LuceneApi.encodeDoublePoint(gen, "numericValue", numericValue);
+			searchApi.encodeDoublePoint(gen, "numericValue", numericValue);
 		} else if (dateTimeValue != null) {
-			LuceneApi.encodeStringField(gen, "dateTimeValue", dateTimeValue);
+			searchApi.encodeStringField(gen, "dateTimeValue", dateTimeValue);
 		}
 	}
 

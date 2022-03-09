@@ -18,7 +18,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
-import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("An investigation or experiment")
 @SuppressWarnings("serial")
@@ -258,7 +258,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
 		StringBuilder sb = new StringBuilder(visitId + " " + name + " " + facility.getName() + " " + type.getName());
 		if (summary != null) {
 			sb.append(" " + summary);
@@ -269,22 +269,49 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		if (title != null) {
 			sb.append(" " + title);
 		}
-		LuceneApi.encodeTextfield(gen, "text", sb.toString());
+		searchApi.encodeTextField(gen, "text", sb.toString());
 
 		if (startDate != null) {
-			LuceneApi.encodeStringField(gen, "startDate", startDate);
+			searchApi.encodeStringField(gen, "startDate", startDate);
 		} else {
-			LuceneApi.encodeStringField(gen, "startDate", createTime);
+			searchApi.encodeStringField(gen, "startDate", createTime);
 		}
 
 		if (endDate != null) {
-			LuceneApi.encodeStringField(gen, "endDate", endDate);
+			searchApi.encodeStringField(gen, "endDate", endDate);
 		} else {
-			LuceneApi.encodeStringField(gen, "endDate", modTime);
+			searchApi.encodeStringField(gen, "endDate", modTime);
 		}
 
-		LuceneApi.encodeSortedDocValuesField(gen, "id", id);
+		investigationUsers.forEach((investigationUser) -> {
+				searchApi.encodeStringField(gen, "userName", investigationUser.getUser().getName());
+				searchApi.encodeTextField(gen, "userFullName", investigationUser.getUser().getFullName());
+		});
+		
 
-		LuceneApi.encodeStoredId(gen, id);
+		samples.forEach((sample) -> {
+				searchApi.encodeSortedSetDocValuesFacetField(gen, "sampleName", sample.getName());
+				searchApi.encodeTextField(gen, "sampleText", sample.getDocText());
+		});
+
+		for (InvestigationParameter parameter : parameters) {
+			ParameterType type = parameter.type;
+			String parameterName = type.getName();
+			String parameterUnits = type.getUnits();
+			searchApi.encodeSortedSetDocValuesFacetField(gen, "parameterName", parameterName);
+			searchApi.encodeStringField(gen, "parameterUnits", parameterUnits);
+			// TODO make all value types facetable...
+			if (type.getValueType() == ParameterValueType.STRING) {
+				searchApi.encodeSortedSetDocValuesFacetField(gen, "parameterStringValue", parameter.getStringValue());
+			} else if (type.getValueType() == ParameterValueType.DATE_AND_TIME) {
+				searchApi.encodeStringField(gen, "parameterDateValue", parameter.getDateTimeValue());
+			} else if (type.getValueType() == ParameterValueType.NUMERIC) {
+				searchApi.encodeDoublePoint(gen, "parameterNumericValue", parameter.getNumericValue());
+			}
+		}
+
+		searchApi.encodeSortedDocValuesField(gen, "id", id);
+
+		searchApi.encodeStoredId(gen, id);
 	}
 }

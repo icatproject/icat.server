@@ -6,17 +6,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Set;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,21 +31,17 @@ import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.json.Json;
+import javax.json.JsonObject;
 import javax.json.stream.JsonGenerator;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.manager.PropertyHandler.SearchEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -57,9 +49,9 @@ import org.slf4j.MarkerFactory;
 
 @Startup
 @Singleton
-public class LuceneManager {
+public class SearchManager {
 
-	public class EnqueuedLuceneRequestHandler extends TimerTask {
+	public class EnqueuedSearchRequestHandler extends TimerTask {
 
 		@Override
 		public void run() {
@@ -83,7 +75,7 @@ public class LuceneManager {
 					sb.append(']');
 
 					try {
-						luceneApi.modify(sb.toString());
+						searchApi.modify(sb.toString());
 					} catch (IcatException e) {
 						// Record failures in a flat file to be examined
 						// periodically
@@ -130,45 +122,14 @@ public class LuceneManager {
 
 		@Override
 		public Long call() throws Exception {
-			if (eiHandler.hasLuceneDoc(klass)) {
-
-				URI uri = new URIBuilder(luceneApi.server).setPath(LuceneApi.basePath + "/addNow/" + entityName)
-						.build();
-				try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-					HttpPost httpPost = new HttpPost(uri);
-					PipedOutputStream beanDocs = new PipedOutputStream();
-					httpPost.setEntity(new InputStreamEntity(new PipedInputStream(beanDocs)));
-					getBeanDocExecutor.submit(() -> {
-						try (JsonGenerator gen = Json.createGenerator(beanDocs)) {
-							gen.writeStartArray();
-							for (Long id : ids) {
-								EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
-								if (bean != null) {
-									gen.writeStartArray();
-									bean.getDoc(gen);
-									gen.writeEnd();
-								}
-							}
-							gen.writeEnd();
-							return null;
-						} catch (Exception e) {
-							logger.error("About to throw internal exception because of", e);
-							throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
-						} finally {
-							manager.close();
-						}
-					});
-
-					try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-						Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-					}
-				}
+			if (eiHandler.hasSearchDoc(klass)) {
+				searchApi.addNow(entityName, ids, manager, klass, getBeanDocExecutor);
 			}
 			return start;
 		}
 	}
 
-	private class PendingLuceneRequestHandler extends TimerTask {
+	private class PendingSearchRequestHandler extends TimerTask {
 
 		@Override
 		public void run() {
@@ -178,14 +139,14 @@ public class LuceneManager {
 					try (BufferedReader reader = new BufferedReader(new FileReader(backlogHandlerFile))) {
 						String line;
 						while ((line = reader.readLine()) != null) {
-							luceneApi.modify(line);
+							searchApi.modify(line);
 						}
 						backlogHandlerFile.delete();
-						logger.info("Pending lucene records now all inserted");
+						logger.info("Pending search records now all inserted");
 					} catch (IOException e) {
 						logger.error("Problems reading from {} : {}", backlogHandlerFile, e.getMessage());
 					} catch (IcatException e) {
-						logger.error("Failed to put previously failed entries into lucene " + e.getMessage());
+						logger.error("Failed to put previously failed entries into search engine " + e.getMessage());
 					} catch (Throwable e) {
 						logger.error("Something unexpected happened " + e.getClass() + " " + e.getMessage());
 					}
@@ -219,11 +180,11 @@ public class LuceneManager {
 					populatingClassEntry = populateMap.firstEntry();
 
 					if (populatingClassEntry != null) {
-						luceneApi.lock(populatingClassEntry.getKey());
+						searchApi.lock(populatingClassEntry.getKey());
 
 						Long start = populatingClassEntry.getValue();
 
-						logger.info("Lucene Populating " + populatingClassEntry);
+						logger.info("Search engine populating " + populatingClassEntry);
 
 						CompletionService<Long> threads = new ExecutorCompletionService<>(populateExecutor);
 						SortedSet<Long> tasks = new ConcurrentSkipListSet<>();
@@ -286,7 +247,7 @@ public class LuceneManager {
 						/*
 						 * Unlock and commit the changes
 						 */
-						luceneApi.unlock(populatingClassEntry.getKey());
+						searchApi.unlock(populatingClassEntry.getKey());
 						populateMap.remove(populatingClassEntry.getKey());
 					}
 				}
@@ -301,7 +262,7 @@ public class LuceneManager {
 
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
-	final static Logger logger = LoggerFactory.getLogger(LuceneManager.class);
+	final static Logger logger = LoggerFactory.getLogger(SearchManager.class);
 
 	final static Marker fatal = MarkerFactory.getMarker("FATAL");
 
@@ -329,7 +290,7 @@ public class LuceneManager {
 
 	private int maxThreads;
 
-	private LuceneApi luceneApi;
+	private SearchApi searchApi;
 
 	private boolean active;
 
@@ -345,13 +306,17 @@ public class LuceneManager {
 
 	private File queueFile;
 
+	private SearchEngine searchEngine;
+
+	private List<URL> urls;
+
 	public void addDocument(EntityBaseBean bean) throws IcatException {
 		String entityName = bean.getClass().getSimpleName();
-		if (eiHandler.hasLuceneDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
+		if (eiHandler.hasSearchDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (JsonGenerator gen = Json.createGenerator(baos)) {
 				gen.writeStartArray();
-				bean.getDoc(gen);
+				bean.getDoc(gen, searchApi);
 				gen.writeEnd();
 			}
 			enqueue(entityName, baos.toString(), null);
@@ -389,7 +354,7 @@ public class LuceneManager {
 	}
 
 	public void clear() throws IcatException {
-		logger.info("Lucene clear called");
+		logger.info("Search engine clear called");
 		popState = PopState.STOPPING;
 		while (populateThread != null && populateThread.getState() != Thread.State.TERMINATED) {
 			try {
@@ -398,34 +363,16 @@ public class LuceneManager {
 				// Do nothing
 			}
 		}
-		logger.debug("Lucene population terminated");
+		logger.debug("Search engine population terminated");
 	}
 
 	public void commit() throws IcatException {
 		pushPendingCalls();
-		luceneApi.commit();
-	}
-
-	public LuceneSearchResult datafiles(String user, String text, Date lower, Date upper, List<ParameterPOJO> parms,
-			int blockSize) throws IcatException {
-		return luceneApi.datafiles(user, text, lower, upper, parms, blockSize);
-	}
-
-	public LuceneSearchResult datafilesAfter(long uid, int blockSize) throws IcatException {
-		return luceneApi.datafiles(uid, blockSize);
-	}
-
-	public LuceneSearchResult datasets(String user, String text, Date lower, Date upper, List<ParameterPOJO> parms,
-			int blockSize) throws IcatException {
-		return luceneApi.datasets(user, text, lower, upper, parms, blockSize);
-	}
-
-	public LuceneSearchResult datasetsAfter(Long uid, int blockSize) throws IcatException {
-		return luceneApi.datasets(uid, blockSize);
+		searchApi.commit();
 	}
 
 	public void deleteDocument(EntityBaseBean bean) throws IcatException {
-		if (eiHandler.hasLuceneDoc(bean.getClass())) {
+		if (eiHandler.hasSearchDoc(bean.getClass())) {
 			String entityName = bean.getClass().getSimpleName();
 			Long id = bean.getId();
 			enqueue(entityName, null, id);
@@ -433,7 +380,7 @@ public class LuceneManager {
 	}
 
 	private void pushPendingCalls() {
-		timer.schedule(new EnqueuedLuceneRequestHandler(), 0L);
+		timer.schedule(new EnqueuedSearchRequestHandler(), 0L);
 		while (queueFile.length() != 0) {
 			try {
 				Thread.sleep(1000);
@@ -445,7 +392,7 @@ public class LuceneManager {
 
 	@PreDestroy
 	private void exit() {
-		logger.info("Closing down LuceneManager");
+		logger.info("Closing down SearchManager");
 		if (active) {
 			try {
 				populateExecutor.shutdown();
@@ -453,15 +400,20 @@ public class LuceneManager {
 				pushPendingCalls();
 				timer.cancel();
 				timer = null;
-				logger.info("Closed down LuceneManager");
+				logger.info("Closed down SearchManager");
 			} catch (Exception e) {
-				logger.error(fatal, "Problem closing down LuceneManager", e);
+				logger.error(fatal, "Problem closing down SearchManager", e);
 			}
 		}
 	}
 
-	public void freeSearcher(Long uid) throws IcatException {
-		luceneApi.freeSearcher(uid);
+    public List<FacetDimension> facetSearch(JsonObject facetQuery, int maxResults, int maxLabels)
+			throws IcatException {
+        return searchApi.facetSearch(facetQuery, maxResults, maxLabels);
+    }
+
+	public void freeSearcher(String uid) throws IcatException {
+		searchApi.freeSearcher(uid);
 	}
 
 	public List<String> getPopulating() {
@@ -472,44 +424,52 @@ public class LuceneManager {
 		return result;
 	}
 
+	public SearchResult freeTextSearch(JsonObject jo, int blockSize) throws IcatException {
+		return searchApi.getResults(jo, blockSize);
+	}
+
+	public SearchResult freeTextSearch(String uid, JsonObject jo, int blockSize) throws IcatException {
+		return searchApi.getResults(uid, jo, blockSize);
+	}
+
 	@PostConstruct
 	private void init() {
-		logger.info("Initialising LuceneManager");
-		URL url = propertyHandler.getLuceneUrl();
-		active = url != null;
+		searchEngine = propertyHandler.getSearchEngine();
+		logger.info("Initialising SearchManager for engine {}", searchEngine);
+		urls = propertyHandler.getSearchUrls();
+		active = urls != null && urls.size() > 0;
 		if (active) {
 			try {
-				luceneApi = new LuceneApi(new URI(propertyHandler.getLuceneUrl().toString()));
-				populateBlockSize = propertyHandler.getLucenePopulateBlockSize();
-				Path luceneDirectory = propertyHandler.getLuceneDirectory();
-				backlogHandlerFile = luceneDirectory.resolve("backLog").toFile();
-				queueFile =  luceneDirectory.resolve("queue").toFile();
+				if (searchEngine == SearchEngine.LUCENE) {
+					searchApi = new LuceneApi(propertyHandler.getSearchUrls().get(0).toURI());
+				} else if (searchEngine == SearchEngine.ELASTICSEARCH) {
+					searchApi = new ElasticsearchApi(propertyHandler.getSearchUrls());
+				// TODO implement opensearch
+				// } else if (searchEngine == SearchEngine.OPENSEARCH) {
+				// 	throw new IllegalStateException("OPENSEARCH NYI");
+				}
+
+				populateBlockSize = propertyHandler.getSearchPopulateBlockSize();
+				Path searchDirectory = propertyHandler.getSearchDirectory();
+				backlogHandlerFile = searchDirectory.resolve("backLog").toFile();
+				queueFile =  searchDirectory.resolve("queue").toFile();
 				maxThreads = Runtime.getRuntime().availableProcessors();
 				populateExecutor = Executors.newWorkStealingPool(maxThreads);
 				getBeanDocExecutor = Executors.newCachedThreadPool();
 				timer = new Timer();
-				timer.schedule(new PendingLuceneRequestHandler(), 0L,
-						propertyHandler.getLuceneBacklogHandlerIntervalMillis());
-				timer.schedule(new EnqueuedLuceneRequestHandler(), 0L,
-						propertyHandler.getLuceneEnqueuedRequestIntervalMillis());
+				timer.schedule(new PendingSearchRequestHandler(), 0L,
+						propertyHandler.getSearchBacklogHandlerIntervalMillis());
+				timer.schedule(new EnqueuedSearchRequestHandler(), 0L,
+						propertyHandler.getSearchEnqueuedRequestIntervalMillis());
 				entitiesToIndex = propertyHandler.getEntitiesToIndex();
-				logger.info("Initialised LuceneManager at {}", url);
+				logger.info("Initialised SearchManager at {}", urls);
 			} catch (Exception e) {
-				logger.error(fatal, "Problem setting up LuceneManager", e);
-				throw new IllegalStateException("Problem setting up LuceneManager");
+				logger.error(fatal, "Problem setting up SearchManager", e);
+				throw new IllegalStateException("Problem setting up SearchManager");
 			}
 		} else {
-			logger.info("LuceneManager is inactive");
+			logger.info("SearchManager is inactive");
 		}
-	}
-
-	public LuceneSearchResult investigations(String user, String text, Date lower, Date upper,
-			List<ParameterPOJO> parms, List<String> samples, String userFullName, int blockSize) throws IcatException {
-		return luceneApi.investigations(user, text, lower, upper, parms, samples, userFullName, blockSize);
-	}
-
-	public LuceneSearchResult investigationsAfter(Long uid, int blockSize) throws IcatException {
-		return luceneApi.investigations(uid, blockSize);
 	}
 
 	public boolean isActive() {
@@ -527,7 +487,7 @@ public class LuceneManager {
 			}
 		}
 		if (populateMap.put(entityName, minid) == null) {
-			logger.debug("Lucene population of {} requested", entityName);
+			logger.debug("Search engine population of {} requested", entityName);
 		} else {
 			throw new IcatException(IcatExceptionType.OBJECT_ALREADY_EXISTS,
 					"population of " + entityName + " already requested");
@@ -540,11 +500,11 @@ public class LuceneManager {
 
 	public void updateDocument(EntityBaseBean bean) throws IcatException {
 		String entityName = bean.getClass().getSimpleName();
-		if (eiHandler.hasLuceneDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
+		if (eiHandler.hasSearchDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (JsonGenerator gen = Json.createGenerator(baos)) {
 				gen.writeStartArray();
-				bean.getDoc(gen);
+				bean.getDoc(gen, searchApi);
 				gen.writeEnd();
 			}
 			enqueue(entityName, baos.toString(), bean.getId());

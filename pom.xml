@@ -124,7 +124,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.3.6</version>
+			<version>4.5.13</version>
 		</dependency>
 
 		<dependency>
@@ -132,6 +132,17 @@
 			<artifactId>httpmime</artifactId>
 			<version>4.3.4</version>
 		</dependency>
+
+		<dependency>
+			<groupId>co.elastic.clients</groupId>
+			<artifactId>elasticsearch-java</artifactId>
+			<version>7.16.3</version>
+		  </dependency>
+		  <dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.12.3</version>
+		  </dependency>
 
 	</dependencies>
 
@@ -225,6 +236,7 @@
 					<systemPropertyVariables>
 						<javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
 						<luceneUrl>${luceneUrl}</luceneUrl>
+						<searchUrls>${searchUrls}</searchUrls>
 					</systemPropertyVariables>
 					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>
@@ -243,6 +255,7 @@
 						<javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
 						<serverUrl>${serverUrl}</serverUrl>
 						<luceneUrl>${luceneUrl}</luceneUrl>
+						<searchUrls>${searchUrls}</searchUrls>
 					</systemPropertyVariables>
 				</configuration>
 				<executions>
@@ -322,6 +335,7 @@
 								<argument>${containerHome}</argument>
 								<argument>${serverUrl}</argument>
 								<argument>${luceneUrl}</argument>
+								<argument>${searchUrls}</argument>
 							</arguments>
 						</configuration>
 						<goals>
@@ -399,6 +413,3 @@
 	</reporting>
 
 </project>
-
-
-

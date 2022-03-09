@@ -15,7 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("A sample to be used in an investigation")
 @SuppressWarnings("serial")
@@ -96,12 +96,16 @@ public class Sample extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
+		searchApi.encodeTextField(gen, "text", getDocText());
+		searchApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
+	}
+
+	public String getDocText() {
 		StringBuilder sb = new StringBuilder(name);
 		if (type != null) {
 			sb.append(" " + type.getName());
 		}
-		LuceneApi.encodeTextfield(gen, "text", sb.toString());
-		LuceneApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
+		return sb.toString();
 	}
 }

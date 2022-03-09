@@ -31,7 +31,8 @@ import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.LuceneManager;
+import org.icatproject.core.manager.SearchApi;
+import org.icatproject.core.manager.SearchManager;
 import org.icatproject.core.parser.IncludeClause.Step;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,8 +82,8 @@ public abstract class EntityBaseBean implements Serializable {
 
 	// This is only used by the older create and createMany calls and not by the
 	// new Restful write call
-	public void addToLucene(LuceneManager lucene) throws IcatException {
-		lucene.addDocument(this);
+	public void addToSearch(SearchManager searchManager) throws IcatException {
+		searchManager.addDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
 		Map<Field, Method> getters = eiHandler.getGetters(klass);
@@ -94,7 +95,7 @@ public abstract class EntityBaseBean implements Serializable {
 					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
 					if (!collection.isEmpty()) {
 						for (EntityBaseBean bean : collection) {
-							bean.addToLucene(lucene);
+							bean.addToSearch(searchManager);
 						}
 					}
 				} catch (Exception e) {
@@ -434,8 +435,8 @@ public abstract class EntityBaseBean implements Serializable {
 		return this.getClass().getSimpleName() + ":" + id;
 	}
 
-	/* This should be overridden by classes wishing to index things in lucene */
-	public void getDoc(JsonGenerator gen) {
+	/* This should be overridden by classes wishing to index things in a search engine */
+	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
 	}
 
 }

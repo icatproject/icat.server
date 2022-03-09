@@ -1,18 +1,23 @@
 package org.icatproject.core.manager;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import javax.json.Json;
+import javax.json.JsonObject;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
+import javax.persistence.EntityManager;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -20,41 +25,59 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.icatproject.core.entity.EntityBaseBean;
 
-public class LuceneApi {
+public class LuceneApi extends SearchApi {
 	private enum ParserState {
-		None, Results
+		None, Results, Dimensions, Labels
 	}
 
 	static String basePath = "/icat.lucene";
-	final static Logger logger = LoggerFactory.getLogger(LuceneApi.class);
 
-	public static void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value) {
+	/*
+	 * Serves as a record of target entities where search is supported, and the
+	 * relevant path to the search endpoint
+	 */
+	private static Map<String, String> targetPaths = new HashMap<>();
+	static {
+		targetPaths.put("Investigation", "investigations");
+		targetPaths.put("Dataset", "datasets");
+		targetPaths.put("Datafile", "datafiles");
+	}
+
+	private String getTargetPath(JsonObject query) throws IcatException {
+		if (!query.containsKey("target")) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"'target' must be present in query for LuceneApi, but it was " + query.toString());
+		}
+		String path = targetPaths.get(query.getString("target"));
+		if (path == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"'target' must be one of " + targetPaths.keySet() + ", but it was " + query.toString());
+		}
+		return path;
+	}
+
+	// TODO this method of encoding an entity as an array of 3 key objects that represent single field each
+	// is something that should be streamlined, but would require changes to icat.lucene
+
+	public void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value) {
 		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
 				.writeEnd();
 	}
 
-	public static void encodeStoredId(JsonGenerator gen, Long id) {
+	public void encodeStoredId(JsonGenerator gen, Long id) {
 		gen.writeStartObject().write("type", "StringField").write("name", "id").write("value", Long.toString(id))
 				.write("store", true).writeEnd();
 	}
 
-	private static SimpleDateFormat df;
-
-	static {
-		df = new SimpleDateFormat("yyyyMMddHHmm");
-		TimeZone tz = TimeZone.getTimeZone("GMT");
-		df.setTimeZone(tz);
-	}
-
-	public static void encodeStringField(JsonGenerator gen, String name, Date value) {
+	public void encodeStringField(JsonGenerator gen, String name, Date value) {
 		String timeString;
 		synchronized (df) {
 			timeString = df.format(value);
@@ -62,22 +85,28 @@ public class LuceneApi {
 		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", timeString).writeEnd();
 	}
 
-	public static void encodeDoublePoint(JsonGenerator gen, String name, Double value) {
+	public void encodeDoublePoint(JsonGenerator gen, String name, Double value) {
 		gen.writeStartObject().write("type", "DoublePoint").write("name", name).write("value", value)
 				.write("store", true).writeEnd();
 	}
 
-	public static void encodeStringField(JsonGenerator gen, String name, Long value) {
+	public void encodeSortedSetDocValuesFacetField(JsonGenerator gen, String name, String value) {
+		gen.writeStartObject().write("type", "SortedSetDocValuesFacetField").write("name", name).write("value", value)
+				.writeEnd();
+
+	}
+
+	public void encodeStringField(JsonGenerator gen, String name, Long value) {
 		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", Long.toString(value))
 				.writeEnd();
 	}
 
-	public static void encodeStringField(JsonGenerator gen, String name, String value) {
+	public void encodeStringField(JsonGenerator gen, String name, String value) {
 		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", value).writeEnd();
 
 	}
 
-	public static void encodeTextfield(JsonGenerator gen, String name, String value) {
+	public void encodeTextField(JsonGenerator gen, String name, String value) {
 		if (value != null) {
 			gen.writeStartObject().write("type", "TextField").write("name", name).write("value", value).writeEnd();
 		}
@@ -89,6 +118,44 @@ public class LuceneApi {
 		this.server = server;
 	}
 
+	@Override
+	public void addNow(String entityName, List<Long> ids, EntityManager manager,
+			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor) throws Exception {
+		URI uri = new URIBuilder(server).setPath(basePath + "/addNow/" + entityName)
+				.build();
+
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			HttpPost httpPost = new HttpPost(uri);
+			PipedOutputStream beanDocs = new PipedOutputStream();
+			httpPost.setEntity(new InputStreamEntity(new PipedInputStream(beanDocs)));
+			getBeanDocExecutor.submit(() -> {
+				try (JsonGenerator gen = Json.createGenerator(beanDocs)) {
+					gen.writeStartArray();
+					for (Long id : ids) {
+						EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
+						if (bean != null) {
+							gen.writeStartArray();
+							bean.getDoc(gen, this);
+							gen.writeEnd();
+						}
+					}
+					gen.writeEnd();
+					return null;
+				} catch (Exception e) {
+					logger.error("About to throw internal exception because of", e);
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+				} finally {
+					manager.close();
+				}
+			});
+
+			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
+			}
+		}
+	}
+
+	@Override
 	public void clear() throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/clear").build();
@@ -102,6 +169,7 @@ public class LuceneApi {
 
 	}
 
+	@Override
 	public void commit() throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/commit").build();
@@ -115,154 +183,23 @@ public class LuceneApi {
 		}
 	}
 
-	public LuceneSearchResult datafiles(long uid, int maxResults) throws IcatException {
+	@Override
+	public List<FacetDimension> facetSearch(JsonObject facetQuery, int maxResults, int maxLabels) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/datafiles/" + uid)
-					.setParameter("maxResults", Integer.toString(maxResults)).build();
-			return getLsr(uri, httpclient);
-
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	public LuceneSearchResult datafiles(String user, String text, Date lower, Date upper, List<ParameterPOJO> parms,
-			int maxResults) throws IcatException {
-
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/datafiles")
-					.setParameter("maxResults", Integer.toString(maxResults)).build();
+			String indexPath = getTargetPath(facetQuery);
+			URI uri = new URIBuilder(server).setPath(basePath + "/" + indexPath + "/facet")
+					.setParameter("maxResults", Integer.toString(maxResults))
+					.setParameter("maxLabels", Integer.toString(maxLabels)).build();
 			logger.trace("Making call {}", uri);
-
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos)) {
-				gen.writeStartObject();
-				if (user != null) {
-					gen.write("user", user);
-				}
-				if (text != null) {
-					gen.write("text", text);
-				}
-				if (lower != null) {
-					gen.write("lower", enc(lower));
-				}
-				if (upper != null) {
-					gen.write("upper", enc(upper));
-				}
-				if (parms != null && !parms.isEmpty()) {
-					gen.writeStartArray("params");
-					for (ParameterPOJO parm : parms) {
-						gen.writeStartObject();
-						if (parm.name != null) {
-							gen.write("name", parm.name);
-						}
-						if (parm.units != null) {
-							gen.write("units", parm.units);
-						}
-						if (parm.stringValue != null) {
-							gen.write("stringValue", parm.stringValue);
-						}
-						if (parm.lowerDateValue != null) {
-							gen.write("lowerDateValue", enc(parm.lowerDateValue));
-						}
-						if (parm.upperDateValue != null) {
-							gen.write("upperDateValue", enc(parm.upperDateValue));
-						}
-						if (parm.lowerNumericValue != null) {
-							gen.write("lowerNumericValue", parm.lowerNumericValue);
-						}
-						if (parm.upperNumericValue != null) {
-							gen.write("upperNumericValue", parm.upperNumericValue);
-						}
-						gen.writeEnd(); // object
-					}
-					gen.writeEnd(); // array
-				}
-				gen.writeEnd(); // object
-			}
-			return getLsr(uri, httpclient, baos);
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	};
-
-	private String enc(Date dateValue) {
-		synchronized (df) {
-			return df.format(dateValue);
-		}
-	}
-
-	public LuceneSearchResult datasets(Long uid, int maxResults) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/datasets/" + uid)
-					.setParameter("maxResults", Integer.toString(maxResults)).build();
-			return getLsr(uri, httpclient);
+			return getFacets(uri, httpclient, facetQuery.toString());
 
 		} catch (IOException | URISyntaxException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
 
-	public LuceneSearchResult datasets(String user, String text, Date lower, Date upper, List<ParameterPOJO> parms,
-			int maxResults) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/datasets")
-					.setParameter("maxResults", Integer.toString(maxResults)).build();
-			logger.trace("Making call {}", uri);
-
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos)) {
-				gen.writeStartObject();
-				if (user != null) {
-					gen.write("user", user);
-				}
-				if (text != null) {
-					gen.write("text", text);
-				}
-				if (lower != null) {
-					gen.write("lower", enc(lower));
-				}
-				if (upper != null) {
-					gen.write("upper", enc(upper));
-				}
-				if (parms != null && !parms.isEmpty()) {
-					gen.writeStartArray("params");
-					for (ParameterPOJO parm : parms) {
-						gen.writeStartObject();
-						if (parm.name != null) {
-							gen.write("name", parm.name);
-						}
-						if (parm.units != null) {
-							gen.write("units", parm.units);
-						}
-						if (parm.stringValue != null) {
-							gen.write("stringValue", parm.stringValue);
-						}
-						if (parm.lowerDateValue != null) {
-							gen.write("lowerDateValue", enc(parm.lowerDateValue));
-						}
-						if (parm.upperDateValue != null) {
-							gen.write("upperDateValue", enc(parm.upperDateValue));
-						}
-						if (parm.lowerNumericValue != null) {
-							gen.write("lowerNumericValue", parm.lowerNumericValue);
-						}
-						if (parm.upperNumericValue != null) {
-							gen.write("upperNumericValue", parm.upperNumericValue);
-						}
-						gen.writeEnd(); // object
-					}
-					gen.writeEnd(); // array
-				}
-				gen.writeEnd(); // object
-			}
-			return getLsr(uri, httpclient, baos);
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	public void freeSearcher(Long uid) throws IcatException {
+	@Override
+	public void freeSearcher(String uid) throws IcatException {
 		try {
 			URI uri = new URIBuilder(server).setPath(basePath + "/freeSearcher/" + uid).build();
 			logger.trace("Making call {}", uri);
@@ -277,9 +214,86 @@ public class LuceneApi {
 		}
 	}
 
-	private LuceneSearchResult getLsr(URI uri, CloseableHttpClient httpclient) throws IcatException {
+	private List<FacetDimension> getFacets(URI uri, CloseableHttpClient httpclient, String facetQueryString)
+			throws IcatException {
+		logger.debug(facetQueryString);
+		try {
+			StringEntity input = new StringEntity(facetQueryString);
+			input.setContentType(MediaType.APPLICATION_JSON);
+			HttpPost httpPost = new HttpPost(uri);
+			httpPost.setEntity(input);
+
+			List<FacetDimension> facetDimensions = new ArrayList<>();
+			ParserState state = ParserState.None;
+			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
+				try (JsonParser p = Json.createParser(response.getEntity().getContent())) {
+					String key = null;
+					while (p.hasNext()) {
+						// Get next event in the stream
+						Event e = p.next();
+						if (e.equals(Event.KEY_NAME)) {
+							// The key name will indicate the content to expect next, and is expected to be
+							// one of
+							// "dimensions", a specific dimension, or a label within that dimension.
+							key = p.getString();
+						} else if (e == Event.START_OBJECT) {
+							if (state == ParserState.None && key != null && key.equals("dimensions")) {
+								state = ParserState.Dimensions;
+							} else if (state == ParserState.Dimensions) {
+								facetDimensions.add(new FacetDimension(key));
+								state = ParserState.Labels;
+							}
+						} else if (e == (Event.END_OBJECT)) {
+							if (state == ParserState.Labels) {
+								// We may have multiple dimensions, so change state so we can read the next one
+								state = ParserState.Dimensions;
+							} else if (state == ParserState.Dimensions) {
+								state = ParserState.None;
+							}
+						} else if (state == ParserState.Labels) {
+							FacetDimension currentFacets = facetDimensions.get(facetDimensions.size() - 1);
+							currentFacets.getFacets().add(new FacetLabel(key, p.getLong()));
+						}
+					}
+				}
+			}
+			return facetDimensions;
+		} catch (IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	@Override
+	public SearchResult getResults(JsonObject query, int maxResults) throws IcatException {
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			String indexPath = getTargetPath(query);
+			URI uri = new URIBuilder(server).setPath(basePath + "/" + indexPath)
+					.setParameter("maxResults", Integer.toString(maxResults)).build();
+			logger.trace("Making call {}", uri);
+			return getResults(uri, httpclient, query.toString());
+
+		} catch (IOException | URISyntaxException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	@Override
+	public SearchResult getResults(String uid, JsonObject query, int maxResults) throws IcatException {
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			String indexPath = getTargetPath(query);
+			URI uri = new URIBuilder(server).setPath(basePath + "/" + indexPath + "/" + uid)
+					.setParameter("maxResults", Integer.toString(maxResults)).build();
+			return getResults(uri, httpclient);
+
+		} catch (IOException | URISyntaxException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	private SearchResult getResults(URI uri, CloseableHttpClient httpclient) throws IcatException {
 		HttpGet httpGet = new HttpGet(uri);
-		LuceneSearchResult lsr = new LuceneSearchResult();
+		SearchResult lsr = new SearchResult();
 		List<ScoredEntityBaseBean> results = lsr.getResults();
 		ParserState state = ParserState.None;
 		try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
@@ -311,16 +325,16 @@ public class LuceneApi {
 		return lsr;
 	}
 
-	private LuceneSearchResult getLsr(URI uri, CloseableHttpClient httpclient, ByteArrayOutputStream baos)
+	private SearchResult getResults(URI uri, CloseableHttpClient httpclient, String queryString)
 			throws IcatException {
-		logger.debug(baos.toString());
+		logger.debug(queryString);
 		try {
-			StringEntity input = new StringEntity(baos.toString());
+			StringEntity input = new StringEntity(queryString);
 			input.setContentType(MediaType.APPLICATION_JSON);
 			HttpPost httpPost = new HttpPost(uri);
 			httpPost.setEntity(input);
 
-			LuceneSearchResult lsr = new LuceneSearchResult();
+			SearchResult lsr = new SearchResult();
 			List<ScoredEntityBaseBean> results = lsr.getResults();
 			ParserState state = ParserState.None;
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
@@ -341,7 +355,7 @@ public class LuceneApi {
 							}
 						} else { // Not in results yet
 							if (e == (Event.VALUE_NUMBER) && key.equals("uid")) {
-								lsr.setUid(p.getLong());
+								lsr.setUid(String.valueOf(p.getLong()));
 							} else if (e == Event.START_ARRAY && key.equals("results")) {
 								state = ParserState.Results;
 							}
@@ -357,86 +371,7 @@ public class LuceneApi {
 		}
 	}
 
-	public LuceneSearchResult investigations(Long uid, int maxResults) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/investigations/" + uid)
-					.setParameter("maxResults", Integer.toString(maxResults)).build();
-			return getLsr(uri, httpclient);
-
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	public LuceneSearchResult investigations(String user, String text, Date lower, Date upper,
-			List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxResults) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/investigations")
-					.setParameter("maxResults", Integer.toString(maxResults)).build();
-			logger.trace("Making call {}", uri);
-
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos)) {
-				gen.writeStartObject();
-				if (user != null) {
-					gen.write("user", user);
-				}
-				if (text != null) {
-					gen.write("text", text);
-				}
-				if (lower != null) {
-					gen.write("lower", enc(lower));
-				}
-				if (upper != null) {
-					gen.write("upper", enc(upper));
-				}
-				if (parms != null && !parms.isEmpty()) {
-					gen.writeStartArray("params");
-					for (ParameterPOJO parm : parms) {
-						gen.writeStartObject();
-						if (parm.name != null) {
-							gen.write("name", parm.name);
-						}
-						if (parm.units != null) {
-							gen.write("units", parm.units);
-						}
-						if (parm.stringValue != null) {
-							gen.write("stringValue", parm.stringValue);
-						}
-						if (parm.lowerDateValue != null) {
-							gen.write("lowerDateValue", enc(parm.lowerDateValue));
-						}
-						if (parm.upperDateValue != null) {
-							gen.write("upperDateValue", enc(parm.upperDateValue));
-						}
-						if (parm.lowerNumericValue != null) {
-							gen.write("lowerNumericValue", parm.lowerNumericValue);
-						}
-						if (parm.upperNumericValue != null) {
-							gen.write("upperNumericValue", parm.upperNumericValue);
-						}
-						gen.writeEnd(); // object
-					}
-					gen.writeEnd(); // array
-				}
-				if (samples != null && !samples.isEmpty()) {
-					gen.writeStartArray("samples");
-					for (String sample : samples) {
-						gen.write(sample);
-					}
-					gen.writeEnd(); // array
-				}
-				if (userFullName != null) {
-					gen.write("userFullName", userFullName);
-				}
-				gen.writeEnd(); // object
-			}
-			return getLsr(uri, httpclient, baos);
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
+	@Override
 	public void lock(String entityName) throws IcatException {
 		try {
 			URI uri = new URIBuilder(server).setPath(basePath + "/lock/" + entityName).build();
@@ -452,6 +387,7 @@ public class LuceneApi {
 		}
 	}
 
+	@Override
 	public void unlock(String entityName) throws IcatException {
 		try {
 			URI uri = new URIBuilder(server).setPath(basePath + "/unlock/" + entityName).build();
@@ -467,6 +403,7 @@ public class LuceneApi {
 		}
 	}
 
+	@Override
 	public void modify(String json) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/modify").build();

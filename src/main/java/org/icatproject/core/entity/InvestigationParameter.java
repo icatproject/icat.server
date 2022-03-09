@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("A parameter associated with an investigation")
 @SuppressWarnings("serial")
@@ -55,8 +55,8 @@ public class InvestigationParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
-		super.getDoc(gen);
-		LuceneApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
+	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
+		super.getDoc(gen, searchApi);
+		searchApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
 	}
 }

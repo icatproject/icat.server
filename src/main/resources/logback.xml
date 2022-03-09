@@ -26,7 +26,7 @@
 	<!-- <logger name="org.icatproject.core.manager.EntityBeanManager" level="TRACE" 
 		/> -->
 
-	<logger name="org.icatproject.core.manager.LuceneManager" level="trace" />
+	<logger name="org.icatproject.core.manager.SearchManager" level="trace" />
 
 
 </configuration>

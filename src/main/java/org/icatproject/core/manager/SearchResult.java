@@ -3,20 +3,20 @@ package org.icatproject.core.manager;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LuceneSearchResult {
+public class SearchResult {
 
-	private Long uid;
+	private String uid;
 	private List<ScoredEntityBaseBean> results = new ArrayList<>();
 
 	public List<ScoredEntityBaseBean> getResults() {
 		return results;
 	}
 
-	public void setUid(Long uid) {
+	public void setUid(String uid) {
 		this.uid = uid;
 	}
 
-	public Long getUid() {
+	public String getUid() {
 		return uid;
 	}
 

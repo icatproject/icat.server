@@ -85,11 +85,11 @@ public class TestLucene {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 			gen.writeStartArray();
-			LuceneApi.encodeTextfield(gen, "text", "Elephants and Aardvarks");
-			LuceneApi.encodeStringField(gen, "startDate", new Date());
-			LuceneApi.encodeStringField(gen, "endDate", new Date());
-			LuceneApi.encodeStoredId(gen, 42L);
-			LuceneApi.encodeStringField(gen, "dataset", 2001L);
+			luceneApi.encodeTextField(gen, "text", "Elephants and Aardvarks");
+			luceneApi.encodeStringField(gen, "startDate", new Date());
+			luceneApi.encodeStringField(gen, "endDate", new Date());
+			luceneApi.encodeStoredId(gen, 42L);
+			luceneApi.encodeStringField(gen, "dataset", 2001L);
 			gen.writeEnd();
 		}
 
@@ -154,7 +154,7 @@ public class TestLucene {
 		luceneApi.clear();
 	}
 
-	private void checkLsr(LuceneSearchResult lsr, Long... n) {
+	private void checkLsr(SearchResult lsr, Long... n) {
 		Set<Long> wanted = new HashSet<>(Arrays.asList(n));
 		Set<Long> got = new HashSet<>();
 
@@ -186,51 +186,54 @@ public class TestLucene {
 	public void datafiles() throws Exception {
 		populate();
 
-		LuceneSearchResult lsr = luceneApi.datafiles(null, null, null, null, null, 5);
-		Long uid = lsr.getUid();
+		SearchResult lsr = luceneApi.getResults(SearchApi.buildQuery("Datafile", null, null, null, null, null, null, null), 5);
+		String uid = lsr.getUid();
 
 		checkLsr(lsr, 0L, 1L, 2L, 3L, 4L);
 		System.out.println(uid);
-		lsr = luceneApi.datafiles(uid, 200);
+		lsr = luceneApi.getResults(uid, SearchApi.buildQuery("Datafile", null, null, null, null, null, null, null), 200);
 		assertTrue(lsr.getUid() == null);
 		assertEquals(95, lsr.getResults().size());
 		luceneApi.freeSearcher(uid);
 
-		lsr = luceneApi.datafiles("e4", null, null, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Datafile", "e4", null, null, null, null, null, null), 100);
 		checkLsr(lsr, 1L, 6L, 11L, 16L, 21L, 26L, 31L, 36L, 41L, 46L, 51L, 56L, 61L, 66L, 71L, 76L, 81L, 86L, 91L, 96L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.datafiles("e4", "dfbbb", null, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Datafile", "e4", "dfbbb", null, null, null, null, null), 100);
 		checkLsr(lsr, 1L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.datafiles(null, "dfbbb", null, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Datafile", null, "dfbbb", null, null, null, null, null), 100);
 		checkLsr(lsr, 1L, 27L, 53L, 79L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.datafiles(null, null, new Date(now + 60000 * 3), new Date(now + 60000 * 6), null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Datafile", null, null, new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), null, null, null), 100);
 		checkLsr(lsr, 3L, 4L, 5L, 6L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.datafiles("b1", "dsddd", new Date(now + 60000 * 3), new Date(now + 60000 * 6), null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Datafile", "b1", "dsddd", new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), null, null, null), 100);
 		checkLsr(lsr);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		List<ParameterPOJO> pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v25"));
-		lsr = luceneApi.datafiles(null, null, new Date(now + 60000 * 3), new Date(now + 60000 * 6), pojos, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Datafile", null, null, new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), pojos, null, null), 100);
 		checkLsr(lsr, 5L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v25"));
-		lsr = luceneApi.datafiles(null, null, null, null, pojos, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Datafile", null, null, null, null, pojos, null, null), 100);
 		checkLsr(lsr, 5L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, "u sss", null));
-		lsr = luceneApi.datafiles(null, null, null, null, pojos, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Datafile", null, null, null, null, pojos, null, null), 100);
 		checkLsr(lsr, 13L, 65L);
 		luceneApi.freeSearcher(lsr.getUid());
 	}
@@ -238,52 +241,56 @@ public class TestLucene {
 	@Test
 	public void datasets() throws Exception {
 		populate();
-		LuceneSearchResult lsr = luceneApi.datasets(null, null, null, null, null, 5);
+		SearchResult lsr = luceneApi.getResults(SearchApi.buildQuery("Dataset", null, null, null, null, null, null, null), 5);
 
-		Long uid = lsr.getUid();
+		String uid = lsr.getUid();
 		checkLsr(lsr, 0L, 1L, 2L, 3L, 4L);
 		System.out.println(uid);
-		lsr = luceneApi.datasets(uid, 100);
+		lsr = luceneApi.getResults(uid, SearchApi.buildQuery("Dataset", null, null, null, null, null, null, null), 100);
 		assertTrue(lsr.getUid() == null);
 		checkLsr(lsr, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L, 20L, 21L, 22L, 23L, 24L,
 				25L, 26L, 27L, 28L, 29L);
 		luceneApi.freeSearcher(uid);
 
-		lsr = luceneApi.datasets("e4", null, null, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Dataset", "e4", null, null, null, null, null, null), 100);
 		checkLsr(lsr, 1L, 6L, 11L, 16L, 21L, 26L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.datasets("e4", "dsbbb", null, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Dataset", "e4", "dsbbb", null, null, null, null, null), 100);
 		checkLsr(lsr, 1L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.datasets(null, "dsbbb", null, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Dataset", null, "dsbbb", null, null, null, null, null), 100);
 		checkLsr(lsr, 1L, 27L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.datasets(null, null, new Date(now + 60000 * 3), new Date(now + 60000 * 6), null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Dataset", null, null, new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), null, null, null), 100);
 		checkLsr(lsr, 3L, 4L, 5L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.datasets("b1", "dsddd", new Date(now + 60000 * 3), new Date(now + 60000 * 6), null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Dataset", "b1", "dsddd", new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), null, null, null), 100);
 		checkLsr(lsr, 3L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		List<ParameterPOJO> pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v16"));
-		lsr = luceneApi.datasets(null, null, null, null, pojos, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Dataset", null, null, null, null, pojos, null, null), 100);
 		checkLsr(lsr, 4L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v16"));
-		lsr = luceneApi.datasets(null, null, new Date(now + 60000 * 3), new Date(now + 60000 * 6), pojos, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Dataset", null, null, new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), pojos, null, null), 100);
 		checkLsr(lsr, 4L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v16"));
-		lsr = luceneApi.datasets("b1", "dsddd", new Date(now + 60000 * 3), new Date(now + 60000 * 6), pojos, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Dataset", "b1", "dsddd", new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), pojos, null, null), 100);
 		checkLsr(lsr);
 		luceneApi.freeSearcher(lsr.getUid());
 
@@ -296,26 +303,26 @@ public class TestLucene {
 		String units = "u " + letters.substring(k, k + 1) + letters.substring(k, k + 1) + letters.substring(k, k + 1);
 
 		gen.writeStartArray();
-		LuceneApi.encodeStringField(gen, "name", "S" + name);
-		LuceneApi.encodeStringField(gen, "units", units);
-		LuceneApi.encodeStringField(gen, "stringValue", "v" + i * i);
-		LuceneApi.encodeSortedDocValuesField(gen, rel, new Long(i));
+		luceneApi.encodeStringField(gen, "name", "S" + name);
+		luceneApi.encodeStringField(gen, "units", units);
+		luceneApi.encodeStringField(gen, "stringValue", "v" + i * i);
+		luceneApi.encodeSortedDocValuesField(gen, rel, new Long(i));
 		gen.writeEnd();
 		System.out.println(rel + " " + i + " '" + "S" + name + "' '" + units + "' 'v" + i * i + "'");
 
 		gen.writeStartArray();
-		LuceneApi.encodeStringField(gen, "name", "N" + name);
-		LuceneApi.encodeStringField(gen, "units", units);
-		LuceneApi.encodeDoublePoint(gen, "numericValue", new Double(j * j));
-		LuceneApi.encodeSortedDocValuesField(gen, rel, new Long(i));
+		luceneApi.encodeStringField(gen, "name", "N" + name);
+		luceneApi.encodeStringField(gen, "units", units);
+		luceneApi.encodeDoublePoint(gen, "numericValue", new Double(j * j));
+		luceneApi.encodeSortedDocValuesField(gen, rel, new Long(i));
 		gen.writeEnd();
 		System.out.println(rel + " " + i + " '" + "N" + name + "' '" + units + "' " + new Double(j * j));
 
 		gen.writeStartArray();
-		LuceneApi.encodeStringField(gen, "name", "D" + name);
-		LuceneApi.encodeStringField(gen, "units", units);
-		LuceneApi.encodeStringField(gen, "dateTimeValue", new Date(now + 60000 * k * k));
-		LuceneApi.encodeSortedDocValuesField(gen, rel, new Long(i));
+		luceneApi.encodeStringField(gen, "name", "D" + name);
+		luceneApi.encodeStringField(gen, "units", units);
+		luceneApi.encodeStringField(gen, "dateTimeValue", new Date(now + 60000 * k * k));
+		luceneApi.encodeSortedDocValuesField(gen, rel, new Long(i));
 		gen.writeEnd();
 		System.out.println(
 				rel + " " + i + " '" + "D" + name + "' '" + units + "' '" + new Date(now + 60000 * k * k) + "'");
@@ -327,60 +334,58 @@ public class TestLucene {
 		populate();
 
 		/* Blocked results */
-		LuceneSearchResult lsr = luceneApi.investigations(null, null, null, null, null, null, null, 5);
-		Long uid = lsr.getUid();
+		SearchResult lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, null, null),
+				5);
+		String uid = lsr.getUid();
 		checkLsr(lsr, 0L, 1L, 2L, 3L, 4L);
 		System.out.println(uid);
-		lsr = luceneApi.investigations(uid, 6);
+		lsr = luceneApi.getResults(uid, SearchApi.buildQuery("Investigation", null, null, null, null, null, null, null), 6);
 		assertTrue(lsr.getUid() == null);
 		checkLsr(lsr, 5L, 6L, 7L, 8L, 9L);
 		luceneApi.freeSearcher(uid);
 
-		lsr = luceneApi.investigations(null, null, null, null, null, null, "b", 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, null, "b"), 100);
 		checkLsr(lsr, 1L, 3L, 5L, 7L, 9L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.investigations(null, null, null, null, null, null, "FN", 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, null, "FN"), 100);
 		checkLsr(lsr, 1L, 3L, 4L, 5L, 6L, 7L, 9L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.investigations(null, null, null, null, null, null, "FN AND \"b b\"", 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, null, "FN AND \"b b\""),
+				100);
 		checkLsr(lsr, 1L, 3L, 5L, 7L, 9L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.investigations("b1", null, null, null, null, null, "b", 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", "b1", null, null, null, null, null, "b"), 100);
 		checkLsr(lsr, 1L, 3L, 5L, 7L, 9L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.investigations("c1", null, null, null, null, null, "b", 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", "c1", null, null, null, null, null, "b"), 100);
 		checkLsr(lsr);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.investigations("b1", null, null, null, null, null, "b", 100);
-		checkLsr(lsr, 1L, 3L, 5L, 7L, 9L);
-		luceneApi.freeSearcher(lsr.getUid());
-
-		lsr = luceneApi.investigations(null, "l v", null, null, null, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, "l v", null, null, null, null, null), 100);
 		checkLsr(lsr, 4L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.investigations("b1", "d", null, null, null, null, "b", 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", "b1", "d", null, null, null, null, "b"), 100);
 		checkLsr(lsr, 3L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.investigations("b1", "d", new Date(now + 60000 * 3), new Date(now + 60000 * 6), null, null, "b",
-				100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", "b1", "d", new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), null, null, "b"), 100);
 		checkLsr(lsr, 3L);
 		luceneApi.freeSearcher(lsr.getUid());
 
-		lsr = luceneApi.investigations(null, null, new Date(now + 60000 * 3), new Date(now + 60000 * 6), null, null,
-				null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), null, null, null), 100);
 		checkLsr(lsr, 3L, 4L, 5L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		List<ParameterPOJO> pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v9"));
-		lsr = luceneApi.investigations(null, null, null, null, pojos, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null), 100);
 		checkLsr(lsr, 3L);
 		luceneApi.freeSearcher(lsr.getUid());
 
@@ -388,45 +393,45 @@ public class TestLucene {
 		pojos.add(new ParameterPOJO(null, null, "v9"));
 		pojos.add(new ParameterPOJO(null, null, 7, 10));
 		pojos.add(new ParameterPOJO(null, null, new Date(now + 60000 * 63), new Date(now + 60000 * 65)));
-		lsr = luceneApi.investigations(null, null, null, null, pojos, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null), 100);
 		checkLsr(lsr, 3L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v9"));
-		lsr = luceneApi.investigations("b1", "d", new Date(now + 60000 * 3), new Date(now + 60000 * 6), pojos, null,
-				"b", 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", "b1", "d", new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), pojos, null, "b"), 100);
 		checkLsr(lsr, 3L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v9"));
 		pojos.add(new ParameterPOJO(null, null, "v81"));
-		lsr = luceneApi.investigations(null, null, null, null, pojos, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null), 100);
 		checkLsr(lsr);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO("Snm ddd", "u iii", "v9"));
-		lsr = luceneApi.investigations(null, null, null, null, pojos, null, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null), 100);
 		checkLsr(lsr, 3L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		List<String> samples = Arrays.asList("ddd", "nnn");
-		lsr = luceneApi.investigations(null, null, null, null, null, samples, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, samples, null), 100);
 		checkLsr(lsr, 3L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		samples = Arrays.asList("ddd", "mmm");
-		lsr = luceneApi.investigations(null, null, null, null, null, samples, null, 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, samples, null), 100);
 		checkLsr(lsr);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO("Snm ddd", "u iii", "v9"));
 		samples = Arrays.asList("ddd", "nnn");
-		lsr = luceneApi.investigations("b1", "d", new Date(now + 60000 * 3), new Date(now + 60000 * 6), pojos, samples,
-				"b", 100);
+		lsr = luceneApi.getResults(SearchApi.buildQuery("Investigation", "b1", "d", new Date(now + 60000 * 3),
+				new Date(now + 60000 * 6), pojos, samples, "b"), 100);
 		checkLsr(lsr, 3L);
 		luceneApi.freeSearcher(lsr.getUid());
 	}
@@ -473,10 +478,10 @@ public class TestLucene {
 						String name = letters.substring(j, j + 1) + j;
 						gen.writeStartArray();
 
-						LuceneApi.encodeTextfield(gen, "text", fn);
+						luceneApi.encodeTextField(gen, "text", fn);
 
-						LuceneApi.encodeStringField(gen, "name", name);
-						LuceneApi.encodeSortedDocValuesField(gen, "investigation", new Long(i));
+						luceneApi.encodeStringField(gen, "name", name);
+						luceneApi.encodeSortedDocValuesField(gen, "investigation", new Long(i));
 
 						gen.writeEnd();
 						System.out.println("'" + fn + "' " + name + " " + i);
@@ -497,11 +502,11 @@ public class TestLucene {
 				String word = letters.substring(j, j + 1) + " " + letters.substring(k, k + 1) + " "
 						+ letters.substring(l, l + 1);
 				gen.writeStartArray();
-				LuceneApi.encodeTextfield(gen, "text", word);
-				LuceneApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
-				LuceneApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
-				LuceneApi.encodeStoredId(gen, new Long(i));
-				LuceneApi.encodeSortedDocValuesField(gen, "id", new Long(i));
+				luceneApi.encodeTextField(gen, "text", word);
+				luceneApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
+				luceneApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
+				luceneApi.encodeStoredId(gen, new Long(i));
+				luceneApi.encodeSortedDocValuesField(gen, "id", new Long(i));
 				gen.writeEnd();
 				System.out.println("INVESTIGATION '" + word + "' " + new Date(now + i * 60000) + " " + i);
 			}
@@ -529,12 +534,12 @@ public class TestLucene {
 				String word = "DS" + letters.substring(j, j + 1) + letters.substring(j, j + 1)
 						+ letters.substring(j, j + 1);
 				gen.writeStartArray();
-				LuceneApi.encodeTextfield(gen, "text", word);
-				LuceneApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
-				LuceneApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
-				LuceneApi.encodeStoredId(gen, new Long(i));
-				LuceneApi.encodeSortedDocValuesField(gen, "id", new Long(i));
-				LuceneApi.encodeStringField(gen, "investigation", new Long(i % NUMINV));
+				luceneApi.encodeTextField(gen, "text", word);
+				luceneApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
+				luceneApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
+				luceneApi.encodeStoredId(gen, new Long(i));
+				luceneApi.encodeSortedDocValuesField(gen, "id", new Long(i));
+				luceneApi.encodeStringField(gen, "investigation", new Long(i % NUMINV));
 				gen.writeEnd();
 				System.out.println("DATASET '" + word + "' " + new Date(now + i * 60000) + " " + i + " " + i % NUMINV);
 			}
@@ -562,10 +567,10 @@ public class TestLucene {
 				String word = "DF" + letters.substring(j, j + 1) + letters.substring(j, j + 1)
 						+ letters.substring(j, j + 1);
 				gen.writeStartArray();
-				LuceneApi.encodeTextfield(gen, "text", word);
-				LuceneApi.encodeStringField(gen, "date", new Date(now + i * 60000));
-				LuceneApi.encodeStoredId(gen, new Long(i));
-				LuceneApi.encodeStringField(gen, "dataset", new Long(i % NUMDS));
+				luceneApi.encodeTextField(gen, "text", word);
+				luceneApi.encodeStringField(gen, "date", new Date(now + i * 60000));
+				luceneApi.encodeStoredId(gen, new Long(i));
+				luceneApi.encodeStringField(gen, "dataset", new Long(i % NUMDS));
 				gen.writeEnd();
 				System.out.println("DATAFILE '" + word + "' " + new Date(now + i * 60000) + " " + i + " " + i % NUMDS);
 
@@ -594,8 +599,8 @@ public class TestLucene {
 				String word = "SType " + letters.substring(j, j + 1) + letters.substring(j, j + 1)
 						+ letters.substring(j, j + 1);
 				gen.writeStartArray();
-				LuceneApi.encodeTextfield(gen, "text", word);
-				LuceneApi.encodeSortedDocValuesField(gen, "investigation", new Long(i % NUMINV));
+				luceneApi.encodeTextField(gen, "text", word);
+				luceneApi.encodeSortedDocValuesField(gen, "investigation", new Long(i % NUMINV));
 				gen.writeEnd();
 				System.out.println("SAMPLE '" + word + "' " + i % NUMINV);
 			}
