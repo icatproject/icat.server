@@ -38,7 +38,7 @@ jobs:
         with:
           repository: icatproject-contrib/icat-ansible
           path: icat-ansible
-          ref: fix_warnings_#23
+          ref: underscore_changes
       - name: Install Ansible
         run: pip install -r icat-ansible/requirements.txt
 
