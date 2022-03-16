@@ -38,12 +38,13 @@ jobs:
         with:
           repository: icatproject-contrib/icat-ansible
           path: icat-ansible
+          ref: master
       - name: Install Ansible
         run: pip install -r icat-ansible/requirements.txt
 
       # Prep for running the playbook
       - name: Create Hosts File
-        run: echo -e "[icat-server-dev-hosts]\nlocalhost ansible_connection=local" > icat-ansible/hosts
+        run: echo -e "[icat_server_dev_hosts]\nlocalhost ansible_connection=local" > icat-ansible/hosts
       - name: Prepare vault pass
         run: echo -e "icattravispw" > icat-ansible/vault_pass.txt
       - name: Move vault to directory it'll get detected by Ansible
@@ -59,7 +60,7 @@ jobs:
       # Create local instance of ICAT
       - name: Run ICAT Ansible Playbook
         run: |
-          ansible-playbook icat-ansible/icat-server-dev-hosts.yml -i icat-ansible/hosts --vault-password-file icat-ansible/vault_pass.txt -vv
+          ansible-playbook icat-ansible/icat_server_dev_hosts.yml -i icat-ansible/hosts --vault-password-file icat-ansible/vault_pass.txt -vv
 
       - name: Checkout icat-server
         uses: actions/checkout@v2
