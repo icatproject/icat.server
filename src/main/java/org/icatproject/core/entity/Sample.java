@@ -98,6 +98,7 @@ public class Sample extends EntityBaseBean implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
 		searchApi.encodeTextField(gen, "text", getDocText());
+		searchApi.encodeTextField(gen, "sampleText", getDocText());
 		searchApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
 	}
 

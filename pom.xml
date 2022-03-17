@@ -136,7 +136,7 @@
 		<dependency>
 			<groupId>co.elastic.clients</groupId>
 			<artifactId>elasticsearch-java</artifactId>
-			<version>7.16.3</version>
+			<version>8.1.0</version>
 		  </dependency>
 		  <dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -236,7 +236,7 @@
 					<systemPropertyVariables>
 						<javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
 						<luceneUrl>${luceneUrl}</luceneUrl>
-						<searchUrls>${searchUrls}</searchUrls>
+						<elasticsearchUrl>${elasticsearchUrl}</elasticsearchUrl>
 					</systemPropertyVariables>
 					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>
@@ -254,8 +254,9 @@
 					<systemPropertyVariables>
 						<javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
 						<serverUrl>${serverUrl}</serverUrl>
+						<searchEngine>${searchEngine}</searchEngine>
 						<luceneUrl>${luceneUrl}</luceneUrl>
-						<searchUrls>${searchUrls}</searchUrls>
+						<elasticsearchUrl>${elasticsearchUrl}</elasticsearchUrl>
 					</systemPropertyVariables>
 				</configuration>
 				<executions>
@@ -334,8 +335,9 @@
 								<argument>src/test/scripts/prepare_test.py</argument>
 								<argument>${containerHome}</argument>
 								<argument>${serverUrl}</argument>
+								<argument>${searchEngine}</argument>
 								<argument>${luceneUrl}</argument>
-								<argument>${searchUrls}</argument>
+								<argument>${elasticsearchUrl}</argument>
 							</arguments>
 						</configuration>
 						<goals>

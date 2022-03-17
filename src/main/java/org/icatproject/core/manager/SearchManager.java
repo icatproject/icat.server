@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -76,9 +75,11 @@ public class SearchManager {
 
 					try {
 						searchApi.modify(sb.toString());
-					} catch (IcatException e) {
-						// Record failures in a flat file to be examined
-						// periodically
+					} catch (Exception e) {
+						// Catch all exceptions so the Timer doesn't end unexpectedly
+						// Record failures in a flat file to be examined periodically
+						logger.error("Search engine failed to modify documents with error {} : {}", e.getClass(),
+								e.getMessage());
 						synchronized (backlogHandlerFileLock) {
 							try {
 								FileWriter output = new FileWriter(backlogHandlerFile, true);
@@ -299,7 +300,7 @@ public class SearchManager {
 	private Long queueFileLock = 0L;
 
 	private Timer timer;
-	
+
 	private Set<String> entitiesToIndex;
 
 	private File backlogHandlerFile;
@@ -407,10 +408,10 @@ public class SearchManager {
 		}
 	}
 
-    public List<FacetDimension> facetSearch(JsonObject facetQuery, int maxResults, int maxLabels)
+	public List<FacetDimension> facetSearch(JsonObject facetQuery, int maxResults, int maxLabels)
 			throws IcatException {
-        return searchApi.facetSearch(facetQuery, maxResults, maxLabels);
-    }
+		return searchApi.facetSearch(facetQuery, maxResults, maxLabels);
+	}
 
 	public void freeSearcher(String uid) throws IcatException {
 		searchApi.freeSearcher(uid);
@@ -444,15 +445,16 @@ public class SearchManager {
 					searchApi = new LuceneApi(propertyHandler.getSearchUrls().get(0).toURI());
 				} else if (searchEngine == SearchEngine.ELASTICSEARCH) {
 					searchApi = new ElasticsearchApi(propertyHandler.getSearchUrls());
-				// TODO implement opensearch
-				// } else if (searchEngine == SearchEngine.OPENSEARCH) {
-				// 	throw new IllegalStateException("OPENSEARCH NYI");
+				} else {
+					// TODO implement opensearch
+					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+							"Search engine {} not supported, must be one of LUCENE, ELASTICSEARCH");
 				}
 
 				populateBlockSize = propertyHandler.getSearchPopulateBlockSize();
 				Path searchDirectory = propertyHandler.getSearchDirectory();
 				backlogHandlerFile = searchDirectory.resolve("backLog").toFile();
-				queueFile =  searchDirectory.resolve("queue").toFile();
+				queueFile = searchDirectory.resolve("queue").toFile();
 				maxThreads = Runtime.getRuntime().availableProcessors();
 				populateExecutor = Executors.newWorkStealingPool(maxThreads);
 				getBeanDocExecutor = Executors.newCachedThreadPool();

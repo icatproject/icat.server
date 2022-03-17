@@ -8,13 +8,22 @@ import shutil
 from zipfile import ZipFile
 import subprocess
 
-if len(sys.argv) != 5:
+if len(sys.argv) != 6:
     raise RuntimeError("Wrong number of arguments")
 
 containerHome = sys.argv[1]
 icat_url = sys.argv[2]
-lucene_url = sys.argv[3]
-search_urls = sys.argv[4]
+search_engine = sys.argv[3]
+lucene_url = sys.argv[4]
+elasticsearch_url = sys.argv[5]
+
+if search_engine == "LUCENE":
+    search_urls = lucene_url
+elif search_engine == "ELASTICSEARCH":
+    search_urls = elasticsearch_url
+else:
+    raise RuntimeError("Search engine %s unrecognised, " % search_engine
+                       + "should be one of LUCENE, ELASTICSEARCH")
 
 subst = dict(os.environ)
 
@@ -24,31 +33,30 @@ for f in glob.glob("src/test/install/*.war"):
 shutil.copy("src/main/config/run.properties.example",
             "src/test/install/run.properties.example")
 
-if not os.path.exists("src/test/install/run.properties"):
-    with open("src/test/install/run.properties", "w") as f:
-        contents = [
-            "lifetimeMinutes = 120",
-            "rootUserNames = db/root simple/root",
-            "maxEntities = 10000",
-            "maxIdsInQuery = 500",
-            "importCacheSize = 50",
-            "exportCacheSize = 50",
-            "authn.list = db simple",
-            "authn.db.url = %s" % icat_url,
-            "authn.simple.url = %s" % icat_url,
-            "notification.list = Dataset Datafile",
-            "notification.Dataset = CU",
-            "notification.Datafile = CU",
-            "log.list = SESSION WRITE READ INFO",
-            "search.engine = LUCENE",  # TODO how to allow us to test other engines?
-            "search.urls = %s" % lucene_url,
-            "search.populateBlockSize = 10000",
-            "search.directory = %s/data/search" % subst["HOME"],
-            "search.backlogHandlerIntervalSeconds = 60",
-            "search.enqueuedRequestIntervalSeconds = 3",
-            "key = wombat"
-        ]
-        f.write("\n".join(contents))
+with open("src/test/install/run.properties", "w") as f:
+    contents = [
+        "lifetimeMinutes = 120",
+        "rootUserNames = db/root simple/root",
+        "maxEntities = 10000",
+        "maxIdsInQuery = 500",
+        "importCacheSize = 50",
+        "exportCacheSize = 50",
+        "authn.list = db simple",
+        "authn.db.url = %s" % icat_url,
+        "authn.simple.url = %s" % icat_url,
+        "notification.list = Dataset Datafile",
+        "notification.Dataset = CU",
+        "notification.Datafile = CU",
+        "log.list = SESSION WRITE READ INFO",
+        "search.engine = %s" % search_engine,
+        "search.urls = %s" % search_urls,
+        "search.populateBlockSize = 10000",
+        "search.directory = %s/data/search" % subst["HOME"],
+        "search.backlogHandlerIntervalSeconds = 60",
+        "search.enqueuedRequestIntervalSeconds = 3",
+        "key = wombat"
+    ]
+    f.write("\n".join(contents))
 
 if not os.path.exists("src/test/install/setup.properties"):
     with open("src/test/install/setup.properties", "w") as f:

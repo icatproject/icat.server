@@ -215,6 +215,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		}
 		searchApi.encodeStoredId(gen, id);
 		searchApi.encodeStringField(gen, "dataset", dataset.id);
+		searchApi.encodeStringField(gen, "investigation", dataset.getInvestigation().id);
 
 		// TODO User and Parameter support for Elasticsearch
 	}

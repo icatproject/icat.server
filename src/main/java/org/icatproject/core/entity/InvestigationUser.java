@@ -41,8 +41,10 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
 		if (user.getFullName() != null) {
 			searchApi.encodeTextField(gen, "text", user.getFullName());
+			searchApi.encodeTextField(gen, "userFullName", user.getFullName());
 		}
 		searchApi.encodeStringField(gen, "name", user.getName());
+		searchApi.encodeStringField(gen, "userName", user.getName());
 		searchApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
 	}
 

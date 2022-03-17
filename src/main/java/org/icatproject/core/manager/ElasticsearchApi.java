@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
 import javax.json.Json;
@@ -20,7 +19,6 @@ import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
 import javax.persistence.EntityManager;
 
@@ -34,16 +32,17 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
-import co.elastic.clients.elasticsearch._types.mapping.DynamicMapping;
+import co.elastic.clients.elasticsearch._types.mapping.Property;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
+import co.elastic.clients.elasticsearch.core.GetResponse;
 import co.elastic.clients.elasticsearch.core.OpenPointInTimeResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.UpdateByQueryRequest;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
@@ -52,9 +51,64 @@ import co.elastic.clients.transport.rest_client.RestClientTransport;
 public class ElasticsearchApi extends SearchApi {
 
 	private static ElasticsearchClient client;
-	private Map<String, Integer> pitMap = new HashMap<>();
+	private final static Map<String, Map<String, Property>> INDEX_PROPERTIES = new HashMap<>();
+	private final static Map<String, String> TARGET_MAP = new HashMap<>();
+	private final static Map<String, String> UPDATE_BY_QUERY_MAP = new HashMap<>();
 
-	public ElasticsearchApi(List<URL> servers) {
+	static {
+		// Add mappings from related entities to the searchable entity they should be
+		// flattened to
+		TARGET_MAP.put("sample", "investigation");
+		TARGET_MAP.put("investigationparameter", "investigation");
+		TARGET_MAP.put("datasetparameter", "dataset");
+		TARGET_MAP.put("datafileparameter", "datafile");
+		TARGET_MAP.put("investigationuser", "investigation");
+
+		// Child entities that should also update by query to other supported entities,
+		// not just their direct parent
+		UPDATE_BY_QUERY_MAP.put("investigationuser", "investigation");
+
+		// Mapping properties that are common to all TARGETS
+		Map<String, Property> commonProperties = new HashMap<>();
+		// commonProperties.put("id", new Property.Builder().text(t -> t).build());
+		commonProperties.put("id", new Property.Builder().long_(t -> t).build());
+		commonProperties.put("text", new Property.Builder().text(t -> t).build());
+		commonProperties.put("userName", new Property.Builder().text(t -> t).build());
+		commonProperties.put("userFullName", new Property.Builder().text(t -> t).build());
+		commonProperties.put("parameterName", new Property.Builder().text(t -> t).build());
+		commonProperties.put("parameterUnits", new Property.Builder().text(t -> t).build());
+		commonProperties.put("parameterStringValue", new Property.Builder().text(t -> t).build());
+		commonProperties.put("parameterDateValue", new Property.Builder().date(d -> d).build());
+		commonProperties.put("parameterNumericValue", new Property.Builder().double_(d -> d).build());
+
+		// Datafile
+		Map<String, Property> datafileProperties = new HashMap<>();
+		datafileProperties.put("date", new Property.Builder().date(d -> d).build());
+		datafileProperties.put("dataset", new Property.Builder().text(t -> t).build());
+		datafileProperties.put("investigation", new Property.Builder().text(t -> t).build());
+		INDEX_PROPERTIES.put("datafile", datafileProperties);
+
+		// Dataset
+		Map<String, Property> datasetProperties = new HashMap<>();
+		datasetProperties.put("startDate", new Property.Builder().date(d -> d).build());
+		datasetProperties.put("endDate", new Property.Builder().date(d -> d).build());
+		datasetProperties.put("investigation", new Property.Builder().text(t -> t).build());
+		INDEX_PROPERTIES.put("dataset", datasetProperties);
+
+		// Investigation
+		Map<String, Property> investigationProperties = new HashMap<>();
+		investigationProperties.put("startDate", new Property.Builder().date(d -> d).build());
+		investigationProperties.put("endDate", new Property.Builder().date(d -> d).build());
+		investigationProperties.put("sampleName", new Property.Builder().text(t -> t).build());
+		investigationProperties.put("sampleText", new Property.Builder().text(t -> t).build());
+		INDEX_PROPERTIES.put("investigation", investigationProperties);
+	}
+
+	// Maps Elasticsearch Points In Time (PIT) to the number of results to skip
+	// for successive searching
+	private final Map<String, Integer> pitMap = new HashMap<>();
+
+	public ElasticsearchApi(List<URL> servers) throws IcatException {
 		List<HttpHost> hosts = new ArrayList<HttpHost>();
 		for (URL server : servers) {
 			hosts.add(new HttpHost(server.getHost(), server.getPort(), server.getProtocol()));
@@ -63,98 +117,88 @@ public class ElasticsearchApi extends SearchApi {
 		ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
 		new JacksonJsonpMapper();
 		client = new ElasticsearchClient(transport);
-		try {
-			initMappings();
-		} catch (Exception e) {
-			logger.warn("ElasticsearchApi init failed when setting explicit mappings");
-		}
+		initMappings();
 	}
 
 	private void initMappings() throws IcatException {
-		CreateIndexResponse response;
 		try {
-			response = client.indices().create(c -> c.index("datafile").mappings(m -> m
-					.dynamic(DynamicMapping.False)
-					.properties("id", p -> p.long_(l -> l))
-					.properties("text", p -> p.text(t -> t))
-					.properties("date", p -> p.date(d -> d))
-					.properties("userName", p -> p.text(t -> t))
-					.properties("userFullName", p -> p.text(t -> t))
-					.properties("parameterName", p -> p.text(t -> t))
-					.properties("parameterUnits", p -> p.text(t -> t))
-					.properties("parameterStringValue", p -> p.text(t -> t))
-					.properties("parameterDateValue", p -> p.date(d -> d))
-					.properties("parameterNumericValue", p -> p.double_(d -> d))));
-			response.acknowledged();
-			response = client.indices().create(c -> c.index("dataset").mappings(m -> m
-					.dynamic(DynamicMapping.False)
-					.properties("id", p -> p.long_(l -> l))
-					.properties("text", p -> p.text(t -> t))
-					.properties("startDate", p -> p.date(d -> d))
-					.properties("endDate", p -> p.date(d -> d))
-					.properties("userName", p -> p.text(t -> t))
-					.properties("userFullName", p -> p.text(t -> t))
-					.properties("parameterName", p -> p.text(t -> t))
-					.properties("parameterUnits", p -> p.text(t -> t))
-					.properties("parameterStringValue", p -> p.text(t -> t))
-					.properties("parameterDateValue", p -> p.date(d -> d))
-					.properties("parameterNumericValue", p -> p.double_(d -> d))));
-			response.acknowledged();
-			response = client.indices().create(c -> c.index("investigation").mappings(m -> m
-					.dynamic(DynamicMapping.False)
-					.properties("id", p -> p.long_(l -> l))
-					.properties("text", p -> p.text(t -> t))
-					.properties("startDate", p -> p.date(d -> d))
-					.properties("endDate", p -> p.date(d -> d))
-					.properties("userName", p -> p.text(t -> t))
-					.properties("userFullName", p -> p.text(t -> t))
-					.properties("sampleName", p -> p.text(t -> t))
-					.properties("sampleText", p -> p.text(t -> t))
-					.properties("parameterName", p -> p.text(t -> t))
-					.properties("parameterUnits", p -> p.text(t -> t))
-					.properties("parameterStringValue", p -> p.text(t -> t))
-					.properties("parameterDateValue", p -> p.date(d -> d))
-					.properties("parameterNumericValue", p -> p.double_(d -> d))));
-			response.acknowledged();
+			client.cluster().putSettings(s -> s.persistent("action.auto_create_index", JsonData.of(false)));
+			client.putScript(p -> p.id("update_user").script(s -> s
+					.lang("painless")
+					.source("if (ctx._source.userName == null) {ctx._source.userName = params['userName']}"
+							+ "else {ctx._source.userName.addAll(params['userName'])}"
+							+ "if (ctx._source.userFullName == null) {ctx._source.userFullName = params['userFullName']}"
+							+ "else {ctx._source.userFullName.addAll(params['userFullName'])}")));
+			client.putScript(p -> p.id("update_sample").script(s -> s
+					.lang("painless")
+					.source("if (ctx._source.sampleName == null) {ctx._source.sampleName = params['sampleName']}"
+							+ "else {ctx._source.sampleName.addAll(params['sampleName'])}"
+							+ "if (ctx._source.sampleText == null) {ctx._source.sampleText = params['sampleText']}"
+							+ "else {ctx._source.sampleText.addAll(params['sampleText'])}")));
+			client.putScript(p -> p.id("update_parameter").script(s -> s
+					.lang("painless")
+					.source("if (ctx._source.parameterName == null) {ctx._source.parameterName = params['parameterName']}"
+							+ "else {ctx._source.parameterName.addAll(params['parameterName'])}"
+							+ "if (ctx._source.parameterUnits == null) {ctx._source.parameterUnits = params['parameterUnits']}"
+							+ "else {ctx._source.parameterUnits.addAll(params['parameterUnits'])}"
+							+ "if (ctx._source.parameterStringValue == null) {ctx._source.parameterStringValue = params['parameterStringValue']}"
+							+ "else {ctx._source.parameterStringValue.addAll(params['parameterStringValue'])}"
+							+ "if (ctx._source.parameterDateValue == null) {ctx._source.parameterDateValue = params['parameterDateValue']}"
+							+ "else {ctx._source.parameterDateValue.addAll(params['parameterDateValue'])}"
+							+ "if (ctx._source.parameterNumericValue == null) {ctx._source.parameterNumericValue = params['parameterNumericValue']}"
+							+ "else {ctx._source.parameterNumericValue.addAll(params['parameterNumericValue'])}")));
+
+			for (String index : INDEX_PROPERTIES.keySet()) {
+				client.indices().create(c -> c.index(index).mappings(m -> m.properties(INDEX_PROPERTIES.get(index))))
+						.acknowledged();
+			}
 			// TODO consider both dynamic field names and nested fields
 		} catch (ElasticsearchException | IOException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+			logger.warn("Unable to initialise mappings due to error {}, {}", e.getClass(), e.getMessage());
 		}
 	}
 
 	@Override
 	public void addNow(String entityName, List<Long> ids, EntityManager manager,
-			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor) throws IcatException {
-		// getBeanDocExecutor is not used for the Elasticsearch implementation
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		JsonGenerator gen = Json.createGenerator(baos);
-		gen.writeStartArray();
+			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor)
+			throws IcatException, IOException {
+		// getBeanDocExecutor is not used for the Elasticsearch implementation, but is
+		// required for the @Override
+
+		// TODO Change this string building fake JSON by hand
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
 		for (Long id : ids) {
 			EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
 			if (bean != null) {
-				gen.writeStartArray();
-				gen.write(entityName); // Index
-				gen.writeNull(); // Search engine ID is null as we are adding
-				bean.getDoc(gen, this); // Fields
-				gen.writeEnd();
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				try (JsonGenerator gen = Json.createGenerator(baos)) {
+					gen.writeStartArray(); // Document fields are wrapped in an array
+					bean.getDoc(gen, this); // Fields
+					gen.writeEnd();
+				}
+				if (sb.length() != 1) {
+					sb.append(',');
+				}
+				sb.append("[\"").append(entityName).append("\",null,").append(baos.toString()).append(']');
 			}
 		}
-		gen.writeEnd();
-		modify(baos.toString());
+		sb.append("]");
+		modify(sb.toString());
 	}
 
 	@Override
 	public void clear() throws IcatException {
 		try {
-			client.indices().delete(c -> c.index("_all"));
-			initMappings();
+			commit();
+			client.deleteByQuery(d -> d.index("_all").query(q -> q.matchAll(m -> m)));
 		} catch (ElasticsearchException | IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
 
 	// TODO Ideally want to write these as k:v pairs in an object, not objects in a
-	// list, but this is to be consistent with Lucene
+	// list, but this is to be consistent with Lucene (for now)
 
 	public void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value) {
 		gen.writeStartObject().write(name, value).writeEnd();
@@ -209,6 +253,7 @@ public class ElasticsearchApi extends SearchApi {
 	@Override
 	public void commit() throws IcatException {
 		try {
+			logger.debug("Manual commit of Elastic search called, refreshing indices");
 			client.indices().refresh();
 		} catch (ElasticsearchException | IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
@@ -286,6 +331,7 @@ public class ElasticsearchApi extends SearchApi {
 	public SearchResult getResults(String uid, JsonObject query, int maxResults)
 			throws IcatException {
 		try {
+			logger.debug("getResults for query: {}", query.toString());
 			Set<String> fields = query.keySet();
 			BoolQuery.Builder builder = new BoolQuery.Builder();
 			for (String field : fields) {
@@ -318,14 +364,19 @@ public class ElasticsearchApi extends SearchApi {
 													.lte(JsonData.of(time))))));
 				} else if (field.equals("user")) {
 					String user = query.getString("user");
-					builder.filter(f -> f.term(t -> t.field("userName").value(v -> v.stringValue(user))));
+					builder.filter(f -> f.match(t -> t
+							.field("userName")
+							.operator(Operator.And)
+							.query(q -> q.stringValue(user))));
 				} else if (field.equals("userFullName")) {
 					String userFullName = query.getString("userFullName");
 					builder.filter(f -> f.queryString(q -> q.defaultField("userFullName").query(userFullName)));
 				} else if (field.equals("samples")) {
-					for (JsonValue sampleValue : query.getJsonArray("samples")) {
+					JsonArray samples = query.getJsonArray("samples");
+					for (int i = 0; i < samples.size(); i++) {
+						String sample = samples.getString(i);
 						builder.filter(
-								f -> f.queryString(q -> q.defaultField("sampleText").query(sampleValue.toString())));
+								f -> f.queryString(q -> q.defaultField("sampleText").query(sample)));
 					}
 				} else if (field.equals("parameters")) {
 					for (JsonValue parameterValue : query.getJsonArray("parameters")) {
@@ -369,15 +420,16 @@ public class ElasticsearchApi extends SearchApi {
 					.size(maxResults)
 					.pit(p -> p.id(uid).keepAlive(t -> t.time("1m")))
 					.query(q -> q.bool(builder.build()))
-					.docvalueFields(d -> d.field("id"))
+					// TODO check the ordering?
 					.from(from)
-					.sort(o -> o.score(c -> c.order(SortOrder.Desc))), ElasticsearchDocument.class);
+					.sort(o -> o.score(c -> c.order(SortOrder.Desc)))
+					.sort(o -> o.field(f -> f.field("id").order(SortOrder.Asc))), ElasticsearchDocument.class);
 			SearchResult result = new SearchResult();
 			result.setUid(uid);
 			pitMap.put(uid, from + maxResults);
 			List<ScoredEntityBaseBean> entities = result.getResults();
 			for (Hit<ElasticsearchDocument> hit : response.hits().hits()) {
-				entities.add(new ScoredEntityBaseBean(hit.source().getId(), hit.score().floatValue()));
+				entities.add(new ScoredEntityBaseBean(Long.parseLong(hit.id()), hit.score().floatValue()));
 			}
 			return result;
 		} catch (ElasticsearchException | IOException | ParseException e) {
@@ -385,108 +437,178 @@ public class ElasticsearchApi extends SearchApi {
 		}
 	}
 
-	// TODO does this need to be separated for different entity types?
-	private ElasticsearchDocument buildDocument(JsonArray jsonArray) throws IcatException {
-		ElasticsearchDocument document = new ElasticsearchDocument();
-		try {
-			for (JsonValue fieldValue : jsonArray) {
-				JsonObject fieldObject = (JsonObject) fieldValue;
-				for (Entry<String, JsonValue> fieldEntry : fieldObject.entrySet()) {
-					if (fieldEntry.getKey().equals("id")) {
-						if (fieldEntry.getValue().getValueType().equals(ValueType.STRING)) {
-							document.setId(Long.parseLong(fieldObject.getString("id")));
-						} else if (fieldEntry.getValue().getValueType().equals(ValueType.NUMBER)) {
-							document.setId((long) fieldObject.getInt("id"));
-						}
-					} else if (fieldEntry.getKey().equals("text")) {
-						document.setText(fieldObject.getString("text"));
-					} else if (fieldEntry.getKey().equals("date")) {
-						document.setDate(dec(fieldObject.getString("date")));
-					} else if (fieldEntry.getKey().equals("startDate")) {
-						document.setStartDate(dec(fieldObject.getString("startDate")));
-					} else if (fieldEntry.getKey().equals("endDate")) {
-						document.setEndDate(dec(fieldObject.getString("endDate")));
-					} else if (fieldEntry.getKey().equals("user.name")) {
-						document.getUserName().add(fieldObject.getString("user.name"));
-					} else if (fieldEntry.getKey().equals("user.fullName")) {
-						document.getUserFullName().add(fieldObject.getString("user.fullName"));
-					} else if (fieldEntry.getKey().equals("sample.name")) {
-						document.getSampleName().add(fieldObject.getString("sample.name"));
-					} else if (fieldEntry.getKey().equals("sample.text")) {
-						document.getSampleText().add(fieldObject.getString("sample.text"));
-					} else if (fieldEntry.getKey().equals("parameter.name")) {
-						document.getParameterName().add(fieldObject.getString("parameter.name"));
-					} else if (fieldEntry.getKey().equals("parameter.units")) {
-						document.getParameterUnits().add(fieldObject.getString("parameter.units"));
-					} else if (fieldEntry.getKey().equals("parameter.stringValue")) {
-						document.getParameterStringValue().add(fieldObject.getString("parameter.stringValue"));
-					} else if (fieldEntry.getKey().equals("parameter.dateValue")) {
-						document.getParameterDateValue().add(dec(fieldObject.getString("parameter.dateValue")));
-					} else if (fieldEntry.getKey().equals("parameter.numericValue")) {
-						document.getParameterNumericValue()
-								.add(fieldObject.getJsonNumber("parameter.numericValue").doubleValue());
-					}
-				}
-			}
-			return document;
-		} catch (ParseException e) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getClass() + " " + e.getMessage());
-		}
-	}
-
 	@Override
 	public void modify(String json) throws IcatException {
 		// Format should be [[<index>, <id>, <object>], ...]
+		logger.debug("modify: {}", json);
 		JsonReader jsonReader = Json.createReader(new StringReader(json));
 		JsonArray outerArray = jsonReader.readArray();
 		List<BulkOperation> operations = new ArrayList<>();
-		for (JsonArray innerArray : outerArray.getValuesAs(JsonArray.class)) {
-			// Index should always be present
-			if (innerArray.isNull(0)) {
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-						"Cannot modify a document without the target index");
-			}
-			String index = innerArray.getString(0).toLowerCase();
-
-			if (innerArray.isNull(2)) {
-				// If the representation is null, delete the document with provided id
-				if (innerArray.isNull(1)) {
-					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-							"Cannot modify document when both the id and object representing its fields are null");
-				}
-				String id = String.valueOf(innerArray.getInt(1));
-				operations.add(new BulkOperation.Builder().delete(c -> c.index(index).id(id)).build());
-			} else {
-				// Both creating and updates are handled by the index operation
-				ElasticsearchDocument document = buildDocument(innerArray.getJsonArray(2));
-				String id;
-				if (innerArray.isNull(1)) {
-					// If we weren't given an id, try and get one from the document
-					// Avoid using a generated id, as this prevents us updating the document later
-					Long documentId = document.getId();
-					if (documentId == null) {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-								"Cannot index a document without an id");
-					}
-					id = String.valueOf(documentId);
-				} else {
-					id = String.valueOf(innerArray.getInt(1));
-				}
-				operations
-						.add(new BulkOperation.Builder().index(c -> c.index(index).id(id).document(document)).build());
-			}
-		}
+		List<UpdateByQueryRequest.Builder> updateByQueryRequests = new ArrayList<>();
+		Map<String, ElasticsearchDocument> investigationsMap = new HashMap<>();
 		try {
-			BulkResponse response = client.bulk(c -> c.operations(operations));
-			if (response.errors()) {
+			for (JsonArray innerArray : outerArray.getValuesAs(JsonArray.class)) {
+				// Index should always be present, and be recognised
+				if (innerArray.isNull(0)) {
+					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+							"Cannot modify a document without the target index");
+				}
+				String index = innerArray.getString(0).toLowerCase();
+				if (!INDEX_PROPERTIES.keySet().contains(index)) {
+					if (UPDATE_BY_QUERY_MAP.containsKey(index)) {
+						String parentIndex = TARGET_MAP.get(index);
+						if (!innerArray.isNull(2)) {
+							// Both creating and updates are handled by the index operation
+							// ElasticsearchDocument document = buildDocument(innerArray.getJsonArray(2),
+							// index, parentIndex);
+							logger.trace("{}, {}, {}", innerArray.getJsonArray(2).toString(), index, parentIndex);
+							ElasticsearchDocument document = new ElasticsearchDocument(innerArray.getJsonArray(2),
+									index, parentIndex);
+							logger.trace(document.toString());
+							// String documentId = document.getId();
+							Long documentId = document.getId();
+							if (documentId == null) {
+								throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+										"Cannot index a document without an id");
+							}
+							// TODO generalise, currently this assumes we have a user
+							ArrayList<String> indices = new ArrayList<>(INDEX_PROPERTIES.keySet());
+							indices.remove(parentIndex);
+							logger.debug("Adding update by query with: {}, {}, {}, {}", parentIndex, documentId,
+									document.getUserName(), document.getUserFullName());
+							updateByQueryRequests.add(new UpdateByQueryRequest.Builder()
+									.index(indices)
+									.query(q -> q.term(
+											t -> t.field(parentIndex).value(v -> v.stringValue(documentId.toString()))))
+									.script(s -> s.stored(i -> i
+											.id("update_user")
+											.params("userName", JsonData.of(document.getUserName()))
+											.params("userFullName", JsonData.of(document.getUserFullName())))));
+						}
+					}
+					if (TARGET_MAP.containsKey(index)) {
+						String parentIndex = TARGET_MAP.get(index);
+						if (innerArray.isNull(2)) {
+							// TODO we need to delete all the fields on the parent entitity that start with
+							// the sample name, this should be possible I think...?
+							// But we have can't because we provide the child ID, but never index this
+							// Either here, or for Lucene
+							logger.warn(
+									"Cannot delete document for related entity {}, instead update parent document {}",
+									index, parentIndex);
+						} else {
+							// Both creating and updates are handled by the index operation
+							ElasticsearchDocument document = new ElasticsearchDocument(innerArray.getJsonArray(2),
+									index, parentIndex);
+							Long documentId = document.getId();
+							if (documentId == null) {
+								throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+										"Cannot index a document without an id");
+							}
+							String scriptId = "update_";
+							if (index.equals("investigationuser")) {
+								scriptId += "user";
+							} else if (index.equals("investigationparameter")) {
+								scriptId += "parameter";
+							} else if (index.equals("datasetparameter")) {
+								scriptId += "parameter";
+							} else if (index.equals("datafileparameter")) {
+								scriptId += "parameter";
+							} else if (index.equals("sample")) {
+								scriptId += "sample";
+							} else {
+								throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+										"Cannot map target {} to a parent index");
+							}
+							String scriptIdFinal = scriptId;
+							operations.add(new BulkOperation.Builder().update(c -> c
+									.index(parentIndex)
+									.id(documentId.toString())
+									.action(a -> a.upsert(document).script(s -> s.stored(t -> t
+											.id(scriptIdFinal)
+											.params("userName", JsonData.of(document.getUserName()))
+											.params("userFullName", JsonData.of(document.getUserFullName()))
+											.params("sampleName", JsonData.of(document.getSampleName()))
+											.params("sampleText", JsonData.of(document.getSampleText()))
+											.params("parameterName", JsonData.of(document.getParameterName()))
+											.params("parameterUnits", JsonData.of(document.getParameterUnits()))
+											.params("parameterStringValue",
+													JsonData.of(document.getParameterStringValue()))
+											.params("parameterDateValue", JsonData.of(document.getParameterDateValue()))
+											.params("parameterNumericValue",
+													JsonData.of(document.getParameterNumericValue()))))))
+									.build());
+						}
+					} else {
+						logger.warn("Cannot index document for unsupported index {}", index);
+						continue;
+					}
+				} else {
+					if (innerArray.isNull(2)) {
+						// If the representation is null, delete the document with provided id
+						if (innerArray.isNull(1)) {
+							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+									"Cannot modify document when both the id and object representing its fields are null");
+						}
+						String id = String.valueOf(innerArray.getInt(1));
+						operations.add(new BulkOperation.Builder().delete(c -> c.index(index).id(id)).build());
+					} else {
+						ElasticsearchDocument document = new ElasticsearchDocument(innerArray.getJsonArray(2));
+						// Get information on user, which might be on the parent investigation
+						String investigationId = document.getInvestigation();
+						logger.debug("Looking for investigations with id: {} for index: {}", investigationId, index);
+						if (investigationId != null) {
+							ElasticsearchDocument investigation = investigationsMap.get(investigationId);
+							if (investigation == null) {
+								GetResponse<ElasticsearchDocument> getResponse = client.get(
+										g -> g.index("investigation").id(investigationId), ElasticsearchDocument.class);
+								if (getResponse.found()) {
+									investigation = getResponse.source();
+								} else {
+									investigation = new ElasticsearchDocument();
+								}
+								investigationsMap.put(investigationId, investigation);
+							}
+							document.getUserName().addAll(investigation.getUserName());
+							document.getUserFullName().addAll(investigation.getUserFullName());
+						}
+
+						// TODO REVERT?
+						// Both creating and updates are handled by the index operation
+						String id;
+						if (innerArray.isNull(1)) {
+							// If we weren't given an id, try and get one from the document
+							// Avoid using a generated id, as this prevents us updating the document later
+							Long documentId = document.getId();
+							if (documentId == null) {
+								throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+										"Cannot index a document without an id");
+							}
+							id = documentId.toString();
+						} else {
+							id = String.valueOf(innerArray.getInt(1));
+						}
+						operations.add(new BulkOperation.Builder().update(c -> c
+								.index(index)
+								.id(id)
+								.action(a -> a.doc(document).docAsUpsert(true))).build());
+					}
+				}
+			}
+			BulkResponse bulkResponse = client.bulk(c -> c.operations(operations));
+			if (bulkResponse.errors()) {
 				// Throw an Exception for the first error we had in the list of operations
-				for (BulkResponseItem responseItem : response.items()) {
-					if (responseItem.error().reason() != "") {
+				for (BulkResponseItem responseItem : bulkResponse.items()) {
+					if (responseItem.error() != null) {
 						throw new IcatException(IcatExceptionType.INTERNAL, responseItem.error().reason());
 					}
 				}
 			}
-			;
+			// TODO this isn't bulked - a single failure will not invalidate the rest...
+			for (UpdateByQueryRequest.Builder request : updateByQueryRequests) {
+				commit();
+				client.updateByQuery(request.build());
+			}
 		} catch (ElasticsearchException | IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}

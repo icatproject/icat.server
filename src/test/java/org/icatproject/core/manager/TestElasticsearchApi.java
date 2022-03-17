@@ -32,7 +32,7 @@ public class TestElasticsearchApi {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		String urlString = System.getProperty("searchUrls");
+		String urlString = System.getProperty("elasticsearchUrl");
 		logger.info("Using Elasticsearch service at {}", urlString);
 		searchApi = new ElasticsearchApi(Arrays.asList(new URL(urlString)));
 	}
@@ -153,12 +153,14 @@ public class TestElasticsearchApi {
 	public void datafiles() throws Exception {
 		populate();
 
-		SearchResult lsr = searchApi.getResults(SearchApi.buildQuery("Datafile", null, null, null, null, null, null, null), 5);
+		SearchResult lsr = searchApi
+				.getResults(SearchApi.buildQuery("Datafile", null, null, null, null, null, null, null), 5);
 		String uid = lsr.getUid();
 
 		checkLsr(lsr, 0L, 1L, 2L, 3L, 4L);
 		System.out.println(uid);
-		lsr = searchApi.getResults(uid, SearchApi.buildQuery("Datafile", null, null, null, null, null, null, null), 200);
+		lsr = searchApi.getResults(uid, SearchApi.buildQuery("Datafile", null, null, null, null, null, null, null),
+				200);
 		// assertTrue(lsr.getUid() == null);
 		assertEquals(95, lsr.getResults().size());
 		searchApi.freeSearcher(uid);
@@ -208,7 +210,8 @@ public class TestElasticsearchApi {
 	@Test
 	public void datasets() throws Exception {
 		populate();
-		SearchResult lsr = searchApi.getResults(SearchApi.buildQuery("Dataset", null, null, null, null, null, null, null), 5);
+		SearchResult lsr = searchApi
+				.getResults(SearchApi.buildQuery("Dataset", null, null, null, null, null, null, null), 5);
 
 		String uid = lsr.getUid();
 		checkLsr(lsr, 0L, 1L, 2L, 3L, 4L);
@@ -263,28 +266,46 @@ public class TestElasticsearchApi {
 
 	}
 
-	private void fillParms(JsonGenerator gen, int i, String rel) {
+	private void fillParameters(JsonGenerator gen, int i, String rel) {
 		int j = i % 26;
 		int k = (i + 5) % 26;
 		String name = "nm " + letters.substring(j, j + 1) + letters.substring(j, j + 1) + letters.substring(j, j + 1);
 		String units = "u " + letters.substring(k, k + 1) + letters.substring(k, k + 1) + letters.substring(k, k + 1);
 
-		searchApi.encodeStringField(gen, "parameter.name", "S" + name);
-		searchApi.encodeStringField(gen, "parameter.units", units);
-		searchApi.encodeStringField(gen, "parameter.stringValue", "v" + i * i);
+		gen.writeStartArray();
+		gen.write(rel + "Parameter");
+		gen.writeNull();
+		gen.writeStartArray();
+		searchApi.encodeStringField(gen, "parameterName", "S" + name);
+		searchApi.encodeStringField(gen, "parameterUnits", units);
+		searchApi.encodeStringField(gen, "parameterStringValue", "v" + i * i);
 		searchApi.encodeSortedDocValuesField(gen, rel, new Long(i));
+		gen.writeEnd();
+		gen.writeEnd();
 		System.out.println(rel + " " + i + " '" + "S" + name + "' '" + units + "' 'v" + i * i + "'");
 
-		searchApi.encodeStringField(gen, "parameter.name", "N" + name);
-		searchApi.encodeStringField(gen, "parameter.units", units);
-		searchApi.encodeDoublePoint(gen, "parameter.numericValue", new Double(j * j));
+		gen.writeStartArray();
+		gen.write(rel + "Parameter");
+		gen.writeNull();
+		gen.writeStartArray();
+		searchApi.encodeStringField(gen, "parameterName", "N" + name);
+		searchApi.encodeStringField(gen, "parameterUnits", units);
+		searchApi.encodeDoublePoint(gen, "parameterNumericValue", new Double(j * j));
 		searchApi.encodeSortedDocValuesField(gen, rel, new Long(i));
+		gen.writeEnd();
+		gen.writeEnd();
 		System.out.println(rel + " " + i + " '" + "N" + name + "' '" + units + "' " + new Double(j * j));
 
-		searchApi.encodeStringField(gen, "parameter.name", "D" + name);
-		searchApi.encodeStringField(gen, "parameter.units", units);
-		searchApi.encodeStringField(gen, "parameter.dateValue", new Date(now + 60000 * k * k));
+		gen.writeStartArray();
+		gen.write(rel + "Parameter");
+		gen.writeNull();
+		gen.writeStartArray();
+		searchApi.encodeStringField(gen, "parameterName", "D" + name);
+		searchApi.encodeStringField(gen, "parameterUnits", units);
+		searchApi.encodeStringField(gen, "parameterDateValue", new Date(now + 60000 * k * k));
 		searchApi.encodeSortedDocValuesField(gen, rel, new Long(i));
+		gen.writeEnd();
+		gen.writeEnd();
 		System.out.println(
 				rel + " " + i + " '" + "D" + name + "' '" + units + "' '" + new Date(now + 60000 * k * k) + "'");
 
@@ -295,12 +316,14 @@ public class TestElasticsearchApi {
 		populate();
 
 		/* Blocked results */
-		SearchResult lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, null, null),
+		SearchResult lsr = searchApi.getResults(
+				SearchApi.buildQuery("Investigation", null, null, null, null, null, null, null),
 				5);
 		String uid = lsr.getUid();
 		checkLsr(lsr, 0L, 1L, 2L, 3L, 4L);
 		System.out.println(uid);
-		lsr = searchApi.getResults(uid, SearchApi.buildQuery("Investigation", null, null, null, null, null, null, null), 6);
+		lsr = searchApi.getResults(uid, SearchApi.buildQuery("Investigation", null, null, null, null, null, null, null),
+				6);
 		// assertTrue(lsr.getUid() == null);
 		checkLsr(lsr, 5L, 6L, 7L, 8L, 9L);
 		searchApi.freeSearcher(uid);
@@ -309,11 +332,13 @@ public class TestElasticsearchApi {
 		checkLsr(lsr, 1L, 3L, 5L, 7L, 9L);
 		searchApi.freeSearcher(lsr.getUid());
 
-		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, null, "FN"), 100);
+		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, null, "FN"),
+				100);
 		checkLsr(lsr, 1L, 3L, 4L, 5L, 6L, 7L, 9L);
 		searchApi.freeSearcher(lsr.getUid());
 
-		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, null, "FN AND \"b b\""),
+		lsr = searchApi.getResults(
+				SearchApi.buildQuery("Investigation", null, null, null, null, null, null, "FN AND \"b b\""),
 				100);
 		checkLsr(lsr, 1L, 3L, 5L, 7L, 9L);
 		searchApi.freeSearcher(lsr.getUid());
@@ -326,7 +351,8 @@ public class TestElasticsearchApi {
 		checkLsr(lsr);
 		searchApi.freeSearcher(lsr.getUid());
 
-		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, "l v", null, null, null, null, null), 100);
+		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, "l v", null, null, null, null, null),
+				100);
 		checkLsr(lsr, 4L);
 		searchApi.freeSearcher(lsr.getUid());
 
@@ -346,7 +372,8 @@ public class TestElasticsearchApi {
 
 		List<ParameterPOJO> pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v9"));
-		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null), 100);
+		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null),
+				100);
 		checkLsr(lsr, 3L);
 		searchApi.freeSearcher(lsr.getUid());
 
@@ -354,7 +381,8 @@ public class TestElasticsearchApi {
 		pojos.add(new ParameterPOJO(null, null, "v9"));
 		pojos.add(new ParameterPOJO(null, null, 7, 10));
 		pojos.add(new ParameterPOJO(null, null, new Date(now + 60000 * 63), new Date(now + 60000 * 65)));
-		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null), 100);
+		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null),
+				100);
 		checkLsr(lsr, 3L);
 		searchApi.freeSearcher(lsr.getUid());
 
@@ -368,23 +396,27 @@ public class TestElasticsearchApi {
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v9"));
 		pojos.add(new ParameterPOJO(null, null, "v81"));
-		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null), 100);
+		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null),
+				100);
 		checkLsr(lsr);
 		searchApi.freeSearcher(lsr.getUid());
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO("Snm ddd", "u iii", "v9"));
-		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null), 100);
+		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, pojos, null, null),
+				100);
 		checkLsr(lsr, 3L);
 		searchApi.freeSearcher(lsr.getUid());
 
 		List<String> samples = Arrays.asList("ddd", "nnn");
-		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, samples, null), 100);
+		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, samples, null),
+				100);
 		checkLsr(lsr, 3L);
 		searchApi.freeSearcher(lsr.getUid());
 
 		samples = Arrays.asList("ddd", "mmm");
-		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, samples, null), 100);
+		lsr = searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, samples, null),
+				100);
 		checkLsr(lsr);
 		searchApi.freeSearcher(lsr.getUid());
 
@@ -406,46 +438,69 @@ public class TestElasticsearchApi {
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 			gen.writeStartArray();
 			for (int i = 0; i < NUMINV; i++) {
-				gen.writeStartArray();
-				gen.write("Investigation");
-				gen.writeNull();
+				for (int j = 0; j < NUMUSERS; j++) {
+					if (i % (j + 1) == 1) {
+						String fn = "FN " + letters.substring(j, j + 1) + " " + letters.substring(j, j + 1);
+						String name = letters.substring(j, j + 1) + j;
+						gen.writeStartArray();
+						gen.write("InvestigationUser");
+						gen.writeNull();
+						gen.writeStartArray();
+
+						searchApi.encodeTextField(gen, "userFullName", fn);
+
+						searchApi.encodeStringField(gen, "userName", name);
+						searchApi.encodeSortedDocValuesField(gen, "investigation", new Long(i));
+
+						gen.writeEnd();
+						gen.writeEnd();
+						System.out.println("'" + fn + "' " + name + " " + i);
+					}
+				}
+			}
+			gen.writeEnd();
+		}
+		searchApi.modify(baos.toString());
+		logger.debug("IUs added:");
+		searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, null, null), 100); // TODO
+																													// RM
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartArray();
+			for (int i = 0; i < NUMINV; i++) {
 				int j = i % 26;
 				int k = (i + 7) % 26;
 				int l = (i + 17) % 26;
 				String word = letters.substring(j, j + 1) + " " + letters.substring(k, k + 1) + " "
 						+ letters.substring(l, l + 1);
 				gen.writeStartArray();
+				gen.write("Investigation");
+				gen.writeNull();
+				gen.writeStartArray();
 				searchApi.encodeTextField(gen, "text", word);
 				searchApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
 				searchApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
 				searchApi.encodeStoredId(gen, new Long(i));
 				searchApi.encodeSortedDocValuesField(gen, "id", new Long(i));
-				if (i % 2 == 1) {
-					fillParms(gen, i, "investigation");
-				}
-				for (int m = 0; m < NUMSAMP; m++) {
-					if (i == m % NUMINV) {
-						int n = m % 26;
-						String sampleText = "SType " + letters.substring(n, n + 1) + letters.substring(n, n + 1)
-								+ letters.substring(n, n + 1);
-						searchApi.encodeSortedSetDocValuesFacetField(gen, "sample.name", letters.substring(n, n + 1) + letters.substring(n, n + 1)
-								+ letters.substring(n, n + 1));
-						searchApi.encodeTextField(gen, "sample.text", sampleText);
-						System.out.println("SAMPLE '" + sampleText + "' " + m % NUMINV);
-					}
-				}
-				for (int p = 0; p < NUMUSERS; p++) {
-					if (i % (p + 1) == 1) {
-						String fn = "FN " + letters.substring(p, p + 1) + " " + letters.substring(p, p + 1);
-						String name = letters.substring(p, p + 1) + p;
-						searchApi.encodeTextField(gen, "user.fullName", fn);
-						searchApi.encodeStringField(gen, "user.name", name);
-						System.out.println("'" + fn + "' " + name + " " + i);
-					}
-				}
 				gen.writeEnd();
 				gen.writeEnd();
 				System.out.println("INVESTIGATION '" + word + "' " + new Date(now + i * 60000) + " " + i);
+			}
+			gen.writeEnd();
+		}
+		searchApi.modify(baos.toString());
+		logger.debug("Is added:");
+		searchApi.getResults(SearchApi.buildQuery("Investigation", null, null, null, null, null, null, null), 100); // TODO
+																													// RM
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartArray();
+			for (int i = 0; i < NUMINV; i++) {
+				if (i % 2 == 1) {
+					fillParameters(gen, i, "investigation");
+				}
 			}
 			gen.writeEnd();
 		}
@@ -467,23 +522,22 @@ public class TestElasticsearchApi {
 				searchApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
 				searchApi.encodeStoredId(gen, new Long(i));
 				searchApi.encodeSortedDocValuesField(gen, "id", new Long(i));
-				Long investigationId = new Long(i % NUMINV);
-				searchApi.encodeStringField(gen, "investigation", investigationId);
-				for (int p = 0; p < NUMUSERS; p++) {
-					if (investigationId % (p + 1) == 1) {
-						String fn = "FN " + letters.substring(p, p + 1) + " " + letters.substring(p, p + 1);
-						String name = letters.substring(p, p + 1) + p;
-						searchApi.encodeTextField(gen, "user.fullName", fn);
-						searchApi.encodeStringField(gen, "user.name", name);
-						System.out.println("'" + fn + "' " + name + " " + i);
-					}
-				}
-				if (i % 3 == 1) {
-					fillParms(gen, i, "dataset");
-				}
+				searchApi.encodeStringField(gen, "investigation", new Long(i % NUMINV));
 				gen.writeEnd();
 				gen.writeEnd();
 				System.out.println("DATASET '" + word + "' " + new Date(now + i * 60000) + " " + i + " " + i % NUMINV);
+			}
+			gen.writeEnd();
+		}
+		searchApi.modify(baos.toString());
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartArray();
+			for (int i = 0; i < NUMDS; i++) {
+				if (i % 3 == 1) {
+					fillParameters(gen, i, "dataset");
+				}
 			}
 			gen.writeEnd();
 		}
@@ -503,22 +557,8 @@ public class TestElasticsearchApi {
 				searchApi.encodeTextField(gen, "text", word);
 				searchApi.encodeStringField(gen, "date", new Date(now + i * 60000));
 				searchApi.encodeStoredId(gen, new Long(i));
-				Long datasetId = new Long(i % NUMDS);
-				Long investigationId = new Long(datasetId % NUMINV);
-				searchApi.encodeStringField(gen, "dataset", datasetId);
-				// searchApi.encodeStringField(gen, "investigation", investigationId);
-				for (int p = 0; p < NUMUSERS; p++) {
-					if (investigationId % (p + 1) == 1) {
-						String fn = "FN " + letters.substring(p, p + 1) + " " + letters.substring(p, p + 1);
-						String name = letters.substring(p, p + 1) + p;
-						searchApi.encodeTextField(gen, "user.fullName", fn);
-						searchApi.encodeStringField(gen, "user.name", name);
-						System.out.println("'" + fn + "' " + name + " " + i);
-					}
-				}
-				if (i % 4 == 1) {
-					fillParms(gen, i, "datafile");
-				}
+				searchApi.encodeStringField(gen, "dataset", new Long(i % NUMDS));
+				searchApi.encodeStringField(gen, "investigation", new Long((i % NUMDS) % NUMINV));
 				gen.writeEnd();
 				gen.writeEnd();
 				System.out.println("DATAFILE '" + word + "' " + new Date(now + i * 60000) + " " + i + " " + i % NUMDS);
@@ -528,8 +568,41 @@ public class TestElasticsearchApi {
 		}
 		searchApi.modify(baos.toString());
 
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartArray();
+			for (int i = 0; i < NUMDF; i++) {
+				if (i % 4 == 1) {
+					fillParameters(gen, i, "datafile");
+				}
+			}
+			gen.writeEnd();
+		}
+		searchApi.modify(baos.toString());
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartArray();
+			for (int i = 0; i < NUMSAMP; i++) {
+				int j = i % 26;
+				String word = "SType " + letters.substring(j, j + 1) + letters.substring(j, j + 1)
+						+ letters.substring(j, j + 1);
+				gen.writeStartArray();
+				gen.write("Sample");
+				gen.writeNull();
+				gen.writeStartArray();
+				searchApi.encodeTextField(gen, "sampleText", word);
+				searchApi.encodeSortedDocValuesField(gen, "investigation", new Long(i % NUMINV));
+				gen.writeEnd();
+				gen.writeEnd();
+				System.out.println("SAMPLE '" + word + "' " + i % NUMINV);
+			}
+			gen.writeEnd();
+
+		}
+		searchApi.modify(baos.toString());
+
 		searchApi.commit();
 
 	}
-
 }

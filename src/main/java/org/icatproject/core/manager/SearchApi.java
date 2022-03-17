@@ -21,10 +21,10 @@ import org.slf4j.LoggerFactory;
 // TODO see what functionality can live here, and possibly convert from abstract to a fully generic API
 public abstract class SearchApi {
 
-	abstract void addNow(String entityName, List<Long> ids, EntityManager manager,
+	public abstract void addNow(String entityName, List<Long> ids, EntityManager manager,
 			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor) throws Exception;
 
-	abstract void clear() throws IcatException;
+	public abstract void clear() throws IcatException;
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected static SimpleDateFormat df;

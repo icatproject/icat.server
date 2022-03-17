@@ -1416,24 +1416,27 @@ public class EntityBeanManager {
 			searchManager.freeSearcher(uid);
 
 			// TODO move this to somewhere we can manually call it
-			if (results.size() > 0) {
-				/* Get facets for the filtered list of IDs */
-				String facetText = "";
-				for (ScoredEntityBaseBean result: results) {
-					facetText += " id:" + result.getEntityBaseBeanId();
-				}
-				JsonObject facetQuery = Json.createObjectBuilder()
-						.add("target", jo.getString("target"))
-						.add("text", facetText.substring(1))
-						.build();
-				List<FacetDimension> facets = searchManager.facetSearch(facetQuery, blockSize, 100); // TODO remove hardcode
-				for (FacetDimension dimension: facets) {
-					logger.debug("Facet dimension: {}", dimension.getDimension());
-					for (FacetLabel facet: dimension.getFacets()) {
-						logger.debug("{}: {}", facet.getLabel(), facet.getValue());
-					}
-				}
-			}
+			// TODO also need to fix it for Elasticsearch (cannot use text fields for
+			// aggregations...)
+			// if (results.size() > 0) {
+			// /* Get facets for the filtered list of IDs */
+			// String facetText = "";
+			// for (ScoredEntityBaseBean result: results) {
+			// facetText += " id:" + result.getEntityBaseBeanId();
+			// }
+			// JsonObject facetQuery = Json.createObjectBuilder()
+			// .add("target", jo.getString("target"))
+			// .add("text", facetText.substring(1))
+			// .build();
+			// List<FacetDimension> facets = searchManager.facetSearch(facetQuery,
+			// blockSize, 100); // TODO remove hardcode
+			// for (FacetDimension dimension: facets) {
+			// logger.debug("Facet dimension: {}", dimension.getDimension());
+			// for (FacetLabel facet: dimension.getFacets()) {
+			// logger.debug("{}: {}", facet.getLabel(), facet.getValue());
+			// }
+			// }
+			// }
 		}
 		if (logRequests.contains("R")) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();

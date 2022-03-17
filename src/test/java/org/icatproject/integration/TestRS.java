@@ -19,7 +19,10 @@ import static org.hamcrest.CoreMatchers.isA;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,7 +49,9 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 
+import org.icatproject.core.manager.ElasticsearchApi;
 import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.manager.SearchApi;
 import org.icatproject.icat.client.ICAT;
 import org.icatproject.icat.client.IcatException;
 import org.icatproject.icat.client.IcatException.IcatExceptionType;
@@ -66,6 +71,30 @@ public class TestRS {
 	private static WSession wSession;
 	private static long end;
 	private static long start;
+	private static SearchApi searchApi;
+
+	/**
+	 * Utility function for manually clearing the search engine indices based on the System properties
+	 * @throws URISyntaxException
+	 * @throws MalformedURLException
+	 * @throws org.icatproject.core.IcatException
+	 */
+	private static void clearSearch() throws URISyntaxException, MalformedURLException, org.icatproject.core.IcatException {
+		if (searchApi == null) {
+			String searchEngine = System.getProperty("searchEngine");
+			if (searchEngine.equals("LUCENE")) {
+				String urlString = System.getProperty("luceneUrl");
+				URI uribase = new URI(urlString);
+				searchApi = new LuceneApi(uribase);
+			} else if (searchEngine.equals("ELASTICSEARCH")) {
+				String urlString = System.getProperty("elasticsearchUrl");				
+				searchApi = new ElasticsearchApi(Arrays.asList(new URL(urlString)));
+			} else {
+				throw new RuntimeException("searchEngine must be one of LUCENE, ELASTICSEARCH, but it was " + searchEngine);
+			}
+		}
+		searchApi.clear();
+	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -460,11 +489,7 @@ public class TestRS {
 		Session rootSession = icat.login("db", credentials);
 
 		rootSession.luceneClear(); // Stop populating
-
-		String urlString = System.getProperty("luceneUrl");
-		URI uribase = new URI(urlString);
-		LuceneApi luceneApi = new LuceneApi(uribase);
-		luceneApi.clear(); // Really empty the db
+		clearSearch(); // Really empty the db
 
 		List<String> props = wSession.getProperties();
 		System.out.println(props);
@@ -1697,11 +1722,7 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		session.luceneClear(); // Stop populating
-
-		String urlString = System.getProperty("luceneUrl");
-		URI uribase = new URI(urlString);
-		LuceneApi luceneApi = new LuceneApi(uribase);
-		luceneApi.clear(); // Really empty the db
+		clearSearch(); // Really empty the db
 
 		assertTrue(session.luceneGetPopulating().isEmpty());
 
