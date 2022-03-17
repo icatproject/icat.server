@@ -461,7 +461,7 @@ public class PropertyHandler {
 				luceneUrl = props.getURL("lucene.url");
 				formattedProps.add("lucene.url" + " " + luceneUrl);
 
-				lucenePopulateBlockSize = props.getPositiveInt("lucene.searchBlockSize");
+				lucenePopulateBlockSize = props.getPositiveInt("lucene.populateBlockSize");
 				formattedProps.add("lucene.populateBlockSize" + " " + lucenePopulateBlockSize);
 
 				luceneSearchBlockSize = props.getPositiveInt("lucene.searchBlockSize");
