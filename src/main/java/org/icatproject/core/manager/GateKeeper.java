@@ -165,9 +165,14 @@ public class GateKeeper {
 	}
 
 	/**
-	 * @param userId     The user making the READ request
-	 * @param simpleName The name of the requested entity type
-	 * @param manager
+	 * Gets READ restrictions that apply to entities of type simpleName, that are
+	 * relevant for the given userId. If userId belongs to a root user, or one of
+	 * the restrictions is itself null, then null is returned. This corresponds to a
+	 * case where the user can READ any entity of type simpleName.
+	 * 
+	 * @param userId     The user making the READ request.
+	 * @param simpleName The name of the requested entity type.
+	 * @param manager    The EntityManager to use.
 	 * @return Returns a list of restrictions that apply to the requested entity
 	 *         type. If there are no restrictions, then returns null.
 	 */
@@ -197,10 +202,12 @@ public class GateKeeper {
 
 	/**
 	 * Returns a sub list of the passed entities that the user has READ access to.
+	 * Note that this method accepts and returns instances of EntityBaseBean, unlike
+	 * getReadableIds.
 	 * 
-	 * @param userId  The user making the READ request
-	 * @param beans   The entities the user wants to READ
-	 * @param manager
+	 * @param userId  The user making the READ request.
+	 * @param beans   The entities the user wants to READ.
+	 * @param manager The EntityManager to use.
 	 * @return A list of entities the user has read access to
 	 */
 	public List<EntityBaseBean> getReadable(String userId, List<EntityBaseBean> beans, EntityManager manager) {
@@ -229,10 +236,15 @@ public class GateKeeper {
 	}
 
 	/**
-	 * @param userId     The user making the READ request
-	 * @param entities   The entities to check
-	 * @param simpleName The name of the requested entity type
-	 * @param manager
+	 * Returns a set of ids that indicate entities of type simpleName that the user
+	 * has READ access to. If all of the entities can be READ (restrictions are
+	 * null) then null is returned. Note that while this accepts anything that
+	 * HasEntityId, the ids are returned as a Set<Long> unlike getReadable.
+	 * 
+	 * @param userId     The user making the READ request.
+	 * @param entities   The entities to check.
+	 * @param simpleName The name of the requested entity type.
+	 * @param manager    The EntityManager to use.
 	 * @return Set of the ids that the user has read access to. If there are no
 	 *         restrictions, then returns null.
 	 */
@@ -252,11 +264,13 @@ public class GateKeeper {
 	}
 
 	/**
-	 * @param userId       The user making the READ request
-	 * @param entities     The entities to check
-	 * @param restrictions The restrictions applying to the entities
-	 * @param manager
-	 * @return Set of the ids that the user has read access to
+	 * Returns a set of ids that indicate entities that the user has READ access to.
+	 * 
+	 * @param userId       The user making the READ request.
+	 * @param entities     The entities to check.
+	 * @param restrictions The restrictions applying to the entities.
+	 * @param manager      The EntityManager to use.
+	 * @return Set of the ids that the user has read access to.
 	 */
 	private Set<Long> getReadableIds(String userId, List<? extends HasEntityId> entities, List<String> restrictions,
 			EntityManager manager) {

@@ -782,6 +782,27 @@ public class EntityBeanManager {
 		}
 	}
 
+	/**
+	 * Performs authorisation for READ access on the newResults. Instead of
+	 * returning the entries which can be READ, they are added to the end of
+	 * acceptedResults, ensuring it doesn't exceed maxCount or maxEntities.
+	 * 
+	 * @param acceptedResults List containing already authorised entities. Entries
+	 *                        in newResults that pass authorisation will be added to
+	 *                        acceptedResults.
+	 * @param newResults      List containing new results to check READ access to.
+	 *                        Entries in newResults that pass authorisation will be
+	 *                        added to acceptedResults.
+	 * @param maxCount        The maximum size of acceptedResults. Once reached, no
+	 *                        more entries from newResults will be added.
+	 * @param userId          The user attempting to read the newResults.
+	 * @param manager         The EntityManager to use.
+	 * @param klass           The Class of the EntityBaseBean that is being
+	 *                        filtered.
+	 * @throws IcatException If more entities than the configuration option
+	 *                       maxEntities would be added to acceptedResults, then an
+	 *                       IcatException is thrown instead.
+	 */
 	private void filterReadAccess(List<ScoredEntityBaseBean> acceptedResults, List<ScoredEntityBaseBean> newResults,
 			int maxCount, String userId, EntityManager manager, Class<? extends EntityBaseBean> klass)
 			throws IcatException {
