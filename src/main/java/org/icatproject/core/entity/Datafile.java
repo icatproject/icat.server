@@ -206,12 +206,13 @@ public class Datafile extends EntityBaseBean implements Serializable {
 			sb.append(" " + datafileFormat.getName());
 		}
 		searchApi.encodeTextField(gen, "text", sb.toString());
+		searchApi.encodeSortedDocValuesField(gen, "name", name);
 		if (datafileModTime != null) {
-			searchApi.encodeStringField(gen, "date", datafileModTime);
+			searchApi.encodeSortedDocValuesField(gen, "date", datafileModTime);
 		} else if (datafileCreateTime != null) {
-			searchApi.encodeStringField(gen, "date", datafileCreateTime);
+			searchApi.encodeSortedDocValuesField(gen, "date", datafileCreateTime);
 		} else {
-			searchApi.encodeStringField(gen, "date", modTime);
+			searchApi.encodeSortedDocValuesField(gen, "date", modTime);
 		}
 		searchApi.encodeStoredId(gen, id);
 		searchApi.encodeStringField(gen, "dataset", dataset.id);

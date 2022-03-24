@@ -425,8 +425,8 @@ public class SearchManager {
 		return result;
 	}
 
-	public SearchResult freeTextSearch(JsonObject jo, int blockSize) throws IcatException {
-		return searchApi.getResults(jo, blockSize);
+	public SearchResult freeTextSearch(JsonObject jo, int blockSize, String sort) throws IcatException {
+		return searchApi.getResults(jo, blockSize, sort);
 	}
 
 	public SearchResult freeTextSearch(String uid, JsonObject jo, int blockSize) throws IcatException {

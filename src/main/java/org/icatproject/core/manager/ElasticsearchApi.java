@@ -32,6 +32,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch._types.mapping.DynamicMapping;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
@@ -149,7 +150,7 @@ public class ElasticsearchApi extends SearchApi {
 							+ "else {ctx._source.parameterNumericValue.addAll(params['parameterNumericValue'])}")));
 
 			for (String index : INDEX_PROPERTIES.keySet()) {
-				client.indices().create(c -> c.index(index).mappings(m -> m.properties(INDEX_PROPERTIES.get(index))))
+				client.indices().create(c -> c.index(index).mappings(m -> m.dynamic(DynamicMapping.False).properties(INDEX_PROPERTIES.get(index))))
 						.acknowledged();
 			}
 			// TODO consider both dynamic field names and nested fields
@@ -201,6 +202,10 @@ public class ElasticsearchApi extends SearchApi {
 	// list, but this is to be consistent with Lucene (for now)
 
 	public void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value) {
+		gen.writeStartObject().write(name, value).writeEnd();
+	}
+
+	public void encodeSortedDocValuesField(JsonGenerator gen, String name, String value) {
 		gen.writeStartObject().write(name, value).writeEnd();
 	}
 
@@ -307,8 +312,9 @@ public class ElasticsearchApi extends SearchApi {
 	}
 
 	@Override
-	public SearchResult getResults(JsonObject query, int maxResults)
+	public SearchResult getResults(JsonObject query, int maxResults, String sort)
 			throws IcatException {
+		// TODO sort argument not supported
 		try {
 			String index;
 			if (query.keySet().contains("target")) {

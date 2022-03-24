@@ -139,33 +139,38 @@ public class ICATRest {
 	 * @summary Write
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user which takes the form
-	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 *                  a sessionId of a user which takes the form
+	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * @param json
-	 *            description of entities to create which takes the form
-	 *            <code>[{"InvestigationType":{"facility":{"id":12042},"name":"ztype"}},{"Facility":{"name":"another
+	 *                  description of entities to create which takes the form
+	 *                  <code>[{"InvestigationType":{"facility":{"id":12042},"name":"ztype"}},{"Facility":{"name":"another
 	 * 			fred"}}]</code> . It is a list of objects where each object has
-	 *            a name which is the type of the entity and a value which is an
-	 *            object with name value pairs where these names are the names
-	 *            of the attributes and the values are either simple or they may
-	 *            be objects themselves. In this case two entities are being
-	 *            created an InvestigationType and a Facility with a name of
-	 *            "another fred". The InvestigationType being created will
-	 *            reference an existing facility with an id of 12042 and will
-	 *            have a name of "ztype". For references to existing objects
-	 *            only the "id" value need be set otherwise if child objects are
-	 *            to be created at the same time then the "id" should not be set
-	 *            but the other desired attributes should.
+	 *                  a name which is the type of the entity and a value which is
+	 *                  an
+	 *                  object with name value pairs where these names are the names
+	 *                  of the attributes and the values are either simple or they
+	 *                  may
+	 *                  be objects themselves. In this case two entities are being
+	 *                  created an InvestigationType and a Facility with a name of
+	 *                  "another fred". The InvestigationType being created will
+	 *                  reference an existing facility with an id of 12042 and will
+	 *                  have a name of "ztype". For references to existing objects
+	 *                  only the "id" value need be set otherwise if child objects
+	 *                  are
+	 *                  to be created at the same time then the "id" should not be
+	 *                  set
+	 *                  but the other desired attributes should.
 	 * 
-	 *            This call can also perform updates as any object included
-	 *            which has an id value provided has any other specified fields
-	 *            updated.
+	 *                  This call can also perform updates as any object included
+	 *                  which has an id value provided has any other specified
+	 *                  fields
+	 *                  updated.
 	 * 
 	 * @return ids of created entities as a json string of the form <samp>[125,
 	 *         126]</samp>
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@POST
 	@Path("entityManager")
@@ -195,23 +200,23 @@ public class ICATRest {
 	 * @summary Clone
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user which takes the form
-	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 *                  a sessionId of a user which takes the form
+	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * @param name
-	 *            name of type of entity such as "Investigation"
+	 *                  name of type of entity such as "Investigation"
 	 * @param id
-	 *            id of entity to be cloned
+	 *                  id of entity to be cloned
 	 * @param keys
-	 *            json string with keys to identify the clone which takes the
-	 *            form <code>{"name":"anInvName", "visitId":"v42"]</code>. If
-	 *            the entity type has more than one field to identify it then
-	 *            any value not supplied in the map represented by the json
-	 *            string will be taken from the object being cloned.
+	 *                  json string with keys to identify the clone which takes the
+	 *                  form <code>{"name":"anInvName", "visitId":"v42"]</code>. If
+	 *                  the entity type has more than one field to identify it then
+	 *                  any value not supplied in the map represented by the json
+	 *                  string will be taken from the object being cloned.
 	 * 
 	 * @return id of clone as a json string of the form <samp>{"id":126}</samp>
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@POST
 	@Path("cloner")
@@ -239,15 +244,17 @@ public class ICATRest {
 	 * @summary delete
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user which takes the form
-	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 *                  a sessionId of a user which takes the form
+	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * @param json
-	 *            specifies what to delete as a single entity or as an array of
-	 *            entities such as <code>{"Facility": {"id" : 42}}</code> where
-	 *            the id must be specified and no other attributes.
+	 *                  specifies what to delete as a single entity or as an array
+	 *                  of
+	 *                  entities such as <code>{"Facility": {"id" : 42}}</code>
+	 *                  where
+	 *                  the id must be specified and no other attributes.
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@DELETE
 	@Path("entityManager")
@@ -319,30 +326,32 @@ public class ICATRest {
 	 * @summary Export Metadata
 	 * 
 	 * @param jsonString
-	 *            what to export which takes the form
-	 *            <code>{"sessionId":"0d9a3706-80d4-4d29-9ff3-4d65d4308a24","query":"Facility",
+	 *                   what to export which takes the form
+	 *                   <code>{"sessionId":"0d9a3706-80d4-4d29-9ff3-4d65d4308a24","query":"Facility",
 	 * 			  "attributes":"ALL"}</code> where query if specified is a
-	 *            normal ICAT query which may have an INCLUDE clause. This is
-	 *            used to define the metadata to export. If not present then the
-	 *            whole ICAT will be exported.
-	 *            <p>
-	 *            The value "attributes" if not specified defaults to "USER". It
-	 *            is not case sensitive and it defines which attributes to
-	 *            consider:
-	 *            </p>
-	 *            <dl>
-	 *            <dt>USER</dt>
-	 *            <dd>values for modId, createId, modDate and createDate will
-	 *            not appear in the output.</dd>
+	 *                   normal ICAT query which may have an INCLUDE clause. This is
+	 *                   used to define the metadata to export. If not present then
+	 *                   the
+	 *                   whole ICAT will be exported.
+	 *                   <p>
+	 *                   The value "attributes" if not specified defaults to "USER".
+	 *                   It
+	 *                   is not case sensitive and it defines which attributes to
+	 *                   consider:
+	 *                   </p>
+	 *                   <dl>
+	 *                   <dt>USER</dt>
+	 *                   <dd>values for modId, createId, modDate and createDate will
+	 *                   not appear in the output.</dd>
 	 * 
-	 *            <dt>ALL</dt>
-	 *            <dd>all field values will be output.</dd>
-	 *            </dl>
+	 *                   <dt>ALL</dt>
+	 *                   <dd>all field values will be output.</dd>
+	 *                   </dl>
 	 * 
 	 * @return plain text in ICAT dump format
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@GET
 	@Path("port")
@@ -358,17 +367,17 @@ public class ICATRest {
 	 * @summary Execute line of jpql
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user listed in rootUserNames
+	 *                  a sessionId of a user listed in rootUserNames
 	 * @param query
-	 *            the jpql
+	 *                  the jpql
 	 * @param max
-	 *            if specified changes the number of entries to return from 5
+	 *                  if specified changes the number of entries to return from 5
 	 * 
 	 * @return the first entities that match the query as simple text for
 	 *         testing
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@GET
 	@Path("jpql")
@@ -426,7 +435,7 @@ public class ICATRest {
 	 * @return a json string
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@GET
 	@Path("properties")
@@ -470,15 +479,15 @@ public class ICATRest {
 	 * @summary Session
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user which takes the form
-	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 *                  a sessionId of a user which takes the form
+	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * 
 	 * @return a json string with userName and remainingMinutes of the form
 	 *         <samp> {"userName":"db/root","remainingMinutes":117.
 	 *         87021666666666} </samp>
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@GET
 	@Path("session/{sessionId}")
@@ -503,7 +512,7 @@ public class ICATRest {
 	 * @summary LoggedIn
 	 * 
 	 * @param userName
-	 *            the name of the user (without mnemonic)
+	 *                 the name of the user (without mnemonic)
 	 * 
 	 * @return json string of the form: <samp>{"isLoggedIn":true}</samp>
 	 */
@@ -525,7 +534,7 @@ public class ICATRest {
 	 * @summary Sleep
 	 * 
 	 * @param seconds
-	 *            how many seconds to wait before returning
+	 *                how many seconds to wait before returning
 	 * 
 	 * @return json string of the form: <samp>{"slept": 20000}</samp>
 	 */
@@ -555,9 +564,9 @@ public class ICATRest {
 	 * @summary LoggedIn
 	 * 
 	 * @param mnemonic
-	 *            the mnemomnic used to identify the authentication plugin
+	 *                 the mnemomnic used to identify the authentication plugin
 	 * @param userName
-	 *            the name of the user (without mnemonic)
+	 *                 the name of the user (without mnemonic)
 	 * 
 	 * @return json string of the form: <samp>{"isLoggedIn":true}</samp>
 	 */
@@ -639,7 +648,7 @@ public class ICATRest {
 	 * @summary import metadata
 	 *
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@POST
 	@Path("port")
@@ -832,15 +841,15 @@ public class ICATRest {
 	 * 
 	 * @param request
 	 * @param jsonString
-	 *            with plugin and credentials which takes the form
-	 *            <code>{"plugin":"db", "credentials:[{"username":"root"},
+	 *                   with plugin and credentials which takes the form
+	 *                   <code>{"plugin":"db", "credentials:[{"username":"root"},
 				{"password":"guess"}]}</code>
 	 * 
 	 * @return json with sessionId of the form
 	 *         <samp>{"sessionId","0d9a3706-80d4-4d29-9ff3-4d65d4308a24"}</samp>
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@POST
 	@Path("session")
@@ -903,11 +912,11 @@ public class ICATRest {
 	 * @summary Logout
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user which takes the form
-	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 *                  a sessionId of a user which takes the form
+	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@DELETE
 	@Path("session/{sessionId}")
@@ -923,104 +932,122 @@ public class ICATRest {
 	 * @summary lucene search
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user which takes the form
-	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 *                  a sessionId of a user which takes the form
+	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * @param query
-	 *            json encoded query object. One of the fields is "target" which
-	 *            must be "Investigation", "Dataset" or "Datafile". The other
-	 *            fields are all optional:
-	 *            <dl>
-	 *            <dt>user</dt>
-	 *            <dd>name of user as in the User table which may include a
-	 *            prefix</dd>
-	 *            <dt>text</dt>
-	 *            <dd>some text occurring somewhere in the entity. This is
-	 *            understood by the <a href=
-	 *            "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
-	 *            >lucene parser</a> but avoid trying to use fields.</dd>
-	 *            <dt>lower</dt>
-	 *            <dd>earliest date to search for in the form
-	 *            <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
-	 *            timezone. In the case of an investigation or data set search
-	 *            the date is compared with the start date and in the case of a
-	 *            data file the date field is used.</dd>
-	 *            <dt>upper</dt>
-	 *            <dd>latest date to search for in the form
-	 *            <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
-	 *            timezone. In the case of an investigation or data set search
-	 *            the date is compared with the end date and in the case of a
-	 *            data file the date field is used.</dd>
-	 *            <dt>parameters</dt>
-	 *            <dd>this holds a list of json parameter objects all of which
-	 *            must match. Parameters have the following fields, all of which
-	 *            are optional:
-	 *            <dl>
-	 *            <dt>name</dt>
-	 *            <dd>A wildcard search for a parameter with this name.
-	 *            Supported wildcards are <code>*</code>, which matches any
-	 *            character sequence (including the empty one), and
-	 *            <code>?</code>, which matches any single character.
-	 *            <code>\</code> is the escape character. Note this query can be
-	 *            slow, as it needs to iterate over many terms. In order to
-	 *            prevent extremely slow queries, a name should not start with
-	 *            the wildcard <code>*</code></dd>
-	 *            <dt>units</dt>
-	 *            <dd>A wildcard search for a parameter with these units.
-	 *            Supported wildcards are <code>*</code>, which matches any
-	 *            character sequence (including the empty one), and
-	 *            <code>?</code>, which matches any single character.
-	 *            <code>\</code> is the escape character. Note this query can be
-	 *            slow, as it needs to iterate over many terms. In order to
-	 *            prevent extremely slow queries, units should not start with
-	 *            the wildcard <code>*</code></dd>
-	 *            <dt>stringValue</dt>
-	 *            <dd>A wildcard search for a parameter stringValue. Supported
-	 *            wildcards are <code>*</code>, which matches any character
-	 *            sequence (including the empty one), and <code>?</code>, which
-	 *            matches any single character. <code>\</code> is the escape
-	 *            character. Note this query can be slow, as it needs to iterate
-	 *            over many terms. In order to prevent extremely slow queries,
-	 *            requested stringValues should not start with the wildcard
-	 *            <code>*</code></dd>
-	 *            <dt>lowerDateValue and upperDateValue</dt>
-	 *            <dd>latest and highest date to search for in the form
-	 *            <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
-	 *            timezone. This should be used to search on parameters having a
-	 *            dateValue. If only one bound is set the restriction has not
-	 *            effect.</dd>
-	 *            <dt>lowerNumericValue and upperNumericValue</dt>
-	 *            <dd>This should be used to search on parameters having a
-	 *            numericValue. If only one bound is set the restriction has not
-	 *            effect.</dd>
-	 *            </dl>
-	 *            </dd>
-	 *            <dt>samples</dt>
-	 *            <dd>A json array of strings each of which must match text
-	 *            found in a sample. This is understood by the <a href=
-	 *            "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
-	 *            >lucene parser</a> but avoid trying to use fields. This is
-	 *            only respected in the case of an investigation search.</dd>
-	 *            <dt>userFullName</dt>
-	 *            <dd>Full name of user in the User table which may contain
-	 *            titles etc. Matching is done by the <a href=
-	 *            "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
-	 *            >lucene parser</a> but avoid trying to use fields. This is
-	 *            only respected in the case of an investigation search.</dd>
-	 *            </dl>
+	 *                  json encoded query object. One of the fields is "target"
+	 *                  which
+	 *                  must be "Investigation", "Dataset" or "Datafile". The other
+	 *                  fields are all optional:
+	 *                  <dl>
+	 *                  <dt>user</dt>
+	 *                  <dd>name of user as in the User table which may include a
+	 *                  prefix</dd>
+	 *                  <dt>text</dt>
+	 *                  <dd>some text occurring somewhere in the entity. This is
+	 *                  understood by the <a href=
+	 *                  "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *                  >lucene parser</a> but avoid trying to use fields.</dd>
+	 *                  <dt>lower</dt>
+	 *                  <dd>earliest date to search for in the form
+	 *                  <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *                  timezone. In the case of an investigation or data set search
+	 *                  the date is compared with the start date and in the case of
+	 *                  a
+	 *                  data file the date field is used.</dd>
+	 *                  <dt>upper</dt>
+	 *                  <dd>latest date to search for in the form
+	 *                  <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *                  timezone. In the case of an investigation or data set search
+	 *                  the date is compared with the end date and in the case of a
+	 *                  data file the date field is used.</dd>
+	 *                  <dt>parameters</dt>
+	 *                  <dd>this holds a list of json parameter objects all of which
+	 *                  must match. Parameters have the following fields, all of
+	 *                  which
+	 *                  are optional:
+	 *                  <dl>
+	 *                  <dt>name</dt>
+	 *                  <dd>A wildcard search for a parameter with this name.
+	 *                  Supported wildcards are <code>*</code>, which matches any
+	 *                  character sequence (including the empty one), and
+	 *                  <code>?</code>, which matches any single character.
+	 *                  <code>\</code> is the escape character. Note this query can
+	 *                  be
+	 *                  slow, as it needs to iterate over many terms. In order to
+	 *                  prevent extremely slow queries, a name should not start with
+	 *                  the wildcard <code>*</code></dd>
+	 *                  <dt>units</dt>
+	 *                  <dd>A wildcard search for a parameter with these units.
+	 *                  Supported wildcards are <code>*</code>, which matches any
+	 *                  character sequence (including the empty one), and
+	 *                  <code>?</code>, which matches any single character.
+	 *                  <code>\</code> is the escape character. Note this query can
+	 *                  be
+	 *                  slow, as it needs to iterate over many terms. In order to
+	 *                  prevent extremely slow queries, units should not start with
+	 *                  the wildcard <code>*</code></dd>
+	 *                  <dt>stringValue</dt>
+	 *                  <dd>A wildcard search for a parameter stringValue. Supported
+	 *                  wildcards are <code>*</code>, which matches any character
+	 *                  sequence (including the empty one), and <code>?</code>,
+	 *                  which
+	 *                  matches any single character. <code>\</code> is the escape
+	 *                  character. Note this query can be slow, as it needs to
+	 *                  iterate
+	 *                  over many terms. In order to prevent extremely slow queries,
+	 *                  requested stringValues should not start with the wildcard
+	 *                  <code>*</code></dd>
+	 *                  <dt>lowerDateValue and upperDateValue</dt>
+	 *                  <dd>latest and highest date to search for in the form
+	 *                  <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *                  timezone. This should be used to search on parameters having
+	 *                  a
+	 *                  dateValue. If only one bound is set the restriction has not
+	 *                  effect.</dd>
+	 *                  <dt>lowerNumericValue and upperNumericValue</dt>
+	 *                  <dd>This should be used to search on parameters having a
+	 *                  numericValue. If only one bound is set the restriction has
+	 *                  not
+	 *                  effect.</dd>
+	 *                  </dl>
+	 *                  </dd>
+	 *                  <dt>samples</dt>
+	 *                  <dd>A json array of strings each of which must match text
+	 *                  found in a sample. This is understood by the <a href=
+	 *                  "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *                  >lucene parser</a> but avoid trying to use fields. This is
+	 *                  only respected in the case of an investigation search.</dd>
+	 *                  <dt>userFullName</dt>
+	 *                  <dd>Full name of user in the User table which may contain
+	 *                  titles etc. Matching is done by the <a href=
+	 *                  "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *                  >lucene parser</a> but avoid trying to use fields. This is
+	 *                  only respected in the case of an investigation search.</dd>
+	 *                  </dl>
+	 * @param sort
+	 *                  json encoded sort object. Each key should be a field on the
+	 *                  targeted Lucene document, with a value of "asc" or "desc" to
+	 *                  specify the order of the results. Multiple pairs can be
+	 *                  provided, in which case each subsequent sort is used as a
+	 *                  tiebreaker for the previous one. If no sort is specified,
+	 *                  then results will be returned in order of relevance to the
+	 *                  search query, with their Lucene id as a tiebreaker.
 	 * 
 	 * @param maxCount
-	 *            maximum number of entities to return
+	 *                  maximum number of entities to return
 	 * 
 	 * @return set of entities encoded as json
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@GET
 	@Path("lucene/data")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String search(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
-			@QueryParam("query") String query, @QueryParam("maxCount") int maxCount) throws IcatException {
+			@QueryParam("query") String query, @QueryParam("maxCount") int maxCount, @QueryParam("sort") String sort)
+			throws IcatException {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}
@@ -1041,12 +1068,12 @@ public class ICATRest {
 						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 								"units not set in parameter '" + name + "'");
 					}
-					// If we don't have either a string, pair of dates, or pair of numbers, then throw
+					// If we don't have either a string, pair of dates, or pair of numbers, throw
 					if (!(parameter.containsKey("stringValue")
 							|| (parameter.containsKey("lowerDateValue")
-								&& parameter.containsKey("upperDateValue"))
+									&& parameter.containsKey("upperDateValue"))
 							|| (parameter.containsKey("lowerNumericValue")
-								&& parameter.containsKey("upperNumericValue")))) {
+									&& parameter.containsKey("upperNumericValue")))) {
 						throw new IcatException(IcatExceptionType.BAD_PARAMETER, parameter.toString());
 					}
 				}
@@ -1064,7 +1091,7 @@ public class ICATRest {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
 			}
 			logger.debug("Free text search with query: {}", jo.toString());
-			objects = beanManager.freeTextSearch(userName, jo, maxCount, manager, request.getRemoteAddr(), klass);
+			objects = beanManager.freeTextSearch(userName, jo, maxCount, sort, manager, request.getRemoteAddr(), klass);
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartArray();
 			for (ScoredEntityBaseBean sb : objects) {
@@ -1122,10 +1149,10 @@ public class ICATRest {
 	 * @summary Lucene Clear
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user listed in rootUserNames
+	 *                  a sessionId of a user listed in rootUserNames
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@DELETE
 	@Path("lucene/db")
@@ -1141,10 +1168,10 @@ public class ICATRest {
 	 * @summary Lucene Commit
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user listed in rootUserNames
+	 *                  a sessionId of a user listed in rootUserNames
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@POST
 	@Path("lucene/db")
@@ -1160,11 +1187,11 @@ public class ICATRest {
 	 * @summary lucene GetPopulating
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user listed in rootUserNames
+	 *                  a sessionId of a user listed in rootUserNames
 	 * @return list of class names
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@GET
 	@Path("lucene/db")
@@ -1188,11 +1215,11 @@ public class ICATRest {
 	 * @summary wait
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user listed in rootUserNames
+	 *                  a sessionId of a user listed in rootUserNames
 	 * @param ms
-	 *            how many milliseconds to wait
+	 *                  how many milliseconds to wait
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@POST
 	@Path("waitMillis")
@@ -1212,14 +1239,15 @@ public class ICATRest {
 	 * @summary Lucene Populate
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user listed in rootUserNames
+	 *                   a sessionId of a user listed in rootUserNames
 	 * @param entityName
-	 *            the name of the entity
+	 *                   the name of the entity
 	 * @param minid
-	 *            only process entities with id values greater than this value
+	 *                   only process entities with id values greater than this
+	 *                   value
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@POST
 	@Path("lucene/db/{entityName}/{minid}")
@@ -1235,11 +1263,11 @@ public class ICATRest {
 	 * @summary Refresh
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user which takes the form
-	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 *                  a sessionId of a user which takes the form
+	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@PUT
 	@Path("session/{sessionId}")
@@ -1256,15 +1284,16 @@ public class ICATRest {
 	 * @summary search/get
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user which takes the form
-	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 *                  a sessionId of a user which takes the form
+	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * @param query
-	 *            specifies what to search for such as
-	 *            <code>SELECT f FROM Facility f</code>
+	 *                  specifies what to search for such as
+	 *                  <code>SELECT f FROM Facility f</code>
 	 * @param id
-	 *            it takes the form <code>732</code> and is used when the
-	 *            functionality of get is required in which case the query must
-	 *            be as described in the ICAT Soap manual</a>.
+	 *                  it takes the form <code>732</code> and is used when the
+	 *                  functionality of get is required in which case the query
+	 *                  must
+	 *                  be as described in the ICAT Soap manual</a>.
 	 * 
 	 * @return entities or arrays of values as a json string. The query
 	 *         <code>SELECT f FROM Facility f</code> might return
@@ -1281,7 +1310,7 @@ public class ICATRest {
 	 *         <em>the outer square brackets are omitted.</em>.
 	 * 
 	 * @throws IcatException
-	 *             when something is wrong
+	 *                       when something is wrong
 	 */
 	@GET
 	@Path("entityManager")

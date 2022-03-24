@@ -1388,7 +1388,7 @@ public class EntityBeanManager {
 		}
 	}
 
-	public List<ScoredEntityBaseBean> freeTextSearch(String userName, JsonObject jo, int maxCount,
+	public List<ScoredEntityBaseBean> freeTextSearch(String userName, JsonObject jo, int maxCount, String sort,
 			EntityManager manager, String ip, Class<? extends EntityBaseBean> klass) throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
@@ -1404,7 +1404,8 @@ public class EntityBeanManager {
 
 			do {
 				if (last == null) {
-					last = searchManager.freeTextSearch(jo, blockSize);
+					// Only need to apply the sort on initial search
+					last = searchManager.freeTextSearch(jo, blockSize, sort);
 					uid = last.getUid();
 				} else {
 					last = searchManager.freeTextSearch(uid, jo, blockSize);

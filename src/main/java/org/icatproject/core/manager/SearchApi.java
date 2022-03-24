@@ -56,22 +56,36 @@ public abstract class SearchApi {
 	}
 
 	protected static String enc(Date dateValue) {
-		synchronized (df) {
-			return df.format(dateValue);
+		if (dateValue == null) {
+			return null;
+		} else {
+			synchronized (df) {
+				return df.format(dateValue);
+			}
 		}
 	}
 
+	public void encodeSortedDocValuesField(JsonGenerator gen, String name, Date value) {
+		encodeSortedDocValuesField(gen, name, enc(value));
+	}
+
+	public void encodeStringField(JsonGenerator gen, String name, Date value) {
+		encodeStringField(gen, name, enc(value));
+	}
+
+	public void encodeStringField(JsonGenerator gen, String name, Long value) {
+		encodeStringField(gen, name, Long.toString(value));
+	}
+
 	public abstract void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value);
+
+	public abstract void encodeSortedDocValuesField(JsonGenerator gen, String name, String value);
 
 	public abstract void encodeSortedSetDocValuesFacetField(JsonGenerator gen, String name, String value);
 
 	public abstract void encodeStoredId(JsonGenerator gen, Long id);
 
-	public abstract void encodeStringField(JsonGenerator gen, String name, Date value);
-
 	public abstract void encodeDoublePoint(JsonGenerator gen, String name, Double value);
-
-	public abstract void encodeStringField(JsonGenerator gen, String name, Long value);
 
 	public abstract void encodeStringField(JsonGenerator gen, String name, String value);
 
@@ -84,7 +98,7 @@ public abstract class SearchApi {
 	public abstract List<FacetDimension> facetSearch(JsonObject facetQuery, int maxResults, int maxLabels)
 			throws IcatException;
 
-	public abstract SearchResult getResults(JsonObject query, int maxResults) throws IcatException;
+	public abstract SearchResult getResults(JsonObject query, int maxResults, String sort) throws IcatException;
 
 	public abstract SearchResult getResults(String uid, JsonObject query, int maxResults) throws IcatException;
 
@@ -123,10 +137,10 @@ public abstract class SearchApi {
 			builder.add("text", text);
 		}
 		if (lower != null) {
-			builder.add("lower", LuceneApi.enc(lower));
+			builder.add("lower", enc(lower));
 		}
 		if (upper != null) {
-			builder.add("upper", LuceneApi.enc(upper));
+			builder.add("upper", enc(upper));
 		}
 		if (parameters != null && !parameters.isEmpty()) {
 			JsonArrayBuilder parametersBuilder = Json.createArrayBuilder();
@@ -142,10 +156,10 @@ public abstract class SearchApi {
 					parameterBuilder.add("stringValue", parameter.stringValue);
 				}
 				if (parameter.lowerDateValue != null) {
-					parameterBuilder.add("lowerDateValue", LuceneApi.enc(parameter.lowerDateValue));
+					parameterBuilder.add("lowerDateValue", enc(parameter.lowerDateValue));
 				}
 				if (parameter.upperDateValue != null) {
-					parameterBuilder.add("upperDateValue", LuceneApi.enc(parameter.upperDateValue));
+					parameterBuilder.add("upperDateValue", enc(parameter.upperDateValue));
 				}
 				if (parameter.lowerNumericValue != null) {
 					parameterBuilder.add("lowerNumericValue", parameter.lowerNumericValue);

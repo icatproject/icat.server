@@ -201,17 +201,18 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		}
 
 		searchApi.encodeTextField(gen, "text", sb.toString());
+		searchApi.encodeSortedDocValuesField(gen, "name", name);
 
 		if (startDate != null) {
-			searchApi.encodeStringField(gen, "startDate", startDate);
+			searchApi.encodeSortedDocValuesField(gen, "startDate", startDate);
 		} else {
-			searchApi.encodeStringField(gen, "startDate", createTime);
+			searchApi.encodeSortedDocValuesField(gen, "startDate", createTime);
 		}
 
 		if (endDate != null) {
-			searchApi.encodeStringField(gen, "endDate", endDate);
+			searchApi.encodeSortedDocValuesField(gen, "endDate", endDate);
 		} else {
-			searchApi.encodeStringField(gen, "endDate", modTime);
+			searchApi.encodeSortedDocValuesField(gen, "endDate", modTime);
 		}
 		searchApi.encodeStoredId(gen, id);
 

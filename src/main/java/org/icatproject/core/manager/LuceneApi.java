@@ -64,10 +64,18 @@ public class LuceneApi extends SearchApi {
 		return path;
 	}
 
-	// TODO this method of encoding an entity as an array of 3 key objects that represent single field each
-	// is something that should be streamlined, but would require changes to icat.lucene
+	// TODO this method of encoding an entity as an array of 3 key objects that
+	// represent single field each
+	// is something that should be streamlined, but would require changes to
+	// icat.lucene
 
 	public void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value) {
+		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
+				.writeEnd();
+	}
+
+	public void encodeSortedDocValuesField(JsonGenerator gen, String name, String value) {
+		encodeStringField(gen, name, value);
 		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
 				.writeEnd();
 	}
@@ -77,21 +85,17 @@ public class LuceneApi extends SearchApi {
 				.write("store", true).writeEnd();
 	}
 
-	public void encodeStringField(JsonGenerator gen, String name, Date value) {
-		String timeString;
-		synchronized (df) {
-			timeString = df.format(value);
-		}
-		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", timeString).writeEnd();
-	}
-
 	public void encodeDoublePoint(JsonGenerator gen, String name, Double value) {
 		gen.writeStartObject().write("type", "DoublePoint").write("name", name).write("value", value)
 				.write("store", true).writeEnd();
 	}
 
 	public void encodeSortedSetDocValuesFacetField(JsonGenerator gen, String name, String value) {
-		gen.writeStartObject().write("type", "SortedSetDocValuesFacetField").write("name", name).write("value", value)
+		// TODO this is needed for Faceting, but will cause errors for an icat.lucene
+		// that doesn't support it
+		// gen.writeStartObject().write("type",
+		// "SortedSetDocValuesFacetField").write("name", name).write("value", value)
+		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", value)
 				.writeEnd();
 
 	}
@@ -265,11 +269,12 @@ public class LuceneApi extends SearchApi {
 	}
 
 	@Override
-	public SearchResult getResults(JsonObject query, int maxResults) throws IcatException {
+	public SearchResult getResults(JsonObject query, int maxResults, String sort) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			String indexPath = getTargetPath(query);
 			URI uri = new URIBuilder(server).setPath(basePath + "/" + indexPath)
-					.setParameter("maxResults", Integer.toString(maxResults)).build();
+					.setParameter("maxResults", Integer.toString(maxResults))
+					.setParameter("sort", sort).build();
 			logger.trace("Making call {}", uri);
 			return getResults(uri, httpclient, query.toString());
 
