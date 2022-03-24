@@ -1,6 +1,5 @@
 package org.icatproject.core.manager;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
@@ -11,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -20,13 +18,11 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
-import javax.persistence.EntityManager;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
-import org.icatproject.core.entity.EntityBaseBean;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
@@ -159,35 +155,6 @@ public class ElasticsearchApi extends SearchApi {
 	}
 
 	@Override
-	public void addNow(String entityName, List<Long> ids, EntityManager manager,
-			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor)
-			throws IcatException, IOException {
-		// getBeanDocExecutor is not used for the Elasticsearch implementation, but is
-		// required for the @Override
-
-		// TODO Change this string building fake JSON by hand
-		StringBuilder sb = new StringBuilder();
-		sb.append("[");
-		for (Long id : ids) {
-			EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
-			if (bean != null) {
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				try (JsonGenerator gen = Json.createGenerator(baos)) {
-					gen.writeStartArray(); // Document fields are wrapped in an array
-					bean.getDoc(gen, this); // Fields
-					gen.writeEnd();
-				}
-				if (sb.length() != 1) {
-					sb.append(',');
-				}
-				sb.append("[\"").append(entityName).append("\",null,").append(baos.toString()).append(']');
-			}
-		}
-		sb.append("]");
-		modify(sb.toString());
-	}
-
-	@Override
 	public void clear() throws IcatException {
 		try {
 			commit();
@@ -214,29 +181,6 @@ public class ElasticsearchApi extends SearchApi {
 			timeString = df.format(value);
 		}
 		gen.writeStartObject().write(name, timeString).writeEnd();
-	}
-
-	public void encodeDoublePoint(JsonGenerator gen, String name, Double value) {
-		gen.writeStartObject().write(name, value).writeEnd();
-	}
-
-	public void encodeSortedSetDocValuesFacetField(JsonGenerator gen, String name, String value) {
-		gen.writeStartObject().write(name, value).writeEnd();
-
-	}
-
-	public void encodeStringField(JsonGenerator gen, String name, Long value) {
-		gen.writeStartObject().write(name, value).writeEnd();
-	}
-
-	public void encodeStringField(JsonGenerator gen, String name, String value) {
-		gen.writeStartObject().write(name, value).writeEnd();
-	}
-
-	public void encodeTextField(JsonGenerator gen, String name, String value) {
-		if (value != null) {
-			gen.writeStartObject().write(name, value).writeEnd();
-		}
 	}
 
 	@Override

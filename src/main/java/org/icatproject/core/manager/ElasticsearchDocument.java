@@ -80,11 +80,11 @@ public class ElasticsearchDocument {
 					} else if (fieldEntry.getKey().equals("text")) {
 						text = fieldObject.getString("text");
 					} else if (fieldEntry.getKey().equals("date")) {
-						date = SearchApi.dec(fieldObject.getString("date"));
+						date = SearchApi.decodeDate(fieldObject.getString("date"));
 					} else if (fieldEntry.getKey().equals("startDate")) {
-						startDate = SearchApi.dec(fieldObject.getString("startDate"));
+						startDate = SearchApi.decodeDate(fieldObject.getString("startDate"));
 					} else if (fieldEntry.getKey().equals("endDate")) {
-						endDate = SearchApi.dec(fieldObject.getString("endDate"));
+						endDate = SearchApi.decodeDate(fieldObject.getString("endDate"));
 					} else if (fieldEntry.getKey().equals("user.name")) {
 						userName.add(fieldObject.getString("user.name"));
 					} else if (fieldEntry.getKey().equals("user.fullName")) {
@@ -100,7 +100,7 @@ public class ElasticsearchDocument {
 					} else if (fieldEntry.getKey().equals("parameter.stringValue")) {
 						parameterStringValue.add(fieldObject.getString("parameter.stringValue"));
 					} else if (fieldEntry.getKey().equals("parameter.dateValue")) {
-						parameterDateValue.add(SearchApi.dec(fieldObject.getString("parameter.dateValue")));
+						parameterDateValue.add(SearchApi.decodeDate(fieldObject.getString("parameter.dateValue")));
 					} else if (fieldEntry.getKey().equals("parameter.numericValue")) {
 						parameterNumericValue
 								.add(fieldObject.getJsonNumber("parameter.numericValue").doubleValue());
@@ -138,7 +138,7 @@ public class ElasticsearchDocument {
 					} else if (fieldEntry.getKey().equals("parameterStringValue")) {
 						parameterStringValue.add(fieldObject.getString("parameterStringValue"));
 					} else if (fieldEntry.getKey().equals("parameterDateValue")) {
-						parameterDateValue.add(SearchApi.dec(fieldObject.getString("parameterDateValue")));
+						parameterDateValue.add(SearchApi.decodeDate(fieldObject.getString("parameterDateValue")));
 					} else if (fieldEntry.getKey().equals("parameterNumericValue")) {
 						parameterNumericValue
 								.add(fieldObject.getJsonNumber("parameterNumericValue").doubleValue());

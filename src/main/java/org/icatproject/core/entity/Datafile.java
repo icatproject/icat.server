@@ -213,7 +213,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		} else {
 			searchApi.encodeStringField(gen, "date", modTime);
 		}
-		searchApi.encodeStoredId(gen, id);
+		searchApi.encodeStringField(gen, "id", id, true);
 		searchApi.encodeStringField(gen, "dataset", dataset.id);
 		searchApi.encodeStringField(gen, "investigation", dataset.getInvestigation().id);
 

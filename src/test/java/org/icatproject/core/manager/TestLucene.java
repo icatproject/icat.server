@@ -88,7 +88,7 @@ public class TestLucene {
 			luceneApi.encodeTextField(gen, "text", "Elephants and Aardvarks");
 			luceneApi.encodeStringField(gen, "startDate", new Date());
 			luceneApi.encodeStringField(gen, "endDate", new Date());
-			luceneApi.encodeStoredId(gen, 42L);
+			luceneApi.encodeStringField(gen, "id", 42L, true);
 			luceneApi.encodeStringField(gen, "dataset", 2001L);
 			gen.writeEnd();
 		}
@@ -505,7 +505,7 @@ public class TestLucene {
 				luceneApi.encodeTextField(gen, "text", word);
 				luceneApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
 				luceneApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
-				luceneApi.encodeStoredId(gen, new Long(i));
+				luceneApi.encodeStringField(gen, "id", new Long(i), true);
 				luceneApi.encodeSortedDocValuesField(gen, "id", new Long(i));
 				gen.writeEnd();
 				System.out.println("INVESTIGATION '" + word + "' " + new Date(now + i * 60000) + " " + i);
@@ -537,7 +537,7 @@ public class TestLucene {
 				luceneApi.encodeTextField(gen, "text", word);
 				luceneApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
 				luceneApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
-				luceneApi.encodeStoredId(gen, new Long(i));
+				luceneApi.encodeStringField(gen, "id", new Long(i), true);
 				luceneApi.encodeSortedDocValuesField(gen, "id", new Long(i));
 				luceneApi.encodeStringField(gen, "investigation", new Long(i % NUMINV));
 				gen.writeEnd();
@@ -569,7 +569,7 @@ public class TestLucene {
 				gen.writeStartArray();
 				luceneApi.encodeTextField(gen, "text", word);
 				luceneApi.encodeStringField(gen, "date", new Date(now + i * 60000));
-				luceneApi.encodeStoredId(gen, new Long(i));
+				luceneApi.encodeStringField(gen, "id", new Long(i), true);
 				luceneApi.encodeStringField(gen, "dataset", new Long(i % NUMDS));
 				gen.writeEnd();
 				System.out.println("DATAFILE '" + word + "' " + new Date(now + i * 60000) + " " + i + " " + i % NUMDS);

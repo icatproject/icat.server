@@ -75,7 +75,7 @@ public class TestElasticsearchApi {
 			searchApi.encodeTextField(gen, "text", "Elephants and Aardvarks");
 			searchApi.encodeStringField(gen, "startDate", new Date());
 			searchApi.encodeStringField(gen, "endDate", new Date());
-			searchApi.encodeStoredId(gen, 42L);
+			searchApi.encodeStringField(gen, "id", 42L, true);
 			searchApi.encodeStringField(gen, "dataset", 2001L);
 			gen.writeEnd();
 		}
@@ -481,7 +481,7 @@ public class TestElasticsearchApi {
 				searchApi.encodeTextField(gen, "text", word);
 				searchApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
 				searchApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
-				searchApi.encodeStoredId(gen, new Long(i));
+				searchApi.encodeStringField(gen, "id", new Long(i), true);
 				searchApi.encodeSortedDocValuesField(gen, "id", new Long(i));
 				gen.writeEnd();
 				gen.writeEnd();
@@ -520,7 +520,7 @@ public class TestElasticsearchApi {
 				searchApi.encodeTextField(gen, "text", word);
 				searchApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
 				searchApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
-				searchApi.encodeStoredId(gen, new Long(i));
+				searchApi.encodeStringField(gen, "id", new Long(i), true);
 				searchApi.encodeSortedDocValuesField(gen, "id", new Long(i));
 				searchApi.encodeStringField(gen, "investigation", new Long(i % NUMINV));
 				gen.writeEnd();
@@ -556,7 +556,7 @@ public class TestElasticsearchApi {
 				gen.writeStartArray();
 				searchApi.encodeTextField(gen, "text", word);
 				searchApi.encodeStringField(gen, "date", new Date(now + i * 60000));
-				searchApi.encodeStoredId(gen, new Long(i));
+				searchApi.encodeStringField(gen, "id", new Long(i), true);
 				searchApi.encodeStringField(gen, "dataset", new Long(i % NUMDS));
 				searchApi.encodeStringField(gen, "investigation", new Long((i % NUMDS) % NUMINV));
 				gen.writeEnd();
