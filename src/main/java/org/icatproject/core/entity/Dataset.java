@@ -214,7 +214,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		} else {
 			searchApi.encodeSortedDocValuesField(gen, "endDate", modTime);
 		}
-		searchApi.encodeStoredId(gen, id);
+		searchApi.encodeStringField(gen, "id", id, true);
 
 		searchApi.encodeSortedDocValuesField(gen, "id", id);
 

@@ -6,7 +6,6 @@ import java.io.PipedOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,47 +68,34 @@ public class LuceneApi extends SearchApi {
 	// is something that should be streamlined, but would require changes to
 	// icat.lucene
 
+	@Override
 	public void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value) {
 		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
 				.writeEnd();
 	}
 
-	public void encodeSortedDocValuesField(JsonGenerator gen, String name, String value) {
-		encodeStringField(gen, name, value);
-		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
-				.writeEnd();
-	}
-
-	public void encodeStoredId(JsonGenerator gen, Long id) {
-		gen.writeStartObject().write("type", "StringField").write("name", "id").write("value", Long.toString(id))
-				.write("store", true).writeEnd();
-	}
-
+	@Override
 	public void encodeDoublePoint(JsonGenerator gen, String name, Double value) {
 		gen.writeStartObject().write("type", "DoublePoint").write("name", name).write("value", value)
 				.write("store", true).writeEnd();
 	}
 
-	public void encodeSortedSetDocValuesFacetField(JsonGenerator gen, String name, String value) {
-		// TODO this is needed for Faceting, but will cause errors for an icat.lucene
-		// that doesn't support it
-		// gen.writeStartObject().write("type",
-		// "SortedSetDocValuesFacetField").write("name", name).write("value", value)
-		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", value)
-				.writeEnd();
+	// public void encodeSortedSetDocValuesFacetField(JsonGenerator gen, String name, String value) {
+	// 	gen.writeStartObject().write("type", "SortedSetDocValuesFacetField").write("name", name).write("value", value)
+	// 			.writeEnd();
+	// }
 
-	}
-
-	public void encodeStringField(JsonGenerator gen, String name, Long value) {
-		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", Long.toString(value))
-				.writeEnd();
-	}
-
+	@Override
 	public void encodeStringField(JsonGenerator gen, String name, String value) {
 		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", value).writeEnd();
-
 	}
 
+	@Override
+	public void encodeStringField(JsonGenerator gen, String name, Long value, Boolean store) {
+		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", Long.toString(value)).write("store", store).writeEnd();
+	}
+
+	@Override
 	public void encodeTextField(JsonGenerator gen, String name, String value) {
 		if (value != null) {
 			gen.writeStartObject().write("type", "TextField").write("name", name).write("value", value).writeEnd();
@@ -122,9 +108,8 @@ public class LuceneApi extends SearchApi {
 		this.server = server;
 	}
 
-	@Override
 	public void addNow(String entityName, List<Long> ids, EntityManager manager,
-			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor) throws Exception {
+			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor) throws IcatException, IOException, URISyntaxException {
 		URI uri = new URIBuilder(server).setPath(basePath + "/addNow/" + entityName)
 				.build();
 

@@ -95,7 +95,7 @@ public class TestLucene {
 			luceneApi.encodeTextField(gen, "text", "Elephants and Aardvarks");
 			luceneApi.encodeStringField(gen, "startDate", new Date());
 			luceneApi.encodeStringField(gen, "endDate", new Date());
-			luceneApi.encodeStoredId(gen, 42L);
+			luceneApi.encodeStringField(gen, "id", 42L, true);
 			luceneApi.encodeStringField(gen, "dataset", 2001L);
 			gen.writeEnd();
 		}

@@ -291,7 +291,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		
 
 		samples.forEach((sample) -> {
-				searchApi.encodeSortedSetDocValuesFacetField(gen, "sampleName", sample.getName());
+				// searchApi.encodeSortedSetDocValuesFacetField(gen, "sampleName", sample.getName());
 				searchApi.encodeTextField(gen, "sampleText", sample.getDocText());
 		});
 
@@ -299,11 +299,11 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			ParameterType type = parameter.type;
 			String parameterName = type.getName();
 			String parameterUnits = type.getUnits();
-			searchApi.encodeSortedSetDocValuesFacetField(gen, "parameterName", parameterName);
+			// searchApi.encodeSortedSetDocValuesFacetField(gen, "parameterName", parameterName);
 			searchApi.encodeStringField(gen, "parameterUnits", parameterUnits);
 			// TODO make all value types facetable...
 			if (type.getValueType() == ParameterValueType.STRING) {
-				searchApi.encodeSortedSetDocValuesFacetField(gen, "parameterStringValue", parameter.getStringValue());
+				// searchApi.encodeSortedSetDocValuesFacetField(gen, "parameterStringValue", parameter.getStringValue());
 			} else if (type.getValueType() == ParameterValueType.DATE_AND_TIME) {
 				searchApi.encodeStringField(gen, "parameterDateValue", parameter.getDateTimeValue());
 			} else if (type.getValueType() == ParameterValueType.NUMERIC) {
@@ -313,6 +313,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 		searchApi.encodeSortedDocValuesField(gen, "id", id);
 
-		searchApi.encodeStoredId(gen, id);
+		searchApi.encodeStringField(gen, "id", id, true);
 	}
 }
