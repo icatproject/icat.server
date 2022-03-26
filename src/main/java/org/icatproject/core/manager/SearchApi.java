@@ -1,5 +1,6 @@
 package org.icatproject.core.manager;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -8,13 +9,10 @@ import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -48,8 +46,6 @@ public abstract class SearchApi {
 	protected static String matchAllQuery;
 
 	protected URI server;
-	protected AtomicLong atomicLongUid = new AtomicLong();
-	protected Map<String, Integer> uidMap = new HashMap<>();
 
 	static {
 		df = new SimpleDateFormat("yyyyMMddHHmm");
@@ -188,9 +184,32 @@ public abstract class SearchApi {
 		modify(sb.toString());
 	}
 
+    public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
+		if (sort != null && !sort.equals("")) {
+			try (JsonReader reader = Json.createReader(new ByteArrayInputStream(sort.getBytes()))) {
+				JsonObject object = reader.readObject();
+				JsonArrayBuilder builder = Json.createArrayBuilder();
+				for (String key : object.keySet()) {
+					if (!lastBean.getSource().keySet().contains(key)) {
+						throw new IcatException(IcatExceptionType.INTERNAL, "Cannot build searchAfter document from source as sorted field " + key + " missing.");
+					}
+					String value = lastBean.getSource().getString(key);
+					builder.add(value);
+				}
+				return builder.build().toString();
+			}
+		} else {
+			JsonArrayBuilder builder = Json.createArrayBuilder();
+			if (Float.isNaN(lastBean.getScore())) {
+				throw new IcatException(IcatExceptionType.INTERNAL, "Cannot build searchAfter document from source as score was NaN.");
+			}
+			builder.add(lastBean.getScore());
+			builder.add(lastBean.getEntityBaseBeanId());
+			return builder.build().toString();
+		}
+    }
+
 	public void clear() throws IcatException {
-		atomicLongUid.set(0);
-		uidMap = new HashMap<>();
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/_delete_by_query").build();
 			HttpPost httpPost = new HttpPost(uri);
@@ -217,19 +236,28 @@ public abstract class SearchApi {
 	}
 
 	public void freeSearcher(String uid) throws IcatException {
-		uidMap.remove(uid);
+		logger.info("Manually freeing searcher not supported, no request sent");
 	}
 
 	public abstract List<FacetDimension> facetSearch(JsonObject facetQuery, int maxResults, int maxLabels)
 			throws IcatException;
 
-	public SearchResult getResults(JsonObject query, int maxResults, String sort) throws IcatException {
-		Long uid = atomicLongUid.getAndIncrement();
-		uidMap.put(uid.toString(), 0);
-		return getResults(uid.toString(), query, maxResults);
+	public SearchResult getResults(JsonObject query, int maxResults) throws IcatException {
+		return getResults(query, null, maxResults, null, null);
 	}
 
-	public SearchResult getResults(String uid, JsonObject query, int maxResults) throws IcatException {
+	public SearchResult getResults(JsonObject query, int maxResults, String sort) throws IcatException {
+		return getResults(query, null, maxResults, sort, null);
+	}
+
+	public SearchResult getResults(JsonObject query, String searchAfter, int blockSize, String sort, List<String> fields) throws IcatException {
+
+		// return getResults(uid.toString(), query, blockSize);
+		// TODO
+		return null;
+	}
+
+	private SearchResult getResults(String uid, JsonObject query, int maxResults) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			String index;
 			Set<String> fields = query.keySet();
@@ -341,7 +369,7 @@ public abstract class SearchApi {
 				JsonObject jsonObject = jsonReader.readObject();
 				JsonArray hits = jsonObject.getJsonObject("hits").getJsonArray("hits");
 				for (JsonObject hit : hits.getValuesAs(JsonObject.class)) {
-					entities.add(new ScoredEntityBaseBean(hit.getString("_id"), hit.getJsonNumber("_score").doubleValue()));
+					entities.add(new ScoredEntityBaseBean(hit.getString("_id"), hit.getJsonNumber("_score").bigDecimalValue().floatValue(), null)); // TODO
 				}
 			}
 			return result;

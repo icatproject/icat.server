@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.Timer;
@@ -39,7 +41,11 @@ import javax.persistence.PersistenceUnit;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
+import org.icatproject.core.entity.Datafile;
+import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.PropertyHandler.SearchEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -311,6 +317,17 @@ public class SearchManager {
 
 	private List<URL> urls;
 
+	private static final Map<String, List<String>> publicSearchFields = new HashMap<>();
+
+	public static List<String> getPublicSearchFields(GateKeeper gateKeeper, String simpleName) throws IcatException {
+		if (gateKeeper.getPublicSearchFieldsStale() || publicSearchFields.size() == 0) {
+			publicSearchFields.put("Datafile", buildPublicSteps(gateKeeper, Datafile.getDocumentFields()));
+			publicSearchFields.put("Dataset", buildPublicSteps(gateKeeper, Dataset.getDocumentFields()));
+			publicSearchFields.put("Investigation", buildPublicSteps(gateKeeper, Investigation.getDocumentFields()));
+		}
+		return publicSearchFields.get(simpleName);
+	}
+
 	public void addDocument(EntityBaseBean bean) throws IcatException {
 		String entityName = bean.getClass().getSimpleName();
 		if (eiHandler.hasSearchDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
@@ -380,6 +397,29 @@ public class SearchManager {
 		}
 	}
 
+	private static List<String> buildPublicSteps(GateKeeper gateKeeper, Map<String, Relationship[]> map) {
+		List<String> fields = new ArrayList<>();
+		for (Entry<String, Relationship[]> entry: map.entrySet()) {
+			Boolean includeField = true;
+			if (entry.getValue() != null) {
+				for (Relationship relationship: entry.getValue()) {
+					if (!gateKeeper.allowed(relationship)) {
+						includeField = false;
+						break;
+					}
+				}
+			}
+			if (includeField) {
+				fields.add(entry.getKey());
+			}
+		}
+		return fields;
+	}
+
+    public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
+        return searchApi.buildSearchAfter(lastBean, sort);
+    }
+
 	private void pushPendingCalls() {
 		timer.schedule(new EnqueuedSearchRequestHandler(), 0L);
 		while (queueFile.length() != 0) {
@@ -429,8 +469,8 @@ public class SearchManager {
 		return searchApi.getResults(jo, blockSize, sort);
 	}
 
-	public SearchResult freeTextSearch(String uid, JsonObject jo, int blockSize) throws IcatException {
-		return searchApi.getResults(uid, jo, blockSize);
+	public SearchResult freeTextSearch(JsonObject jo, String searchAfter, int blockSize, String sort, List<String> fields) throws IcatException {
+		return searchApi.getResults(jo, searchAfter, blockSize, sort, fields);
 	}
 
 	@PostConstruct

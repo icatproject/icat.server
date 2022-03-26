@@ -63,7 +63,7 @@ public class ElasticsearchDocument {
 						if (fieldEntry.getValue().getValueType().equals(ValueType.STRING)) {
 							id = Long.valueOf(fieldObject.getString("id"));
 						} else if (fieldEntry.getValue().getValueType().equals(ValueType.NUMBER)) {
-							id = fieldObject.getJsonNumber("id").longValue();
+							id = fieldObject.getJsonNumber("id").longValueExact();
 						}
 					} else if (fieldEntry.getKey().equals("investigation")) {
 						if (fieldEntry.getValue().getValueType().equals(ValueType.STRING)) {
@@ -121,7 +121,7 @@ public class ElasticsearchDocument {
 						if (fieldEntry.getValue().getValueType().equals(ValueType.STRING)) {
 							id = Long.valueOf(fieldObject.getString(parentIndex));
 						} else if (fieldEntry.getValue().getValueType().equals(ValueType.NUMBER)) {
-							id = fieldObject.getJsonNumber(parentIndex).longValue();
+							id = fieldObject.getJsonNumber(parentIndex).longValueExact();
 						}
 					} else if (fieldEntry.getKey().equals("userName")) {
 						userName.add(fieldObject.getString("userName"));

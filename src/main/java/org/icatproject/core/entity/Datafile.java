@@ -3,7 +3,9 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
@@ -20,7 +22,10 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.SearchApi;
+import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 
 @Comment("A data file")
 @SuppressWarnings("serial")
@@ -76,6 +81,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sourceDatafile")
 	private List<RelatedDatafile> sourceDatafiles = new ArrayList<RelatedDatafile>();
+
+	private static final Map<String, Relationship[]> documentFields = new HashMap<>();
 
 	/* Needed for JPA */
 	public Datafile() {
@@ -220,4 +227,34 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
 		// TODO User and Parameter support for Elasticsearch
 	}
+
+	/**
+	 * Gets the fields used in the search component for this entity, and the
+	 * relationships that would restrict the content of those fields.
+	 * 
+	 * @return Map of field names (as they appear on the search document) against
+	 *         the Relationships that need to be allowed for that field to be
+	 *         viewable. If there are no restrictive relationships, then the value
+	 *         will be null.
+	 * @throws IcatException If the EntityInfoHandler cannot find one of the
+	 *                       Relationships.
+	 */
+	public static Map<String, Relationship[]> getDocumentFields() throws IcatException {
+		if (documentFields.size() == 0) {
+			EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
+			Relationship[] textRelationships = {
+					eiHandler.getRelationshipsByName(Datafile.class).get("datafileFormat") };
+			Relationship[] investigationRelationships = {
+					eiHandler.getRelationshipsByName(Datafile.class).get("dataset"),
+					eiHandler.getRelationshipsByName(Dataset.class).get("investigation") }; // TODO check if we need this
+			documentFields.put("text", textRelationships);
+			documentFields.put("name", null);
+			documentFields.put("date", null);
+			documentFields.put("id", null);
+			documentFields.put("dataset", null);
+			documentFields.put("investigation", investigationRelationships);
+		}
+		return documentFields;
+	}
+
 }

@@ -93,6 +93,8 @@ public class GateKeeper {
 
 	private boolean publicTablesStale;
 
+	private boolean publicSearchFieldsStale;
+
 	private Map<String, String> cluster;
 
 	private String basePath = "/icat";
@@ -162,6 +164,10 @@ public class GateKeeper {
 			updatePublicTables();
 		}
 		return publicTables;
+	}
+
+	public Boolean getPublicSearchFieldsStale() {
+		return publicSearchFieldsStale;
 	}
 
 	public List<EntityBaseBean> getReadable(String userId, List<EntityBaseBean> beans, EntityManager manager) {
@@ -337,10 +343,16 @@ public class GateKeeper {
 
 	public void markPublicStepsStale() {
 		publicStepsStale = true;
+		publicSearchFieldsStale = true;
 	}
 
 	public void markPublicTablesStale() {
 		publicTablesStale = true;
+		publicSearchFieldsStale = true;
+	}
+
+	public void markPublicSearchFieldsFresh() {
+		publicSearchFieldsStale = false;
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package org.icatproject.core.manager;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -12,7 +13,10 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
@@ -20,8 +24,6 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.InputStreamEntity;
@@ -70,6 +72,13 @@ public class LuceneApi extends SearchApi {
 
 	@Override
 	public void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value) {
+		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
+				.writeEnd();
+	}
+
+	@Override
+	public void encodeSortedDocValuesField(JsonGenerator gen, String name, String value) {
+		encodeStringField(gen, name, value);
 		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
 				.writeEnd();
 	}
@@ -145,6 +154,31 @@ public class LuceneApi extends SearchApi {
 	}
 
 	@Override
+    public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
+		JsonObjectBuilder builder = Json.createObjectBuilder();
+		builder.add("doc", lastBean.getEntityBaseBeanId());
+		builder.add("shardIndex", -1);
+		if (!Float.isNaN(lastBean.getScore())) {
+			builder.add("score", lastBean.getScore());
+		}
+		if (sort != null && !sort.equals("")) {
+			try (JsonReader reader = Json.createReader(new ByteArrayInputStream(sort.getBytes()))) {
+				JsonObject object = reader.readObject();
+				JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+				for (String key : object.keySet()) {
+					if (!lastBean.getSource().keySet().contains(key)) {
+						throw new IcatException(IcatExceptionType.INTERNAL, "Cannot build searchAfter document from source as sorted field " + key + " missing.");
+					}
+					String value = lastBean.getSource().getString(key);
+					arrayBuilder.add(value);
+				}
+				builder.add("fields", arrayBuilder);
+			}
+		}
+		return builder.build().toString();
+    }
+
+	@Override
 	public void clear() throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/clear").build();
@@ -183,22 +217,6 @@ public class LuceneApi extends SearchApi {
 			return getFacets(uri, httpclient, facetQuery.toString());
 
 		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	@Override
-	public void freeSearcher(String uid) throws IcatException {
-		try {
-			URI uri = new URIBuilder(server).setPath(basePath + "/freeSearcher/" + uid).build();
-			logger.trace("Making call {}", uri);
-			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-				HttpDelete httpDelete = new HttpDelete(uri);
-				try (CloseableHttpResponse response = httpclient.execute(httpDelete)) {
-					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-				}
-			}
-		} catch (URISyntaxException | IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
@@ -254,65 +272,27 @@ public class LuceneApi extends SearchApi {
 	}
 
 	@Override
-	public SearchResult getResults(JsonObject query, int maxResults, String sort) throws IcatException {
+	public SearchResult getResults(JsonObject query, String searchAfter, int blockSize, String sort, List<String> fields) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			String indexPath = getTargetPath(query);
 			URI uri = new URIBuilder(server).setPath(basePath + "/" + indexPath)
-					.setParameter("maxResults", Integer.toString(maxResults))
+					.setParameter("search_after", searchAfter)
+					.setParameter("maxResults", Integer.toString(blockSize))
 					.setParameter("sort", sort).build();
-			logger.trace("Making call {}", uri);
-			return getResults(uri, httpclient, query.toString());
-
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	@Override
-	public SearchResult getResults(String uid, JsonObject query, int maxResults) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			String indexPath = getTargetPath(query);
-			URI uri = new URIBuilder(server).setPath(basePath + "/" + indexPath + "/" + uid)
-					.setParameter("maxResults", Integer.toString(maxResults)).build();
-			return getResults(uri, httpclient);
-
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	private SearchResult getResults(URI uri, CloseableHttpClient httpclient) throws IcatException {
-		HttpGet httpGet = new HttpGet(uri);
-		SearchResult lsr = new SearchResult();
-		List<ScoredEntityBaseBean> results = lsr.getResults();
-		ParserState state = ParserState.None;
-		try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
-			Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-			try (JsonParser p = Json.createParser(response.getEntity().getContent())) {
-				String key = null;
-				while (p.hasNext()) {
-					Event e = p.next();
-					if (e.equals(Event.KEY_NAME)) {
-						key = p.getString();
-					} else if (state == ParserState.Results) {
-						if (e == (Event.START_ARRAY)) {
-							p.next();
-							Long id = p.getLong();
-							p.next();
-							results.add(new ScoredEntityBaseBean(id, p.getBigDecimal().floatValue()));
-							p.next(); // skip the }
-						}
-					} else { // Not in results yet
-						if (e == Event.START_ARRAY && key.equals("results")) {
-							state = ParserState.Results;
-						}
-					}
-				}
+			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+			objectBuilder.add("query", query);
+			if (fields != null && fields.size() > 0) {
+				JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+				fields.forEach((field) -> arrayBuilder.add(field));
+				objectBuilder.add("fields", arrayBuilder.build());
 			}
-		} catch (IOException e) {
+			String queryString = objectBuilder.build().toString();
+			logger.trace("Making call {} with queryString {}", uri, queryString);
+			return getResults(uri, httpclient, queryString);
+
+		} catch (IOException | URISyntaxException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
-		return lsr;
 	}
 
 	private SearchResult getResults(URI uri, CloseableHttpClient httpclient, String queryString)
@@ -326,32 +306,22 @@ public class LuceneApi extends SearchApi {
 
 			SearchResult lsr = new SearchResult();
 			List<ScoredEntityBaseBean> results = lsr.getResults();
-			ParserState state = ParserState.None;
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
 				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-				try (JsonParser p = Json.createParser(response.getEntity().getContent())) {
-					String key = null;
-					while (p.hasNext()) {
-						Event e = p.next();
-						if (e.equals(Event.KEY_NAME)) {
-							key = p.getString();
-						} else if (state == ParserState.Results) {
-							if (e == (Event.START_ARRAY)) {
-								p.next();
-								Long id = p.getLong();
-								p.next();
-								results.add(new ScoredEntityBaseBean(id, p.getBigDecimal().floatValue()));
-								p.next(); // skip the }
-							}
-						} else { // Not in results yet
-							if (e == (Event.VALUE_NUMBER) && key.equals("uid")) {
-								lsr.setUid(String.valueOf(p.getLong()));
-							} else if (e == Event.START_ARRAY && key.equals("results")) {
-								state = ParserState.Results;
-							}
-
+				try (JsonReader reader = Json.createReader(response.getEntity().getContent())) {
+					JsonObject responseObject = reader.readObject();
+					List<JsonObject> resultsArray = responseObject.getJsonArray("results").getValuesAs(JsonObject.class);
+					for (JsonObject resultObject: resultsArray) {
+						long id = resultObject.getJsonNumber("id").longValueExact();
+						Float score = Float.NaN;
+						if (resultObject.keySet().contains("score")) {
+							score = resultObject.getJsonNumber("score").bigDecimalValue().floatValue();
 						}
-
+						JsonObject source = resultObject.getJsonObject("source");
+						results.add(new ScoredEntityBaseBean(id, score, source));
+					}
+					if (responseObject.containsKey("search_after")) {
+						lsr.setSearchAfter(responseObject.getJsonObject("search_after").toString());
 					}
 				}
 			}

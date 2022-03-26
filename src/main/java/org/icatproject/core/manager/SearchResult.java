@@ -5,19 +5,26 @@ import java.util.List;
 
 public class SearchResult {
 
-	private String uid;
+	private String searchAfter;
 	private List<ScoredEntityBaseBean> results = new ArrayList<>();
+
+	public SearchResult() {}
+
+	public SearchResult(String searchAfter, List<ScoredEntityBaseBean> results) {
+		this.searchAfter = searchAfter;
+		this.results = results;
+	}
 
 	public List<ScoredEntityBaseBean> getResults() {
 		return results;
 	}
 
-	public void setUid(String uid) {
-		this.uid = uid;
+	public String getSearchAfter() {
+		return searchAfter;
 	}
 
-	public String getUid() {
-		return uid;
+	public void setSearchAfter(String searchAfter) {
+		this.searchAfter = searchAfter;
 	}
 
 }

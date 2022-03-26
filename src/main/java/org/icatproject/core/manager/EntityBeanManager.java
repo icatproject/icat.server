@@ -779,7 +779,7 @@ public class EntityBeanManager {
 		}
 	}
 
-	private void filterReadAccess(List<ScoredEntityBaseBean> results, List<ScoredEntityBaseBean> allResults,
+	private ScoredEntityBaseBean filterReadAccess(List<ScoredEntityBaseBean> results, List<ScoredEntityBaseBean> allResults,
 			int maxCount, String userId, EntityManager manager, Class<? extends EntityBaseBean> klass)
 			throws IcatException {
 
@@ -790,19 +790,20 @@ public class EntityBeanManager {
 			if (beanManaged != null) {
 				try {
 					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
-					results.add(new ScoredEntityBaseBean(entityId, sr.getScore()));
+					results.add(new ScoredEntityBaseBean(entityId, sr.getScore(), sr.getSource()));
 					if (results.size() > maxEntities) {
 						throw new IcatException(IcatExceptionType.VALIDATION,
 								"attempt to return more than " + maxEntities + " entities");
 					}
 					if (results.size() == maxCount) {
-						break;
+						return sr;
 					}
 				} catch (IcatException e) {
 					// Nothing to do
 				}
 			}
 		}
+		return null;
 	}
 
 	private EntityBaseBean find(EntityBaseBean bean, EntityManager manager) throws IcatException {
@@ -1388,33 +1389,40 @@ public class EntityBeanManager {
 		}
 	}
 
-	public List<ScoredEntityBaseBean> freeTextSearch(String userName, JsonObject jo, int maxCount, String sort,
+	public List<ScoredEntityBaseBean> freeTextSearch(String userName, JsonObject jo, int limit, String sort,
 			EntityManager manager, String ip, Class<? extends EntityBaseBean> klass) throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
+		String searchAfter = null;
+		String lastSearchAfter = null;
 		if (searchActive) {
-			SearchResult last = null;
-			String uid = null;
+			SearchResult lastSearchResult = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
 			 * don't make a huge number of calls to search engine
 			 */
-			int blockSize = Math.max(1000, maxCount);
+			int blockSize = Math.max(1000, limit);
 
 			do {
-				if (last == null) {
-					// Only need to apply the sort on initial search
-					last = searchManager.freeTextSearch(jo, blockSize, sort);
-					uid = last.getUid();
+				List<String> fields = SearchManager.getPublicSearchFields(gateKeeper, klass.getSimpleName());
+				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
+				allResults = lastSearchResult.getResults();
+				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, limit, userName, manager, klass);
+				if (lastBean == null) {
+					// Haven't stopped early, so use the Lucene provided searchAfter document
+					lastSearchAfter = lastSearchResult.getSearchAfter();
+					if (lastSearchAfter == null) {
+						break; // If searchAfter is null, we ran out of results so stop here
+					}
+					searchAfter = lastSearchAfter.toString();
 				} else {
-					last = searchManager.freeTextSearch(uid, jo, blockSize);
+					// Have stopped early by reaching the limit, so build a searchAfter document
+					lastSearchAfter = searchManager.buildSearchAfter(lastBean, sort);
+					break;
 				}
-				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userName, manager, klass);
-			} while (results.size() != maxCount && allResults.size() == blockSize);
-			/* failing retrieval calls clean up before throwing */
-			searchManager.freeSearcher(uid);
+			} while (results.size() < limit);
+		}
 
 			// TODO move this to somewhere we can manually call it
 			// TODO also need to fix it for Elasticsearch (cannot use text fields for
@@ -1438,7 +1446,6 @@ public class EntityBeanManager {
 			// }
 			// }
 			// }
-		}
 		if (logRequests.contains("R")) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
@@ -1452,6 +1459,54 @@ public class EntityBeanManager {
 		}
 		logger.debug("Returning {} results", results.size());
 		return results;
+	}
+
+	public SearchResult freeTextSearchDocs(String userName, JsonObject jo, String searchAfter, int limit, String sort,
+			EntityManager manager, String ip, Class<? extends EntityBaseBean> klass) throws IcatException {
+		long startMillis = log ? System.currentTimeMillis() : 0;
+		List<ScoredEntityBaseBean> results = new ArrayList<>();
+		String lastSearchAfter = null;
+		if (searchActive) {
+			SearchResult lastSearchResult = null;
+			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
+			/*
+			 * As results may be rejected and maxCount may be 1 ensure that we
+			 * don't make a huge number of calls to search engine
+			 */
+			int blockSize = Math.max(1000, limit);
+
+			do {
+				List<String> fields = SearchManager.getPublicSearchFields(gateKeeper, klass.getSimpleName());
+				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
+				allResults = lastSearchResult.getResults();
+				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, limit, userName, manager, klass);
+				if (lastBean == null) {
+					// Haven't stopped early, so use the Lucene provided searchAfter document
+					lastSearchAfter = lastSearchResult.getSearchAfter();
+					if (lastSearchAfter == null) {
+						break; // If searchAfter is null, we ran out of results so stop here
+					}
+					searchAfter = lastSearchAfter.toString();
+				} else {
+					// Have stopped early by reaching the limit, so build a searchAfter document
+					lastSearchAfter = searchManager.buildSearchAfter(lastBean, sort);
+					break;
+				}
+			} while (results.size() < limit);
+		}
+		if (logRequests.contains("R")) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+				gen.write("userName", userName);
+				if (results.size() > 0) {
+					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+				}
+				gen.writeEnd();
+			}
+			transmitter.processMessage("freeTextSearchDocs", ip, baos.toString(), startMillis);
+		}
+		logger.debug("Returning {} results", results.size());
+		return new SearchResult(lastSearchAfter, results);
 	}
 
 	public List<String> searchGetPopulating() {

@@ -255,137 +255,137 @@ public class ElasticsearchApi extends SearchApi {
 		}
 	}
 
-	@Override
-	public SearchResult getResults(JsonObject query, int maxResults, String sort)
-			throws IcatException {
-		// TODO sort argument not supported
-		try {
-			String index;
-			if (query.keySet().contains("target")) {
-				index = query.getString("target").toLowerCase();
-			} else {
-				index = query.getString("_all");
-			}
-			OpenPointInTimeResponse pitResponse = client.openPointInTime(p -> p
-					.index(index)
-					.keepAlive(t -> t.time("1m")));
-			String pit = pitResponse.id();
-			pitMap.put(pit, 0);
-			return getResults(pit, query, maxResults);
-		} catch (ElasticsearchException | IOException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
+	// @Override
+	// public SearchResult getResults(JsonObject query, int maxResults, String sort)
+	// 		throws IcatException {
+	// 	// TODO sort argument not supported
+	// 	try {
+	// 		String index;
+	// 		if (query.keySet().contains("target")) {
+	// 			index = query.getString("target").toLowerCase();
+	// 		} else {
+	// 			index = query.getString("_all");
+	// 		}
+	// 		OpenPointInTimeResponse pitResponse = client.openPointInTime(p -> p
+	// 				.index(index)
+	// 				.keepAlive(t -> t.time("1m")));
+	// 		String pit = pitResponse.id();
+	// 		pitMap.put(pit, 0);
+	// 		return getResults(pit, query, maxResults);
+	// 	} catch (ElasticsearchException | IOException e) {
+	// 		throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+	// 	}
+	// }
 
-	@Override
-	public SearchResult getResults(String uid, JsonObject query, int maxResults)
-			throws IcatException {
-		try {
-			logger.debug("getResults for query: {}", query.toString());
-			Set<String> fields = query.keySet();
-			BoolQuery.Builder builder = new BoolQuery.Builder();
-			for (String field : fields) {
-				if (field.equals("text")) {
-					String text = query.getString("text");
-					builder.must(m -> m.queryString(q -> q.defaultField("text").query(text)));
-				} else if (field.equals("lower")) {
-					Long time = decodeTime(query.getString("lower"));
-					builder.must(m -> m
-							.bool(b -> b
-									.should(s -> s
-											.range(r -> r
-													.field("date")
-													.gte(JsonData.of(time))))
-									.should(s -> s
-											.range(r -> r
-													.field("startDate")
-													.gte(JsonData.of(time))))));
-				} else if (field.equals("upper")) {
-					Long time = decodeTime(query.getString("upper"));
-					builder.must(m -> m
-							.bool(b -> b
-									.should(s -> s
-											.range(r -> r
-													.field("date")
-													.lte(JsonData.of(time))))
-									.should(s -> s
-											.range(r -> r
-													.field("endDate")
-													.lte(JsonData.of(time))))));
-				} else if (field.equals("user")) {
-					String user = query.getString("user");
-					builder.filter(f -> f.match(t -> t
-							.field("userName")
-							.operator(Operator.And)
-							.query(q -> q.stringValue(user))));
-				} else if (field.equals("userFullName")) {
-					String userFullName = query.getString("userFullName");
-					builder.filter(f -> f.queryString(q -> q.defaultField("userFullName").query(userFullName)));
-				} else if (field.equals("samples")) {
-					JsonArray samples = query.getJsonArray("samples");
-					for (int i = 0; i < samples.size(); i++) {
-						String sample = samples.getString(i);
-						builder.filter(
-								f -> f.queryString(q -> q.defaultField("sampleText").query(sample)));
-					}
-				} else if (field.equals("parameters")) {
-					for (JsonValue parameterValue : query.getJsonArray("parameters")) {
-						// TODO there are more things to support and consider here... e.g. parameters
-						// with a numeric range not a numeric value
-						BoolQuery.Builder parameterBuilder = new BoolQuery.Builder();
-						JsonObject parameterObject = (JsonObject) parameterValue;
-						String name = parameterObject.getString("name", null);
-						String units = parameterObject.getString("units", null);
-						String stringValue = parameterObject.getString("stringValue", null);
-						Long lowerDate = decodeTime(parameterObject.getString("lowerDateValue", null));
-						Long upperDate = decodeTime(parameterObject.getString("upperDateValue", null));
-						JsonNumber lowerNumeric = parameterObject.getJsonNumber("lowerNumericValue");
-						JsonNumber upperNumeric = parameterObject.getJsonNumber("upperNumericValue");
-						if (name != null) {
-							parameterBuilder.must(m -> m.match(a -> a.field("parameterName").operator(Operator.And)
-									.query(q -> q.stringValue(name))));
-						}
-						if (units != null) {
-							parameterBuilder.must(m -> m.match(a -> a.field("parameterUnits").operator(Operator.And)
-									.query(q -> q.stringValue(units))));
-						}
-						if (stringValue != null) {
-							parameterBuilder.must(m -> m.match(a -> a.field("parameterStringValue")
-									.operator(Operator.And).query(q -> q.stringValue(stringValue))));
-						} else if (lowerDate != null && upperDate != null) {
-							parameterBuilder.must(m -> m.range(r -> r.field("parameterDateValue")
-									.gte(JsonData.of(lowerDate)).lte(JsonData.of(upperDate))));
-						} else if (lowerNumeric != null && upperNumeric != null) {
-							parameterBuilder.must(m -> m.range(
-									r -> r.field("parameterNumericValue").gte(JsonData.of(lowerNumeric.doubleValue()))
-											.lte(JsonData.of(upperNumeric.doubleValue()))));
-						}
-						builder.filter(f -> f.bool(b -> parameterBuilder));
-					}
-					// TODO consider support for other fields (would require dynamic fields)
-				}
-			}
-			Integer from = pitMap.get(uid);
-			SearchResponse<ElasticsearchDocument> response = client.search(s -> s
-					.size(maxResults)
-					.pit(p -> p.id(uid).keepAlive(t -> t.time("1m")))
-					.query(q -> q.bool(builder.build()))
-					// TODO check the ordering?
-					.from(from)
-					.sort(o -> o.score(c -> c.order(SortOrder.Desc)))
-					.sort(o -> o.field(f -> f.field("id").order(SortOrder.Asc))), ElasticsearchDocument.class);
-			SearchResult result = new SearchResult();
-			result.setUid(uid);
-			pitMap.put(uid, from + maxResults);
-			List<ScoredEntityBaseBean> entities = result.getResults();
-			for (Hit<ElasticsearchDocument> hit : response.hits().hits()) {
-				entities.add(new ScoredEntityBaseBean(Long.parseLong(hit.id()), hit.score().floatValue()));
-			}
-			return result;
-		} catch (ElasticsearchException | IOException | ParseException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
+	// @Override
+	// public SearchResult getResults(String uid, JsonObject query, int maxResults)
+	// 		throws IcatException {
+	// 	try {
+	// 		logger.debug("getResults for query: {}", query.toString());
+	// 		Set<String> fields = query.keySet();
+	// 		BoolQuery.Builder builder = new BoolQuery.Builder();
+	// 		for (String field : fields) {
+	// 			if (field.equals("text")) {
+	// 				String text = query.getString("text");
+	// 				builder.must(m -> m.queryString(q -> q.defaultField("text").query(text)));
+	// 			} else if (field.equals("lower")) {
+	// 				Long time = decodeTime(query.getString("lower"));
+	// 				builder.must(m -> m
+	// 						.bool(b -> b
+	// 								.should(s -> s
+	// 										.range(r -> r
+	// 												.field("date")
+	// 												.gte(JsonData.of(time))))
+	// 								.should(s -> s
+	// 										.range(r -> r
+	// 												.field("startDate")
+	// 												.gte(JsonData.of(time))))));
+	// 			} else if (field.equals("upper")) {
+	// 				Long time = decodeTime(query.getString("upper"));
+	// 				builder.must(m -> m
+	// 						.bool(b -> b
+	// 								.should(s -> s
+	// 										.range(r -> r
+	// 												.field("date")
+	// 												.lte(JsonData.of(time))))
+	// 								.should(s -> s
+	// 										.range(r -> r
+	// 												.field("endDate")
+	// 												.lte(JsonData.of(time))))));
+	// 			} else if (field.equals("user")) {
+	// 				String user = query.getString("user");
+	// 				builder.filter(f -> f.match(t -> t
+	// 						.field("userName")
+	// 						.operator(Operator.And)
+	// 						.query(q -> q.stringValue(user))));
+	// 			} else if (field.equals("userFullName")) {
+	// 				String userFullName = query.getString("userFullName");
+	// 				builder.filter(f -> f.queryString(q -> q.defaultField("userFullName").query(userFullName)));
+	// 			} else if (field.equals("samples")) {
+	// 				JsonArray samples = query.getJsonArray("samples");
+	// 				for (int i = 0; i < samples.size(); i++) {
+	// 					String sample = samples.getString(i);
+	// 					builder.filter(
+	// 							f -> f.queryString(q -> q.defaultField("sampleText").query(sample)));
+	// 				}
+	// 			} else if (field.equals("parameters")) {
+	// 				for (JsonValue parameterValue : query.getJsonArray("parameters")) {
+	// 					// TODO there are more things to support and consider here... e.g. parameters
+	// 					// with a numeric range not a numeric value
+	// 					BoolQuery.Builder parameterBuilder = new BoolQuery.Builder();
+	// 					JsonObject parameterObject = (JsonObject) parameterValue;
+	// 					String name = parameterObject.getString("name", null);
+	// 					String units = parameterObject.getString("units", null);
+	// 					String stringValue = parameterObject.getString("stringValue", null);
+	// 					Long lowerDate = decodeTime(parameterObject.getString("lowerDateValue", null));
+	// 					Long upperDate = decodeTime(parameterObject.getString("upperDateValue", null));
+	// 					JsonNumber lowerNumeric = parameterObject.getJsonNumber("lowerNumericValue");
+	// 					JsonNumber upperNumeric = parameterObject.getJsonNumber("upperNumericValue");
+	// 					if (name != null) {
+	// 						parameterBuilder.must(m -> m.match(a -> a.field("parameterName").operator(Operator.And)
+	// 								.query(q -> q.stringValue(name))));
+	// 					}
+	// 					if (units != null) {
+	// 						parameterBuilder.must(m -> m.match(a -> a.field("parameterUnits").operator(Operator.And)
+	// 								.query(q -> q.stringValue(units))));
+	// 					}
+	// 					if (stringValue != null) {
+	// 						parameterBuilder.must(m -> m.match(a -> a.field("parameterStringValue")
+	// 								.operator(Operator.And).query(q -> q.stringValue(stringValue))));
+	// 					} else if (lowerDate != null && upperDate != null) {
+	// 						parameterBuilder.must(m -> m.range(r -> r.field("parameterDateValue")
+	// 								.gte(JsonData.of(lowerDate)).lte(JsonData.of(upperDate))));
+	// 					} else if (lowerNumeric != null && upperNumeric != null) {
+	// 						parameterBuilder.must(m -> m.range(
+	// 								r -> r.field("parameterNumericValue").gte(JsonData.of(lowerNumeric.doubleValue()))
+	// 										.lte(JsonData.of(upperNumeric.doubleValue()))));
+	// 					}
+	// 					builder.filter(f -> f.bool(b -> parameterBuilder));
+	// 				}
+	// 				// TODO consider support for other fields (would require dynamic fields)
+	// 			}
+	// 		}
+	// 		Integer from = pitMap.get(uid);
+	// 		SearchResponse<ElasticsearchDocument> response = client.search(s -> s
+	// 				.size(maxResults)
+	// 				.pit(p -> p.id(uid).keepAlive(t -> t.time("1m")))
+	// 				.query(q -> q.bool(builder.build()))
+	// 				// TODO check the ordering?
+	// 				.from(from)
+	// 				.sort(o -> o.score(c -> c.order(SortOrder.Desc)))
+	// 				.sort(o -> o.field(f -> f.field("id").order(SortOrder.Asc))), ElasticsearchDocument.class);
+	// 		SearchResult result = new SearchResult();
+	// 		// result.setUid(uid);
+	// 		pitMap.put(uid, from + maxResults);
+	// 		List<ScoredEntityBaseBean> entities = result.getResults();
+	// 		for (Hit<ElasticsearchDocument> hit : response.hits().hits()) {
+	// 			entities.add(new ScoredEntityBaseBean(Long.parseLong(hit.id()), hit.score().floatValue(), ""));
+	// 		}
+	// 		return result;
+	// 	} catch (ElasticsearchException | IOException | ParseException e) {
+	// 		throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+	// 	}
+	// }
 
 	@Override
 	public void modify(String json) throws IcatException {
