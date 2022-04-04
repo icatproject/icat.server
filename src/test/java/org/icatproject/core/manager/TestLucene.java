@@ -89,8 +89,6 @@ public class TestLucene {
 
 	@Test
 	public void modify() throws IcatException {
-		Queue<QueueItem> queue = new ConcurrentLinkedQueue<>();
-
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 			gen.writeStartArray();
@@ -101,16 +99,53 @@ public class TestLucene {
 			luceneApi.encodeStringField(gen, "dataset", 2001L);
 			gen.writeEnd();
 		}
+		String elephantJson = baos.toString();
 
-		String json = baos.toString();
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartArray();
+			luceneApi.encodeTextField(gen, "text", "Rhinos and Aardvarks");
+			luceneApi.encodeStringField(gen, "startDate", new Date());
+			luceneApi.encodeStringField(gen, "endDate", new Date());
+			luceneApi.encodeStoredId(gen, 42L);
+			luceneApi.encodeStringField(gen, "dataset", 2001L);
+			gen.writeEnd();
+		}
+		String rhinoJson = baos.toString();
 
-		queue.add(new QueueItem("Datafile", null, json));
+		JsonObject elephantQuery = SearchApi.buildQuery("Datafile", null, "elephant", null, null, null, null, null);
+		JsonObject rhinoQuery = SearchApi.buildQuery("Datafile", null, "rhino", null, null, null, null, null);
 
-		queue.add(new QueueItem("Datafile", 42L, json));
+		Queue<QueueItem> queue = new ConcurrentLinkedQueue<>();
+		queue.add(new QueueItem("Datafile", null, elephantJson));
+		modifyQueue(queue);
+		checkLsr(luceneApi.getResults(elephantQuery, 5), 42L);
+		checkLsr(luceneApi.getResults(rhinoQuery, 5));
 
+		queue = new ConcurrentLinkedQueue<>();
+		queue.add(new QueueItem("Datafile", 42L, rhinoJson));
+		modifyQueue(queue);
+		checkLsr(luceneApi.getResults(elephantQuery, 5));
+		checkLsr(luceneApi.getResults(rhinoQuery, 5), 42L);
+
+		queue = new ConcurrentLinkedQueue<>();
 		queue.add(new QueueItem("Datafile", 42L, null));
 		queue.add(new QueueItem("Datafile", 42L, null));
+		modifyQueue(queue);
+		checkLsr(luceneApi.getResults(elephantQuery, 5));
+		checkLsr(luceneApi.getResults(rhinoQuery, 5));
 
+		queue = new ConcurrentLinkedQueue<>();
+		queue.add(new QueueItem("Datafile", null, elephantJson));
+		queue.add(new QueueItem("Datafile", 42L, rhinoJson));
+		queue.add(new QueueItem("Datafile", 42L, null));
+		queue.add(new QueueItem("Datafile", 42L, null));
+		modifyQueue(queue);
+		checkLsr(luceneApi.getResults(elephantQuery, 5));
+		checkLsr(luceneApi.getResults(rhinoQuery, 5));
+	}
+
+	private void modifyQueue(Queue<QueueItem> queue) throws IcatException {
 		Iterator<QueueItem> qiter = queue.iterator();
 		if (qiter.hasNext()) {
 			StringBuilder sb = new StringBuilder("[");
@@ -138,8 +173,8 @@ public class TestLucene {
 			logger.debug("XXX " + sb.toString());
 
 			luceneApi.modify(sb.toString());
+			luceneApi.commit();
 		}
-
 	}
 
 	private void addDocuments(String entityName, String json) throws IcatException {
