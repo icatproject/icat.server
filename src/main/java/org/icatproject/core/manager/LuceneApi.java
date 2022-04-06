@@ -78,7 +78,7 @@ public class LuceneApi extends SearchApi {
 
 	@Override
 	public void encodeSortedDocValuesField(JsonGenerator gen, String name, String value) {
-		encodeStringField(gen, name, value);
+		encodeStringField(gen, name, value); // TODO leading to duplications in the _source, do we need both here?
 		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
 				.writeEnd();
 	}
@@ -156,7 +156,7 @@ public class LuceneApi extends SearchApi {
 	@Override
     public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
-		builder.add("doc", lastBean.getEntityBaseBeanId());
+		builder.add("doc", lastBean.getEngineDocId());
 		builder.add("shardIndex", -1);
 		if (!Float.isNaN(lastBean.getScore())) {
 			builder.add("score", lastBean.getScore());
@@ -312,13 +312,13 @@ public class LuceneApi extends SearchApi {
 					JsonObject responseObject = reader.readObject();
 					List<JsonObject> resultsArray = responseObject.getJsonArray("results").getValuesAs(JsonObject.class);
 					for (JsonObject resultObject: resultsArray) {
-						long id = resultObject.getJsonNumber("id").longValueExact();
+						int luceneDocId = resultObject.getInt("_id");
 						Float score = Float.NaN;
-						if (resultObject.keySet().contains("score")) {
-							score = resultObject.getJsonNumber("score").bigDecimalValue().floatValue();
+						if (resultObject.keySet().contains("_score")) {
+							score = resultObject.getJsonNumber("_score").bigDecimalValue().floatValue();
 						}
-						JsonObject source = resultObject.getJsonObject("source");
-						results.add(new ScoredEntityBaseBean(id, score, source));
+						JsonObject source = resultObject.getJsonObject("_source");
+						results.add(new ScoredEntityBaseBean(luceneDocId, score, source));
 					}
 					if (responseObject.containsKey("search_after")) {
 						lsr.setSearchAfter(responseObject.getJsonObject("search_after").toString());

@@ -790,7 +790,7 @@ public class EntityBeanManager {
 			if (beanManaged != null) {
 				try {
 					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
-					results.add(new ScoredEntityBaseBean(entityId, sr.getScore(), sr.getSource()));
+					results.add(sr);
 					if (results.size() > maxEntities) {
 						throw new IcatException(IcatExceptionType.VALIDATION,
 								"attempt to return more than " + maxEntities + " entities");
@@ -1405,8 +1405,7 @@ public class EntityBeanManager {
 			int blockSize = Math.max(1000, limit);
 
 			do {
-				List<String> fields = SearchManager.getPublicSearchFields(gateKeeper, klass.getSimpleName());
-				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
+				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, Arrays.asList("id"));
 				allResults = lastSearchResult.getResults();
 				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, limit, userName, manager, klass);
 				if (lastBean == null) {
@@ -1469,6 +1468,7 @@ public class EntityBeanManager {
 		if (searchActive) {
 			SearchResult lastSearchResult = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
+			List<String> fields = SearchManager.getPublicSearchFields(gateKeeper, klass.getSimpleName());
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
 			 * don't make a huge number of calls to search engine
@@ -1476,7 +1476,6 @@ public class EntityBeanManager {
 			int blockSize = Math.max(1000, limit);
 
 			do {
-				List<String> fields = SearchManager.getPublicSearchFields(gateKeeper, klass.getSimpleName());
 				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
 				allResults = lastSearchResult.getResults();
 				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, limit, userName, manager, klass);

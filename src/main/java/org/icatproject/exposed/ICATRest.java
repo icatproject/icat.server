@@ -926,11 +926,10 @@ public class ICATRest {
 		beanManager.logout(sessionId, manager, userTransaction, request.getRemoteAddr());
 	}
 
-	// TODO update endpoints to be generic
 	/**
-	 * perform a lucene search
+	 * Perform a free text search against a dedicated (non-DB) search engine component for entity ids.
 	 * 
-	 * @summary lucene search
+	 * @summary Free text id search.
 	 * 
 	 * @param sessionId
 	 *                  a sessionId of a user which takes the form
@@ -1027,18 +1026,18 @@ public class ICATRest {
 	 *                  only respected in the case of an investigation search.</dd>
 	 *                  </dl>
 	 * @param sort
-	 *                  json encoded sort object. Each key should be a field on the
-	 *                  targeted Lucene document, with a value of "asc" or "desc" to
+	 *                  JSON encoded sort object. Each key should be a field on the
+	 *                  targeted Document, with a value of "asc" or "desc" to
 	 *                  specify the order of the results. Multiple pairs can be
 	 *                  provided, in which case each subsequent sort is used as a
 	 *                  tiebreaker for the previous one. If no sort is specified,
 	 *                  then results will be returned in order of relevance to the
-	 *                  search query, with their Lucene id as a tiebreaker.
+	 *                  search query, with their search engine id as a tiebreaker.
 	 * 
 	 * @param maxCount
 	 *                  maximum number of entities to return
 	 * 
-	 * @return set of entities encoded as json
+	 * @return set of entity ids and relevance scores encoded as json
 	 * 
 	 * @throws IcatException
 	 *                       when something is wrong
@@ -1098,7 +1097,9 @@ public class ICATRest {
 			for (ScoredEntityBaseBean sb : objects) {
 				gen.writeStartObject();
 				gen.write("id", sb.getEntityBaseBeanId());
-				gen.write("score", sb.getScore());
+				if (!Float.isNaN(sb.getScore())) {
+					gen.write("score", sb.getScore());
+				}
 				gen.writeEnd();
 			}
 			gen.writeEnd();
@@ -1109,11 +1110,10 @@ public class ICATRest {
 		}
 	}
 
-	// TODO update endpoints to be generic
 	/**
-	 * perform a free text search
+	 * Perform a free text search against a dedicated (non-DB) search engine component for entire Documents.
 	 * 
-	 * @summary free text search
+	 * @summary Free text Document search.
 	 * 
 	 * @param sessionId
 	 *                  a sessionId of a user which takes the form
@@ -1213,17 +1213,17 @@ public class ICATRest {
 	 *                  String representing the last returned document of a previous search, so that new results will be from after this document. The representation should be a JSON array, but the nature of the values will depend on the sort applied.
 	 * @param sort
 	 *                  json encoded sort object. Each key should be a field on the
-	 *                  targeted Lucene document, with a value of "asc" or "desc" to
+	 *                  targeted Document, with a value of "asc" or "desc" to
 	 *                  specify the order of the results. Multiple pairs can be
 	 *                  provided, in which case each subsequent sort is used as a
 	 *                  tiebreaker for the previous one. If no sort is specified,
 	 *                  then results will be returned in order of relevance to the
-	 *                  search query, with their Lucene id as a tiebreaker.
+	 *                  search query, with their search engine id as a tiebreaker.
 	 * 
 	 * @param limit
 	 *                  maximum number of entities to return
 	 * 
-	 * @return set of entities encoded as json
+	 * @return Set of entity ids, relevance scores and Document source encoded as json.
 	 * 
 	 * @throws IcatException
 	 *                       when something is wrong
@@ -1260,7 +1260,7 @@ public class ICATRest {
 									&& parameter.containsKey("upperDateValue"))
 							|| (parameter.containsKey("lowerNumericValue")
 									&& parameter.containsKey("upperNumericValue")))) {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER, parameter.toString());
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "value not set in parameter '" + name + "'");
 					}
 				}
 			}
@@ -1279,11 +1279,18 @@ public class ICATRest {
 			logger.debug("Free text search with query: {}", jo.toString());
 			result = beanManager.freeTextSearchDocs(userName, jo, searchAfter, limit, sort, manager, request.getRemoteAddr(), klass);
 			JsonGenerator gen = Json.createGenerator(baos);
-			gen.writeStartObject().write("search_after", result.getSearchAfter()).writeStartArray();
+			gen.writeStartObject();
+			String newSearchAfter = result.getSearchAfter();
+			if (newSearchAfter != null) {
+				gen.write("search_after", newSearchAfter);
+			}
+			gen.writeStartArray("results");
 			for (ScoredEntityBaseBean sb : result.getResults()) {
 				gen.writeStartObject();
 				gen.write("id", sb.getEntityBaseBeanId());
-				gen.write("score", sb.getScore());
+				if (!Float.isNaN(sb.getScore())) {
+					gen.write("score", sb.getScore());
+				}
 				gen.write("source", sb.getSource());
 				gen.writeEnd();
 			}
@@ -1328,11 +1335,10 @@ public class ICATRest {
 		gatekeeper.markPublicStepsStale();
 	}
 
-	// TODO generalise endpoints
 	/**
-	 * Stop population of the lucene database if it is running.
+	 * Stop population of the search engine if it is running.
 	 * 
-	 * @summary Lucene Clear
+	 * @summary Search engine clear
 	 * 
 	 * @param sessionId
 	 *                  a sessionId of a user listed in rootUserNames
@@ -1347,11 +1353,10 @@ public class ICATRest {
 		beanManager.searchClear();
 	}
 
-	// TODO generalise endpoints
 	/**
-	 * Forces a commit of the lucene database
+	 * Forces a commit of the search engine
 	 * 
-	 * @summary Lucene Commit
+	 * @summary Search engine commit
 	 * 
 	 * @param sessionId
 	 *                  a sessionId of a user listed in rootUserNames
@@ -1366,11 +1371,10 @@ public class ICATRest {
 		beanManager.searchCommit();
 	}
 
-	// TODO generalise endpoints
 	/**
-	 * Return a list of class names for which population is going on
+	 * Return a list of class names for which search engine population is ongoing
 	 * 
-	 * @summary lucene GetPopulating
+	 * @summary Search engine get populating
 	 * 
 	 * @param sessionId
 	 *                  a sessionId of a user listed in rootUserNames
@@ -1418,11 +1422,10 @@ public class ICATRest {
 		}
 	}
 
-	// TODO generalise endpoints
 	/**
-	 * Clear and repopulate lucene documents for the specified entityName
+	 * Clear and repopulate search engine documents for the specified entityName
 	 * 
-	 * @summary Lucene Populate
+	 * @summary Search engine populate
 	 * 
 	 * @param sessionId
 	 *                   a sessionId of a user listed in rootUserNames

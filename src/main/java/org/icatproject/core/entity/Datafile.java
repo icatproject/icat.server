@@ -245,8 +245,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 			Relationship[] textRelationships = {
 					eiHandler.getRelationshipsByName(Datafile.class).get("datafileFormat") };
 			Relationship[] investigationRelationships = {
-					eiHandler.getRelationshipsByName(Datafile.class).get("dataset"),
-					eiHandler.getRelationshipsByName(Dataset.class).get("investigation") }; // TODO check if we need this
+					eiHandler.getRelationshipsByName(Datafile.class).get("dataset") };
 			documentFields.put("text", textRelationships);
 			documentFields.put("name", null);
 			documentFields.put("date", null);

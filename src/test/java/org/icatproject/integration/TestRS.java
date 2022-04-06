@@ -2,6 +2,7 @@ package org.icatproject.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -40,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import javax.json.Json;
@@ -61,6 +63,7 @@ import org.icatproject.icat.client.Session.Attributes;
 import org.icatproject.icat.client.Session.DuplicateAction;
 import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
+import org.icatproject.PublicStep;
 
 /**
  * These tests are for those aspects that cannot be tested by the core tests. In
@@ -74,12 +77,15 @@ public class TestRS {
 	private static SearchApi searchApi;
 
 	/**
-	 * Utility function for manually clearing the search engine indices based on the System properties
+	 * Utility function for manually clearing the search engine indices based on the
+	 * System properties
+	 * 
 	 * @throws URISyntaxException
 	 * @throws MalformedURLException
 	 * @throws org.icatproject.core.IcatException
 	 */
-	private static void clearSearch() throws URISyntaxException, MalformedURLException, org.icatproject.core.IcatException {
+	private static void clearSearch()
+			throws URISyntaxException, MalformedURLException, org.icatproject.core.IcatException {
 		if (searchApi == null) {
 			String searchEngine = System.getProperty("searchEngine");
 			if (searchEngine.equals("LUCENE")) {
@@ -87,10 +93,11 @@ public class TestRS {
 				URI uribase = new URI(urlString);
 				searchApi = new LuceneApi(uribase);
 			} else if (searchEngine.equals("ELASTICSEARCH")) {
-				String urlString = System.getProperty("elasticsearchUrl");				
+				String urlString = System.getProperty("elasticsearchUrl");
 				searchApi = new ElasticsearchApi(Arrays.asList(new URL(urlString)));
 			} else {
-				throw new RuntimeException("searchEngine must be one of LUCENE, ELASTICSEARCH, but it was " + searchEngine);
+				throw new RuntimeException(
+						"searchEngine must be one of LUCENE, ELASTICSEARCH, but it was " + searchEngine);
 			}
 		}
 		searchApi.clear();
@@ -144,97 +151,244 @@ public class TestRS {
 		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 		Session session = createAndPopulate();
 
-		/* Expected: <[{"User":{"id":8148,"createId":"db/notroot","createTime":"2019-03-11T14:14:47.000Z","modId":"db/notroot","modTime":"2019-03-11T14:14:47.000Z","affiliation":"Unseen University","familyName":"Worblehat","fullName":"Dr. Horace Worblehat","givenName":"Horace","instrumentScientists":[],"investigationUsers":[],"name":"db/lib","studies":[],"userGroups":[]}}]> */
+		/*
+		 * Expected: <[{"User":{"id":8148,"createId":"db/notroot","createTime":
+		 * "2019-03-11T14:14:47.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T14:14:47.000Z","affiliation":"Unseen University","familyName":
+		 * "Worblehat","fullName":"Dr. Horace Worblehat","givenName":"Horace",
+		 * "instrumentScientists":[],"investigationUsers":[],"name":"db/lib","studies":[
+		 * ],"userGroups":[]}}]>
+		 */
 		JsonArray user_response = search(session, "SELECT u from User u WHERE u.name = 'db/lib'", 1);
 		collector.checkThat(user_response.getJsonObject(0).containsKey("User"), is(true));
 
 		JsonObject user = user_response.getJsonObject(0).getJsonObject("User");
-		collector.checkThat(user.getJsonNumber("id").isIntegral(), is(true));    // Check Integer conversion
-		collector.checkThat(user.getString("createId"), is("db/notroot"));       // Check String conversion
+		collector.checkThat(user.getJsonNumber("id").isIntegral(), is(true)); // Check Integer conversion
+		collector.checkThat(user.getString("createId"), is("db/notroot")); // Check String conversion
 
-		/* Expected: <[{"Facility":{"id":2852,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","applications":[],"datafileFormats":[],"datasetTypes":[],"daysUntilRelease":90,"facilityCycles":[],"instruments":[],"investigationTypes":[],"investigations":[],"name":"Test port facility","parameterTypes":[],"sampleTypes":[]}}]> */
+		/*
+		 * Expected: <[{"Facility":{"id":2852,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","applications":[],"datafileFormats":[],
+		 * "datasetTypes":[],"daysUntilRelease":90,"facilityCycles":[],"instruments":[],
+		 * "investigationTypes":[],"investigations":[],"name":"Test port facility"
+		 * ,"parameterTypes":[],"sampleTypes":[]}}]>
+		 */
 		JsonArray fac_response = search(session, "SELECT f from Facility f WHERE f.name = 'Test port facility'", 1);
 		collector.checkThat(fac_response.getJsonObject(0).containsKey("Facility"), is(true));
 
-		 /* Expected: <[{"Instrument":{"id":1449,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","fullName":"EDDI - Energy Dispersive Diffraction","instrumentScientists":[],"investigationInstruments":[],"name":"EDDI","pid":"ig:0815","shifts":[]}}]> */
+		/*
+		 * Expected: <[{"Instrument":{"id":1449,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","fullName":"EDDI - Energy Dispersive Diffraction"
+		 * ,"instrumentScientists":[],"investigationInstruments":[],"name":"EDDI","pid":
+		 * "ig:0815","shifts":[]}}]>
+		 */
 		JsonArray inst_response = search(session, "SELECT i from Instrument i WHERE i.name = 'EDDI'", 1);
 		collector.checkThat(inst_response.getJsonObject(0).containsKey("Instrument"), is(true));
 
-		/* Expected: <[{"InvestigationType":{"id":3401,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","investigations":[],"name":"atype"}}]> */
+		/*
+		 * Expected:
+		 * <[{"InvestigationType":{"id":3401,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","investigations":[],"name":"atype"}}]>
+		 */
 		JsonArray it_response = search(session, "SELECT it from InvestigationType it WHERE it.name = 'atype'", 1);
 		collector.checkThat(it_response.getJsonObject(0).containsKey("InvestigationType"), is(true));
 
-		/* Expected: <[{"ParameterType":{"id":5373,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","applicableToDataCollection":false,"applicableToDatafile":true,"applicableToDataset":true,"applicableToInvestigation":true,"applicableToSample":false,"dataCollectionParameters":[],"datafileParameters":[],"datasetParameters":[],"enforced":false,"investigationParameters":[],"minimumNumericValue":73.4,"name":"temp","permissibleStringValues":[],"pid":"pt:25c","sampleParameters":[],"units":"degrees Kelvin","valueType":"NUMERIC","verified":false}}]> */
+		/*
+		 * Expected: <[{"ParameterType":{"id":5373,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","applicableToDataCollection":false,
+		 * "applicableToDatafile":true,"applicableToDataset":true,
+		 * "applicableToInvestigation":true,"applicableToSample":false,
+		 * "dataCollectionParameters":[],"datafileParameters":[],"datasetParameters":[],
+		 * "enforced":false,"investigationParameters":[],"minimumNumericValue":73.4,
+		 * "name":"temp","permissibleStringValues":[],"pid":"pt:25c","sampleParameters":
+		 * [],"units":"degrees Kelvin","valueType":"NUMERIC","verified":false}}]>
+		 */
 		JsonArray pt_response = search(session, "SELECT pt from ParameterType pt WHERE pt.name = 'temp'", 1);
 		collector.checkThat(pt_response.getJsonObject(0).containsKey("ParameterType"), is(true));
-		collector.checkThat((Double) pt_response.getJsonObject(0).getJsonObject("ParameterType").getJsonNumber("minimumNumericValue").doubleValue(), is(73.4)); // Check Double conversion
-		collector.checkThat((Boolean) pt_response.getJsonObject(0).getJsonObject("ParameterType").getBoolean("enforced"), is(Boolean.FALSE)); // Check boolean conversion
-		collector.checkThat(pt_response.getJsonObject(0).getJsonObject("ParameterType").getJsonString("valueType").getString(), is("NUMERIC")); // Check ParameterValueType conversion
+		collector.checkThat((Double) pt_response.getJsonObject(0).getJsonObject("ParameterType")
+				.getJsonNumber("minimumNumericValue").doubleValue(), is(73.4)); // Check Double conversion
+		collector.checkThat(
+				(Boolean) pt_response.getJsonObject(0).getJsonObject("ParameterType").getBoolean("enforced"),
+				is(Boolean.FALSE)); // Check boolean conversion
+		collector.checkThat(
+				pt_response.getJsonObject(0).getJsonObject("ParameterType").getJsonString("valueType").getString(),
+				is("NUMERIC")); // Check ParameterValueType conversion
 
-		/* Expected: <[{"Investigation":{"id":4814,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","datasets":[],"endDate":"2010-12-31T23:59:59.000Z","investigationGroups":[],"investigationInstruments":[],"investigationUsers":[],"keywords":[],"name":"expt1","parameters":[],"publications":[],"samples":[],"shifts":[],"startDate":"2010-01-01T00:00:00.000Z","studyInvestigations":[],"title":"a title at the beginning","visitId":"zero"}},{"Investigation":{"id":4815,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","datasets":[],"endDate":"2011-12-31T23:59:59.000Z","investigationGroups":[],"investigationInstruments":[],"investigationUsers":[],"keywords":[],"name":"expt1","parameters":[],"publications":[],"samples":[],"shifts":[],"startDate":"2011-01-01T00:00:00.000Z","studyInvestigations":[],"title":"a title in the middle","visitId":"one"}},{"Investigation":{"id":4816,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","datasets":[],"endDate":"2012-12-31T23:59:59.000Z","investigationGroups":[],"investigationInstruments":[],"investigationUsers":[],"keywords":[],"name":"expt1","parameters":[],"publications":[],"samples":[],"shifts":[],"startDate":"2012-01-01T00:00:00.000Z","studyInvestigations":[],"title":"a title at the end","visitId":"two"}}]> */
+		/*
+		 * Expected: <[{"Investigation":{"id":4814,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","datasets":[],"endDate":"2010-12-31T23:59:59.000Z"
+		 * ,"investigationGroups":[],"investigationInstruments":[],"investigationUsers":
+		 * [],"keywords":[],"name":"expt1","parameters":[],"publications":[],"samples":[
+		 * ],"shifts":[],"startDate":"2010-01-01T00:00:00.000Z","studyInvestigations":[]
+		 * ,"title":"a title at the beginning","visitId":"zero"}},{"Investigation":{"id"
+		 * :4815,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId"
+		 * :"db/notroot","modTime":"2019-03-11T15:58:33.000Z","datasets":[],"endDate":
+		 * "2011-12-31T23:59:59.000Z","investigationGroups":[],
+		 * "investigationInstruments":[],"investigationUsers":[],"keywords":[],"name":
+		 * "expt1","parameters":[],"publications":[],"samples":[],"shifts":[],
+		 * "startDate":"2011-01-01T00:00:00.000Z","studyInvestigations":[],
+		 * "title":"a title in the middle","visitId":"one"}},{"Investigation":{"id":4816
+		 * ,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":
+		 * "db/notroot","modTime":"2019-03-11T15:58:33.000Z","datasets":[],"endDate":
+		 * "2012-12-31T23:59:59.000Z","investigationGroups":[],
+		 * "investigationInstruments":[],"investigationUsers":[],"keywords":[],"name":
+		 * "expt1","parameters":[],"publications":[],"samples":[],"shifts":[],
+		 * "startDate":"2012-01-01T00:00:00.000Z","studyInvestigations":[],
+		 * "title":"a title at the end","visitId":"two"}}]>
+		 */
 		JsonArray inv_response = search(session, "SELECT inv from Investigation inv WHERE inv.name = 'expt1'", 3);
 		collector.checkThat(inv_response.getJsonObject(0).containsKey("Investigation"), is(true));
 
-		/* Expected: <[{"InvestigationUser":{"id":4723,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","role":"troublemaker"}}]> */
-		JsonArray invu_response = search(session, "SELECT invu from InvestigationUser invu WHERE invu.role = 'troublemaker'", 1);
+		/*
+		 * Expected:
+		 * <[{"InvestigationUser":{"id":4723,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","role":"troublemaker"}}]>
+		 */
+		JsonArray invu_response = search(session,
+				"SELECT invu from InvestigationUser invu WHERE invu.role = 'troublemaker'", 1);
 		collector.checkThat(invu_response.getJsonObject(0).containsKey("InvestigationUser"), is(true));
 
-		/* Expected: <[{"Shift":{"id":2995,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","comment":"waiting","endDate":"2013-12-31T22:59:59.000Z","startDate":"2013-12-31T11:00:00.000Z"}}]> */
+		/*
+		 * Expected: <[{"Shift":{"id":2995,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","comment":"waiting","endDate":
+		 * "2013-12-31T22:59:59.000Z","startDate":"2013-12-31T11:00:00.000Z"}}]>
+		 */
 		JsonArray shift_response = search(session, "SELECT shift from Shift shift WHERE shift.comment = 'waiting'", 1);
 		collector.checkThat(shift_response.getJsonObject(0).containsKey("Shift"), is(true));
 
-		/* Expected: <[{"SampleType":{"id":3220,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","molecularFormula":"C","name":"diamond","safetyInformation":"fairly harmless","samples":[]}}]> */
+		/*
+		 * Expected: <[{"SampleType":{"id":3220,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","molecularFormula":"C","name":"diamond",
+		 * "safetyInformation":"fairly harmless","samples":[]}}]>
+		 */
 		JsonArray st_response = search(session, "SELECT st from SampleType st WHERE st.name = 'diamond'", 1);
 		collector.checkThat(st_response.getJsonObject(0).containsKey("SampleType"), is(true));
 
-		/* Expected: <[{"Sample":{"id":2181,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","datasets":[],"name":"Koh-I-Noor","parameters":[],"pid":"sdb:374717"}}]> */
+		/*
+		 * Expected: <[{"Sample":{"id":2181,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","datasets":[],"name":"Koh-I-Noor","parameters":[],
+		 * "pid":"sdb:374717"}}]>
+		 */
 		JsonArray s_response = search(session, "SELECT s from Sample s WHERE s.name = 'Koh-I-Noor'", 1);
 		collector.checkThat(s_response.getJsonObject(0).containsKey("Sample"), is(true));
 
-		/* Expected: <[{"InvestigationParameter":{"id":1123,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","stringValue":"green"}}]> */
-		JsonArray invp_response = search(session, "SELECT invp from InvestigationParameter invp WHERE invp.stringValue = 'green'", 1);
+		/*
+		 * Expected:
+		 * <[{"InvestigationParameter":{"id":1123,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","stringValue":"green"}}]>
+		 */
+		JsonArray invp_response = search(session,
+				"SELECT invp from InvestigationParameter invp WHERE invp.stringValue = 'green'", 1);
 		collector.checkThat(invp_response.size(), equalTo(1));
 		collector.checkThat(invp_response.getJsonObject(0).containsKey("InvestigationParameter"), is(true));
 
-		/* Expected: <[{"DatasetType":{"id":1754,"createId":"db/notroot","createTime":"2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":"2019-03-11T15:58:33.000Z","datasets":[],"name":"calibration"}}]> */
+		/*
+		 * Expected: <[{"DatasetType":{"id":1754,"createId":"db/notroot","createTime":
+		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-11T15:58:33.000Z","datasets":[],"name":"calibration"}}]>
+		 */
 		JsonArray dst_response = search(session, "SELECT dst from DatasetType dst WHERE dst.name = 'calibration'", 1);
 		collector.checkThat(dst_response.getJsonObject(0).containsKey("DatasetType"), is(true));
 
-		/* Expected: <[{"Dataset":{"id":8128,"createId":"db/notroot","createTime":"2019-03-12T11:40:26.000Z","modId":"db/notroot","modTime":"2019-03-12T11:40:26.000Z","complete":true,"dataCollectionDatasets":[],"datafiles":[],"description":"alpha","endDate":"2014-05-16T04:28:26.000Z","name":"ds1","parameters":[],"startDate":"2014-05-16T04:28:26.000Z"}}]> */
+		/*
+		 * Expected: <[{"Dataset":{"id":8128,"createId":"db/notroot","createTime":
+		 * "2019-03-12T11:40:26.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-12T11:40:26.000Z","complete":true,"dataCollectionDatasets":[],
+		 * "datafiles":[],"description":"alpha","endDate":"2014-05-16T04:28:26.000Z",
+		 * "name":"ds1","parameters":[],"startDate":"2014-05-16T04:28:26.000Z"}}]>
+		 */
 		JsonArray ds_response = search(session, "SELECT ds from Dataset ds WHERE ds.name = 'ds1'", 1);
 		collector.checkThat(ds_response.getJsonObject(0).containsKey("Dataset"), is(true));
-		collector.checkThat(dft.parse(ds_response.getJsonObject(0).getJsonObject("Dataset").getString("startDate")), isA(Date.class));     //Check Date conversion
+		collector.checkThat(dft.parse(ds_response.getJsonObject(0).getJsonObject("Dataset").getString("startDate")),
+				isA(Date.class)); // Check Date conversion
 
-		/* Expected: <[{"DatasetParameter":{"id":4632,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z","stringValue":"green"}}]> */
-		JsonArray dsp_response = search(session, "SELECT dsp from DatasetParameter dsp WHERE dsp.stringValue = 'green'", 1);
+		/*
+		 * Expected:
+		 * <[{"DatasetParameter":{"id":4632,"createId":"db/notroot","createTime":
+		 * "2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-12T13:30:33.000Z","stringValue":"green"}}]>
+		 */
+		JsonArray dsp_response = search(session, "SELECT dsp from DatasetParameter dsp WHERE dsp.stringValue = 'green'",
+				1);
 		collector.checkThat(dsp_response.size(), equalTo(1));
 		collector.checkThat(dsp_response.getJsonObject(0).containsKey("DatasetParameter"), is(true));
 
-		/* Expected: <[{"Datafile":{"id":15643,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z","dataCollectionDatafiles":[],"destDatafiles":[],"fileSize":17,"name":"df2","parameters":[],"sourceDatafiles":[]}}]> */
+		/*
+		 * Expected: <[{"Datafile":{"id":15643,"createId":"db/notroot","createTime":
+		 * "2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-12T13:30:33.000Z","dataCollectionDatafiles":[],"destDatafiles":[],
+		 * "fileSize":17,"name":"df2","parameters":[],"sourceDatafiles":[]}}]>
+		 */
 		JsonArray df_response = search(session, "SELECT df from Datafile df WHERE df.name = 'df2'", 1);
 		collector.checkThat(df_response.size(), equalTo(1));
 		collector.checkThat(df_response.getJsonObject(0).containsKey("Datafile"), is(true));
 
-		/* Expected: <[{"DatafileParameter":{"id":1938,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z","stringValue":"green"}}]>  */
-		JsonArray dfp_response = search(session, "SELECT dfp from DatafileParameter dfp WHERE dfp.stringValue = 'green'", 1);
+		/*
+		 * Expected:
+		 * <[{"DatafileParameter":{"id":1938,"createId":"db/notroot","createTime":
+		 * "2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-12T13:30:33.000Z","stringValue":"green"}}]>
+		 */
+		JsonArray dfp_response = search(session,
+				"SELECT dfp from DatafileParameter dfp WHERE dfp.stringValue = 'green'", 1);
 		collector.checkThat(dfp_response.size(), equalTo(1));
 		collector.checkThat(dfp_response.getJsonObject(0).containsKey("DatafileParameter"), is(true));
 
-		/* Expected: <[{"Application":{"id":2972,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z","jobs":[],"name":"aprog","version":"1.2.3"}},{"Application":{"id":2973,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z","jobs":[],"name":"aprog","version":"1.2.6"}}]>  */
+		/*
+		 * Expected: <[{"Application":{"id":2972,"createId":"db/notroot","createTime":
+		 * "2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-12T13:30:33.000Z","jobs":[],"name":"aprog","version":"1.2.3"}},{
+		 * "Application":{"id":2973,"createId":"db/notroot","createTime":
+		 * "2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-12T13:30:33.000Z","jobs":[],"name":"aprog","version":"1.2.6"}}]>
+		 */
 		JsonArray a_response = search(session, "SELECT a from Application a WHERE a.name = 'aprog'", 2);
 		collector.checkThat(a_response.size(), equalTo(2));
 		collector.checkThat(a_response.getJsonObject(0).containsKey("Application"), is(true));
 
-		/* Expected: <[{DataCollection":{"id":4485,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z","dataCollectionDatafiles":[],"dataCollectionDatasets":[],"jobsAsInput":[],"jobsAsOutput":[],"parameters":[]}},{"DataCollection":{"id":4486,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z","dataCollectionDatafiles":[],"dataCollectionDatasets":[],"jobsAsInput":[],"jobsAsOutput":[],"parameters":[]}},{"DataCollection":{"id":4487,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z","dataCollectionDatafiles":[],"dataCollectionDatasets":[],"jobsAsInput":[],"jobsAsOutput":[],"parameters":[]}}]> */
+		/*
+		 * Expected:
+		 * <[{DataCollection":{"id":4485,"createId":"db/notroot","createTime":"2019-03-
+		 * 12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.
+		 * 000Z","dataCollectionDatafiles":[],"dataCollectionDatasets":[],"jobsAsInput":[],"jobsAsOutput":[],"parameters":[]}},{"DataCollection":{"id":4486,"createId":"db
+		 * /notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/
+		 * notroot","modTime":"2019-03-12T13:30:33.
+		 * 000Z","dataCollectionDatafiles":[],"dataCollectionDatasets":[],"jobsAsInput":[],"jobsAsOutput":[],"parameters":[]}},{"DataCollection":{"id":4487,"createId":"db
+		 * /notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/
+		 * notroot","modTime":"2019-03-12T13:30:33.
+		 * 000Z","dataCollectionDatafiles":[],"dataCollectionDatasets":[],"jobsAsInput":[],"jobsAsOutput":[],"parameters
+		 * ":[]}}]>
+		 */
 		JsonArray dc_response = search(session, "SELECT dc from DataCollection dc", 3);
 		collector.checkThat(dc_response.size(), equalTo(3));
 		collector.checkThat(dc_response.getJsonObject(0).containsKey("DataCollection"), is(true));
 
-		/* Expected: <[{"DataCollectionDatafile":{"id":4362,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z"}},{"DataCollectionDatafile":{"id":4363,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z"}}]> */
+		/*
+		 * Expected:
+		 * <[{"DataCollectionDatafile":{"id":4362,"createId":"db/notroot","createTime":
+		 * "2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-12T13:30:33.000Z"}},{"DataCollectionDatafile":{"id":4363,"createId":
+		 * "db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot",
+		 * "modTime":"2019-03-12T13:30:33.000Z"}}]>
+		 */
 		JsonArray dcdf_response = search(session, "SELECT dcdf from DataCollectionDatafile dcdf", 2);
 		collector.checkThat(dcdf_response.getJsonObject(0).containsKey("DataCollectionDatafile"), is(true));
 
-		/* Expected: <[{"Job":{"id":1634,"createId":"db/notroot","createTime":"2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":"2019-03-12T13:30:33.000Z"}}]> */
+		/*
+		 * Expected: <[{"Job":{"id":1634,"createId":"db/notroot","createTime":
+		 * "2019-03-12T13:30:33.000Z","modId":"db/notroot","modTime":
+		 * "2019-03-12T13:30:33.000Z"}}]>
+		 */
 		JsonArray j_response = search(session, "SELECT j from Job j", 1);
 		collector.checkThat(j_response.getJsonObject(0).containsKey("Job"), is(true));
 	}
@@ -470,11 +624,363 @@ public class TestRS {
 		}
 	}
 
+	@Test
+	public void testSearchDatafiles() throws Exception {
+		Session session = setupLuceneTest();
+		JsonObject responseObject;
+		String searchAfter;
+		Map<String, String> expectation = new HashMap<>();
+		expectation.put("investigation", null);
+		expectation.put("text", null);
+		expectation.put("date", "notNull");
+		expectation.put("dataset", "notNull");
+
+		List<ParameterForLucene> parameters = new ArrayList<>();
+		parameters.add(new ParameterForLucene("colour", "name", "green"));
+
+		// All data files
+		searchDatafiles(session, null, null, null, null, null, null, 10, null, 3);
+
+		// Use the user
+		searchDatafiles(session, "db/tr", null, null, null, null, null, 10, null, 3);
+
+		// Try a bad user
+		searchDatafiles(session, "db/fred", null, null, null, null, null, 10, null, 0);
+
+		// Set text and parameters
+		responseObject = searchDatafiles(session, null, "df2", null, null, parameters, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("name", "df2");
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		// Try sorting and searchAfter
+		String sort = Json.createObjectBuilder().add("name", "desc").add("date", "asc").build().toString();
+		responseObject = searchDatafiles(session, null, null, null, null, null, null, 1, sort, 1);
+		searchAfter = responseObject.getString("search_after");
+		assertNotNull(searchAfter);
+		expectation.put("name", "df3");
+		checkResultsSource(responseObject, Arrays.asList(expectation), false);
+
+		responseObject = searchDatafiles(session, null, null, null, null, null, searchAfter, 1, sort, 1);
+		searchAfter = responseObject.getString("search_after");
+		assertNotNull(searchAfter);
+		expectation.put("name", "df2");
+		checkResultsSource(responseObject, Arrays.asList(expectation), false);
+
+		// Test that changes to the public steps/tables are reflected in returned fields
+		PublicStep ps = new PublicStep();
+		ps.setOrigin("Datafile");
+		ps.setField("dataset");
+
+		ps.setId(wSession.create(ps));
+		responseObject = searchDatafiles(session, null, "df2", null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("investigation", "notNull");
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		wSession.delete(ps);
+		responseObject = searchDatafiles(session, null, "df2", null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("investigation", null);
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		wSession.addRule(null, "DatafileFormat", "R");
+		responseObject = searchDatafiles(session, null, "df2", null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("text", "df2");
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		wSession.delRule(null, "DatafileFormat", "R");
+		responseObject = searchDatafiles(session, null, "df2", null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("text", null);
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		// Test searching with someone without authz for the Datafile(s)
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "piOne");
+		credentials.put("password", "piOne");
+		Session piSession = icat.login("db", credentials);
+		searchDatafiles(piSession, null, null, null, null, null, null, 10, null, 0);
+	}
+
+	@Test
+	public void testSearchDatasets() throws Exception {
+		Session session = setupLuceneTest();
+		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		JsonObject responseObject;
+		String searchAfter;
+		Map<String, String> expectation = new HashMap<>();
+		expectation.put("text", null);
+		expectation.put("startDate", "notNull");
+		expectation.put("endDate", "notNull");
+		expectation.put("investigation", "notNull");
+
+		// All datasets
+		searchDatasets(session, null, null, null, null, null, null, 10, null, 5);
+
+		// Use the user
+		responseObject = searchDatasets(session, "db/tr", null, null, null, null, null, 10, null, 3);
+		List<Map<String, String>> expectations = new ArrayList<>();
+		expectation.put("name", "ds1");
+		expectations.add(new HashMap<>(expectation));
+		expectation.put("name", "ds2");
+		expectations.add(new HashMap<>(expectation));
+		expectation.put("name", "ds3");
+		expectations.add(new HashMap<>(expectation));
+		checkResultsSource(responseObject, expectations, true);
+
+		// Try a bad user
+		searchDatasets(session, "db/fred", null, null, null, null, null, 10, null, 0);
+
+		// Try text
+		responseObject = searchDatasets(session, null, "gamma AND ds3", null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		// Try parameters
+		Date lower = dft.parse("2014-05-16T05:09:03+0000");
+		Date upper = dft.parse("2014-05-16T05:15:26+0000");
+		List<ParameterForLucene> parameters = new ArrayList<>();
+		Date parameterDate = dft.parse("2014-05-16T16:58:26+0000");
+		parameters.add(new ParameterForLucene("colour", "name", "green"));
+		parameters.add(new ParameterForLucene("birthday", "date", parameterDate, parameterDate));
+		parameters.add(new ParameterForLucene("current", "amps", 140, 165));
+
+		responseObject = searchDatasets(session, null, null, null, null, parameters, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		responseObject = searchDatasets(session, null, "gamma AND ds3", lower, upper, parameters, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		// Try sorting and searchAfter
+		String sort = Json.createObjectBuilder().add("name", "desc").add("startDate", "asc").build().toString();
+		responseObject = searchDatasets(session, null, null, null, null, null, null, 1, sort, 1);
+		searchAfter = responseObject.getString("search_after");
+		assertNotNull(searchAfter);
+		expectation.put("name", "ds4");
+		checkResultsSource(responseObject, Arrays.asList(expectation), false);
+		responseObject = searchDatasets(session, null, null, null, null, null, searchAfter, 1, sort, 1);
+		searchAfter = responseObject.getString("search_after");
+		assertNotNull(searchAfter);
+		expectation.put("name", "ds3");
+		checkResultsSource(responseObject, Arrays.asList(expectation), false);
+
+		// Test that changes to the public steps/tables are reflected in returned fields
+		PublicStep ps = new PublicStep();
+		ps.setOrigin("Dataset");
+		ps.setField("type");
+
+		ps.setId(wSession.create(ps));
+		responseObject = searchDatasets(session, null, "ds1", null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("name", "ds1");
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		wSession.addRule(null, "Sample", "R");
+		responseObject = searchDatasets(session, null, "ds1", null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("text", "ds1 calibration calibration alpha Koh-I-Noor diamond");
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		wSession.delete(ps);
+		responseObject = searchDatasets(session, null, "ds1", null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("text", null);
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		wSession.delRule(null, "Sample", "R");
+		responseObject = searchDatasets(session, null, "ds1", null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		// Test searching with someone without authz for the Dataset(s)
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "piOne");
+		credentials.put("password", "piOne");
+		Session piSession = icat.login("db", credentials);
+		searchDatasets(piSession, null, null, null, null, null, null, 10, null, 0);
+	}
+
+	@Test
+	public void testSearchInvestigations() throws Exception {
+		Session session = setupLuceneTest();
+		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		JsonObject responseObject;
+		Map<String, String> expectation = new HashMap<>();
+		expectation.put("name", "expt1");
+		expectation.put("startDate", "notNull");
+		expectation.put("endDate", "notNull");
+		expectation.put("text", null);
+
+		Date lowerOrigin = dft.parse("2011-01-01T00:00:00+0000");
+		Date lowerSecond = dft.parse("2011-01-01T00:00:01+0000");
+		Date lowerMinute = dft.parse("2011-01-01T00:01:00+0000");
+		Date upperOrigin = dft.parse("2011-12-31T23:59:59+0000");
+		Date upperSecond = dft.parse("2011-12-31T23:59:58+0000");
+		Date upperMinute = dft.parse("2011-12-31T23:58:00+0000");
+		List<String> samplesAnd = Arrays.asList("ford AND rust", "koh* AND diamond");
+		List<String> samplesPlus = Arrays.asList("ford + rust", "koh + diamond");
+		List<String> samplesBad = Arrays.asList("ford AND rust", "kog* AND diamond");
+		String textAnd = "title AND one";
+		String textTwo = "title AND two";
+		String textPlus = "title + one";
+
+		searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, 3);
+
+		List<ParameterForLucene> parameters = new ArrayList<>();
+		parameters.add(new ParameterForLucene("colour", "name", "green"));
+		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
+				samplesAnd, "Professor", null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		// change user
+		searchInvestigations(session, "db/fred", textAnd, null, null, parameters, null, null, null, 10, null, 0);
+
+		// change text
+		searchInvestigations(session, "db/tr", textTwo, null, null, parameters, null, null, null, 10, null, 0);
+
+		// Only working to a minute
+		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerSecond, upperOrigin, parameters, null,
+				null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperSecond, parameters, null,
+				null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		searchInvestigations(session, "db/tr", textAnd, lowerMinute, upperOrigin, parameters, null, null, null,
+				10, null, 0);
+
+		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperMinute, parameters, null, null, null,
+				10, null, 0);
+
+		// Change parameters
+		List<ParameterForLucene> badParameters = new ArrayList<>();
+		badParameters.add(new ParameterForLucene("color", "name", "green"));
+		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, badParameters, samplesPlus, null,
+				null, 10, null, 0);
+
+		// Change samples
+		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters, samplesBad, null, null,
+				10, null, 0);
+
+		// Change userFullName
+		searchInvestigations(session, "db/tr", textPlus, lowerOrigin, upperOrigin, parameters, samplesAnd, "Doctor",
+				null, 10, null, 0);
+
+		// TODO currently the only field we can access is name due to how
+		// Investigation.getDoc() encodes, but this is the same for all the
+		// investigations so testing sorting is not feasible
+
+		// Test that changes to the public steps/tables are reflected in returned fields
+		PublicStep ps = new PublicStep();
+		ps.setOrigin("Investigation");
+		ps.setField("type");
+
+		ps.setId(wSession.create(ps));
+		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		wSession.addRule(null, "Facility", "R");
+		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("text", "one expt1 Test port facility atype a title in the middle");
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		wSession.delete(ps);
+		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("text", null);
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		wSession.delRule(null, "Facility", "R");
+		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null, 1);
+		assertFalse(responseObject.keySet().contains("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		// Test searching with someone without authz for the Investigation(s)
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "piOne");
+		credentials.put("password", "piOne");
+		Session piSession = icat.login("db", credentials);
+		searchInvestigations(piSession, null, null, null, null, null, null, null, null, 10, null, 0);
+	}
+
+	@Test
+	public void testSearchParameterValidation() throws Exception {
+		Session session = setupLuceneTest();
+		List<ParameterForLucene> badParameters = new ArrayList<>();
+
+		badParameters = Arrays.asList(new ParameterForLucene(null, null, null));
+		try {
+			searchInvestigations(session, null, null, null, null, badParameters, null, null, null, 10, null, 0);
+			fail("BAD_PARAMETER exception not caught");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
+			assertEquals("name not set in one of parameters", e.getMessage());
+		}
+
+		badParameters = Arrays.asList(new ParameterForLucene("color", null, null));
+		try {
+			searchInvestigations(session, null, null, null, null, badParameters, null, null, null, 10, null, 0);
+			fail("BAD_PARAMETER exception not caught");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
+			assertEquals("units not set in parameter 'color'", e.getMessage());
+		}
+
+		badParameters = Arrays.asList(new ParameterForLucene("color", "string", null));
+		try {
+			searchInvestigations(session, null, null, null, null, badParameters, null, null, null, 10, null, 0);
+			fail("BAD_PARAMETER exception not caught");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
+			assertEquals("value not set in parameter 'color'", e.getMessage());
+		}
+	}
+
 	private void checkResultFromLuceneSearch(Session session, String val, JsonArray array, String ename, String field)
 			throws IcatException {
 		long n = array.getJsonObject(0).getJsonNumber("id").longValueExact();
 		JsonObject result = Json.createReader(new ByteArrayInputStream(session.get(ename, n).getBytes())).readObject();
 		assertEquals(val, result.getJsonObject(ename).getString(field));
+	}
+
+	private void checkResultsSource(JsonObject responseObject, List<Map<String, String>> expectations, Boolean scored) {
+		JsonArray results = responseObject.getJsonArray("results");
+		assertEquals(expectations.size(), results.size());
+		for (int i = 0; i < expectations.size(); i++) {
+			JsonObject result = results.getJsonObject(i);
+			assertTrue(result.keySet().contains("id"));
+			assertEquals(scored, result.keySet().contains("score"));
+
+			assertTrue(result.keySet().contains("source"));
+			JsonObject source = result.getJsonObject("source");
+			assertTrue(source.keySet().contains("id"));
+			Map<String, String> expectation = expectations.get(i);
+			for (Entry<String, String> entry: expectation.entrySet()) {
+				String key = entry.getKey();
+				String value = entry.getValue();
+				if (value == null) {
+					assertFalse("Source " + source.toString() + " should NOT contain " + key, source.keySet().contains(key));
+				} else if (value.equals("notNull")) {
+					assertTrue("Source " + source.toString() + " should contain " + key, source.keySet().contains(key));
+				} else {
+					assertTrue("Source " + source.toString() + " should contain " + key, source.keySet().contains(key));
+					assertEquals(value, source.getString(key));
+				}
+			}
+		}
 	}
 
 	private Session setupLuceneTest() throws Exception {
@@ -632,14 +1138,15 @@ public class TestRS {
 
 		JsonArray array;
 
-		JsonObject user = search(session, "SELECT u FROM User u WHERE u.name = 'db/lib'", 1).getJsonObject(0).getJsonObject("User");
+		JsonObject user = search(session, "SELECT u FROM User u WHERE u.name = 'db/lib'", 1).getJsonObject(0)
+				.getJsonObject("User");
 		assertEquals("Horace", user.getString("givenName"));
 		assertEquals("Worblehat", user.getString("familyName"));
 		assertEquals("Unseen University", user.getString("affiliation"));
 
 		String query = "SELECT inv FROM Investigation inv JOIN inv.shifts AS s "
-			+ "WHERE s.instrument.pid = 'ig:0815' AND s.comment = 'beamtime' "
-			+ "AND s.startDate <= '2014-01-01 12:00:00' AND s.endDate >= '2014-01-01 12:00:00'";
+				+ "WHERE s.instrument.pid = 'ig:0815' AND s.comment = 'beamtime' "
+				+ "AND s.startDate <= '2014-01-01 12:00:00' AND s.endDate >= '2014-01-01 12:00:00'";
 		JsonObject inv = search(session, query, 1).getJsonObject(0).getJsonObject("Investigation");
 		assertEquals("expt1", inv.getString("name"));
 		assertEquals("zero", inv.getString("visitId"));
@@ -1070,6 +1577,37 @@ public class TestRS {
 		return result;
 	}
 
+	private JsonObject searchDatafiles(Session session, String user, String text, Date lower, Date upper,
+			List<ParameterForLucene> parameters, String searchAfter, int limit, String sort, int n)
+			throws IcatException {
+		String response = session.searchDatafiles(user, text, lower, upper, parameters, searchAfter, limit, sort);
+		JsonObject responseObject = Json.createReader(new ByteArrayInputStream(response.getBytes())).readObject();
+		JsonArray results = responseObject.getJsonArray("results");
+		assertEquals(n, results.size());
+		return responseObject;
+	}
+
+	private JsonObject searchDatasets(Session session, String user, String text, Date lower, Date upper,
+			List<ParameterForLucene> parameters, String searchAfter, int limit, String sort, int n)
+			throws IcatException {
+		String response = session.searchDatasets(user, text, lower, upper, parameters, searchAfter, limit, sort);
+		JsonObject responseObject = Json.createReader(new ByteArrayInputStream(response.getBytes())).readObject();
+		JsonArray results = responseObject.getJsonArray("results");
+		assertEquals(n, results.size());
+		return responseObject;
+	}
+
+	private JsonObject searchInvestigations(Session session, String user, String text, Date lower, Date upper,
+			List<ParameterForLucene> parameters, List<String> samples, String userFullName, String searchAfter,
+			int limit, String sort, int n) throws IcatException {
+		String response = session.searchInvestigations(user, text, lower, upper, parameters, samples, userFullName,
+				searchAfter, limit, sort);
+		JsonObject responseObject = Json.createReader(new ByteArrayInputStream(response.getBytes())).readObject();
+		JsonArray results = responseObject.getJsonArray("results");
+		assertEquals(n, results.size());
+		return responseObject;
+	}
+
 	@Test
 	public void testWriteGood() throws Exception {
 
@@ -1095,7 +1633,7 @@ public class TestRS {
 
 		JsonArray array = search(session,
 				"SELECT it.name, it.facility.name FROM InvestigationType it WHERE it.id = " + newInvTypeId, 1)
-						.getJsonArray(0);
+				.getJsonArray(0);
 		assertEquals("ztype", array.getString(0));
 		assertEquals("Test port facility", array.getString(1));
 

@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -243,11 +244,11 @@ public abstract class SearchApi {
 			throws IcatException;
 
 	public SearchResult getResults(JsonObject query, int maxResults) throws IcatException {
-		return getResults(query, null, maxResults, null, null);
+		return getResults(query, null, maxResults, null, Arrays.asList("id"));
 	}
 
 	public SearchResult getResults(JsonObject query, int maxResults, String sort) throws IcatException {
-		return getResults(query, null, maxResults, sort, null);
+		return getResults(query, null, maxResults, sort, Arrays.asList("id"));
 	}
 
 	public SearchResult getResults(JsonObject query, String searchAfter, int blockSize, String sort, List<String> fields) throws IcatException {
@@ -369,7 +370,7 @@ public abstract class SearchApi {
 				JsonObject jsonObject = jsonReader.readObject();
 				JsonArray hits = jsonObject.getJsonObject("hits").getJsonArray("hits");
 				for (JsonObject hit : hits.getValuesAs(JsonObject.class)) {
-					entities.add(new ScoredEntityBaseBean(hit.getString("_id"), hit.getJsonNumber("_score").bigDecimalValue().floatValue(), null)); // TODO
+					entities.add(new ScoredEntityBaseBean(hit.getInt("_id"), hit.getJsonNumber("_score").bigDecimalValue().floatValue(), null)); // TODO
 				}
 			}
 			return result;

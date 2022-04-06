@@ -191,7 +191,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
 
-		StringBuilder sb = new StringBuilder(name + " " + type.getName() + " " + type.getName());
+		StringBuilder sb = new StringBuilder(name + " " + type.getName() + " " + type.getName()); // TODO duplicate type.getName()
 		if (description != null) {
 			sb.append(" " + description);
 		}
@@ -244,15 +244,13 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	public static Map<String, Relationship[]> getDocumentFields() throws IcatException {
 		if (documentFields.size() == 0) {
 			EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-			Relationship[] textRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("type") };
-			Relationship[] investigationRelationships = {
-					eiHandler.getRelationshipsByName(Dataset.class).get("investigation") };
+			Relationship[] textRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("type"), eiHandler.getRelationshipsByName(Dataset.class).get("sample") };
 			documentFields.put("text", textRelationships);
 			documentFields.put("name", null);
 			documentFields.put("startDate", null);
 			documentFields.put("endDate", null);
 			documentFields.put("id", null);
-			documentFields.put("investigation", investigationRelationships);
+			documentFields.put("investigation", null);
 		}
 		return documentFields;
 	}

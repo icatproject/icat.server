@@ -109,7 +109,12 @@ public class GateKeeper {
 	 */
 	public boolean allowed(Relationship r) {
 		String beanName = r.getDestinationBean().getSimpleName();
-		if (publicTables.contains(beanName)) {
+		// TODO by using the getter we can update the public tables if needed.
+		// Previous direct access meant we use out of date permissions, so why was there
+		// no update not here before? Needed for the publicSearchFields but if there's a
+		// reason for it to be publicTables and not getPublicTables can manually call
+		// update in SearchManager
+		if (getPublicTables().contains(beanName)) {
 			return true;
 		}
 		String originBeanName = r.getOriginBean().getSimpleName();
@@ -289,7 +294,7 @@ public class GateKeeper {
 		if (access == AccessType.CREATE) {
 			qName = Rule.CREATE_QUERY;
 		} else if (access == AccessType.READ) {
-			if (publicTables.contains(simpleName)) {
+			if (getPublicTables().contains(simpleName)) { // TODO see other comment on publicTables vs getPublicTables
 				logger.info("All are allowed " + access + " to " + simpleName);
 				return true;
 			}

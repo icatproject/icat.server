@@ -321,9 +321,12 @@ public class SearchManager {
 
 	public static List<String> getPublicSearchFields(GateKeeper gateKeeper, String simpleName) throws IcatException {
 		if (gateKeeper.getPublicSearchFieldsStale() || publicSearchFields.size() == 0) {
-			publicSearchFields.put("Datafile", buildPublicSteps(gateKeeper, Datafile.getDocumentFields()));
-			publicSearchFields.put("Dataset", buildPublicSteps(gateKeeper, Dataset.getDocumentFields()));
-			publicSearchFields.put("Investigation", buildPublicSteps(gateKeeper, Investigation.getDocumentFields()));
+			logger.info("Building public search fields from public tables and steps");
+			publicSearchFields.put("Datafile", buildPublicSearchFields(gateKeeper, Datafile.getDocumentFields()));
+			publicSearchFields.put("Dataset", buildPublicSearchFields(gateKeeper, Dataset.getDocumentFields()));
+			publicSearchFields.put("Investigation",
+					buildPublicSearchFields(gateKeeper, Investigation.getDocumentFields()));
+			gateKeeper.markPublicSearchFieldsFresh();
 		}
 		return publicSearchFields.get(simpleName);
 	}
@@ -397,14 +400,17 @@ public class SearchManager {
 		}
 	}
 
-	private static List<String> buildPublicSteps(GateKeeper gateKeeper, Map<String, Relationship[]> map) {
+	private static List<String> buildPublicSearchFields(GateKeeper gateKeeper, Map<String, Relationship[]> map) {
 		List<String> fields = new ArrayList<>();
-		for (Entry<String, Relationship[]> entry: map.entrySet()) {
+		for (Entry<String, Relationship[]> entry : map.entrySet()) {
 			Boolean includeField = true;
 			if (entry.getValue() != null) {
-				for (Relationship relationship: entry.getValue()) {
+				for (Relationship relationship : entry.getValue()) {
 					if (!gateKeeper.allowed(relationship)) {
 						includeField = false;
+						logger.debug("Access to {} blocked by disallowed relationship between {} and {}", entry.getKey(),
+								relationship.getOriginBean().getSimpleName(),
+								relationship.getDestinationBean().getSimpleName());
 						break;
 					}
 				}
@@ -416,9 +422,9 @@ public class SearchManager {
 		return fields;
 	}
 
-    public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
-        return searchApi.buildSearchAfter(lastBean, sort);
-    }
+	public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
+		return searchApi.buildSearchAfter(lastBean, sort);
+	}
 
 	private void pushPendingCalls() {
 		timer.schedule(new EnqueuedSearchRequestHandler(), 0L);
@@ -469,7 +475,8 @@ public class SearchManager {
 		return searchApi.getResults(jo, blockSize, sort);
 	}
 
-	public SearchResult freeTextSearch(JsonObject jo, String searchAfter, int blockSize, String sort, List<String> fields) throws IcatException {
+	public SearchResult freeTextSearch(JsonObject jo, String searchAfter, int blockSize, String sort,
+			List<String> fields) throws IcatException {
 		return searchApi.getResults(jo, searchAfter, blockSize, sort, fields);
 	}
 
