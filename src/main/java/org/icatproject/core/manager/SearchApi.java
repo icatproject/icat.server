@@ -113,22 +113,19 @@ public abstract class SearchApi {
 		}
 	}
 
-	// TODO if encoding methods are unified across all APIs, then we can make these
-	// static
-	public void encodeDoublePoint(JsonGenerator gen, String name, Double value) {
-		gen.writeStartObject().write(name, value).writeEnd();
+	public static String encodeDeletion(EntityBaseBean bean) {
+		String entityName = bean.getClass().getSimpleName();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartObject().writeStartObject("delete");
+			gen.write("_index", entityName).write("_id", bean.getId().toString());
+			gen.writeEnd().writeEnd();
+		}
+		return baos.toString();
 	}
 
-	public void encodeSortedDocValuesField(JsonGenerator gen, String name, Date value) {
-		encodeSortedDocValuesField(gen, name, encodeDate(value));
-	}
-
-	public void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value) {
-		gen.writeStartObject().write(name, value).writeEnd();
-	}
-
-	public void encodeSortedDocValuesField(JsonGenerator gen, String name, String value) {
-		encodeStringField(gen, name, value);
+	public static void encodeDouble(JsonGenerator gen, String name, Double value) {
+		gen.write(name, value);
 	}
 
 	// public void encodeSortedSetDocValuesFacetField(JsonGenerator gen, String
@@ -136,25 +133,38 @@ public abstract class SearchApi {
 	// encodeStringField(gen, name, value);
 	// }
 
-	public void encodeStringField(JsonGenerator gen, String name, Date value) {
-		encodeStringField(gen, name, encodeDate(value));
+	public static void encodeLong(JsonGenerator gen, String name, Date value) {
+		gen.write(name, value.getTime());
 	}
 
-	public void encodeStringField(JsonGenerator gen, String name, Long value) {
-		encodeStringField(gen, name, Long.toString(value));
+	public static String encodeOperation(String operation, EntityBaseBean bean) throws IcatException {
+		Long icatId = bean.getId();
+		if (icatId == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, bean.toString() + " had null id");
+		}
+		String entityName = bean.getClass().getSimpleName();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartObject().writeStartObject(operation);
+			gen.write("_index", entityName).write("_id", icatId.toString());
+			gen.writeStartObject("doc");
+			bean.getDoc(gen);
+			gen.writeEnd().writeEnd().writeEnd();
+		}
+		return baos.toString();
 	}
 
-	public void encodeStringField(JsonGenerator gen, String name, Long value, Boolean store) {
-		encodeStringField(gen, name, value);
+	public static void encodeString(JsonGenerator gen, String name, Long value) {
+		gen.write(name, Long.toString(value));
 	}
 
-	public void encodeStringField(JsonGenerator gen, String name, String value) {
-		gen.writeStartObject().write(name, value).writeEnd();
+	public static void encodeString(JsonGenerator gen, String name, String value) {
+		gen.write(name, value);
 	}
 
-	public void encodeTextField(JsonGenerator gen, String name, String value) {
+	public static void encodeText(JsonGenerator gen, String name, String value) {
 		if (value != null) {
-			gen.writeStartObject().write(name, value).writeEnd();
+			gen.write(name, value);
 		}
 	}
 
@@ -171,28 +181,31 @@ public abstract class SearchApi {
 			if (bean != null) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				try (JsonGenerator gen = Json.createGenerator(baos)) {
-					gen.writeStartArray(); // Document fields are wrapped in an array
-					bean.getDoc(gen, this); // Fields
-					gen.writeEnd();
+					gen.writeStartObject().writeStartObject("create");
+					gen.write("_index", entityName).write("_id", bean.getId().toString());
+					gen.writeStartObject("doc");
+					bean.getDoc(gen);
+					gen.writeEnd().writeEnd().writeEnd();
 				}
 				if (sb.length() != 1) {
 					sb.append(',');
 				}
-				sb.append("[\"").append(entityName).append("\",null,").append(baos.toString()).append(']');
+				sb.append(baos.toString());
 			}
 		}
 		sb.append("]");
 		modify(sb.toString());
 	}
 
-    public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
+	public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
 		if (sort != null && !sort.equals("")) {
 			try (JsonReader reader = Json.createReader(new ByteArrayInputStream(sort.getBytes()))) {
 				JsonObject object = reader.readObject();
 				JsonArrayBuilder builder = Json.createArrayBuilder();
 				for (String key : object.keySet()) {
 					if (!lastBean.getSource().keySet().contains(key)) {
-						throw new IcatException(IcatExceptionType.INTERNAL, "Cannot build searchAfter document from source as sorted field " + key + " missing.");
+						throw new IcatException(IcatExceptionType.INTERNAL,
+								"Cannot build searchAfter document from source as sorted field " + key + " missing.");
 					}
 					String value = lastBean.getSource().getString(key);
 					builder.add(value);
@@ -202,13 +215,14 @@ public abstract class SearchApi {
 		} else {
 			JsonArrayBuilder builder = Json.createArrayBuilder();
 			if (Float.isNaN(lastBean.getScore())) {
-				throw new IcatException(IcatExceptionType.INTERNAL, "Cannot build searchAfter document from source as score was NaN.");
+				throw new IcatException(IcatExceptionType.INTERNAL,
+						"Cannot build searchAfter document from source as score was NaN.");
 			}
 			builder.add(lastBean.getScore());
 			builder.add(lastBean.getEntityBaseBeanId());
 			return builder.build().toString();
 		}
-    }
+	}
 
 	public void clear() throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
@@ -251,7 +265,8 @@ public abstract class SearchApi {
 		return getResults(query, null, maxResults, sort, Arrays.asList("id"));
 	}
 
-	public SearchResult getResults(JsonObject query, String searchAfter, int blockSize, String sort, List<String> fields) throws IcatException {
+	public SearchResult getResults(JsonObject query, String searchAfter, int blockSize, String sort,
+			List<String> fields) throws IcatException {
 
 		// return getResults(uid.toString(), query, blockSize);
 		// TODO
@@ -263,7 +278,7 @@ public abstract class SearchApi {
 			String index;
 			Set<String> fields = query.keySet();
 			if (fields.contains("target")) {
-				index = query.getString("target").toLowerCase();
+				index = query.getString("target");
 			} else {
 				index = query.getString("_all");
 			}
@@ -370,7 +385,8 @@ public abstract class SearchApi {
 				JsonObject jsonObject = jsonReader.readObject();
 				JsonArray hits = jsonObject.getJsonObject("hits").getJsonArray("hits");
 				for (JsonObject hit : hits.getValuesAs(JsonObject.class)) {
-					entities.add(new ScoredEntityBaseBean(hit.getInt("_id"), hit.getJsonNumber("_score").bigDecimalValue().floatValue(), null)); // TODO
+					entities.add(new ScoredEntityBaseBean(hit.getInt("_id"),
+							hit.getJsonNumber("_score").bigDecimalValue().floatValue(), null)); // TODO
 				}
 			}
 			return result;
@@ -390,56 +406,22 @@ public abstract class SearchApi {
 	public void modify(String json) throws IcatException {
 		// TODO replace other places with this format
 		// TODO this assumes simple update/create with no relation
-		// Format should be [{"index": "investigation", "id": "123", "document": {}}, ...]
+		// Format should be [{"index": "investigation", "id": "123", "document": {}},
+		// ...]
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			logger.debug("modify: {}", json);
 			StringBuilder sb = new StringBuilder();
 			JsonReader jsonReader = Json.createReader(new StringReader(json));
 			JsonArray outerArray = jsonReader.readArray();
 			for (JsonObject operation : outerArray.getValuesAs(JsonObject.class)) {
-				String index = operation.getString("index", null);
-				String id = operation.getString("id", null);
-				JsonObject document = operation.getJsonObject("document");
-				if (index == null) {
-					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-							"Cannot modify a document without the target index");
-				}
-				if (document == null) {
-					// Delete
-					if (id == null) {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-								"Cannot delete a document without an id");
-					}
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					try (JsonGenerator gen = Json.createGenerator(baos)) {
-						gen.writeStartObject().writeStartObject("delete").write("_index", index).write("_id", id).writeEnd().writeEnd();
-					}
-					sb.append(baos.toString()).append("\n");
+				if (operation.containsKey("doc")) {
+					JsonObject document = operation.getJsonObject("doc");
+					operation.remove("doc");
+					sb.append(operation.toString()).append("\n");
+					sb.append(document.toString()).append("\n");
 				} else {
-					if (id == null) {
-						// Create
-						id = document.getString("id", null);
-						if (id == null) {
-							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-									"Cannot index a document without an id");
-						}
-						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						try (JsonGenerator gen = Json.createGenerator(baos)) {
-							gen.writeStartObject().writeStartObject("create").write("_index", index).write("_id", id).writeEnd().writeEnd();
-						}
-						sb.append(baos.toString()).append("\n");
-						sb.append(document.toString()).append("\n");
-					} else {
-						// Update
-						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						try (JsonGenerator gen = Json.createGenerator(baos)) {
-							gen.writeStartObject().writeStartObject("update").write("_index", index).write("_id", id).writeEnd().writeEnd();
-						}
-						sb.append(baos.toString()).append("\n");
-						sb.append(document.toString()).append("\n");
-					}
+					sb.append(operation.toString()).append("\n");
 				}
-
 			}
 			URI uri = new URIBuilder(server).setPath(basePath + "/_bulk").build();
 			HttpPost httpPost = new HttpPost(uri);
@@ -479,10 +461,10 @@ public abstract class SearchApi {
 			builder.add("text", text);
 		}
 		if (lower != null) {
-			builder.add("lower", encodeDate(lower));
+			builder.add("lower", lower.getTime());
 		}
 		if (upper != null) {
-			builder.add("upper", encodeDate(upper));
+			builder.add("upper", upper.getTime());
 		}
 		if (parameters != null && !parameters.isEmpty()) {
 			JsonArrayBuilder parametersBuilder = Json.createArrayBuilder();
@@ -498,10 +480,10 @@ public abstract class SearchApi {
 					parameterBuilder.add("stringValue", parameter.stringValue);
 				}
 				if (parameter.lowerDateValue != null) {
-					parameterBuilder.add("lowerDateValue", encodeDate(parameter.lowerDateValue));
+					parameterBuilder.add("lowerDateValue", parameter.lowerDateValue.getTime());
 				}
 				if (parameter.upperDateValue != null) {
-					parameterBuilder.add("upperDateValue", encodeDate(parameter.upperDateValue));
+					parameterBuilder.add("upperDateValue", parameter.upperDateValue.getTime());
 				}
 				if (parameter.lowerNumericValue != null) {
 					parameterBuilder.add("lowerNumericValue", parameter.lowerNumericValue);

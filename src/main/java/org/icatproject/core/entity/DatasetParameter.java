@@ -54,8 +54,8 @@ public class DatasetParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
-		super.getDoc(gen, searchApi);
-		searchApi.encodeSortedDocValuesField(gen, "dataset", dataset.id);
+	public void getDoc(JsonGenerator gen) {
+		super.getDoc(gen);
+		SearchApi.encodeString(gen, "dataset.id", dataset.id);
 	}
 }

@@ -1,7 +1,6 @@
 package org.icatproject.core.manager;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -31,9 +30,7 @@ import javax.annotation.PreDestroy;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.stream.JsonGenerator;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
@@ -332,38 +329,17 @@ public class SearchManager {
 	}
 
 	public void addDocument(EntityBaseBean bean) throws IcatException {
-		String entityName = bean.getClass().getSimpleName();
-		if (eiHandler.hasSearchDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos)) {
-				gen.writeStartArray();
-				bean.getDoc(gen, searchApi);
-				gen.writeEnd();
-			}
-			enqueue(entityName, baos.toString(), null);
+		Class<? extends EntityBaseBean> klass = bean.getClass();
+		if (eiHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
+			enqueue(SearchApi.encodeOperation("create", bean));
 		}
 	}
 
-	public void enqueue(String entityName, String json, Long id) throws IcatException {
-
-		StringBuilder sb = new StringBuilder();
-		sb.append("[\"").append(entityName).append('"');
-		if (id != null) {
-			sb.append(',').append(id);
-		} else {
-			sb.append(",null");
-		}
-		if (json != null) {
-			sb.append(',').append(json);
-		} else {
-			sb.append(",null");
-		}
-		sb.append(']');
-
+	public void enqueue(String json) throws IcatException {
 		synchronized (queueFileLock) {
 			try {
 				FileWriter output = new FileWriter(queueFile, true);
-				output.write(sb.toString() + "\n");
+				output.write(json + "\n");
 				output.close();
 			} catch (IOException e) {
 				String msg = "Problems writing to " + queueFile + " " + e.getMessage();
@@ -394,9 +370,7 @@ public class SearchManager {
 
 	public void deleteDocument(EntityBaseBean bean) throws IcatException {
 		if (eiHandler.hasSearchDoc(bean.getClass())) {
-			String entityName = bean.getClass().getSimpleName();
-			Long id = bean.getId();
-			enqueue(entityName, null, id);
+			enqueue(SearchApi.encodeDeletion(bean));
 		}
 	}
 
@@ -548,15 +522,9 @@ public class SearchManager {
 	}
 
 	public void updateDocument(EntityBaseBean bean) throws IcatException {
-		String entityName = bean.getClass().getSimpleName();
-		if (eiHandler.hasSearchDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos)) {
-				gen.writeStartArray();
-				bean.getDoc(gen, searchApi);
-				gen.writeEnd();
-			}
-			enqueue(entityName, baos.toString(), bean.getId());
+		Class<? extends EntityBaseBean> klass = bean.getClass();
+		if (eiHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
+			enqueue(SearchApi.encodeOperation("update", bean));
 		}
 	}
 

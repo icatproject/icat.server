@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("A data file format")
 @SuppressWarnings("serial")
@@ -93,6 +96,12 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "datafileFormat.name", name);
+		SearchApi.encodeString(gen, "datafileFormat.id", id);
 	}
 
 }

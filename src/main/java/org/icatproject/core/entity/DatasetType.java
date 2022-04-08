@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("A type of data set")
 @SuppressWarnings("serial")
@@ -69,6 +72,12 @@ public class DatasetType extends EntityBaseBean implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "type.name", name);
+		SearchApi.encodeString(gen, "type.id", id);
 	}
 
 }

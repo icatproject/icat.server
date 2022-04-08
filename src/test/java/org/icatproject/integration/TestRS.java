@@ -630,10 +630,8 @@ public class TestRS {
 		JsonObject responseObject;
 		String searchAfter;
 		Map<String, String> expectation = new HashMap<>();
-		expectation.put("investigation", null);
-		expectation.put("text", null);
+		expectation.put("investigation.id", null);
 		expectation.put("date", "notNull");
-		expectation.put("dataset", "notNull");
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
@@ -675,25 +673,25 @@ public class TestRS {
 		ps.setId(wSession.create(ps));
 		responseObject = searchDatafiles(session, null, "df2", null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
-		expectation.put("investigation", "notNull");
+		expectation.put("investigation.id", "notNull");
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		wSession.delete(ps);
 		responseObject = searchDatafiles(session, null, "df2", null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
-		expectation.put("investigation", null);
+		expectation.put("investigation.id", null);
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
-		wSession.addRule(null, "DatafileFormat", "R");
+		wSession.addRule(null, "Dataset", "R");
 		responseObject = searchDatafiles(session, null, "df2", null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
-		expectation.put("text", "df2");
+		expectation.put("investigation.id", "notNull");
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
-		wSession.delRule(null, "DatafileFormat", "R");
+		wSession.delRule(null, "Dataset", "R");
 		responseObject = searchDatafiles(session, null, "df2", null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
-		expectation.put("text", null);
+		expectation.put("investigation.id", null);
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		// Test searching with someone without authz for the Datafile(s)
@@ -712,10 +710,12 @@ public class TestRS {
 		JsonObject responseObject;
 		String searchAfter;
 		Map<String, String> expectation = new HashMap<>();
-		expectation.put("text", null);
 		expectation.put("startDate", "notNull");
 		expectation.put("endDate", "notNull");
-		expectation.put("investigation", "notNull");
+		expectation.put("investigation.id", "notNull");
+		expectation.put("sample.name", null);
+		expectation.put("sample.type.name", null);
+		expectation.put("type.name", null);
 
 		// All datasets
 		searchDatasets(session, null, null, null, null, null, null, 10, null, 5);
@@ -778,23 +778,25 @@ public class TestRS {
 		responseObject = searchDatasets(session, null, "ds1", null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
 		expectation.put("name", "ds1");
+		expectation.put("type.name", "calibration");
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		wSession.addRule(null, "Sample", "R");
 		responseObject = searchDatasets(session, null, "ds1", null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
-		expectation.put("text", "ds1 calibration calibration alpha Koh-I-Noor diamond");
+		expectation.put("sample.name", "Koh-I-Noor");
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		wSession.delete(ps);
 		responseObject = searchDatasets(session, null, "ds1", null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
-		expectation.put("text", null);
+		expectation.put("type.name", null);
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		wSession.delRule(null, "Sample", "R");
 		responseObject = searchDatasets(session, null, "ds1", null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("sample.name", null);
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		// Test searching with someone without authz for the Dataset(s)
@@ -815,7 +817,8 @@ public class TestRS {
 		expectation.put("name", "expt1");
 		expectation.put("startDate", "notNull");
 		expectation.put("endDate", "notNull");
-		expectation.put("text", null);
+		expectation.put("type.name", null);
+		expectation.put("facility.name", null);
 
 		Date lowerOrigin = dft.parse("2011-01-01T00:00:00+0000");
 		Date lowerSecond = dft.parse("2011-01-01T00:00:01+0000");
@@ -834,6 +837,15 @@ public class TestRS {
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
+		// TODO remove additional checks here
+		responseObject = searchInvestigations(session, "db/tr", null, lowerOrigin, upperOrigin, null,
+				null, null, null, 10, null, 1);
+		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, null,
+				null, null, null, 10, null, 1);
+		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
+				null, null, null, 10, null, 1);
+		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
+				null, "Professor", null, 10, null, 1);
 		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
 				samplesAnd, "Professor", null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
@@ -888,23 +900,25 @@ public class TestRS {
 		ps.setId(wSession.create(ps));
 		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("type.name", "atype");
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		wSession.addRule(null, "Facility", "R");
 		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
-		expectation.put("text", "one expt1 Test port facility atype a title in the middle");
+		expectation.put("facility.name", "Test port facility");
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		wSession.delete(ps);
 		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
-		expectation.put("text", null);
+		expectation.put("type.name", null);
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		wSession.delRule(null, "Facility", "R");
 		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null, 1);
 		assertFalse(responseObject.keySet().contains("search_after"));
+		expectation.put("facility.name", null);
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		// Test searching with someone without authz for the Investigation(s)
@@ -968,11 +982,12 @@ public class TestRS {
 			JsonObject source = result.getJsonObject("source");
 			assertTrue(source.keySet().contains("id"));
 			Map<String, String> expectation = expectations.get(i);
-			for (Entry<String, String> entry: expectation.entrySet()) {
+			for (Entry<String, String> entry : expectation.entrySet()) {
 				String key = entry.getKey();
 				String value = entry.getValue();
 				if (value == null) {
-					assertFalse("Source " + source.toString() + " should NOT contain " + key, source.keySet().contains(key));
+					assertFalse("Source " + source.toString() + " should NOT contain " + key,
+							source.keySet().contains(key));
 				} else if (value.equals("notNull")) {
 					assertTrue("Source " + source.toString() + " should contain " + key, source.keySet().contains(key));
 				} else {

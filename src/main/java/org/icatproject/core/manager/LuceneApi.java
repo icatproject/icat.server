@@ -17,6 +17,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
+import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
@@ -65,52 +66,6 @@ public class LuceneApi extends SearchApi {
 		return path;
 	}
 
-	// TODO this method of encoding an entity as an array of 3 key objects that
-	// represent single field each
-	// is something that should be streamlined, but would require changes to
-	// icat.lucene
-
-	@Override
-	public void encodeSortedDocValuesField(JsonGenerator gen, String name, Long value) {
-		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
-				.writeEnd();
-	}
-
-	@Override
-	public void encodeSortedDocValuesField(JsonGenerator gen, String name, String value) {
-		encodeStringField(gen, name, value); // TODO leading to duplications in the _source, do we need both here?
-		gen.writeStartObject().write("type", "SortedDocValuesField").write("name", name).write("value", value)
-				.writeEnd();
-	}
-
-	@Override
-	public void encodeDoublePoint(JsonGenerator gen, String name, Double value) {
-		gen.writeStartObject().write("type", "DoublePoint").write("name", name).write("value", value)
-				.write("store", true).writeEnd();
-	}
-
-	// public void encodeSortedSetDocValuesFacetField(JsonGenerator gen, String name, String value) {
-	// 	gen.writeStartObject().write("type", "SortedSetDocValuesFacetField").write("name", name).write("value", value)
-	// 			.writeEnd();
-	// }
-
-	@Override
-	public void encodeStringField(JsonGenerator gen, String name, String value) {
-		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", value).writeEnd();
-	}
-
-	@Override
-	public void encodeStringField(JsonGenerator gen, String name, Long value, Boolean store) {
-		gen.writeStartObject().write("type", "StringField").write("name", name).write("value", Long.toString(value)).write("store", store).writeEnd();
-	}
-
-	@Override
-	public void encodeTextField(JsonGenerator gen, String name, String value) {
-		if (value != null) {
-			gen.writeStartObject().write("type", "TextField").write("name", name).write("value", value).writeEnd();
-		}
-	}
-
 	URI server;
 
 	public LuceneApi(URI server) {
@@ -118,7 +73,8 @@ public class LuceneApi extends SearchApi {
 	}
 
 	public void addNow(String entityName, List<Long> ids, EntityManager manager,
-			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor) throws IcatException, IOException, URISyntaxException {
+			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor)
+			throws IcatException, IOException, URISyntaxException {
 		URI uri = new URIBuilder(server).setPath(basePath + "/addNow/" + entityName)
 				.build();
 
@@ -132,8 +88,8 @@ public class LuceneApi extends SearchApi {
 					for (Long id : ids) {
 						EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
 						if (bean != null) {
-							gen.writeStartArray();
-							bean.getDoc(gen, this);
+							gen.writeStartObject();
+							bean.getDoc(gen);
 							gen.writeEnd();
 						}
 					}
@@ -154,7 +110,7 @@ public class LuceneApi extends SearchApi {
 	}
 
 	@Override
-    public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
+	public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		builder.add("doc", lastBean.getEngineDocId());
 		builder.add("shardIndex", -1);
@@ -167,16 +123,17 @@ public class LuceneApi extends SearchApi {
 				JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 				for (String key : object.keySet()) {
 					if (!lastBean.getSource().keySet().contains(key)) {
-						throw new IcatException(IcatExceptionType.INTERNAL, "Cannot build searchAfter document from source as sorted field " + key + " missing.");
+						throw new IcatException(IcatExceptionType.INTERNAL,
+								"Cannot build searchAfter document from source as sorted field " + key + " missing.");
 					}
-					String value = lastBean.getSource().getString(key);
+					JsonValue value = lastBean.getSource().get(key);
 					arrayBuilder.add(value);
 				}
 				builder.add("fields", arrayBuilder);
 			}
 		}
 		return builder.build().toString();
-    }
+	}
 
 	@Override
 	public void clear() throws IcatException {
@@ -272,7 +229,8 @@ public class LuceneApi extends SearchApi {
 	}
 
 	@Override
-	public SearchResult getResults(JsonObject query, String searchAfter, int blockSize, String sort, List<String> fields) throws IcatException {
+	public SearchResult getResults(JsonObject query, String searchAfter, int blockSize, String sort,
+			List<String> fields) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			String indexPath = getTargetPath(query);
 			URI uri = new URIBuilder(server).setPath(basePath + "/" + indexPath)
@@ -310,8 +268,9 @@ public class LuceneApi extends SearchApi {
 				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 				try (JsonReader reader = Json.createReader(response.getEntity().getContent())) {
 					JsonObject responseObject = reader.readObject();
-					List<JsonObject> resultsArray = responseObject.getJsonArray("results").getValuesAs(JsonObject.class);
-					for (JsonObject resultObject: resultsArray) {
+					List<JsonObject> resultsArray = responseObject.getJsonArray("results")
+							.getValuesAs(JsonObject.class);
+					for (JsonObject resultObject : resultsArray) {
 						int luceneDocId = resultObject.getInt("_id");
 						Float score = Float.NaN;
 						if (resultObject.keySet().contains("_score")) {

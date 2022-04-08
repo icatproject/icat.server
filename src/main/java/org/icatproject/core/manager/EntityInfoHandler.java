@@ -593,7 +593,7 @@ public class EntityInfoHandler {
 
 		boolean hasSearchDoc = true;
 		try {
-			objectClass.getDeclaredMethod("getDoc", JsonGenerator.class, SearchApi.class);
+			objectClass.getDeclaredMethod("getDoc", JsonGenerator.class);
 		} catch (NoSuchMethodException e) {
 			hasSearchDoc = false;
 		}

@@ -435,8 +435,11 @@ public abstract class EntityBaseBean implements Serializable {
 		return this.getClass().getSimpleName() + ":" + id;
 	}
 
-	/* This should be overridden by classes wishing to index things in a search engine */
-	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
+	/*
+	 * This should be overridden by classes wishing to index things in a search
+	 * engine
+	 */
+	public void getDoc(JsonGenerator gen) {
 	}
 
 }

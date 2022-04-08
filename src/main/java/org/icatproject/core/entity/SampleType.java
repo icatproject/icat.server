@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("A sample to be used in an investigation")
 @SuppressWarnings("serial")
@@ -82,6 +85,27 @@ public class SampleType extends EntityBaseBean implements Serializable {
 
 	public void setSamples(List<Sample> samples) {
 		this.samples = samples;
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "sample.type.name", name);
+		SearchApi.encodeString(gen, "type.id", id);
+	}
+
+
+	/**
+	 * Alternative method for encoding that applies a prefix to potentially
+	 * ambiguous fields: "type.id". In the case of a single
+	 * Dataset Sample, this fields will already be used by the Dataset and so
+	 * cannot be overwritten by the Sample.
+	 * 
+	 * @param gen    JsonGenerator
+	 * @param prefix String to precede all ambiguous field names.
+	 */
+	public void getDoc(JsonGenerator gen, String prefix) {
+		SearchApi.encodeString(gen, "sample.type.name", name);
+		SearchApi.encodeString(gen, prefix + "type.id", id);
 	}
 
 }

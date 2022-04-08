@@ -201,31 +201,26 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
-		StringBuilder sb = new StringBuilder(name);
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "name", name);
 		if (description != null) {
-			sb.append(" " + description);
+			SearchApi.encodeString(gen, "description", description);
 		}
 		if (doi != null) {
-			sb.append(" " + doi);
+			SearchApi.encodeString(gen, "doi", doi);
 		}
 		if (datafileFormat != null) {
-			sb.append(" " + datafileFormat.getName());
+			datafileFormat.getDoc(gen);
 		}
-		searchApi.encodeTextField(gen, "text", sb.toString());
-		searchApi.encodeSortedDocValuesField(gen, "name", name);
 		if (datafileModTime != null) {
-			searchApi.encodeSortedDocValuesField(gen, "date", datafileModTime);
+			SearchApi.encodeLong(gen, "date", datafileModTime);
 		} else if (datafileCreateTime != null) {
-			searchApi.encodeSortedDocValuesField(gen, "date", datafileCreateTime);
+			SearchApi.encodeLong(gen, "date", datafileCreateTime);
 		} else {
-			searchApi.encodeSortedDocValuesField(gen, "date", modTime);
+			SearchApi.encodeLong(gen, "date", modTime);
 		}
-		searchApi.encodeStringField(gen, "id", id, true);
-		searchApi.encodeStringField(gen, "dataset", dataset.id);
-		searchApi.encodeStringField(gen, "investigation", dataset.getInvestigation().id);
-
-		// TODO User and Parameter support for Elasticsearch
+		SearchApi.encodeString(gen, "id", id);
+		SearchApi.encodeString(gen, "investigation.id", dataset.getInvestigation().id);
 	}
 
 	/**
@@ -242,16 +237,18 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	public static Map<String, Relationship[]> getDocumentFields() throws IcatException {
 		if (documentFields.size() == 0) {
 			EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-			Relationship[] textRelationships = {
+			Relationship[] datafileFormatRelationships = {
 					eiHandler.getRelationshipsByName(Datafile.class).get("datafileFormat") };
 			Relationship[] investigationRelationships = {
 					eiHandler.getRelationshipsByName(Datafile.class).get("dataset") };
-			documentFields.put("text", textRelationships);
 			documentFields.put("name", null);
+			documentFields.put("description", null);
+			documentFields.put("doi", null);
 			documentFields.put("date", null);
 			documentFields.put("id", null);
-			documentFields.put("dataset", null);
-			documentFields.put("investigation", investigationRelationships);
+			documentFields.put("investigation.id", investigationRelationships);
+			documentFields.put("datafileFormat.id", null);
+			documentFields.put("datafileFormat.name", datafileFormatRelationships);
 		}
 		return documentFields;
 	}

@@ -4,12 +4,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("A user of the facility")
 @SuppressWarnings("serial")
@@ -145,6 +148,15 @@ public class User extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "User[name=" + name + "]";
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		if (fullName != null) {
+			SearchApi.encodeText(gen, "user.fullName", fullName);
+		}
+		SearchApi.encodeString(gen, "user.name", name);
+		SearchApi.encodeString(gen, "user.id", id);
 	}
 
 }

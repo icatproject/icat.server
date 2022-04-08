@@ -34,11 +34,21 @@ import org.apache.http.impl.client.HttpClients;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.Datafile;
+import org.icatproject.core.entity.DatafileFormat;
+import org.icatproject.core.entity.DatafileParameter;
 import org.icatproject.core.entity.Dataset;
+import org.icatproject.core.entity.DatasetParameter;
 import org.icatproject.core.entity.DatasetType;
 import org.icatproject.core.entity.Facility;
 import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.InvestigationParameter;
 import org.icatproject.core.entity.InvestigationType;
+import org.icatproject.core.entity.InvestigationUser;
+import org.icatproject.core.entity.Parameter;
+import org.icatproject.core.entity.ParameterType;
+import org.icatproject.core.entity.Sample;
+import org.icatproject.core.entity.SampleType;
+import org.icatproject.core.entity.User;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -73,103 +83,111 @@ public class TestLucene {
 
 	int NUMSAMP = 15;
 
-	private class QueueItem {
-
-		private String entityName;
-		private Long id;
-		private String json;
-
-		public QueueItem(String entityName, Long id, String json) {
-			this.entityName = entityName;
-			this.id = id;
-			this.json = json;
-		}
-
-	}
-
 	@Test
-	public void modify() throws IcatException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	public void modifyDatafile() throws IcatException {
 		Investigation investigation = new Investigation();
 		investigation.setId(0L);
 		Dataset dataset = new Dataset();
 		dataset.setId(0L);
 		dataset.setInvestigation(investigation);
-		Datafile datafile = new Datafile();
-		datafile.setName("Elephants and Aardvarks");
-		datafile.setDatafileModTime(new Date());
-		datafile.setId(new Long(42L));
-		datafile.setDataset(dataset);
-		try (JsonGenerator gen = Json.createGenerator(baos)) {
-			gen.writeStartArray();
-			datafile.getDoc(gen, luceneApi);
-			gen.writeEnd();
-		}
-		String elephantJson = baos.toString();
 
-		baos = new ByteArrayOutputStream();
-		datafile.setName("Rhinos and Aardvarks");
-		try (JsonGenerator gen = Json.createGenerator(baos)) {
-			gen.writeStartArray();
-			datafile.getDoc(gen, luceneApi);
-			gen.writeEnd();
-		}
-		String rhinoJson = baos.toString();
+		Datafile elephantDatafile = new Datafile();
+		elephantDatafile.setName("Elephants and Aardvarks");
+		elephantDatafile.setDatafileModTime(new Date());
+		elephantDatafile.setId(42L);
+		elephantDatafile.setDataset(dataset);
+
+		DatafileFormat pdfFormat = new DatafileFormat();
+		pdfFormat.setId(0L);
+		pdfFormat.setName("pdf");
+		Datafile rhinoDatafile = new Datafile();
+		rhinoDatafile.setName("Rhinos and Aardvarks");
+		rhinoDatafile.setDatafileModTime(new Date());
+		rhinoDatafile.setId(42L);
+		rhinoDatafile.setDataset(dataset);
+		rhinoDatafile.setDatafileFormat(pdfFormat);
+
+		DatafileFormat pngFormat = new DatafileFormat();
+		pngFormat.setId(0L);
+		pngFormat.setName("png");
 
 		JsonObject elephantQuery = SearchApi.buildQuery("Datafile", null, "elephant", null, null, null, null, null);
 		JsonObject rhinoQuery = SearchApi.buildQuery("Datafile", null, "rhino", null, null, null, null, null);
+		JsonObject pdfQuery = SearchApi.buildQuery("Datafile", null, "datafileFormat.name:pdf", null, null, null, null,
+				null);
+		JsonObject pngQuery = SearchApi.buildQuery("Datafile", null, "datafileFormat.name:png", null, null, null, null,
+				null);
 
-		Queue<QueueItem> queue = new ConcurrentLinkedQueue<>();
-		queue.add(new QueueItem("Datafile", null, elephantJson));
+		// Original
+		Queue<String> queue = new ConcurrentLinkedQueue<>();
+		queue.add(SearchApi.encodeOperation("create", elephantDatafile));
 		modifyQueue(queue);
 		checkLsr(luceneApi.getResults(elephantQuery, 5), 42L);
 		checkLsr(luceneApi.getResults(rhinoQuery, 5));
+		checkLsr(luceneApi.getResults(pdfQuery, 5));
+		checkLsr(luceneApi.getResults(pngQuery, 5));
 
+		// Change name and add a format
 		queue = new ConcurrentLinkedQueue<>();
-		queue.add(new QueueItem("Datafile", 42L, rhinoJson));
+		queue.add(SearchApi.encodeOperation("update", rhinoDatafile));
 		modifyQueue(queue);
 		checkLsr(luceneApi.getResults(elephantQuery, 5));
 		checkLsr(luceneApi.getResults(rhinoQuery, 5), 42L);
+		checkLsr(luceneApi.getResults(pdfQuery, 5), 42L);
+		checkLsr(luceneApi.getResults(pngQuery, 5));
 
+		// Change just the format
 		queue = new ConcurrentLinkedQueue<>();
-		queue.add(new QueueItem("Datafile", 42L, null));
-		queue.add(new QueueItem("Datafile", 42L, null));
+		queue.add(SearchApi.encodeOperation("update", pngFormat));
+		modifyQueue(queue);
+		checkLsr(luceneApi.getResults(elephantQuery, 5));
+		checkLsr(luceneApi.getResults(rhinoQuery, 5), 42L);
+		checkLsr(luceneApi.getResults(pdfQuery, 5));
+		checkLsr(luceneApi.getResults(pngQuery, 5), 42L);
+
+		// Remove the format
+		queue = new ConcurrentLinkedQueue<>();
+		queue.add(SearchApi.encodeOperation("delete", pngFormat));
+		modifyQueue(queue);
+		checkLsr(luceneApi.getResults(elephantQuery, 5));
+		checkLsr(luceneApi.getResults(rhinoQuery, 5), 42L);
+		checkLsr(luceneApi.getResults(pdfQuery, 5));
+		checkLsr(luceneApi.getResults(pngQuery, 5));
+
+		// Remove the file
+		queue = new ConcurrentLinkedQueue<>();
+		queue.add(SearchApi.encodeDeletion(elephantDatafile));
+		queue.add(SearchApi.encodeDeletion(rhinoDatafile));
 		modifyQueue(queue);
 		checkLsr(luceneApi.getResults(elephantQuery, 5));
 		checkLsr(luceneApi.getResults(rhinoQuery, 5));
+		checkLsr(luceneApi.getResults(pdfQuery, 5));
+		checkLsr(luceneApi.getResults(pngQuery, 5));
 
+		// Multiple commands at once
 		queue = new ConcurrentLinkedQueue<>();
-		queue.add(new QueueItem("Datafile", null, elephantJson));
-		queue.add(new QueueItem("Datafile", 42L, rhinoJson));
-		queue.add(new QueueItem("Datafile", 42L, null));
-		queue.add(new QueueItem("Datafile", 42L, null));
+		queue.add(SearchApi.encodeOperation("create", elephantDatafile));
+		queue.add(SearchApi.encodeOperation("update", rhinoDatafile));
+		queue.add(SearchApi.encodeDeletion(elephantDatafile));
+		queue.add(SearchApi.encodeDeletion(rhinoDatafile));
 		modifyQueue(queue);
 		checkLsr(luceneApi.getResults(elephantQuery, 5));
 		checkLsr(luceneApi.getResults(rhinoQuery, 5));
+		checkLsr(luceneApi.getResults(pdfQuery, 5));
+		checkLsr(luceneApi.getResults(pngQuery, 5));
 	}
 
-	private void modifyQueue(Queue<QueueItem> queue) throws IcatException {
-		Iterator<QueueItem> qiter = queue.iterator();
+	private void modifyQueue(Queue<String> queue) throws IcatException {
+		Iterator<String> qiter = queue.iterator();
 		if (qiter.hasNext()) {
 			StringBuilder sb = new StringBuilder("[");
 
 			while (qiter.hasNext()) {
-				QueueItem item = qiter.next();
+				String item = qiter.next();
 				if (sb.length() != 1) {
 					sb.append(',');
 				}
-				sb.append("[\"").append(item.entityName).append('"');
-				if (item.id != null) {
-					sb.append(',').append(item.id);
-				} else {
-					sb.append(",null");
-				}
-				if (item.json != null) {
-					sb.append(',').append(item.json);
-				} else {
-					sb.append(",null");
-				}
-				sb.append(']');
+				sb.append(item);
 				qiter.remove();
 			}
 			sb.append(']');
@@ -205,40 +223,36 @@ public class TestLucene {
 		JsonObject source = datafile.getSource();
 		assertNotNull(source);
 		Set<String> expectedKeys = new HashSet<>(
-				Arrays.asList("id", "dataset", "investigation", "name", "text", "date"));
+				Arrays.asList("id", "investigation.id", "name", "date"));
 		assertEquals(expectedKeys, source.keySet());
 		assertEquals("0", source.getString("id"));
-		assertEquals("0", source.getString("dataset"));
-		assertEquals("0", source.getString("investigation"));
+		assertEquals("0", source.getString("investigation.id"));
 		assertEquals("DFaaa", source.getString("name"));
-		assertEquals("DFaaa", source.getString("text"));
-		assertNotNull(source.getString("date"));
+		assertNotNull(source.getJsonNumber("date"));
 	}
 
 	private void checkDataset(ScoredEntityBaseBean dataset) {
 		JsonObject source = dataset.getSource();
 		assertNotNull(source);
 		Set<String> expectedKeys = new HashSet<>(
-				Arrays.asList("id", "investigation", "name", "text", "startDate", "endDate"));
+				Arrays.asList("id", "investigation.id", "name", "startDate", "endDate"));
 		assertEquals(expectedKeys, source.keySet());
 		assertEquals("0", source.getString("id"));
-		assertEquals("0", source.getString("investigation"));
+		assertEquals("0", source.getString("investigation.id"));
 		assertEquals("DSaaa", source.getString("name"));
-		assertEquals("DSaaa null null", source.getString("text"));
-		assertNotNull(source.getString("startDate"));
-		assertNotNull(source.getString("endDate"));
+		assertNotNull(source.getJsonNumber("startDate"));
+		assertNotNull(source.getJsonNumber("endDate"));
 	}
 
 	private void checkInvestigation(ScoredEntityBaseBean investigation) {
 		JsonObject source = investigation.getSource();
 		assertNotNull(source);
-		Set<String> expectedKeys = new HashSet<>(Arrays.asList("id", "name", "text", "startDate", "endDate"));
+		Set<String> expectedKeys = new HashSet<>(Arrays.asList("id", "name", "startDate", "endDate"));
 		assertEquals(expectedKeys, source.keySet());
 		assertEquals("0", source.getString("id"));
 		assertEquals("a h r", source.getString("name"));
-		assertEquals("null a h r null null", source.getString("text"));
-		assertNotNull(source.getString("startDate"));
-		assertNotNull(source.getString("endDate"));
+		assertNotNull(source.getJsonNumber("startDate"));
+		assertNotNull(source.getJsonNumber("endDate"));
 	}
 
 	private void checkLsr(SearchResult lsr, Long... n) {
@@ -288,7 +302,7 @@ public class TestLucene {
 		populate();
 
 		JsonObject query = SearchApi.buildQuery("Datafile", null, null, null, null, null, null, null);
-		List<String> fields = Arrays.asList("date", "name", "investigation", "id", "text", "dataset");
+		List<String> fields = Arrays.asList("date", "name", "investigation.id", "id");
 		SearchResult lsr = luceneApi.getResults(query, null, 5, null, fields);
 		String searchAfter = lsr.getSearchAfter();
 		assertNotNull(searchAfter);
@@ -429,7 +443,7 @@ public class TestLucene {
 		populate();
 
 		JsonObject query = SearchApi.buildQuery("Dataset", null, null, null, null, null, null, null);
-		List<String> fields = Arrays.asList("startDate", "endDate", "name", "investigation", "id", "text");
+		List<String> fields = Arrays.asList("startDate", "endDate", "name", "investigation.id", "id");
 		SearchResult lsr = luceneApi.getResults(query, null, 5, null, fields);
 		String searchAfter = lsr.getSearchAfter();
 		assertNotNull(searchAfter);
@@ -482,7 +496,7 @@ public class TestLucene {
 			gen.writeEnd();
 		}
 		sort = baos.toString();
-		lsr = luceneApi.getResults(query, searchAfter, 5, sort, fields);
+		lsr = luceneApi.getResults(query, null, 5, sort, fields);
 		checkLsrOrder(lsr, 0L, 26L, 1L, 27L, 2L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(searchAfter);
@@ -544,31 +558,62 @@ public class TestLucene {
 		String name = "nm " + letters.substring(j, j + 1) + letters.substring(j, j + 1) + letters.substring(j, j + 1);
 		String units = "u " + letters.substring(k, k + 1) + letters.substring(k, k + 1) + letters.substring(k, k + 1);
 
-		gen.writeStartArray();
-		luceneApi.encodeStringField(gen, "name", "S" + name);
-		luceneApi.encodeStringField(gen, "units", units);
-		luceneApi.encodeStringField(gen, "stringValue", "v" + i * i);
-		luceneApi.encodeSortedDocValuesField(gen, rel, new Long(i));
-		gen.writeEnd();
-		System.out.println(rel + " " + i + " '" + "S" + name + "' '" + units + "' 'v" + i * i + "'");
+		ParameterType dateParameterType = new ParameterType();
+		dateParameterType.setId(0L);
+		dateParameterType.setName("D" + name);
+		dateParameterType.setUnits(units);
+		ParameterType numericParameterType = new ParameterType();
+		numericParameterType.setId(0L);
+		numericParameterType.setName("N" + name);
+		numericParameterType.setUnits(units);
+		ParameterType stringParameterType = new ParameterType();
+		stringParameterType.setId(0L);
+		stringParameterType.setName("S" + name);
+		stringParameterType.setUnits(units);
 
-		gen.writeStartArray();
-		luceneApi.encodeStringField(gen, "name", "N" + name);
-		luceneApi.encodeStringField(gen, "units", units);
-		luceneApi.encodeDoublePoint(gen, "numericValue", new Double(j * j));
-		luceneApi.encodeSortedDocValuesField(gen, rel, new Long(i));
-		gen.writeEnd();
-		System.out.println(rel + " " + i + " '" + "N" + name + "' '" + units + "' " + new Double(j * j));
+		Parameter parameter;
+		if (rel.equals("datafile")) {
+			parameter = new DatafileParameter();
+			Datafile datafile = new Datafile();
+			datafile.setId(new Long(i));
+			((DatafileParameter) parameter).setDatafile(datafile);
+		} else if (rel.equals("dataset")) {
+			parameter = new DatasetParameter();
+			Dataset dataset = new Dataset();
+			dataset.setId(new Long(i));
+			((DatasetParameter) parameter).setDataset(dataset);
+		} else if (rel.equals("investigation")) {
+			parameter = new InvestigationParameter();
+			Investigation investigation = new Investigation();
+			investigation.setId(new Long(i));
+			((InvestigationParameter) parameter).setInvestigation(investigation);
+		} else {
+			fail(rel + " is not valid");
+			return;
+		}
+		parameter.setId(0L);
 
-		gen.writeStartArray();
-		luceneApi.encodeStringField(gen, "name", "D" + name);
-		luceneApi.encodeStringField(gen, "units", units);
-		luceneApi.encodeStringField(gen, "dateTimeValue", new Date(now + 60000 * k * k));
-		luceneApi.encodeSortedDocValuesField(gen, rel, new Long(i));
+		parameter.setType(dateParameterType);
+		parameter.setDateTimeValue(new Date(now + 60000 * k * k));
+		gen.writeStartObject();
+		parameter.getDoc(gen);
 		gen.writeEnd();
 		System.out.println(
 				rel + " " + i + " '" + "D" + name + "' '" + units + "' '" + new Date(now + 60000 * k * k) + "'");
 
+		parameter.setType(numericParameterType);
+		parameter.setNumericValue(new Double(j * j));
+		gen.writeStartObject();
+		parameter.getDoc(gen);
+		gen.writeEnd();
+		System.out.println(rel + " " + i + " '" + "N" + name + "' '" + units + "' " + new Double(j * j));
+
+		parameter.setType(stringParameterType);
+		parameter.setStringValue("v" + i * i);
+		gen.writeStartObject();
+		parameter.getDoc(gen);
+		gen.writeEnd();
+		System.out.println(rel + " " + i + " '" + "S" + name + "' '" + units + "' 'v" + i * i + "'");
 	}
 
 	@Test
@@ -577,7 +622,7 @@ public class TestLucene {
 
 		/* Blocked results */
 		JsonObject query = SearchApi.buildQuery("Investigation", null, null, null, null, null, null, null);
-		List<String> fields = Arrays.asList("startDate", "endDate", "name", "id", "text");
+		List<String> fields = Arrays.asList("startDate", "endDate", "name", "id");
 		SearchResult lsr = luceneApi.getResults(query, null, 5, null, fields);
 		checkLsr(lsr, 0L, 1L, 2L, 3L, 4L);
 		checkInvestigation(lsr.getResults().get(0));
@@ -746,20 +791,28 @@ public class TestLucene {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			Long investigationUserId = 0L;
 			gen.writeStartArray();
 			for (int i = 0; i < NUMINV; i++) {
 				for (int j = 0; j < NUMUSERS; j++) {
 					if (i % (j + 1) == 1) {
 						String fn = "FN " + letters.substring(j, j + 1) + " " + letters.substring(j, j + 1);
 						String name = letters.substring(j, j + 1) + j;
-						gen.writeStartArray();
+						User user = new User();
+						user.setId(new Long(j));
+						user.setName(name);
+						user.setFullName(fn);
+						Investigation investigation = new Investigation();
+						investigation.setId(new Long(i));
+						InvestigationUser investigationUser = new InvestigationUser();
+						investigationUser.setId(investigationUserId);
+						investigationUser.setUser(user);
+						investigationUser.setInvestigation(investigation);
 
-						luceneApi.encodeTextField(gen, "text", fn);
-
-						luceneApi.encodeStringField(gen, "name", name);
-						luceneApi.encodeSortedDocValuesField(gen, "investigation", new Long(i));
-
+						gen.writeStartObject();
+						investigationUser.getDoc(gen);
 						gen.writeEnd();
+						investigationUserId++;
 						System.out.println("'" + fn + "' " + name + " " + i);
 					}
 				}
@@ -778,14 +831,22 @@ public class TestLucene {
 				String word = letters.substring(j, j + 1) + " " + letters.substring(k, k + 1) + " "
 						+ letters.substring(l, l + 1);
 				Investigation investigation = new Investigation();
-				investigation.setFacility(new Facility());
-				investigation.setType(new InvestigationType());
+				Facility facility = new Facility();
+				facility.setName("");
+				facility.setId(0L);
+				investigation.setFacility(facility);
+				InvestigationType type = new InvestigationType();
+				type.setName("");
+				type.setId(0L);
+				investigation.setType(type);
 				investigation.setName(word);
+				investigation.setTitle("");
+				investigation.setVisitId("");
 				investigation.setStartDate(new Date(now + i * 60000));
 				investigation.setEndDate(new Date(now + (i + 1) * 60000));
 				investigation.setId(new Long(i));
-				gen.writeStartArray();
-				investigation.getDoc(gen, luceneApi);
+				gen.writeStartObject();
+				investigation.getDoc(gen);
 				gen.writeEnd();
 				System.out.println("INVESTIGATION '" + word + "' " + new Date(now + i * 60000) + " " + i);
 			}
@@ -816,15 +877,18 @@ public class TestLucene {
 				Investigation investigation = new Investigation();
 				investigation.setId(new Long(i % NUMINV));
 				Dataset dataset = new Dataset();
-				dataset.setType(new DatasetType());
+				DatasetType type = new DatasetType();
+				type.setName("");
+				type.setId(0L);
+				dataset.setType(type);
 				dataset.setName(word);
 				dataset.setStartDate(new Date(now + i * 60000));
 				dataset.setEndDate(new Date(now + (i + 1) * 60000));
 				dataset.setId(new Long(i));
 				dataset.setInvestigation(investigation);
 
-				gen.writeStartArray();
-				dataset.getDoc(gen, luceneApi);
+				gen.writeStartObject();
+				dataset.getDoc(gen);
 				gen.writeEnd();
 				System.out.println("DATASET '" + word + "' " + new Date(now + i * 60000) + " " + i + " " + i % NUMINV);
 			}
@@ -863,8 +927,8 @@ public class TestLucene {
 				datafile.setId(new Long(i));
 				datafile.setDataset(dataset);
 
-				gen.writeStartArray();
-				datafile.getDoc(gen, luceneApi);
+				gen.writeStartObject();
+				datafile.getDoc(gen);
 				gen.writeEnd();
 				System.out.println("DATAFILE '" + word + "' " + new Date(now + i * 60000) + " " + i + " " + i % NUMDS);
 
@@ -892,9 +956,20 @@ public class TestLucene {
 				int j = i % 26;
 				String word = "SType " + letters.substring(j, j + 1) + letters.substring(j, j + 1)
 						+ letters.substring(j, j + 1);
-				gen.writeStartArray();
-				luceneApi.encodeTextField(gen, "text", word);
-				luceneApi.encodeSortedDocValuesField(gen, "investigation", new Long(i % NUMINV));
+
+				Investigation investigation = new Investigation();
+				investigation.setId(new Long(i % NUMINV));
+				SampleType sampleType = new SampleType();
+				sampleType.setId(0L);
+				sampleType.setName("");
+				Sample sample = new Sample();
+				sample.setId(new Long(i));
+				sample.setInvestigation(investigation);
+				sample.setType(sampleType);
+				sample.setName(word);
+
+				gen.writeStartObject();
+				sample.getDoc(gen);
 				gen.writeEnd();
 				System.out.println("SAMPLE '" + word + "' " + i % NUMINV);
 			}

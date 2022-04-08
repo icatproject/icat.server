@@ -47,7 +47,9 @@ public class TestEntityInfo {
 	@Test
 	public void testHasSearchDoc() throws Exception {
 		Set<String> docdbeans = new HashSet<>(Arrays.asList("Investigation", "Dataset", "Datafile",
-				"InvestigationParameter", "DatasetParameter", "DatafileParameter", "InvestigationUser", "Sample"));
+				"InvestigationParameter", "DatasetParameter", "DatafileParameter", "ParameterType",
+				"InvestigationUser", "User", "Sample", "SampleType", "Facility", "InvestigationType", "DatasetType",
+				"DatafileFormat"));
 		for (String beanName : EntityInfoHandler.getEntityNamesList()) {
 			@SuppressWarnings("unchecked")
 			Class<? extends EntityBaseBean> bean = (Class<? extends EntityBaseBean>) Class
@@ -79,7 +81,7 @@ public class TestEntityInfo {
 		assertEquals(
 				"Job(?:0,application(facility(name:1),name:2,version:3),arguments:4,inputDataCollection(?:5),outputDataCollection(?:6))",
 				eiHandler.getExportHeader(Job.class));
-		assertEquals( "Study(?:0,description:1,endDate:2,name:3,pid:4,startDate:5,status:6,user(name:7))",
+		assertEquals("Study(?:0,description:1,endDate:2,name:3,pid:4,startDate:5,status:6,user(name:7))",
 				eiHandler.getExportHeader(Study.class));
 		assertEquals(
 				"DatasetParameter(dataset(investigation(facility(name:0),name:1,visitId:2),name:3),"
@@ -126,7 +128,7 @@ public class TestEntityInfo {
 						+ "application(facility(name:5),name:6,version:7),arguments:8,"
 						+ "inputDataCollection(?:9),outputDataCollection(?:10))",
 				eiHandler.getExportHeaderAll(Job.class));
-		assertEquals( "Study(?:0,description:1,endDate:2,name:3,pid:4,startDate:5,status:6,user(name:7))",
+		assertEquals("Study(?:0,description:1,endDate:2,name:3,pid:4,startDate:5,status:6,user(name:7))",
 				eiHandler.getExportHeader(Study.class));
 		assertEquals(
 				"DatasetParameter(createId:0,createTime:1,modId:2,modTime:3,"
@@ -181,7 +183,7 @@ public class TestEntityInfo {
 		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
-		testField( "description,endDate,name,pid,startDate,status,studyInvestigations,user",Study.class);
+		testField("description,endDate,name,pid,startDate,status,studyInvestigations,user", Study.class);
 		testField("dataset,dateTimeValue,error,numericValue,rangeBottom,rangeTop,stringValue,type",
 				DatasetParameter.class);
 		testField(
@@ -357,7 +359,8 @@ public class TestEntityInfo {
 		testSF(Dataset.class, "name 255", "description 255", "location 255", "doi 255");
 		testSF(Keyword.class, "name 255");
 		testSF(InvestigationUser.class, "role 255");
-		testSF(User.class, "name 255", "fullName 255", "givenName 255", "familyName 255", "affiliation 255", "email 255", "orcidId 255");
+		testSF(User.class, "name 255", "fullName 255", "givenName 255", "familyName 255", "affiliation 255",
+				"email 255", "orcidId 255");
 		testSF(ParameterType.class, "pid 255", "description 255", "unitsFullName 255", "units 255", "name 255");
 		testSF(Job.class, "arguments 255");
 		testSF(Study.class, "name 255", "description 4000", "pid 255");

@@ -43,7 +43,7 @@ public class ParameterPOJO implements Serializable {
 		if (stringValue != null) {
 			sb.append(" stringValue:" + stringValue);
 		} else if (lowerDateValue != null) {
-			sb.append(" lowerDateValue:" + lowerDateValue + " upperDateValue:" + upperDateValue);
+			sb.append(" lowerDateValue:" + lowerDateValue.getTime() + " upperDateValue:" + upperDateValue.getTime());
 		} else if (lowerNumericValue != null) {
 			sb.append(", lowerNumericValue:" + lowerNumericValue + " upperNumericValue:" + upperNumericValue);
 		}

@@ -96,17 +96,31 @@ public class Sample extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
-		searchApi.encodeTextField(gen, "text", getDocText());
-		searchApi.encodeTextField(gen, "sampleText", getDocText());
-		searchApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "sample.name", name);
+		SearchApi.encodeString(gen, "id", id);
+		SearchApi.encodeString(gen, "investigation.id", investigation.id);
+		if (type != null) {
+			type.getDoc(gen);
+		}
 	}
 
-	public String getDocText() {
-		StringBuilder sb = new StringBuilder(name);
+	/**
+	 * Alternative method for encoding that applies a prefix to potentially
+	 * ambiguous fields: "id" and "investigation.id". In the case of a single
+	 * Dataset Sample, these fields will already be used by the Dataset and so
+	 * cannot be overwritten by the Sample.
+	 * 
+	 * @param gen    JsonGenerator
+	 * @param prefix String to precede all ambiguous field names.
+	 */
+	public void getDoc(JsonGenerator gen, String prefix) {
+		SearchApi.encodeString(gen, "sample.name", name);
+		SearchApi.encodeString(gen, prefix + "id", id);
+		SearchApi.encodeString(gen, prefix + "investigation.id", investigation.id);
 		if (type != null) {
-			sb.append(" " + type.getName());
+			type.getDoc(gen, prefix);
 		}
-		return sb.toString();
 	}
+
 }

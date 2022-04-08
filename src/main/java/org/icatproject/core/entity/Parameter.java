@@ -162,21 +162,16 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
-		searchApi.encodeStringField(gen, "name", type.getName());
-		searchApi.encodeStringField(gen, "parameterName", type.getName());
-		searchApi.encodeStringField(gen, "units", type.getUnits());
-		searchApi.encodeStringField(gen, "parameterUnits", type.getUnits());
+	public void getDoc(JsonGenerator gen) {
 		if (stringValue != null) {
-			searchApi.encodeStringField(gen, "stringValue", stringValue);
-			searchApi.encodeStringField(gen, "parameterStringValue", stringValue);
+			SearchApi.encodeString(gen, "stringValue", stringValue);
 		} else if (numericValue != null) {
-			searchApi.encodeDoublePoint(gen, "numericValue", numericValue);
-			searchApi.encodeDoublePoint(gen, "parameterNumericValue", numericValue);
+			SearchApi.encodeDouble(gen, "numericValue", numericValue);
 		} else if (dateTimeValue != null) {
-			searchApi.encodeStringField(gen, "dateTimeValue", dateTimeValue);
-			searchApi.encodeStringField(gen, "parameterDateValue", dateTimeValue);
+			SearchApi.encodeLong(gen, "dateTimeValue", dateTimeValue);
 		}
+		type.getDoc(gen);
+		SearchApi.encodeString(gen, "id", id);
 	}
 
 }

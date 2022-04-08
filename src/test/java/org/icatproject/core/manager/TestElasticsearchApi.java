@@ -72,11 +72,11 @@
 // 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 // 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 // 			gen.writeStartArray();
-// 			searchApi.encodeTextField(gen, "text", "Elephants and Aardvarks");
-// 			searchApi.encodeStringField(gen, "startDate", new Date());
-// 			searchApi.encodeStringField(gen, "endDate", new Date());
-// 			searchApi.encodeStoredId(gen, 42L);
-// 			searchApi.encodeStringField(gen, "dataset", 2001L);
+// 			SearchApi.encodeTextField(gen, "text", "Elephants and Aardvarks");
+// 			SearchApi.encodeStringField(gen, "startDate", new Date());
+// 			SearchApi.encodeStringField(gen, "endDate", new Date());
+// 			SearchApi.encodeStoredId(gen, 42L);
+// 			SearchApi.encodeStringField(gen, "dataset", 2001L);
 // 			gen.writeEnd();
 // 		}
 
@@ -276,10 +276,10 @@
 // 		gen.write(rel + "Parameter");
 // 		gen.writeNull();
 // 		gen.writeStartArray();
-// 		searchApi.encodeStringField(gen, "parameterName", "S" + name);
-// 		searchApi.encodeStringField(gen, "parameterUnits", units);
-// 		searchApi.encodeStringField(gen, "parameterStringValue", "v" + i * i);
-// 		searchApi.encodeSortedDocValuesField(gen, rel, new Long(i));
+// 		SearchApi.encodeStringField(gen, "parameterName", "S" + name);
+// 		SearchApi.encodeStringField(gen, "parameterUnits", units);
+// 		SearchApi.encodeStringField(gen, "parameterStringValue", "v" + i * i);
+// 		SearchApi.encodeSortedDocValuesField(gen, rel, new Long(i));
 // 		gen.writeEnd();
 // 		gen.writeEnd();
 // 		System.out.println(rel + " " + i + " '" + "S" + name + "' '" + units + "' 'v" + i * i + "'");
@@ -288,10 +288,10 @@
 // 		gen.write(rel + "Parameter");
 // 		gen.writeNull();
 // 		gen.writeStartArray();
-// 		searchApi.encodeStringField(gen, "parameterName", "N" + name);
-// 		searchApi.encodeStringField(gen, "parameterUnits", units);
-// 		searchApi.encodeDoublePoint(gen, "parameterNumericValue", new Double(j * j));
-// 		searchApi.encodeSortedDocValuesField(gen, rel, new Long(i));
+// 		SearchApi.encodeStringField(gen, "parameterName", "N" + name);
+// 		SearchApi.encodeStringField(gen, "parameterUnits", units);
+// 		SearchApi.encodeDoublePoint(gen, "parameterNumericValue", new Double(j * j));
+// 		SearchApi.encodeSortedDocValuesField(gen, rel, new Long(i));
 // 		gen.writeEnd();
 // 		gen.writeEnd();
 // 		System.out.println(rel + " " + i + " '" + "N" + name + "' '" + units + "' " + new Double(j * j));
@@ -300,10 +300,10 @@
 // 		gen.write(rel + "Parameter");
 // 		gen.writeNull();
 // 		gen.writeStartArray();
-// 		searchApi.encodeStringField(gen, "parameterName", "D" + name);
-// 		searchApi.encodeStringField(gen, "parameterUnits", units);
-// 		searchApi.encodeStringField(gen, "parameterDateValue", new Date(now + 60000 * k * k));
-// 		searchApi.encodeSortedDocValuesField(gen, rel, new Long(i));
+// 		SearchApi.encodeStringField(gen, "parameterName", "D" + name);
+// 		SearchApi.encodeStringField(gen, "parameterUnits", units);
+// 		SearchApi.encodeStringField(gen, "parameterDateValue", new Date(now + 60000 * k * k));
+// 		SearchApi.encodeSortedDocValuesField(gen, rel, new Long(i));
 // 		gen.writeEnd();
 // 		gen.writeEnd();
 // 		System.out.println(
@@ -447,10 +447,10 @@
 // 						gen.writeNull();
 // 						gen.writeStartArray();
 
-// 						searchApi.encodeTextField(gen, "userFullName", fn);
+// 						SearchApi.encodeTextField(gen, "userFullName", fn);
 
-// 						searchApi.encodeStringField(gen, "userName", name);
-// 						searchApi.encodeSortedDocValuesField(gen, "investigation", new Long(i));
+// 						SearchApi.encodeStringField(gen, "userName", name);
+// 						SearchApi.encodeSortedDocValuesField(gen, "investigation", new Long(i));
 
 // 						gen.writeEnd();
 // 						gen.writeEnd();
@@ -478,11 +478,11 @@
 // 				gen.write("Investigation");
 // 				gen.writeNull();
 // 				gen.writeStartArray();
-// 				searchApi.encodeTextField(gen, "text", word);
-// 				searchApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
-// 				searchApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
-// 				searchApi.encodeStoredId(gen, new Long(i));
-// 				searchApi.encodeSortedDocValuesField(gen, "id", new Long(i));
+// 				SearchApi.encodeTextField(gen, "text", word);
+// 				SearchApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
+// 				SearchApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
+// 				SearchApi.encodeStoredId(gen, new Long(i));
+// 				SearchApi.encodeSortedDocValuesField(gen, "id", new Long(i));
 // 				gen.writeEnd();
 // 				gen.writeEnd();
 // 				System.out.println("INVESTIGATION '" + word + "' " + new Date(now + i * 60000) + " " + i);
@@ -517,12 +517,12 @@
 // 				gen.write("Dataset");
 // 				gen.writeNull();
 // 				gen.writeStartArray();
-// 				searchApi.encodeTextField(gen, "text", word);
-// 				searchApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
-// 				searchApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
-// 				searchApi.encodeStoredId(gen, new Long(i));
-// 				searchApi.encodeSortedDocValuesField(gen, "id", new Long(i));
-// 				searchApi.encodeStringField(gen, "investigation", new Long(i % NUMINV));
+// 				SearchApi.encodeTextField(gen, "text", word);
+// 				SearchApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
+// 				SearchApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
+// 				SearchApi.encodeStoredId(gen, new Long(i));
+// 				SearchApi.encodeSortedDocValuesField(gen, "id", new Long(i));
+// 				SearchApi.encodeStringField(gen, "investigation", new Long(i % NUMINV));
 // 				gen.writeEnd();
 // 				gen.writeEnd();
 // 				System.out.println("DATASET '" + word + "' " + new Date(now + i * 60000) + " " + i + " " + i % NUMINV);
@@ -554,11 +554,11 @@
 // 				gen.write("Datafile");
 // 				gen.writeNull();
 // 				gen.writeStartArray();
-// 				searchApi.encodeTextField(gen, "text", word);
-// 				searchApi.encodeStringField(gen, "date", new Date(now + i * 60000));
-// 				searchApi.encodeStoredId(gen, new Long(i));
-// 				searchApi.encodeStringField(gen, "dataset", new Long(i % NUMDS));
-// 				searchApi.encodeStringField(gen, "investigation", new Long((i % NUMDS) % NUMINV));
+// 				SearchApi.encodeTextField(gen, "text", word);
+// 				SearchApi.encodeStringField(gen, "date", new Date(now + i * 60000));
+// 				SearchApi.encodeStoredId(gen, new Long(i));
+// 				SearchApi.encodeStringField(gen, "dataset", new Long(i % NUMDS));
+// 				SearchApi.encodeStringField(gen, "investigation", new Long((i % NUMDS) % NUMINV));
 // 				gen.writeEnd();
 // 				gen.writeEnd();
 // 				System.out.println("DATAFILE '" + word + "' " + new Date(now + i * 60000) + " " + i + " " + i % NUMDS);
@@ -591,8 +591,8 @@
 // 				gen.write("Sample");
 // 				gen.writeNull();
 // 				gen.writeStartArray();
-// 				searchApi.encodeTextField(gen, "sampleText", word);
-// 				searchApi.encodeSortedDocValuesField(gen, "investigation", new Long(i % NUMINV));
+// 				SearchApi.encodeTextField(gen, "sampleText", word);
+// 				SearchApi.encodeSortedDocValuesField(gen, "investigation", new Long(i % NUMINV));
 // 				gen.writeEnd();
 // 				gen.writeEnd();
 // 				System.out.println("SAMPLE '" + word + "' " + i % NUMINV);

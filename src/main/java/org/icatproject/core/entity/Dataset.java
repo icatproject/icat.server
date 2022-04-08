@@ -189,45 +189,31 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
-
-		StringBuilder sb = new StringBuilder(name + " " + type.getName() + " " + type.getName()); // TODO duplicate type.getName()
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "name", name);
 		if (description != null) {
-			sb.append(" " + description);
+			SearchApi.encodeString(gen, "description", description);
 		}
-
 		if (doi != null) {
-			sb.append(" " + doi);
+			SearchApi.encodeString(gen, "doi", doi);
 		}
+		if (startDate != null) {
+			SearchApi.encodeLong(gen, "startDate", startDate);
+		} else {
+			SearchApi.encodeLong(gen, "startDate", createTime);
+		}
+		if (endDate != null) {
+			SearchApi.encodeLong(gen, "endDate", endDate);
+		} else {
+			SearchApi.encodeLong(gen, "endDate", modTime);
+		}
+		SearchApi.encodeString(gen, "id", id);
+		SearchApi.encodeString(gen, "investigation.id", investigation.id);
 
 		if (sample != null) {
-			sb.append(" " + sample.getName());
-			if (sample.getType() != null) {
-				sb.append(" " + sample.getType().getName());
-			}
+			sample.getDoc(gen, "sample.");
 		}
-
-		searchApi.encodeTextField(gen, "text", sb.toString());
-		searchApi.encodeSortedDocValuesField(gen, "name", name);
-
-		if (startDate != null) {
-			searchApi.encodeSortedDocValuesField(gen, "startDate", startDate);
-		} else {
-			searchApi.encodeSortedDocValuesField(gen, "startDate", createTime);
-		}
-
-		if (endDate != null) {
-			searchApi.encodeSortedDocValuesField(gen, "endDate", endDate);
-		} else {
-			searchApi.encodeSortedDocValuesField(gen, "endDate", modTime);
-		}
-		searchApi.encodeStringField(gen, "id", id, true);
-
-		searchApi.encodeSortedDocValuesField(gen, "id", id);
-
-		searchApi.encodeStringField(gen, "investigation", investigation.id);
-
-		// TODO User, Parameter and Sample support for Elasticsearch
+		type.getDoc(gen);
 	}
 
 	/**
@@ -244,13 +230,24 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	public static Map<String, Relationship[]> getDocumentFields() throws IcatException {
 		if (documentFields.size() == 0) {
 			EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-			Relationship[] textRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("type"), eiHandler.getRelationshipsByName(Dataset.class).get("sample") };
-			documentFields.put("text", textRelationships);
+			Relationship[] sampleRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("sample") };
+			Relationship[] sampleTypeRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("sample"),
+					eiHandler.getRelationshipsByName(Sample.class).get("type") };
+			Relationship[] typeRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("type") };
 			documentFields.put("name", null);
+			documentFields.put("description", null);
+			documentFields.put("doi", null);
 			documentFields.put("startDate", null);
 			documentFields.put("endDate", null);
 			documentFields.put("id", null);
-			documentFields.put("investigation", null);
+			documentFields.put("investigation.id", null);
+			documentFields.put("sample.id", null);
+			documentFields.put("sample.name", sampleRelationships);
+			documentFields.put("sample.investigation.id", sampleRelationships);
+			documentFields.put("sample.type.id", sampleRelationships);
+			documentFields.put("sample.type.name", sampleTypeRelationships);
+			documentFields.put("type.id", null);
+			documentFields.put("type.name", typeRelationships);
 		}
 		return documentFields;
 	}

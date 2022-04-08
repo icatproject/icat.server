@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("A parameter type with unique name and units")
 @SuppressWarnings("serial")
@@ -269,6 +272,13 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 
 	public void setVerified(boolean verified) {
 		this.verified = verified;
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "type.name", name);
+		SearchApi.encodeString(gen, "type.units", units);
+		SearchApi.encodeString(gen, "type.id", id);
 	}
 
 }

@@ -4,12 +4,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.SearchApi;
 
 @Comment("An experimental facility")
 @SuppressWarnings("serial")
@@ -175,6 +178,12 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "facility.name", name);
+		SearchApi.encodeString(gen, "facility.id", id);
 	}
 
 }

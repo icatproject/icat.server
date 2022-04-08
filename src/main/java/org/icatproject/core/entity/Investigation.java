@@ -265,66 +265,32 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen, SearchApi searchApi) {
-		StringBuilder sb = new StringBuilder(visitId + " " + name + " " + facility.getName() + " " + type.getName());
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "name", name);
+		SearchApi.encodeString(gen, "visitId", visitId);
+		SearchApi.encodeString(gen, "title", title);
 		if (summary != null) {
-			sb.append(" " + summary);
+			SearchApi.encodeString(gen, "summary", summary);
 		}
 		if (doi != null) {
-			sb.append(" " + doi);
+			SearchApi.encodeString(gen, "doi", doi);
 		}
-		if (title != null) {
-			sb.append(" " + title);
-		}
-		searchApi.encodeTextField(gen, "text", sb.toString());
-		searchApi.encodeSortedDocValuesField(gen, "name", name);
 
 		if (startDate != null) {
-			searchApi.encodeSortedDocValuesField(gen, "startDate", startDate);
+			SearchApi.encodeLong(gen, "startDate", startDate);
 		} else {
-			searchApi.encodeSortedDocValuesField(gen, "startDate", createTime);
+			SearchApi.encodeLong(gen, "startDate", createTime);
 		}
 
 		if (endDate != null) {
-			searchApi.encodeSortedDocValuesField(gen, "endDate", endDate);
+			SearchApi.encodeLong(gen, "endDate", endDate);
 		} else {
-			searchApi.encodeSortedDocValuesField(gen, "endDate", modTime);
+			SearchApi.encodeLong(gen, "endDate", modTime);
 		}
 
-		investigationUsers.forEach((investigationUser) -> {
-			searchApi.encodeStringField(gen, "userName", investigationUser.getUser().getName());
-			searchApi.encodeTextField(gen, "userFullName", investigationUser.getUser().getFullName());
-		});
-
-		samples.forEach((sample) -> {
-			// searchApi.encodeSortedSetDocValuesFacetField(gen, "sampleName",
-			// sample.getName());
-			searchApi.encodeTextField(gen, "sampleText", sample.getDocText());
-		});
-
-		for (InvestigationParameter parameter : parameters) {
-			ParameterType type = parameter.type;
-			String parameterName = type.getName();
-			String parameterUnits = type.getUnits();
-			// searchApi.encodeSortedSetDocValuesFacetField(gen, "parameterName",
-			// parameterName);
-			searchApi.encodeStringField(gen, "parameterName", parameterName);
-			searchApi.encodeStringField(gen, "parameterUnits", parameterUnits);
-			// TODO make all value types facetable...
-			if (type.getValueType() == ParameterValueType.STRING) {
-				// searchApi.encodeSortedSetDocValuesFacetField(gen, "parameterStringValue",
-				// parameter.getStringValue());
-				searchApi.encodeStringField(gen, "parameterStringValue", parameter.getStringValue());
-			} else if (type.getValueType() == ParameterValueType.DATE_AND_TIME) {
-				searchApi.encodeStringField(gen, "parameterDateValue", parameter.getDateTimeValue());
-			} else if (type.getValueType() == ParameterValueType.NUMERIC) {
-				searchApi.encodeDoublePoint(gen, "parameterNumericValue", parameter.getNumericValue());
-			}
-		}
-
-		searchApi.encodeSortedDocValuesField(gen, "id", id);
-
-		searchApi.encodeStringField(gen, "id", id, true);
+		SearchApi.encodeString(gen, "id", id);
+		facility.getDoc(gen);
+		type.getDoc(gen);
 	}
 
 	/**
@@ -341,13 +307,21 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	public static Map<String, Relationship[]> getDocumentFields() throws IcatException {
 		if (documentFields.size() == 0) {
 			EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-			Relationship[] textRelationships = { eiHandler.getRelationshipsByName(Investigation.class).get("type"),
+			Relationship[] typeRelationships = { eiHandler.getRelationshipsByName(Investigation.class).get("type") };
+			Relationship[] facilityRelationships = {
 					eiHandler.getRelationshipsByName(Investigation.class).get("facility") };
-			documentFields.put("text", textRelationships);
 			documentFields.put("name", null);
+			documentFields.put("visitId", null);
+			documentFields.put("title", null);
+			documentFields.put("summary", null);
+			documentFields.put("doi", null);
 			documentFields.put("startDate", null);
 			documentFields.put("endDate", null);
 			documentFields.put("id", null);
+			documentFields.put("facility.name", facilityRelationships);
+			documentFields.put("facility.id", null);
+			documentFields.put("type.name", typeRelationships);
+			documentFields.put("type.id", null);
 		}
 		return documentFields;
 	}
