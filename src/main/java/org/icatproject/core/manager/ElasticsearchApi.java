@@ -189,49 +189,50 @@ public class ElasticsearchApi extends SearchApi {
 	}
 
 	@Override
-	public List<FacetDimension> facetSearch(JsonObject facetQuery, int maxResults, int maxLabels) throws IcatException {
+	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, int maxResults, int maxLabels) throws IcatException {
 		// TODO this should be generalised
-		try {
-			String index = "_all";
-			Set<String> fields = facetQuery.keySet();
-			BoolQuery.Builder builder = new BoolQuery.Builder();
-			for (String field : fields) {
-				// Only expecting a target and text field as part of the current facet
-				// implementation
-				if (field.equals("target")) {
-					index = facetQuery.getString("target").toLowerCase();
-				} else if (field.equals("text")) {
-					String text = facetQuery.getString("text");
-					builder.must(m -> m.queryString(q -> q.defaultField("text").query(text)));
-				}
-			}
-			String indexFinal = index;
-			SearchResponse<Object> response = client.search(s -> s
-					.index(indexFinal)
-					.size(maxResults)
-					.query(q -> q.bool(builder.build()))
-					.aggregations("samples", a -> a.terms(t -> t.field("sampleName").size(maxLabels)))
-					.aggregations("parameters", a -> a.terms(t -> t.field("parameterName").size(maxLabels))),
-					Object.class);
+		return null;
+		// try {
+		// 	String index = "_all";
+		// 	Set<String> fields = facetQuery.keySet();
+		// 	BoolQuery.Builder builder = new BoolQuery.Builder();
+		// 	for (String field : fields) {
+		// 		// Only expecting a target and text field as part of the current facet
+		// 		// implementation
+		// 		if (field.equals("target")) {
+		// 			index = facetQuery.getString("target").toLowerCase();
+		// 		} else if (field.equals("text")) {
+		// 			String text = facetQuery.getString("text");
+		// 			builder.must(m -> m.queryString(q -> q.defaultField("text").query(text)));
+		// 		}
+		// 	}
+		// 	String indexFinal = index;
+		// 	SearchResponse<Object> response = client.search(s -> s
+		// 			.index(indexFinal)
+		// 			.size(maxResults)
+		// 			.query(q -> q.bool(builder.build()))
+		// 			.aggregations("samples", a -> a.terms(t -> t.field("sampleName").size(maxLabels)))
+		// 			.aggregations("parameters", a -> a.terms(t -> t.field("parameterName").size(maxLabels))),
+		// 			Object.class);
 
-			List<StringTermsBucket> sampleBuckets = response.aggregations().get("samples").sterms().buckets().array();
-			List<StringTermsBucket> parameterBuckets = response.aggregations().get("parameters").sterms().buckets()
-					.array();
-			List<FacetDimension> facetDimensions = new ArrayList<>();
-			FacetDimension sampleDimension = new FacetDimension("sampleName");
-			FacetDimension parameterDimension = new FacetDimension("parameterName");
-			for (StringTermsBucket sampleBucket : sampleBuckets) {
-				sampleDimension.getFacets().add(new FacetLabel(sampleBucket.key(), sampleBucket.docCount()));
-			}
-			for (StringTermsBucket parameterBucket : parameterBuckets) {
-				parameterDimension.getFacets().add(new FacetLabel(parameterBucket.key(), parameterBucket.docCount()));
-			}
-			facetDimensions.add(sampleDimension);
-			facetDimensions.add(parameterDimension);
-			return facetDimensions;
-		} catch (ElasticsearchException | IOException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
+		// 	List<StringTermsBucket> sampleBuckets = response.aggregations().get("samples").sterms().buckets().array();
+		// 	List<StringTermsBucket> parameterBuckets = response.aggregations().get("parameters").sterms().buckets()
+		// 			.array();
+		// 	List<FacetDimension> facetDimensions = new ArrayList<>();
+		// 	FacetDimension sampleDimension = new FacetDimension("sampleName");
+		// 	FacetDimension parameterDimension = new FacetDimension("parameterName");
+		// 	for (StringTermsBucket sampleBucket : sampleBuckets) {
+		// 		sampleDimension.getFacets().add(new FacetLabel(sampleBucket.key(), sampleBucket.docCount()));
+		// 	}
+		// 	for (StringTermsBucket parameterBucket : parameterBuckets) {
+		// 		parameterDimension.getFacets().add(new FacetLabel(parameterBucket.key(), parameterBucket.docCount()));
+		// 	}
+		// 	facetDimensions.add(sampleDimension);
+		// 	facetDimensions.add(parameterDimension);
+		// 	return facetDimensions;
+		// } catch (ElasticsearchException | IOException e) {
+		// 	throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		// }
 	}
 
 	// @Override

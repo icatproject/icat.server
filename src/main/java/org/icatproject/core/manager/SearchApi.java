@@ -128,11 +128,6 @@ public abstract class SearchApi {
 		gen.write(name, value);
 	}
 
-	// public void encodeSortedSetDocValuesFacetField(JsonGenerator gen, String
-	// name, String value) {
-	// encodeStringField(gen, name, value);
-	// }
-
 	public static void encodeLong(JsonGenerator gen, String name, Date value) {
 		gen.write(name, value.getTime());
 	}
@@ -254,7 +249,7 @@ public abstract class SearchApi {
 		logger.info("Manually freeing searcher not supported, no request sent");
 	}
 
-	public abstract List<FacetDimension> facetSearch(JsonObject facetQuery, int maxResults, int maxLabels)
+	public abstract List<FacetDimension> facetSearch(String target, JsonObject facetQuery, int maxResults, int maxLabels)
 			throws IcatException;
 
 	public SearchResult getResults(JsonObject query, int maxResults) throws IcatException {

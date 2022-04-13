@@ -164,21 +164,19 @@ public class LuceneApi extends SearchApi {
 	}
 
 	@Override
-	public List<FacetDimension> facetSearch(JsonObject facetQuery, int maxResults, int maxLabels) throws IcatException {
+	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, int maxResults, int maxLabels) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			String indexPath = getTargetPath(facetQuery);
-			URI uri = new URIBuilder(server).setPath(basePath + "/" + indexPath + "/facet")
+			URI uri = new URIBuilder(server).setPath(basePath + "/" + target + "/facet")
 					.setParameter("maxResults", Integer.toString(maxResults))
 					.setParameter("maxLabels", Integer.toString(maxLabels)).build();
 			logger.trace("Making call {}", uri);
-			return getFacets(uri, httpclient, facetQuery.toString());
-
+			return getFacets(uri, httpclient, facetQuery.toString(), target);
 		} catch (IOException | URISyntaxException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
 
-	private List<FacetDimension> getFacets(URI uri, CloseableHttpClient httpclient, String facetQueryString)
+	private List<FacetDimension> getFacets(URI uri, CloseableHttpClient httpclient, String facetQueryString, String target)
 			throws IcatException {
 		logger.debug(facetQueryString);
 		try {
@@ -205,7 +203,7 @@ public class LuceneApi extends SearchApi {
 							if (state == ParserState.None && key != null && key.equals("dimensions")) {
 								state = ParserState.Dimensions;
 							} else if (state == ParserState.Dimensions) {
-								facetDimensions.add(new FacetDimension(key));
+								facetDimensions.add(new FacetDimension(target, key));
 								state = ParserState.Labels;
 							}
 						} else if (e == (Event.END_OBJECT)) {

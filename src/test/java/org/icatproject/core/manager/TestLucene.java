@@ -21,7 +21,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.stream.JsonGenerator;
 import javax.ws.rs.core.MediaType;
 
@@ -93,7 +95,7 @@ public class TestLucene {
 
 		Datafile elephantDatafile = new Datafile();
 		elephantDatafile.setName("Elephants and Aardvarks");
-		elephantDatafile.setDatafileModTime(new Date());
+		elephantDatafile.setDatafileModTime(new Date(0L));
 		elephantDatafile.setId(42L);
 		elephantDatafile.setDataset(dataset);
 
@@ -102,7 +104,7 @@ public class TestLucene {
 		pdfFormat.setName("pdf");
 		Datafile rhinoDatafile = new Datafile();
 		rhinoDatafile.setName("Rhinos and Aardvarks");
-		rhinoDatafile.setDatafileModTime(new Date());
+		rhinoDatafile.setDatafileModTime(new Date(3L));
 		rhinoDatafile.setId(42L);
 		rhinoDatafile.setDataset(dataset);
 		rhinoDatafile.setDatafileFormat(pdfFormat);
@@ -117,6 +119,16 @@ public class TestLucene {
 				null);
 		JsonObject pngQuery = SearchApi.buildQuery("Datafile", null, "datafileFormat.name:png", null, null, null, null,
 				null);
+		JsonObject queryObject = Json.createObjectBuilder().add("id", Json.createArrayBuilder().add("42")).build();
+		JsonObjectBuilder lowRangeBuilder = Json.createObjectBuilder().add("lower", 0L).add("upper", 1L);
+		JsonObjectBuilder highRangeBuilder = Json.createObjectBuilder().add("lower", 2L).add("upper", 3L);
+		JsonArrayBuilder rangesBuilder = Json.createArrayBuilder().add(lowRangeBuilder).add(highRangeBuilder);
+		JsonObjectBuilder dimensionBuilder = Json.createObjectBuilder().add("dimension", "date").add("ranges",
+				rangesBuilder);
+		JsonArrayBuilder dimensionsBuilder = Json.createArrayBuilder().add(dimensionBuilder);
+		JsonObject stringFacetQuery = Json.createObjectBuilder().add("query", queryObject).build();
+		JsonObject rangeFacetQuery = Json.createObjectBuilder().add("query", queryObject)
+				.add("dimensions", dimensionsBuilder).build();
 
 		// Original
 		Queue<String> queue = new ConcurrentLinkedQueue<>();
@@ -126,6 +138,19 @@ public class TestLucene {
 		checkLsr(luceneApi.getResults(rhinoQuery, 5));
 		checkLsr(luceneApi.getResults(pdfQuery, 5));
 		checkLsr(luceneApi.getResults(pngQuery, 5));
+		List<FacetDimension> facetDimensions = luceneApi.facetSearch("Datafile", stringFacetQuery, 5, 5);
+		assertEquals(0, facetDimensions.size());
+		facetDimensions = luceneApi.facetSearch("Datafile", rangeFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		FacetDimension facetDimension = facetDimensions.get(0);
+		assertEquals("date", facetDimension.getDimension());
+		assertEquals(2, facetDimension.getFacets().size());
+		FacetLabel facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("0_1", facetLabel.getLabel());
+		assertEquals(new Long(1), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(1);
+		assertEquals("2_3", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
 
 		// Change name and add a format
 		queue = new ConcurrentLinkedQueue<>();
@@ -135,6 +160,19 @@ public class TestLucene {
 		checkLsr(luceneApi.getResults(rhinoQuery, 5), 42L);
 		checkLsr(luceneApi.getResults(pdfQuery, 5), 42L);
 		checkLsr(luceneApi.getResults(pngQuery, 5));
+		facetDimensions = luceneApi.facetSearch("Datafile", stringFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		facetDimensions = luceneApi.facetSearch("Datafile", rangeFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		facetDimension = facetDimensions.get(0);
+		assertEquals("date", facetDimension.getDimension());
+		assertEquals(2, facetDimension.getFacets().size());
+		facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("0_1", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(1);
+		assertEquals("2_3", facetLabel.getLabel());
+		assertEquals(new Long(1), facetLabel.getValue());
 
 		// Change just the format
 		queue = new ConcurrentLinkedQueue<>();
@@ -144,6 +182,25 @@ public class TestLucene {
 		checkLsr(luceneApi.getResults(rhinoQuery, 5), 42L);
 		checkLsr(luceneApi.getResults(pdfQuery, 5));
 		checkLsr(luceneApi.getResults(pngQuery, 5), 42L);
+		facetDimensions = luceneApi.facetSearch("Datafile", stringFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		facetDimension = facetDimensions.get(0);
+		assertEquals("datafileFormat.name", facetDimension.getDimension());
+		assertEquals(1, facetDimension.getFacets().size());
+		facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("png", facetLabel.getLabel());
+		assertEquals(new Long(1), facetLabel.getValue());
+		facetDimensions = luceneApi.facetSearch("Datafile", rangeFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		facetDimension = facetDimensions.get(0);
+		assertEquals("date", facetDimension.getDimension());
+		assertEquals(2, facetDimension.getFacets().size());
+		facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("0_1", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(1);
+		assertEquals("2_3", facetLabel.getLabel());
+		assertEquals(new Long(1), facetLabel.getValue());
 
 		// Remove the format
 		queue = new ConcurrentLinkedQueue<>();
@@ -153,6 +210,19 @@ public class TestLucene {
 		checkLsr(luceneApi.getResults(rhinoQuery, 5), 42L);
 		checkLsr(luceneApi.getResults(pdfQuery, 5));
 		checkLsr(luceneApi.getResults(pngQuery, 5));
+		facetDimensions = luceneApi.facetSearch("Datafile", stringFacetQuery, 5, 5);
+		assertEquals(0, facetDimensions.size());
+		facetDimensions = luceneApi.facetSearch("Datafile", rangeFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		facetDimension = facetDimensions.get(0);
+		assertEquals("date", facetDimension.getDimension());
+		assertEquals(2, facetDimension.getFacets().size());
+		facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("0_1", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(1);
+		assertEquals("2_3", facetLabel.getLabel());
+		assertEquals(new Long(1), facetLabel.getValue());
 
 		// Remove the file
 		queue = new ConcurrentLinkedQueue<>();
@@ -836,7 +906,7 @@ public class TestLucene {
 				facility.setId(0L);
 				investigation.setFacility(facility);
 				InvestigationType type = new InvestigationType();
-				type.setName("");
+				type.setName("test");
 				type.setId(0L);
 				investigation.setType(type);
 				investigation.setName(word);
@@ -878,7 +948,7 @@ public class TestLucene {
 				investigation.setId(new Long(i % NUMINV));
 				Dataset dataset = new Dataset();
 				DatasetType type = new DatasetType();
-				type.setName("");
+				type.setName("test");
 				type.setId(0L);
 				dataset.setType(type);
 				dataset.setName(word);
@@ -961,7 +1031,7 @@ public class TestLucene {
 				investigation.setId(new Long(i % NUMINV));
 				SampleType sampleType = new SampleType();
 				sampleType.setId(0L);
-				sampleType.setName("");
+				sampleType.setName("test");
 				Sample sample = new Sample();
 				sample.setId(new Long(i));
 				sample.setInvestigation(investigation);

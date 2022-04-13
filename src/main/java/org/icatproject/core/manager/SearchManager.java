@@ -30,7 +30,10 @@ import javax.annotation.PreDestroy;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
@@ -374,6 +377,17 @@ public class SearchManager {
 		}
 	}
 
+	public static JsonObject buildFacetQuery(List<ScoredEntityBaseBean> results, String idField, JsonObject facetJson) {
+		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+		results.forEach(r -> arrayBuilder.add(Long.toString(r.getEntityBaseBeanId())));
+		JsonObject terms = Json.createObjectBuilder().add(idField, arrayBuilder.build()).build();
+		JsonObjectBuilder objectBuilder = Json.createObjectBuilder().add("query", terms);
+		if (facetJson.containsKey("dimensions")) {
+			objectBuilder.add("dimensions", facetJson.getJsonArray("dimensions"));
+		}
+		return objectBuilder.build();
+	}
+
 	private static List<String> buildPublicSearchFields(GateKeeper gateKeeper, Map<String, Relationship[]> map) {
 		List<String> fields = new ArrayList<>();
 		for (Entry<String, Relationship[]> entry : map.entrySet()) {
@@ -428,9 +442,9 @@ public class SearchManager {
 		}
 	}
 
-	public List<FacetDimension> facetSearch(JsonObject facetQuery, int maxResults, int maxLabels)
+	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, int maxResults, int maxLabels)
 			throws IcatException {
-		return searchApi.facetSearch(facetQuery, maxResults, maxLabels);
+		return searchApi.facetSearch(target, facetQuery, maxResults, maxLabels);
 	}
 
 	public void freeSearcher(String uid) throws IcatException {

@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -779,9 +780,9 @@ public class EntityBeanManager {
 		}
 	}
 
-	private ScoredEntityBaseBean filterReadAccess(List<ScoredEntityBaseBean> results, List<ScoredEntityBaseBean> allResults,
-			int maxCount, String userId, EntityManager manager, Class<? extends EntityBaseBean> klass)
-			throws IcatException {
+	private ScoredEntityBaseBean filterReadAccess(List<ScoredEntityBaseBean> results,
+			List<ScoredEntityBaseBean> allResults, int maxCount, String userId, EntityManager manager,
+			Class<? extends EntityBaseBean> klass) throws IcatException {
 
 		logger.debug("Got " + allResults.size() + " results from search engine");
 		for (ScoredEntityBaseBean sr : allResults) {
@@ -1423,28 +1424,6 @@ public class EntityBeanManager {
 			} while (results.size() < limit);
 		}
 
-			// TODO move this to somewhere we can manually call it
-			// TODO also need to fix it for Elasticsearch (cannot use text fields for
-			// aggregations...)
-			// if (results.size() > 0) {
-			// /* Get facets for the filtered list of IDs */
-			// String facetText = "";
-			// for (ScoredEntityBaseBean result: results) {
-			// facetText += " id:" + result.getEntityBaseBeanId();
-			// }
-			// JsonObject facetQuery = Json.createObjectBuilder()
-			// .add("target", jo.getString("target"))
-			// .add("text", facetText.substring(1))
-			// .build();
-			// List<FacetDimension> facets = searchManager.facetSearch(facetQuery,
-			// blockSize, 100); // TODO remove hardcode
-			// for (FacetDimension dimension: facets) {
-			// logger.debug("Facet dimension: {}", dimension.getDimension());
-			// for (FacetLabel facet: dimension.getFacets()) {
-			// logger.debug("{}: {}", facet.getLabel(), facet.getValue());
-			// }
-			// }
-			// }
 		if (logRequests.contains("R")) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
@@ -1461,10 +1440,12 @@ public class EntityBeanManager {
 	}
 
 	public SearchResult freeTextSearchDocs(String userName, JsonObject jo, String searchAfter, int limit, String sort,
-			EntityManager manager, String ip, Class<? extends EntityBaseBean> klass) throws IcatException {
+			String facets, EntityManager manager, String ip, Class<? extends EntityBaseBean> klass)
+			throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		String lastSearchAfter = null;
+		List<FacetDimension> dimensions = null;
 		if (searchActive) {
 			SearchResult lastSearchResult = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
@@ -1492,6 +1473,38 @@ public class EntityBeanManager {
 					break;
 				}
 			} while (results.size() < limit);
+
+			if (facets != null && !facets.equals("") && results.size() > 0) {
+				JsonReader reader = Json.createReader(new StringReader(facets));
+				List<JsonObject> jsonFacets = reader.readArray().getValuesAs(JsonObject.class);
+
+				for (JsonObject jsonFacet : jsonFacets) {
+					JsonObject facetQuery;
+					String target = jsonFacet.getString("target");
+					if (target.equals(klass.getSimpleName())) {
+						facetQuery = SearchManager.buildFacetQuery(results, "id", jsonFacet);
+					} else {
+						Relationship relationship;
+						if (target.contains("Parameter")) {
+							relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
+						} else {
+							// TODO allow more types here, as we decide what to support
+							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+									"Facet target should be a Parameter, but it was " + target);
+						}
+
+						if (gateKeeper.allowed(relationship)) {
+							facetQuery = SearchManager.buildFacetQuery(results,
+									klass.getSimpleName().toLowerCase() + ".id", jsonFacet);
+						} else {
+							logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed",
+									target, klass.getSimpleName());
+							continue;
+						}
+					}
+					dimensions = searchManager.facetSearch(target, facetQuery, results.size(), 10);
+				}
+			}
 		}
 		if (logRequests.contains("R")) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1505,7 +1518,7 @@ public class EntityBeanManager {
 			transmitter.processMessage("freeTextSearchDocs", ip, baos.toString(), startMillis);
 		}
 		logger.debug("Returning {} results", results.size());
-		return new SearchResult(lastSearchAfter, results);
+		return new SearchResult(lastSearchAfter, results, dimensions);
 	}
 
 	public List<String> searchGetPopulating() {

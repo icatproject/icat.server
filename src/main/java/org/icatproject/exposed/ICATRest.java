@@ -76,6 +76,8 @@ import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.core.manager.FacetDimension;
+import org.icatproject.core.manager.FacetLabel;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
@@ -927,7 +929,8 @@ public class ICATRest {
 	}
 
 	/**
-	 * Perform a free text search against a dedicated (non-DB) search engine component for entity ids.
+	 * Perform a free text search against a dedicated (non-DB) search engine
+	 * component for entity ids.
 	 * 
 	 * @summary Free text id search.
 	 * 
@@ -1111,119 +1114,150 @@ public class ICATRest {
 	}
 
 	/**
-	 * Perform a free text search against a dedicated (non-DB) search engine component for entire Documents.
+	 * Perform a free text search against a dedicated (non-DB) search engine
+	 * component for entire Documents.
 	 * 
 	 * @summary Free text Document search.
 	 * 
 	 * @param sessionId
-	 *                  a sessionId of a user which takes the form
-	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 *                    a sessionId of a user which takes the form
+	 *                    <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * @param query
-	 *                  json encoded query object. One of the fields is "target"
-	 *                  which
-	 *                  must be "Investigation", "Dataset" or "Datafile". The other
-	 *                  fields are all optional:
-	 *                  <dl>
-	 *                  <dt>user</dt>
-	 *                  <dd>name of user as in the User table which may include a
-	 *                  prefix</dd>
-	 *                  <dt>text</dt>
-	 *                  <dd>some text occurring somewhere in the entity. This is
-	 *                  understood by the <a href=
-	 *                  "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
-	 *                  >lucene parser</a> but avoid trying to use fields.</dd>
-	 *                  <dt>lower</dt>
-	 *                  <dd>earliest date to search for in the form
-	 *                  <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
-	 *                  timezone. In the case of an investigation or data set search
-	 *                  the date is compared with the start date and in the case of
-	 *                  a
-	 *                  data file the date field is used.</dd>
-	 *                  <dt>upper</dt>
-	 *                  <dd>latest date to search for in the form
-	 *                  <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
-	 *                  timezone. In the case of an investigation or data set search
-	 *                  the date is compared with the end date and in the case of a
-	 *                  data file the date field is used.</dd>
-	 *                  <dt>parameters</dt>
-	 *                  <dd>this holds a list of json parameter objects all of which
-	 *                  must match. Parameters have the following fields, all of
-	 *                  which
-	 *                  are optional:
-	 *                  <dl>
-	 *                  <dt>name</dt>
-	 *                  <dd>A wildcard search for a parameter with this name.
-	 *                  Supported wildcards are <code>*</code>, which matches any
-	 *                  character sequence (including the empty one), and
-	 *                  <code>?</code>, which matches any single character.
-	 *                  <code>\</code> is the escape character. Note this query can
-	 *                  be
-	 *                  slow, as it needs to iterate over many terms. In order to
-	 *                  prevent extremely slow queries, a name should not start with
-	 *                  the wildcard <code>*</code></dd>
-	 *                  <dt>units</dt>
-	 *                  <dd>A wildcard search for a parameter with these units.
-	 *                  Supported wildcards are <code>*</code>, which matches any
-	 *                  character sequence (including the empty one), and
-	 *                  <code>?</code>, which matches any single character.
-	 *                  <code>\</code> is the escape character. Note this query can
-	 *                  be
-	 *                  slow, as it needs to iterate over many terms. In order to
-	 *                  prevent extremely slow queries, units should not start with
-	 *                  the wildcard <code>*</code></dd>
-	 *                  <dt>stringValue</dt>
-	 *                  <dd>A wildcard search for a parameter stringValue. Supported
-	 *                  wildcards are <code>*</code>, which matches any character
-	 *                  sequence (including the empty one), and <code>?</code>,
-	 *                  which
-	 *                  matches any single character. <code>\</code> is the escape
-	 *                  character. Note this query can be slow, as it needs to
-	 *                  iterate
-	 *                  over many terms. In order to prevent extremely slow queries,
-	 *                  requested stringValues should not start with the wildcard
-	 *                  <code>*</code></dd>
-	 *                  <dt>lowerDateValue and upperDateValue</dt>
-	 *                  <dd>latest and highest date to search for in the form
-	 *                  <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
-	 *                  timezone. This should be used to search on parameters having
-	 *                  a
-	 *                  dateValue. If only one bound is set the restriction has not
-	 *                  effect.</dd>
-	 *                  <dt>lowerNumericValue and upperNumericValue</dt>
-	 *                  <dd>This should be used to search on parameters having a
-	 *                  numericValue. If only one bound is set the restriction has
-	 *                  not
-	 *                  effect.</dd>
-	 *                  </dl>
-	 *                  </dd>
-	 *                  <dt>samples</dt>
-	 *                  <dd>A json array of strings each of which must match text
-	 *                  found in a sample. This is understood by the <a href=
-	 *                  "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
-	 *                  >lucene parser</a> but avoid trying to use fields. This is
-	 *                  only respected in the case of an investigation search.</dd>
-	 *                  <dt>userFullName</dt>
-	 *                  <dd>Full name of user in the User table which may contain
-	 *                  titles etc. Matching is done by the <a href=
-	 *                  "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
-	 *                  >lucene parser</a> but avoid trying to use fields. This is
-	 *                  only respected in the case of an investigation search.</dd>
-	 *                  </dl>
+	 *                    json encoded query object. One of the fields is "target"
+	 *                    which
+	 *                    must be "Investigation", "Dataset" or "Datafile". The
+	 *                    other
+	 *                    fields are all optional:
+	 *                    <dl>
+	 *                    <dt>user</dt>
+	 *                    <dd>name of user as in the User table which may include a
+	 *                    prefix</dd>
+	 *                    <dt>text</dt>
+	 *                    <dd>some text occurring somewhere in the entity. This is
+	 *                    understood by the <a href=
+	 *                    "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *                    >lucene parser</a> but avoid trying to use fields.</dd>
+	 *                    <dt>lower</dt>
+	 *                    <dd>earliest date to search for in the form
+	 *                    <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *                    timezone. In the case of an investigation or data set
+	 *                    search
+	 *                    the date is compared with the start date and in the case
+	 *                    of
+	 *                    a
+	 *                    data file the date field is used.</dd>
+	 *                    <dt>upper</dt>
+	 *                    <dd>latest date to search for in the form
+	 *                    <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *                    timezone. In the case of an investigation or data set
+	 *                    search
+	 *                    the date is compared with the end date and in the case of
+	 *                    a
+	 *                    data file the date field is used.</dd>
+	 *                    <dt>parameters</dt>
+	 *                    <dd>this holds a list of json parameter objects all of
+	 *                    which
+	 *                    must match. Parameters have the following fields, all of
+	 *                    which
+	 *                    are optional:
+	 *                    <dl>
+	 *                    <dt>name</dt>
+	 *                    <dd>A wildcard search for a parameter with this name.
+	 *                    Supported wildcards are <code>*</code>, which matches any
+	 *                    character sequence (including the empty one), and
+	 *                    <code>?</code>, which matches any single character.
+	 *                    <code>\</code> is the escape character. Note this query
+	 *                    can
+	 *                    be
+	 *                    slow, as it needs to iterate over many terms. In order to
+	 *                    prevent extremely slow queries, a name should not start
+	 *                    with
+	 *                    the wildcard <code>*</code></dd>
+	 *                    <dt>units</dt>
+	 *                    <dd>A wildcard search for a parameter with these units.
+	 *                    Supported wildcards are <code>*</code>, which matches any
+	 *                    character sequence (including the empty one), and
+	 *                    <code>?</code>, which matches any single character.
+	 *                    <code>\</code> is the escape character. Note this query
+	 *                    can
+	 *                    be
+	 *                    slow, as it needs to iterate over many terms. In order to
+	 *                    prevent extremely slow queries, units should not start
+	 *                    with
+	 *                    the wildcard <code>*</code></dd>
+	 *                    <dt>stringValue</dt>
+	 *                    <dd>A wildcard search for a parameter stringValue.
+	 *                    Supported
+	 *                    wildcards are <code>*</code>, which matches any character
+	 *                    sequence (including the empty one), and <code>?</code>,
+	 *                    which
+	 *                    matches any single character. <code>\</code> is the escape
+	 *                    character. Note this query can be slow, as it needs to
+	 *                    iterate
+	 *                    over many terms. In order to prevent extremely slow
+	 *                    queries,
+	 *                    requested stringValues should not start with the wildcard
+	 *                    <code>*</code></dd>
+	 *                    <dt>lowerDateValue and upperDateValue</dt>
+	 *                    <dd>latest and highest date to search for in the form
+	 *                    <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *                    timezone. This should be used to search on parameters
+	 *                    having
+	 *                    a
+	 *                    dateValue. If only one bound is set the restriction has
+	 *                    not
+	 *                    effect.</dd>
+	 *                    <dt>lowerNumericValue and upperNumericValue</dt>
+	 *                    <dd>This should be used to search on parameters having a
+	 *                    numericValue. If only one bound is set the restriction has
+	 *                    not
+	 *                    effect.</dd>
+	 *                    </dl>
+	 *                    </dd>
+	 *                    <dt>samples</dt>
+	 *                    <dd>A json array of strings each of which must match text
+	 *                    found in a sample. This is understood by the <a href=
+	 *                    "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *                    >lucene parser</a> but avoid trying to use fields. This is
+	 *                    only respected in the case of an investigation
+	 *                    search.</dd>
+	 *                    <dt>userFullName</dt>
+	 *                    <dd>Full name of user in the User table which may contain
+	 *                    titles etc. Matching is done by the <a href=
+	 *                    "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *                    >lucene parser</a> but avoid trying to use fields. This is
+	 *                    only respected in the case of an investigation
+	 *                    search.</dd>
+	 *                    </dl>
 	 * @param searchAfter
-	 *                  String representing the last returned document of a previous search, so that new results will be from after this document. The representation should be a JSON array, but the nature of the values will depend on the sort applied.
+	 *                    String representing the last returned document of a
+	 *                    previous search, so that new results will be from after
+	 *                    this document. The representation should be a JSON array,
+	 *                    but the nature of the values will depend on the sort
+	 *                    applied.
 	 * @param sort
-	 *                  json encoded sort object. Each key should be a field on the
-	 *                  targeted Document, with a value of "asc" or "desc" to
-	 *                  specify the order of the results. Multiple pairs can be
-	 *                  provided, in which case each subsequent sort is used as a
-	 *                  tiebreaker for the previous one. If no sort is specified,
-	 *                  then results will be returned in order of relevance to the
-	 *                  search query, with their search engine id as a tiebreaker.
+	 *                    json encoded sort object. Each key should be a field on
+	 *                    the targeted Document, with a value of "asc" or "desc" to
+	 *                    specify the order of the results. Multiple pairs can be
+	 *                    provided, in which case each subsequent sort is used as a
+	 *                    tiebreaker for the previous one. If no sort is specified,
+	 *                    then results will be returned in order of relevance to the
+	 *                    search query, with their search engine id as a tiebreaker.
 	 * 
 	 * @param limit
-	 *                  maximum number of entities to return
+	 *                    maximum number of entities to return
+	 * @param facets
+	 *                    String representing a JsonArray of JsonObjects. Each
+	 *                    should define the "target" entity name, and optionally
+	 *                    another JsonArray of JsonObjects representing specific
+	 *                    fields to facet. If absent, then all applicable String
+	 *                    fields will be faceted. These objects must have the
+	 *                    "dimension" key, and if the field is numeric than the
+	 *                    "range" key should denote an array of objects with "lower"
+	 *                    and "upper" values.
 	 * 
-	 * @return Set of entity ids, relevance scores and Document source encoded as json.
+	 * @return Set of entity ids, relevance scores and Document source encoded as
+	 *         json.
 	 * 
 	 * @throws IcatException
 	 *                       when something is wrong
@@ -1232,7 +1266,8 @@ public class ICATRest {
 	@Path("search/documents")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String search(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
-			@QueryParam("query") String query, @QueryParam("search_after") String searchAfter, @QueryParam("limit") int limit, @QueryParam("sort") String sort)
+			@QueryParam("query") String query, @QueryParam("search_after") String searchAfter,
+			@QueryParam("limit") int limit, @QueryParam("sort") String sort, @QueryParam("facets") String facets)
 			throws IcatException {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
@@ -1260,7 +1295,8 @@ public class ICATRest {
 									&& parameter.containsKey("upperDateValue"))
 							|| (parameter.containsKey("lowerNumericValue")
 									&& parameter.containsKey("upperNumericValue")))) {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "value not set in parameter '" + name + "'");
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+								"value not set in parameter '" + name + "'");
 					}
 				}
 			}
@@ -1277,13 +1313,30 @@ public class ICATRest {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
 			}
 			logger.debug("Free text search with query: {}", jo.toString());
-			result = beanManager.freeTextSearchDocs(userName, jo, searchAfter, limit, sort, manager, request.getRemoteAddr(), klass);
+			result = beanManager.freeTextSearchDocs(userName, jo, searchAfter, limit, sort, facets, manager,
+					request.getRemoteAddr(), klass);
+
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartObject();
+
 			String newSearchAfter = result.getSearchAfter();
 			if (newSearchAfter != null) {
 				gen.write("search_after", newSearchAfter);
 			}
+
+			List<FacetDimension> dimensions = result.getDimensions();
+			if (dimensions != null && dimensions.size() > 0) {
+				gen.writeStartObject("dimensions");
+				for (FacetDimension dimension : dimensions) {
+					gen.writeStartObject(dimension.getTarget() + "." + dimension.getDimension());
+					for (FacetLabel label : dimension.getFacets()) {
+						gen.write(label.getLabel(), label.getValue());
+					}
+					gen.writeEnd();
+				}
+				gen.writeEnd();
+			}
+
 			gen.writeStartArray("results");
 			for (ScoredEntityBaseBean sb : result.getResults()) {
 				gen.writeStartObject();
