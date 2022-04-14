@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -1050,6 +1051,175 @@ public class TestLucene {
 
 		luceneApi.commit();
 
+	}
+
+	@Test
+	public void unitConversion() throws IcatException {
+		// Build queries for raw and SI values
+		// JsonObject queryObject = Json.createObjectBuilder().add("investigation.id",
+		// Json.createArrayBuilder().add("0"))
+		// .build();
+		JsonObject mKQuery = Json.createObjectBuilder().add("type.units", "mK").build();
+		JsonObject celsiusQuery = Json.createObjectBuilder().add("type.units", "celsius").build();
+		JsonObject wrongQuery = Json.createObjectBuilder().add("type.units", "wrong").build();
+		JsonObject kelvinQuery = Json.createObjectBuilder().add("type.unitsSI", "Kelvin").build();
+		JsonObjectBuilder lowRangeBuilder = Json.createObjectBuilder().add("lower", 272.5).add("upper", 273.5);
+		JsonObjectBuilder midRangeBuilder = Json.createObjectBuilder().add("lower", 272999.5).add("upper", 273000.5);
+		JsonObjectBuilder highRangeBuilder = Json.createObjectBuilder().add("lower", 273272.5).add("upper", 273273.5);
+		JsonArray ranges = Json.createArrayBuilder().add(lowRangeBuilder).add(midRangeBuilder).add(highRangeBuilder)
+				.build();
+		JsonObject rawObject = Json.createObjectBuilder().add("dimension", "numericValue").add("ranges", ranges)
+				.build();
+		JsonObject rawFacetQuery = Json.createObjectBuilder().add("query", mKQuery)
+				.add("dimensions", Json.createArrayBuilder().add(rawObject)).build();
+		JsonObject systemObject = Json.createObjectBuilder().add("dimension", "numericValueSI").add("ranges", ranges)
+				.build();
+		JsonObject systemFacetQuery = Json.createObjectBuilder().add("query", kelvinQuery)
+				.add("dimensions", Json.createArrayBuilder().add(systemObject)).build();
+
+		// Build entities
+		Investigation investigation = new Investigation();
+		investigation.setId(0L);
+		investigation.setName("name");
+		investigation.setVisitId("visitId");
+		investigation.setTitle("title");
+		investigation.setCreateTime(new Date());
+		investigation.setModTime(new Date());
+		Facility facility = new Facility();
+		facility.setName("facility");
+		facility.setId(0L);
+		investigation.setFacility(facility);
+		InvestigationType type = new InvestigationType();
+		type.setName("type");
+		type.setId(0L);
+		investigation.setType(type);
+
+		ParameterType numericParameterType = new ParameterType();
+		numericParameterType.setId(0L);
+		numericParameterType.setName("parameter");
+		numericParameterType.setUnits("mK");
+		InvestigationParameter parameter = new InvestigationParameter();
+		parameter.setInvestigation(investigation);
+		parameter.setType(numericParameterType);
+		parameter.setNumericValue(273000.);
+		parameter.setId(0L);
+
+		Queue<String> queue = new ConcurrentLinkedQueue<>();
+		queue.add(SearchApi.encodeOperation("create", investigation));
+		queue.add(SearchApi.encodeOperation("create", parameter));
+		modifyQueue(queue);
+
+		// Assert the raw value is still 273000 (mK)
+		List<FacetDimension> facetDimensions = luceneApi.facetSearch("InvestigationParameter", rawFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		FacetDimension facetDimension = facetDimensions.get(0);
+		assertEquals("numericValue", facetDimension.getDimension());
+		assertEquals(3, facetDimension.getFacets().size());
+		FacetLabel facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("272.5_273.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(1);
+		assertEquals("272999.5_273000.5", facetLabel.getLabel());
+		assertEquals(new Long(1), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(2);
+		assertEquals("273272.5_273273.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+
+		// Assert the SI value is 273 (K)
+		facetDimensions = luceneApi.facetSearch("InvestigationParameter", systemFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		facetDimension = facetDimensions.get(0);
+		assertEquals("numericValueSI", facetDimension.getDimension());
+		assertEquals(3, facetDimension.getFacets().size());
+		facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("272.5_273.5", facetLabel.getLabel());
+		assertEquals(new Long(1), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(1);
+		assertEquals("272999.5_273000.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(2);
+		assertEquals("273272.5_273273.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+
+		// Change units only to "celsius"
+		numericParameterType.setUnits("celsius");
+		queue = new ConcurrentLinkedQueue<>();
+		queue.add(SearchApi.encodeOperation("update", parameter));
+		modifyQueue(queue);
+		rawFacetQuery = Json.createObjectBuilder().add("query", celsiusQuery)
+				.add("dimensions", Json.createArrayBuilder().add(rawObject)).build();
+
+		// Assert the raw value is still 273000 (deg C)
+		facetDimensions = luceneApi.facetSearch("InvestigationParameter", rawFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		facetDimension = facetDimensions.get(0);
+		assertEquals("numericValue", facetDimension.getDimension());
+		assertEquals(3, facetDimension.getFacets().size());
+		facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("272.5_273.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(1);
+		assertEquals("272999.5_273000.5", facetLabel.getLabel());
+		assertEquals(new Long(1), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(2);
+		assertEquals("273272.5_273273.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+
+		// Assert the SI value is 273273.15 (K)
+		facetDimensions = luceneApi.facetSearch("InvestigationParameter", systemFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		facetDimension = facetDimensions.get(0);
+		assertEquals("numericValueSI", facetDimension.getDimension());
+		assertEquals(3, facetDimension.getFacets().size());
+		facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("272.5_273.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(1);
+		assertEquals("272999.5_273000.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(2);
+		assertEquals("273272.5_273273.5", facetLabel.getLabel());
+		assertEquals(new Long(1), facetLabel.getValue());
+
+		// Change units to something wrong
+		numericParameterType.setUnits("wrong");
+		queue = new ConcurrentLinkedQueue<>();
+		queue.add(SearchApi.encodeOperation("update", parameter));
+		modifyQueue(queue);
+		rawFacetQuery = Json.createObjectBuilder().add("query", wrongQuery)
+				.add("dimensions", Json.createArrayBuilder().add(rawObject)).build();
+
+		// Assert the raw value is still 273000 (wrong)
+		facetDimensions = luceneApi.facetSearch("InvestigationParameter", rawFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		facetDimension = facetDimensions.get(0);
+		assertEquals("numericValue", facetDimension.getDimension());
+		assertEquals(3, facetDimension.getFacets().size());
+		facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("272.5_273.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(1);
+		assertEquals("272999.5_273000.5", facetLabel.getLabel());
+		assertEquals(new Long(1), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(2);
+		assertEquals("273272.5_273273.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+
+		// Assert that the SI value has not been set due to conversion failing
+		facetDimensions = luceneApi.facetSearch("InvestigationParameter", systemFacetQuery, 5, 5);
+		assertEquals(1, facetDimensions.size());
+		facetDimension = facetDimensions.get(0);
+		assertEquals("numericValueSI", facetDimension.getDimension());
+		assertEquals(3, facetDimension.getFacets().size());
+		facetLabel = facetDimension.getFacets().get(0);
+		assertEquals("272.5_273.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(1);
+		assertEquals("272999.5_273000.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
+		facetLabel = facetDimension.getFacets().get(2);
+		assertEquals("273272.5_273273.5", facetLabel.getLabel());
+		assertEquals(new Long(0), facetLabel.getValue());
 	}
 
 }
