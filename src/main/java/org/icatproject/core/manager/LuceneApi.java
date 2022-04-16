@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -66,10 +67,8 @@ public class LuceneApi extends SearchApi {
 		return path;
 	}
 
-	URI server;
-
 	public LuceneApi(URI server) {
-		this.server = server;
+		super(server);
 	}
 
 	public void addNow(String entityName, List<Long> ids, EntityManager manager,
@@ -110,7 +109,7 @@ public class LuceneApi extends SearchApi {
 	}
 
 	@Override
-	public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
+	public JsonObject buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		builder.add("doc", lastBean.getEngineDocId());
 		builder.add("shardIndex", -1);
@@ -132,7 +131,7 @@ public class LuceneApi extends SearchApi {
 				builder.add("fields", arrayBuilder);
 			}
 		}
-		return builder.build().toString();
+		return builder.build();
 	}
 
 	@Override
@@ -164,7 +163,7 @@ public class LuceneApi extends SearchApi {
 	}
 
 	@Override
-	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, int maxResults, int maxLabels) throws IcatException {
+	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, Integer maxResults, int maxLabels) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URI uri = new URIBuilder(server).setPath(basePath + "/" + target + "/facet")
 					.setParameter("maxResults", Integer.toString(maxResults))
@@ -227,14 +226,18 @@ public class LuceneApi extends SearchApi {
 	}
 
 	@Override
-	public SearchResult getResults(JsonObject query, String searchAfter, int blockSize, String sort,
+	public SearchResult getResults(JsonObject query, JsonValue searchAfter, Integer blockSize, String sort,
 			List<String> fields) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			String indexPath = getTargetPath(query);
-			URI uri = new URIBuilder(server).setPath(basePath + "/" + indexPath)
-					.setParameter("search_after", searchAfter)
-					.setParameter("maxResults", Integer.toString(blockSize))
-					.setParameter("sort", sort).build();
+			URIBuilder uriBuilder = new URIBuilder(server).setPath(basePath + "/" + indexPath)
+					.setParameter("maxResults", Integer.toString(blockSize));
+			if (searchAfter != null) {
+				uriBuilder.setParameter("search_after", searchAfter.toString());
+			}
+			if (sort != null) {
+				uriBuilder.setParameter("sort", sort);
+			}
 			JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
 			objectBuilder.add("query", query);
 			if (fields != null && fields.size() > 0) {
@@ -243,6 +246,7 @@ public class LuceneApi extends SearchApi {
 				objectBuilder.add("fields", arrayBuilder.build());
 			}
 			String queryString = objectBuilder.build().toString();
+			URI uri = uriBuilder.build();
 			logger.trace("Making call {} with queryString {}", uri, queryString);
 			return getResults(uri, httpclient, queryString);
 
@@ -278,7 +282,7 @@ public class LuceneApi extends SearchApi {
 						results.add(new ScoredEntityBaseBean(luceneDocId, score, source));
 					}
 					if (responseObject.containsKey("search_after")) {
-						lsr.setSearchAfter(responseObject.getJsonObject("search_after").toString());
+						lsr.setSearchAfter(responseObject.getJsonObject("search_after"));
 					}
 				}
 			}

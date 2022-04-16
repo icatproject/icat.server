@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.json.stream.JsonGenerator;
@@ -53,6 +54,8 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 	@Comment("The version if needed.  The version code may be part of the basic name")
 	@Column(name = "VERSION", nullable = false)
 	private String version;
+
+	public static List<String> docFields = Arrays.asList("datafileFormat.name", "datafileFormat.id");
 
 	/* Needed for JPA */
 	public DatafileFormat() {

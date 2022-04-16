@@ -8,7 +8,7 @@ import shutil
 from zipfile import ZipFile
 import subprocess
 
-if len(sys.argv) != 6:
+if len(sys.argv) != 7:
     raise RuntimeError("Wrong number of arguments")
 
 containerHome = sys.argv[1]
@@ -16,14 +16,17 @@ icat_url = sys.argv[2]
 search_engine = sys.argv[3]
 lucene_url = sys.argv[4]
 elasticsearch_url = sys.argv[5]
+opensearch_url = sys.argv[6]
 
 if search_engine == "LUCENE":
     search_urls = lucene_url
 elif search_engine == "ELASTICSEARCH":
     search_urls = elasticsearch_url
+elif search_engine == "OPENSEARCH":
+    search_urls = opensearch_url
 else:
     raise RuntimeError("Search engine %s unrecognised, " % search_engine
-                       + "should be one of LUCENE, ELASTICSEARCH")
+                       + "should be one of LUCENE, ELASTICSEARCH, OPENSEARCH")
 
 subst = dict(os.environ)
 

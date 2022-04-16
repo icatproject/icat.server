@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.json.stream.JsonGenerator;
@@ -63,6 +64,8 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	@Comment("A URL associated with this facility")
 	private String url;
+
+	public static List<String> docFields = Arrays.asList("facility.name", "facility.id");
 
 	/* Needed for JPA */
 	public Facility() {

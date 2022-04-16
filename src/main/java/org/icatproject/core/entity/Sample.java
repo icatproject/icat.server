@@ -97,7 +97,7 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void getDoc(JsonGenerator gen) {
-		SearchApi.encodeString(gen, "sample.name", name);
+		SearchApi.encodeString(gen, "name", name);
 		SearchApi.encodeString(gen, "id", id);
 		SearchApi.encodeString(gen, "investigation.id", investigation.id);
 		if (type != null) {
@@ -115,7 +115,7 @@ public class Sample extends EntityBaseBean implements Serializable {
 	 * @param prefix String to precede all ambiguous field names.
 	 */
 	public void getDoc(JsonGenerator gen, String prefix) {
-		SearchApi.encodeString(gen, "sample.name", name);
+		SearchApi.encodeString(gen, prefix + "name", name);
 		SearchApi.encodeString(gen, prefix + "id", id);
 		SearchApi.encodeString(gen, prefix + "investigation.id", investigation.id);
 		if (type != null) {

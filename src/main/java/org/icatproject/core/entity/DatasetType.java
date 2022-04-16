@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.json.stream.JsonGenerator;
@@ -37,6 +38,8 @@ public class DatasetType extends EntityBaseBean implements Serializable {
 	@Comment("A short name identifying this data set type within the facility")
 	@Column(name = "NAME", nullable = false)
 	private String name;
+
+	public static List<String> docFields = Arrays.asList("type.name", "type.id");
 
 	/* Needed for JPA */
 	public DatasetType() {

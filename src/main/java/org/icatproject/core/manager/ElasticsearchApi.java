@@ -106,6 +106,7 @@ public class ElasticsearchApi extends SearchApi {
 	private final Map<String, Integer> pitMap = new HashMap<>();
 
 	public ElasticsearchApi(List<URL> servers) throws IcatException {
+		super(null);
 		List<HttpHost> hosts = new ArrayList<HttpHost>();
 		for (URL server : servers) {
 			hosts.add(new HttpHost(server.getHost(), server.getPort(), server.getProtocol()));
@@ -117,7 +118,7 @@ public class ElasticsearchApi extends SearchApi {
 		initMappings();
 	}
 
-	private void initMappings() throws IcatException {
+	public void initMappings() throws IcatException {
 		try {
 			client.cluster().putSettings(s -> s.persistent("action.auto_create_index", JsonData.of(false)));
 			client.putScript(p -> p.id("update_user").script(s -> s
@@ -189,7 +190,7 @@ public class ElasticsearchApi extends SearchApi {
 	}
 
 	@Override
-	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, int maxResults, int maxLabels) throws IcatException {
+	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, Integer maxResults, int maxLabels) throws IcatException {
 		// TODO this should be generalised
 		return null;
 		// try {

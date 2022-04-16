@@ -1394,8 +1394,8 @@ public class EntityBeanManager {
 			EntityManager manager, String ip, Class<? extends EntityBaseBean> klass) throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
-		String searchAfter = null;
-		String lastSearchAfter = null;
+		JsonValue searchAfter = null;
+		JsonValue lastSearchAfter = null;
 		if (searchActive) {
 			SearchResult lastSearchResult = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
@@ -1415,7 +1415,7 @@ public class EntityBeanManager {
 					if (lastSearchAfter == null) {
 						break; // If searchAfter is null, we ran out of results so stop here
 					}
-					searchAfter = lastSearchAfter.toString();
+					searchAfter = lastSearchAfter;
 				} else {
 					// Have stopped early by reaching the limit, so build a searchAfter document
 					lastSearchAfter = searchManager.buildSearchAfter(lastBean, sort);
@@ -1439,12 +1439,12 @@ public class EntityBeanManager {
 		return results;
 	}
 
-	public SearchResult freeTextSearchDocs(String userName, JsonObject jo, String searchAfter, int limit, String sort,
+	public SearchResult freeTextSearchDocs(String userName, JsonObject jo, JsonValue searchAfter, int limit, String sort,
 			String facets, EntityManager manager, String ip, Class<? extends EntityBaseBean> klass)
 			throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
-		String lastSearchAfter = null;
+		JsonValue lastSearchAfter = null;
 		List<FacetDimension> dimensions = null;
 		if (searchActive) {
 			SearchResult lastSearchResult = null;
@@ -1466,7 +1466,7 @@ public class EntityBeanManager {
 					if (lastSearchAfter == null) {
 						break; // If searchAfter is null, we ran out of results so stop here
 					}
-					searchAfter = lastSearchAfter.toString();
+					searchAfter = lastSearchAfter;
 				} else {
 					// Have stopped early by reaching the limit, so build a searchAfter document
 					lastSearchAfter = searchManager.buildSearchAfter(lastBean, sort);

@@ -34,6 +34,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
@@ -410,7 +411,7 @@ public class SearchManager {
 		return fields;
 	}
 
-	public String buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
+	public JsonValue buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
 		return searchApi.buildSearchAfter(lastBean, sort);
 	}
 
@@ -463,7 +464,7 @@ public class SearchManager {
 		return searchApi.getResults(jo, blockSize, sort);
 	}
 
-	public SearchResult freeTextSearch(JsonObject jo, String searchAfter, int blockSize, String sort,
+	public SearchResult freeTextSearch(JsonObject jo, JsonValue searchAfter, int blockSize, String sort,
 			List<String> fields) throws IcatException {
 		return searchApi.getResults(jo, searchAfter, blockSize, sort, fields);
 	}
@@ -480,6 +481,8 @@ public class SearchManager {
 					searchApi = new LuceneApi(propertyHandler.getSearchUrls().get(0).toURI());
 				} else if (searchEngine == SearchEngine.ELASTICSEARCH) {
 					searchApi = new ElasticsearchApi(propertyHandler.getSearchUrls());
+				} else if (searchEngine == SearchEngine.OPENSEARCH) {
+					searchApi = new SearchApi(propertyHandler.getSearchUrls().get(0).toURI());
 				} else {
 					// TODO implement opensearch
 					throw new IcatException(IcatExceptionType.BAD_PARAMETER,

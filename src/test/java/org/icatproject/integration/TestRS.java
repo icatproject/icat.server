@@ -93,12 +93,16 @@ public class TestRS {
 				String urlString = System.getProperty("luceneUrl");
 				URI uribase = new URI(urlString);
 				searchApi = new LuceneApi(uribase);
+			} else if (searchEngine.equals("OPENSEARCH")) {
+				String urlString = System.getProperty("opensearchUrl");
+				URI uribase = new URI(urlString);
+				searchApi = new SearchApi(uribase);
 			} else if (searchEngine.equals("ELASTICSEARCH")) {
 				String urlString = System.getProperty("elasticsearchUrl");
 				searchApi = new ElasticsearchApi(Arrays.asList(new URL(urlString)));
 			} else {
 				throw new RuntimeException(
-						"searchEngine must be one of LUCENE, ELASTICSEARCH, but it was " + searchEngine);
+						"searchEngine must be one of LUCENE, OPENSEARCH, ELASTICSEARCH, but it was " + searchEngine);
 			}
 		}
 		searchApi.clear();
@@ -629,7 +633,7 @@ public class TestRS {
 	public void testSearchDatafiles() throws Exception {
 		Session session = setupLuceneTest();
 		JsonObject responseObject;
-		String searchAfter;
+		JsonValue searchAfter;
 		Map<String, String> expectation = new HashMap<>();
 		expectation.put("investigation.id", null);
 		expectation.put("date", "notNull");
@@ -655,13 +659,13 @@ public class TestRS {
 		// Try sorting and searchAfter
 		String sort = Json.createObjectBuilder().add("name", "desc").add("date", "asc").build().toString();
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 1, sort, null, 1);
-		searchAfter = responseObject.getString("search_after");
+		searchAfter = responseObject.get("search_after");
 		assertNotNull(searchAfter);
 		expectation.put("name", "df3");
 		checkResultsSource(responseObject, Arrays.asList(expectation), false);
 
-		responseObject = searchDatafiles(session, null, null, null, null, null, searchAfter, 1, sort, null, 1);
-		searchAfter = responseObject.getString("search_after");
+		responseObject = searchDatafiles(session, null, null, null, null, null, searchAfter.toString(), 1, sort, null, 1);
+		searchAfter = responseObject.get("search_after");
 		assertNotNull(searchAfter);
 		expectation.put("name", "df2");
 		checkResultsSource(responseObject, Arrays.asList(expectation), false);
@@ -733,7 +737,7 @@ public class TestRS {
 		Session session = setupLuceneTest();
 		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 		JsonObject responseObject;
-		String searchAfter;
+		JsonValue searchAfter;
 		Map<String, String> expectation = new HashMap<>();
 		expectation.put("startDate", "notNull");
 		expectation.put("endDate", "notNull");
@@ -785,12 +789,12 @@ public class TestRS {
 		// Try sorting and searchAfter
 		String sort = Json.createObjectBuilder().add("name", "desc").add("startDate", "asc").build().toString();
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 1, sort, null, 1);
-		searchAfter = responseObject.getString("search_after");
+		searchAfter = responseObject.get("search_after");
 		assertNotNull(searchAfter);
 		expectation.put("name", "ds4");
 		checkResultsSource(responseObject, Arrays.asList(expectation), false);
-		responseObject = searchDatasets(session, null, null, null, null, null, searchAfter, 1, sort, null, 1);
-		searchAfter = responseObject.getString("search_after");
+		responseObject = searchDatasets(session, null, null, null, null, null, searchAfter.toString(), 1, sort, null, 1);
+		searchAfter = responseObject.get("search_after");
 		assertNotNull(searchAfter);
 		expectation.put("name", "ds3");
 		checkResultsSource(responseObject, Arrays.asList(expectation), false);

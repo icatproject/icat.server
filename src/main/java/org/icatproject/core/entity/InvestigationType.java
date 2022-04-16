@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.json.stream.JsonGenerator;
@@ -53,6 +54,8 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
 	public void setInvestigations(List<Investigation> investigations) {
 		this.investigations = investigations;
 	}
+
+	public static List<String> docFields = Arrays.asList("type.name", "type.id");
 
 	/* Needed for JPA */
 	public InvestigationType() {

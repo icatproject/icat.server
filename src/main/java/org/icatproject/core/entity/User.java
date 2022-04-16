@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.json.stream.JsonGenerator;
@@ -53,6 +54,8 @@ public class User extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<Study> studies = new ArrayList<Study>();
+
+	public static List<String> docFields = Arrays.asList("user.name", "user.fullName", "user.id");
 
 	public User() {
 	}

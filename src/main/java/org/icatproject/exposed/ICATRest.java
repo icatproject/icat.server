@@ -1273,8 +1273,14 @@ public class ICATRest {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}
 		String userName = beanManager.getUserName(sessionId, manager);
+		JsonValue searchAfterValue = null;
+		if (searchAfter.length() > 0) {
+			try (JsonReader jr = Json.createReader(new StringReader(searchAfter))) {
+				searchAfterValue = jr.read();
+			}
+		}
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (JsonReader jr = Json.createReader(new ByteArrayInputStream(query.getBytes()))) {
+		try (JsonReader jr = Json.createReader(new StringReader(query))) {
 			JsonObject jo = jr.readObject();
 			String target = jo.getString("target", null);
 			if (jo.containsKey("parameters")) {
@@ -1313,13 +1319,13 @@ public class ICATRest {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
 			}
 			logger.debug("Free text search with query: {}", jo.toString());
-			result = beanManager.freeTextSearchDocs(userName, jo, searchAfter, limit, sort, facets, manager,
+			result = beanManager.freeTextSearchDocs(userName, jo, searchAfterValue, limit, sort, facets, manager,
 					request.getRemoteAddr(), klass);
 
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartObject();
 
-			String newSearchAfter = result.getSearchAfter();
+			JsonValue newSearchAfter = result.getSearchAfter();
 			if (newSearchAfter != null) {
 				gen.write("search_after", newSearchAfter);
 			}

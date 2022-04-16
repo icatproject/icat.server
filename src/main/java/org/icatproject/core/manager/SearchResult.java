@@ -3,15 +3,17 @@ package org.icatproject.core.manager;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.JsonValue;
+
 public class SearchResult {
 
-	private String searchAfter;
+	private JsonValue searchAfter;
 	private List<ScoredEntityBaseBean> results = new ArrayList<>();
 	private List<FacetDimension> dimensions;
 
 	public SearchResult() {}
 
-	public SearchResult(String searchAfter, List<ScoredEntityBaseBean> results, List<FacetDimension> dimensions) {
+	public SearchResult(JsonValue searchAfter, List<ScoredEntityBaseBean> results, List<FacetDimension> dimensions) {
 		this.searchAfter = searchAfter;
 		this.results = results;
 		this.dimensions = dimensions;
@@ -29,11 +31,11 @@ public class SearchResult {
 		return results;
 	}
 
-	public String getSearchAfter() {
+	public JsonValue getSearchAfter() {
 		return searchAfter;
 	}
 
-	public void setSearchAfter(String searchAfter) {
+	public void setSearchAfter(JsonValue searchAfter) {
 		this.searchAfter = searchAfter;
 	}
 

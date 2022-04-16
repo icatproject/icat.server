@@ -225,7 +225,9 @@ public class PropertyHandler {
 		READ, WRITE, SESSION, INFO
 	}
 
-	public enum SearchEngine {LUCENE, ELASTICSEARCH}
+	public enum SearchEngine {
+		LUCENE, ELASTICSEARCH, OPENSEARCH
+	}
 
 	public class ExtendedAuthenticator {
 
@@ -275,16 +277,15 @@ public class PropertyHandler {
 		return rootUserNames;
 	}
 
-	
 	/**
 	 * Configure which entities will be indexed on ingest
 	 */
 	private Set<String> entitiesToIndex = new HashSet<String>();
-	
+
 	public Set<String> getEntitiesToIndex() {
 		return entitiesToIndex;
 	}
-	
+
 	public int getLifetimeMinutes() {
 		return lifetimeMinutes;
 	}
@@ -390,16 +391,17 @@ public class PropertyHandler {
 				}
 				logger.info("search.entitiesToIndex: {}", entitiesToIndex.toString());
 			} else {
-				/* If the property is not specified, we default to all the entities which
+				/*
+				 * If the property is not specified, we default to all the entities which
 				 * currently override the EntityBaseBean.getDoc() method. This should
 				 * result in no change to behaviour if the property is not specified.
 				 */
-				entitiesToIndex.addAll(Arrays.asList("Datafile", "Dataset", "Investigation", "InvestigationUser", 
+				entitiesToIndex.addAll(Arrays.asList("Datafile", "Dataset", "Investigation", "InvestigationUser",
 						"DatafileParameter", "DatasetParameter", "InvestigationParameter", "Sample"));
 				logger.info("search.entitiesToIndex not set. Defaulting to: {}", entitiesToIndex.toString());
 			}
 			formattedProps.add("search.entitiesToIndex " + entitiesToIndex.toString());
-			
+
 			/* notification.list */
 			key = "notification.list";
 			if (props.has(key)) {
@@ -476,13 +478,14 @@ public class PropertyHandler {
 					}
 				}
 
-				if (searchEngine == SearchEngine.LUCENE && searchUrls.size() != 1) {
+				if ((searchEngine.equals(SearchEngine.LUCENE) || searchEngine.equals(SearchEngine.OPENSEARCH))
+						&& searchUrls.size() != 1) {
 					String msg = "Exactly one value for search.urls must be provided when using " + searchEngine;
 					throw new IllegalStateException(msg);
 				} else if (searchUrls.size() == 0) {
 					String msg = "At least one value for search.urls must be provided";
 					throw new IllegalStateException(msg);
-				} 
+				}
 				formattedProps.add("search.urls" + " " + searchUrls.toString());
 				logger.info("Using {} as search engine with url(s) {}", searchEngine, searchUrls);
 

@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.json.stream.JsonGenerator;
@@ -42,6 +43,8 @@ public class SampleType extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<Sample> samples = new ArrayList<>();
+
+	public static List<String> docFields = Arrays.asList("sample.type.name", "type.id");
 
 	/* Needed for JPA */
 	public SampleType() {
@@ -89,7 +92,7 @@ public class SampleType extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void getDoc(JsonGenerator gen) {
-		SearchApi.encodeString(gen, "sample.type.name", name);
+		SearchApi.encodeString(gen, "type.name", name);
 		SearchApi.encodeString(gen, "type.id", id);
 	}
 
@@ -104,7 +107,7 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	 * @param prefix String to precede all ambiguous field names.
 	 */
 	public void getDoc(JsonGenerator gen, String prefix) {
-		SearchApi.encodeString(gen, "sample.type.name", name);
+		SearchApi.encodeString(gen, prefix + "type.name", name);
 		SearchApi.encodeString(gen, prefix + "type.id", id);
 	}
 
