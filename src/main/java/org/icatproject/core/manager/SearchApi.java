@@ -81,10 +81,20 @@ public class SearchApi {
 	protected static String basePath = "";
 	protected static JsonObject matchAllQuery = Json.createObjectBuilder().add("query", Json.createObjectBuilder()
 			.add("match_all", Json.createObjectBuilder())).build();
+	 // TODO synonym filter in the default_search ONLY
 	private static JsonObject indexSettings = Json.createObjectBuilder().add("analysis", Json.createObjectBuilder()
-			.add("analyzer", Json.createObjectBuilder().add("default", Json.createObjectBuilder()
-			.add("tokenizer", "lowercase").add("filter", Json.createArrayBuilder().add("porter_stem"))))).build();
-	// private static JsonObject mappingsBuilder;
+			.add("analyzer", Json.createObjectBuilder()
+					.add("default", Json.createObjectBuilder()
+							.add("tokenizer", "classic").add("filter", Json.createArrayBuilder()
+									.add("possessive_english").add("lowercase").add("porter_stem")))
+					.add("default_search", Json.createObjectBuilder()
+							.add("tokenizer", "classic").add("filter", Json.createArrayBuilder()
+									.add("possessive_english").add("lowercase").add("porter_stem").add("synonym"))))
+			.add("filter", Json.createObjectBuilder()
+					.add("synonym", Json.createObjectBuilder()
+							.add("type", "synonym").add("synonyms_path", "synonym.txt"))
+					.add("possessive_english", Json.createObjectBuilder()
+							.add("type", "stemmer").add("langauge", "possessive_english")))).build();
 	protected static Set<String> indices = new HashSet<>();
 	protected static Map<String, String> scripts = new HashMap<>();
 	private static Map<String, List<ParentRelationship>> relationships = new HashMap<>();
@@ -263,10 +273,14 @@ public class SearchApi {
 		return Json.createObjectBuilder().add("nested", nestedBuilder).build();
 	}
 
-	private static JsonObject buildStringQuery(String field, String value) {
+	private static JsonObject buildStringQuery(String value, String... fields) {
 		JsonObjectBuilder queryStringBuilder = Json.createObjectBuilder().add("query", value);
-		if (field != null) {
-			queryStringBuilder.add("fields", Json.createArrayBuilder().add(field));
+		if (fields.length > 0) {
+			JsonArrayBuilder fieldsBuilder = Json.createArrayBuilder();
+			for (String field : fields) {
+				fieldsBuilder.add(field);
+			}
+			queryStringBuilder.add("fields", fieldsBuilder);
 		}
 		return Json.createObjectBuilder().add("query_string", queryStringBuilder).build();
 	}
@@ -447,9 +461,10 @@ public class SearchApi {
 						throw new IcatException(IcatExceptionType.INTERNAL,
 								"Cannot build searchAfter document from source as sorted field " + key + " missing.");
 					}
-					String value = lastBean.getSource().getString(key);
+					JsonValue value = lastBean.getSource().get(key);
 					builder.add(value);
 				}
+				builder.add(lastBean.getEntityBaseBeanId());
 				return builder.build();
 			}
 		} else {
@@ -632,6 +647,7 @@ public class SearchApi {
 				JsonObject jsonObject = jsonReader.readObject();
 				JsonArray hits = jsonObject.getJsonObject("hits").getJsonArray("hits");
 				for (JsonObject hit : hits.getValuesAs(JsonObject.class)) {
+					logger.trace("Hit: {}", hit.toString());
 					Float score = Float.NaN;
 					if (!hit.isNull("_score")) {
 						score = hit.getJsonNumber("_score").bigDecimalValue().floatValue();
@@ -660,7 +676,7 @@ public class SearchApi {
 	private JsonObjectBuilder parseQuery(JsonObject query, JsonValue searchAfter, String sort, String index,
 			Set<String> queryFields) throws IcatException, ParseException {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
-		if (sort == null) {
+		if (sort == null || sort.equals("")) {
 			builder.add("sort", Json.createArrayBuilder()
 					.add(Json.createObjectBuilder().add("_score", "desc"))
 					.add(Json.createObjectBuilder().add("id", "asc")).build());
@@ -685,11 +701,11 @@ public class SearchApi {
 		JsonArrayBuilder filterBuilder = Json.createArrayBuilder();
 		if (queryFields.contains("text")) {
 			JsonArrayBuilder mustBuilder = Json.createArrayBuilder();
-			mustBuilder.add(buildStringQuery(null, query.getString("text")));
+			mustBuilder.add(buildStringQuery(query.getString("text")));
 			boolBuilder.add("must", mustBuilder);
 		}
 		Long lowerTime = parseDate(query, "lower", 0, Long.MIN_VALUE);
-		Long upperTime = parseDate(query, "upper", 0, Long.MAX_VALUE);
+		Long upperTime = parseDate(query, "upper", 59999, Long.MAX_VALUE);
 		if (lowerTime != Long.MIN_VALUE || upperTime != Long.MAX_VALUE) {
 			if (index.equals("datafile")) {
 				// datafile has only one date field
@@ -705,7 +721,7 @@ public class SearchApi {
 			investigationUserQueries.add(buildMatchQuery("investigationuser.user.name", query.getString("user")));
 		}
 		if (queryFields.contains("userFullName")) {
-			investigationUserQueries.add(buildStringQuery("investigationuser.user.fullName", query.getString("userFullName")));
+			investigationUserQueries.add(buildStringQuery(query.getString("userFullName"), "investigationuser.user.fullName"));
 		}
 		if (investigationUserQueries.size() > 0) {
 			filterBuilder.add(buildNestedQuery("investigationuser", investigationUserQueries.toArray(new JsonObject[0])));
@@ -715,7 +731,7 @@ public class SearchApi {
 			JsonArray samples = query.getJsonArray("samples");
 			for (int i = 0; i < samples.size(); i++) {
 				String sample = samples.getString(i);
-				filterBuilder.add(buildNestedQuery("sample", buildStringQuery("sample.name", sample)));
+				filterBuilder.add(buildNestedQuery("sample", buildStringQuery(sample, "sample.name", "sample.type.name")));
 			}
 		}
 		if (queryFields.contains("parameters")) {
@@ -724,8 +740,8 @@ public class SearchApi {
 				String name = parameterObject.getString("name", null);
 				String units = parameterObject.getString("units", null);
 				String stringValue = parameterObject.getString("stringValue", null);
-				Long lowerDate = decodeTime(parameterObject.getString("lowerDateValue", null));
-				Long upperDate = decodeTime(parameterObject.getString("upperDateValue", null));
+				Long lowerDate = parseDate(parameterObject, "lowerDateValue", 0, null);
+				Long upperDate = parseDate(parameterObject, "upperDateValue", 59999, null);
 				JsonNumber lowerNumeric = parameterObject.getJsonNumber("lowerNumericValue");
 				JsonNumber upperNumeric = parameterObject.getJsonNumber("upperNumericValue");
 
@@ -770,6 +786,7 @@ public class SearchApi {
 					// If the index isn't present, we should get 404 and create the index
 					if (statusCode == 200) {
 						// If the index already exists (200), do not attempt to create it
+						logger.trace("{} index already exists, continue", index);
 						continue;
 					} else if (statusCode != 404) {
 						// If the code isn't 200 or 404, something has gone wrong
@@ -782,10 +799,10 @@ public class SearchApi {
 
 			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 				URI uri = new URIBuilder(server).setPath(basePath + "/" + index).build();
-				logger.trace("Making call {}", uri);
 				HttpPut httpPut = new HttpPut(uri);
 				String body = Json.createObjectBuilder()
 						.add("settings", indexSettings).add("mappings", buildMappings(index)).build().toString();
+				logger.trace("Making call {} with body {}", uri, body);
 				httpPut.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
 				try (CloseableHttpResponse response = httpclient.execute(httpPut)) {
 					Rest.checkStatus(response, IcatExceptionType.INTERNAL);

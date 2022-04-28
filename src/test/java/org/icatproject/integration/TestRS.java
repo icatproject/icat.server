@@ -552,11 +552,16 @@ public class TestRS {
 
 		// Try parameters
 		List<ParameterForLucene> parameters = new ArrayList<>();
-		parameters.add(new ParameterForLucene("colour", "name", "green"));
-		parameters.add(new ParameterForLucene("birthday", "date", dft.parse("2014-05-16T16:58:26+0000"),
-				dft.parse("2014-05-16T16:58:26+0000")));
-		parameters.add(new ParameterForLucene("current", "amps", 140, 165));
-
+		ParameterForLucene stringParameter = new ParameterForLucene("colour", "name", "green");
+		ParameterForLucene dateParameter = new ParameterForLucene("birthday", "date",
+				dft.parse("2014-05-16T16:58:26+0000"), dft.parse("2014-05-16T16:58:26+0000"));
+		ParameterForLucene numericParameter = new ParameterForLucene("current", "amps", 140, 165);
+		array = searchDatasets(session, null, null, null, null, Arrays.asList(stringParameter), 20, 1);
+		array = searchDatasets(session, null, null, null, null, Arrays.asList(dateParameter), 20, 1);
+		array = searchDatasets(session, null, null, null, null, Arrays.asList(numericParameter), 20, 1);
+		parameters.add(stringParameter);
+		parameters.add(dateParameter);
+		parameters.add(numericParameter);
 		array = searchDatasets(session, null, null, null, null, parameters, 20, 1);
 
 		array = searchDatasets(session, null, "gamma AND ds3", dft.parse("2014-05-16T05:09:03+0000"),
@@ -716,7 +721,8 @@ public class TestRS {
 				responseObject.containsKey("dimensions"));
 
 		// Test no facets match on DatafileParameters due to lack of READ access
-		target = Json.createObjectBuilder().add("target", "DatafileParameter");
+		target = Json.createObjectBuilder()
+				.add("target", "DatafileParameter").add("dimensions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("dimension", "type.name")));
 		facets = Json.createArrayBuilder().add(target).build().toString();
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 10, null, facets, 3);
 		assertFalse(responseObject.containsKey("search_after"));
@@ -725,8 +731,6 @@ public class TestRS {
 
 		// Test facets match on DatafileParameters
 		wSession.addRule(null, "DatafileParameter", "R");
-		target = Json.createObjectBuilder().add("target", "DatafileParameter");
-		facets = Json.createArrayBuilder().add(target).build().toString();
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 10, null, facets, 3);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkFacets(responseObject, "DatafileParameter.type.name", Arrays.asList("colour"), Arrays.asList(1L));
@@ -774,9 +778,16 @@ public class TestRS {
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		Date parameterDate = dft.parse("2014-05-16T16:58:26+0000");
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
-		parameters.add(new ParameterForLucene("birthday", "date", parameterDate, parameterDate));
-		parameters.add(new ParameterForLucene("current", "amps", 140, 165));
+		responseObject = searchDatasets(session, null, null, null, null, parameters, null, 10, null, null, 1);
+		assertFalse(responseObject.containsKey("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
+		parameters.add(new ParameterForLucene("birthday", "date", parameterDate, parameterDate));
+		responseObject = searchDatasets(session, null, null, null, null, parameters, null, 10, null, null, 1);
+		assertFalse(responseObject.containsKey("search_after"));
+		checkResultsSource(responseObject, Arrays.asList(expectation), true);
+
+		parameters.add(new ParameterForLucene("current", "amps", 140, 165));
 		responseObject = searchDatasets(session, null, null, null, null, parameters, null, 10, null, null, 1);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
@@ -837,15 +848,17 @@ public class TestRS {
 		Session piSession = icat.login("db", credentials);
 		searchDatasets(piSession, null, null, null, null, null, null, 10, null, null, 0);
 
-		// Test no facets match on Datasets
-		JsonObjectBuilder target = Json.createObjectBuilder().add("target", "Dataset");
+		// Test facets match on Datasets
+		JsonObjectBuilder target = Json.createObjectBuilder()
+				.add("target", "Dataset").add("dimensions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("dimension", "type.name")));
 		String facets = Json.createArrayBuilder().add(target).build().toString();
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 10, null, facets, 5);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkFacets(responseObject, "Dataset.type.name", Arrays.asList("calibration"), Arrays.asList(5L));
 
 		// Test no facets match on DatasetParameters due to lack of READ access
-		target = Json.createObjectBuilder().add("target", "DatasetParameter");
+		target = Json.createObjectBuilder()
+				.add("target", "DatasetParameter").add("dimensions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("dimension", "type.name")));
 		facets = Json.createArrayBuilder().add(target).build().toString();
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 10, null, facets, 5);
 		assertFalse(responseObject.containsKey("search_after"));
@@ -854,8 +867,6 @@ public class TestRS {
 
 		// Test facets match on DatasetParameters
 		wSession.addRule(null, "DatasetParameter", "R");
-		target = Json.createObjectBuilder().add("target", "DatasetParameter");
-		facets = Json.createArrayBuilder().add(target).build().toString();
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 10, null, facets, 5);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkFacets(responseObject, "DatasetParameter.type.name", Arrays.asList("colour", "birthday", "current"),
@@ -891,7 +902,6 @@ public class TestRS {
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
-		// TODO remove additional checks here
 		responseObject = searchInvestigations(session, "db/tr", null, lowerOrigin, upperOrigin, null,
 				null, null, null, 10, null, null, 1);
 		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, null,
@@ -987,8 +997,9 @@ public class TestRS {
 		Session piSession = icat.login("db", credentials);
 		searchInvestigations(piSession, null, null, null, null, null, null, null, null, 10, null, null, 0);
 
-		// Test no facets match on Investigations
-		JsonObjectBuilder target = Json.createObjectBuilder().add("target", "Investigation");
+		// Test facets match on Investigations
+		JsonObjectBuilder target = Json.createObjectBuilder()
+				.add("target", "Investigation").add("dimensions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("dimension", "type.name")));
 		String facets = Json.createArrayBuilder().add(target).build().toString();
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
 				3);
@@ -996,7 +1007,8 @@ public class TestRS {
 		checkFacets(responseObject, "Investigation.type.name", Arrays.asList("atype"), Arrays.asList(3L));
 
 		// Test no facets match on InvestigationParameters due to lack of READ access
-		target = Json.createObjectBuilder().add("target", "InvestigationParameter");
+		target = Json.createObjectBuilder().add("target", "InvestigationParameter")
+				.add("dimensions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("dimension", "type.name")));
 		facets = Json.createArrayBuilder().add(target).build().toString();
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
 				3);
@@ -1006,8 +1018,6 @@ public class TestRS {
 
 		// Test facets match on InvestigationParameters
 		wSession.addRule(null, "InvestigationParameter", "R");
-		target = Json.createObjectBuilder().add("target", "InvestigationParameter");
-		facets = Json.createArrayBuilder().add(target).build().toString();
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
