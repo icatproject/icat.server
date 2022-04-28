@@ -3,7 +3,9 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
@@ -95,7 +97,7 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	@Comment("If ordinary users are allowed to create their own parameter types this indicates that this one has been approved")
 	private boolean verified;
 
-	public static List<String> docFields = Arrays.asList("type.name", "type.units", "type.unitsSI", "numericValueSI", "type.id");
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("type.name", "type.units", "type.unitsSI", "numericValueSI", "type.id"));
 
 	/* Needed for JPA */
 	public ParameterType() {

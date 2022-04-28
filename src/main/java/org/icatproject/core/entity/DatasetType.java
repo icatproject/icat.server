@@ -3,7 +3,9 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
@@ -39,7 +41,7 @@ public class DatasetType extends EntityBaseBean implements Serializable {
 	@Column(name = "NAME", nullable = false)
 	private String name;
 
-	public static List<String> docFields = Arrays.asList("type.name", "type.id");
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("type.name", "type.id"));
 
 	/* Needed for JPA */
 	public DatasetType() {

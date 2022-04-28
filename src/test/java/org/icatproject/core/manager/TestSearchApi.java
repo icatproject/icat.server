@@ -277,22 +277,6 @@ public class TestSearchApi {
 		}
 	}
 
-	private void addDocuments(String entityName, String json) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(uribase).setPath(SearchApi.basePath + "/addNow/" + entityName).build();
-			HttpPost httpPost = new HttpPost(uri);
-			StringEntity input = new StringEntity(json);
-			input.setContentType(MediaType.APPLICATION_JSON);
-			httpPost.setEntity(input);
-
-			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-			}
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
 	@Before
 	public void before() throws Exception {
 		searchApi.clear();

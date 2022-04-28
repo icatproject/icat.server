@@ -3,7 +3,9 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
@@ -55,7 +57,7 @@ public class User extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<Study> studies = new ArrayList<Study>();
 
-	public static List<String> docFields = Arrays.asList("user.name", "user.fullName", "user.id");
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("user.name", "user.fullName", "user.id"));
 
 	public User() {
 	}

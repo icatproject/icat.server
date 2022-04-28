@@ -3,7 +3,9 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
@@ -44,7 +46,7 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<Sample> samples = new ArrayList<>();
 
-	public static List<String> docFields = Arrays.asList("sample.type.name", "type.id");
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("sample.type.name", "type.id"));
 
 	/* Needed for JPA */
 	public SampleType() {
