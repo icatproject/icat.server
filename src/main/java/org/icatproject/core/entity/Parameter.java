@@ -16,8 +16,8 @@ import javax.persistence.TemporalType;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
+import org.icatproject.core.manager.search.SearchApi;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.SearchApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

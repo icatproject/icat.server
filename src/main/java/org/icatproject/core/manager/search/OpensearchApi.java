@@ -1,22 +1,19 @@
-package org.icatproject.core.manager;
+package org.icatproject.core.manager.search;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
+import java.util.Set;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -28,10 +25,6 @@ import javax.json.JsonReader;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
-import javax.measure.IncommensurableException;
-import javax.measure.Unit;
-import javax.measure.UnitConverter;
-import javax.measure.format.MeasurementParseException;
 import javax.persistence.EntityManager;
 
 import org.apache.http.client.ClientProtocolException;
@@ -55,15 +48,13 @@ import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.SampleType;
 import org.icatproject.core.entity.User;
-import org.icatproject.core.manager.search.QueryBuilder;
+import org.icatproject.core.manager.Rest;
+import org.icatproject.utils.IcatUnits;
+import org.icatproject.utils.IcatUnits.SystemValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tech.units.indriya.format.SimpleUnitFormat;
-import tech.units.indriya.unit.Units;
-
-// TODO see what functionality can live here, and possibly convert from abstract to a fully generic API
-public class SearchApi {
+public class OpensearchApi extends SearchApi {
 
 	private static enum ModificationType {
 		CREATE, UPDATE, DELETE
@@ -87,10 +78,8 @@ public class SearchApi {
 		}
 	}
 
-	private static final SimpleUnitFormat unitFormat = SimpleUnitFormat.getInstance();
-	protected static final Logger logger = LoggerFactory.getLogger(SearchApi.class);
-	protected static SimpleDateFormat df;
-	protected static String basePath = "";
+	private IcatUnits icatUnits;
+	protected static final Logger logger = LoggerFactory.getLogger(OpensearchApi.class);
 	private static JsonObject indexSettings = Json.createObjectBuilder().add("analysis", Json.createObjectBuilder()
 			.add("analyzer", Json.createObjectBuilder()
 					.add("default", Json.createObjectBuilder()
@@ -105,20 +94,9 @@ public class SearchApi {
 					.add("possessive_english", Json.createObjectBuilder()
 							.add("type", "stemmer").add("langauge", "possessive_english"))))
 			.build();
-	protected static Set<String> indices = new HashSet<>();
 	private static Map<String, List<ParentRelation>> relations = new HashMap<>();
 
-	protected URI server;
-
 	static {
-		df = new SimpleDateFormat("yyyyMMddHHmm");
-		TimeZone tz = TimeZone.getTimeZone("GMT");
-		df.setTimeZone(tz);
-
-		unitFormat.alias(Units.CELSIUS, "celsius"); // TODO this should be generalised with the units we need
-
-		indices.addAll(Arrays.asList("datafile", "dataset", "investigation"));
-
 		// Non-nested children have a one to one relationship with an indexed entity and
 		// so do not form an array, and update specific fields by query
 		relations.put("datafileformat", Arrays.asList(
@@ -166,8 +144,14 @@ public class SearchApi {
 				new ParentRelation(RelationType.NESTED_GRANDCHILD, "investigation", "sample", SampleType.docFields)));
 	}
 
-	public SearchApi(URI server) {
-		this.server = server;
+	public OpensearchApi(URI server) {
+		super(server);
+		icatUnits = new IcatUnits();
+	}
+
+	public OpensearchApi(URI server, String unitAliasOptions) {
+		super(server);
+		icatUnits = new IcatUnits(unitAliasOptions);
 	}
 
 	private static String buildCreateScript(String target) {
@@ -259,7 +243,6 @@ public class SearchApi {
 		return Json.createObjectBuilder().add("type", "nested").add("properties", propertiesBuilder).build();
 	}
 
-	// TODO (mostly) duplicated code from icat.lucene...
 	private static Long parseDate(JsonObject jsonObject, String key, int offset, Long defaultValue)
 			throws IcatException {
 		if (jsonObject.containsKey(key)) {
@@ -283,110 +266,11 @@ public class SearchApi {
 		return defaultValue;
 	}
 
-	/**
-	 * Converts String into Date object.
-	 * 
-	 * @param value String representing a Date in the format "yyyyMMddHHmm".
-	 * @return Date object, or null if value was null.
-	 * @throws java.text.ParseException
-	 */
-	protected static Date decodeDate(String value) throws java.text.ParseException {
-		if (value == null) {
-			return null;
-		} else {
-			synchronized (df) {
-				return df.parse(value);
-			}
-		}
-	}
-
-	/**
-	 * Converts String into number of ms since epoch.
-	 * 
-	 * @param value String representing a Date in the format "yyyyMMddHHmm".
-	 * @return Number of ms since epoch, or null if value was null
-	 * @throws java.text.ParseException
-	 */
-	protected static Long decodeTime(String value) throws java.text.ParseException {
-		if (value == null) {
-			return null;
-		} else {
-			synchronized (df) {
-				return df.parse(value).getTime();
-			}
-		}
-	}
-
-	/**
-	 * Converts Date object into String format.
-	 * 
-	 * @param dateValue Date object to be converted.
-	 * @return String representing a Date in the format "yyyyMMddHHmm".
-	 */
-	protected static String encodeDate(Date dateValue) {
-		if (dateValue == null) {
-			return null;
-		} else {
-			synchronized (df) {
-				return df.format(dateValue);
-			}
-		}
-	}
-
-	public static String encodeDeletion(EntityBaseBean bean) {
-		String entityName = bean.getClass().getSimpleName();
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (JsonGenerator gen = Json.createGenerator(baos)) {
-			gen.writeStartObject().writeStartObject("delete");
-			gen.write("_index", entityName).write("_id", bean.getId().toString());
-			gen.writeEnd().writeEnd();
-		}
-		return baos.toString();
-	}
-
-	public static void encodeDouble(JsonGenerator gen, String name, Double value) {
-		gen.write(name, value);
-	}
-
-	public static void encodeLong(JsonGenerator gen, String name, Date value) {
-		gen.write(name, value.getTime());
-	}
-
-	public static String encodeOperation(String operation, EntityBaseBean bean) throws IcatException {
-		Long icatId = bean.getId();
-		if (icatId == null) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, bean.toString() + " had null id");
-		}
-		String entityName = bean.getClass().getSimpleName();
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (JsonGenerator gen = Json.createGenerator(baos)) {
-			gen.writeStartObject().writeStartObject(operation);
-			gen.write("_index", entityName).write("_id", icatId.toString());
-			gen.writeStartObject("doc");
-			bean.getDoc(gen);
-			gen.writeEnd().writeEnd().writeEnd();
-		}
-		return baos.toString();
-	}
-
-	public static void encodeString(JsonGenerator gen, String name, Long value) {
-		gen.write(name, Long.toString(value));
-	}
-
-	public static void encodeString(JsonGenerator gen, String name, String value) {
-		gen.write(name, value);
-	}
-
-	public static void encodeText(JsonGenerator gen, String name, String value) {
-		if (value != null) {
-			gen.write(name, value);
-		}
-	}
-
+	@Override
 	public void addNow(String entityName, List<Long> ids, EntityManager manager,
 			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor)
 			throws IcatException, IOException, URISyntaxException {
-		// getBeanDocExecutor is not used for all implementations, but is
+		// getBeanDocExecutor is not used for this implementation, but is
 		// required for the @Override
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
@@ -406,69 +290,21 @@ public class SearchApi {
 		modify(baos.toString());
 	}
 
-	public JsonValue buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
-		if (sort != null && !sort.equals("")) {
-			try (JsonReader reader = Json.createReader(new StringReader(sort))) {
-				JsonObject object = reader.readObject();
-				JsonArrayBuilder builder = Json.createArrayBuilder();
-				for (String key : object.keySet()) {
-					if (!lastBean.getSource().keySet().contains(key)) {
-						throw new IcatException(IcatExceptionType.INTERNAL,
-								"Cannot build searchAfter document from source as sorted field " + key + " missing.");
-					}
-					JsonValue value = lastBean.getSource().get(key);
-					builder.add(value);
-				}
-				builder.add(lastBean.getEntityBaseBeanId());
-				return builder.build();
-			}
-		} else {
-			JsonArrayBuilder builder = Json.createArrayBuilder();
-			if (Float.isNaN(lastBean.getScore())) {
-				throw new IcatException(IcatExceptionType.INTERNAL,
-						"Cannot build searchAfter document from source as score was NaN.");
-			}
-			builder.add(lastBean.getScore());
-			builder.add(lastBean.getEntityBaseBeanId());
-			return builder.build();
-		}
-	}
-
+	@Override
 	public void clear() throws IcatException {
 		commit();
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/_all/_delete_by_query").build();
-			HttpPost httpPost = new HttpPost(uri);
-			String body = Json.createObjectBuilder().add("query", QueryBuilder.buildMatchAllQuery()).build().toString();
-			httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-			logger.trace("Making call {} with body {}", uri, body);
-			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-			}
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
+		String body = QueryBuilder.addQuery(QueryBuilder.buildMatchAllQuery()).build().toString();
+		post("/_all/_delete_by_query", body);
 	}
 
+	@Override
 	public void commit() throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/_refresh").build();
-			logger.trace("Making call {}", uri);
-			HttpPost httpPost = new HttpPost(uri);
-			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-			}
-		} catch (URISyntaxException | IOException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
+		post("/_refresh");		
 	}
 
-	public void freeSearcher(String uid) throws IcatException {
-		logger.info("Manually freeing searcher not supported, no request sent");
-	}
-
+	@Override
 	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, Integer maxResults,
-			int maxLabels) throws IcatException {
+			Integer maxLabels) throws IcatException {
 		List<FacetDimension> results = new ArrayList<>();
 		if (!facetQuery.containsKey("dimensions")) {
 			// If no dimensions were specified, return early
@@ -481,37 +317,26 @@ public class SearchApi {
 			dimensionPrefix = index;
 			index = relations.get(index).get(0).parentName;
 		}
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URIBuilder builder = new URIBuilder(server).setPath(basePath + "/" + index + "/_search");
-			builder.addParameter("size", maxResults.toString());
-			URI uri = builder.build();
 
-			JsonObject queryObject = facetQuery.getJsonObject("query");
-			JsonArray dimensions = facetQuery.getJsonArray("dimensions");
-			JsonObjectBuilder bodyBuilder = parseQuery(Json.createObjectBuilder(), queryObject, index);
-			bodyBuilder = parseFacets(bodyBuilder, dimensions, maxLabels, dimensionPrefix);
-			String body = bodyBuilder.build().toString();
+		JsonObject queryObject = facetQuery.getJsonObject("query");
+		JsonArray dimensions = facetQuery.getJsonArray("dimensions");
+		JsonObjectBuilder bodyBuilder = parseQuery(Json.createObjectBuilder(), queryObject, index);
+		bodyBuilder = parseFacets(bodyBuilder, dimensions, maxLabels, dimensionPrefix);
+		String body = bodyBuilder.build().toString();
 
-			HttpPost httpPost = new HttpPost(uri);
-			httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-			logger.trace("Making call {} with body {}", uri, body);
-			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-				JsonReader jsonReader = Json.createReader(response.getEntity().getContent());
-				JsonObject jsonObject = jsonReader.readObject();
-				logger.trace("facet response: {}", jsonObject);
-				JsonObject aggregations = jsonObject.getJsonObject("aggregations");
-				if (dimensionPrefix != null) {
-					aggregations = aggregations.getJsonObject(dimensionPrefix);
-				}
-				for (String dimension : aggregations.keySet()) {
-					parseFacetsResponse(results, target, dimension, aggregations);
-				}
-			}
-			return results;
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		Map<String, String> parameterMap = new HashMap<>();
+		parameterMap.put("size", maxResults.toString());
+
+		JsonObject postResponse = postResponse("/" + index + "/_search", body, parameterMap);
+	
+		JsonObject aggregations = postResponse.getJsonObject("aggregations");
+		if (dimensionPrefix != null) {
+			aggregations = aggregations.getJsonObject(dimensionPrefix);
 		}
+		for (String dimension : aggregations.keySet()) {
+			parseFacetsResponse(results, target, dimension, aggregations);
+		}
+		return results;
 	}
 
 	private JsonObjectBuilder parseFacets(JsonObjectBuilder bodyBuilder, JsonArray dimensions, int maxLabels,
@@ -538,111 +363,52 @@ public class SearchApi {
 		return bodyBuilder;
 	}
 
-	private void parseFacetsResponse(List<FacetDimension> results, String target, String dimension,
-			JsonObject aggregations) throws IcatException {
-		if (dimension.equals("doc_count")) {
-			// For nested aggregations, there is a doc_count entry at the same level as the
-			// dimension objects, but we're not interested in this
-			return;
-		}
-		FacetDimension facetDimension = new FacetDimension(target, dimension);
-		List<FacetLabel> facets = facetDimension.getFacets();
-		JsonObject aggregation = aggregations.getJsonObject(dimension);
-		JsonValue bucketsValue = aggregation.get("buckets");
-		ValueType valueType = bucketsValue.getValueType();
-		switch (valueType) {
-			case ARRAY:
-				List<JsonObject> buckets = ((JsonArray) bucketsValue).getValuesAs(JsonObject.class);
-				if (buckets.size() == 0) {
-					return;
-				}
-				for (JsonObject bucket : buckets) {
-					long docCount = bucket.getJsonNumber("doc_count").longValueExact();
-					facets.add(new FacetLabel(bucket.getString("key"), docCount));
-				}
-				break;
-			case OBJECT:
-				JsonObject bucketsObject = (JsonObject) bucketsValue;
-				Set<String> keySet = bucketsObject.keySet();
-				if (keySet.size() == 0) {
-					return;
-				}
-				for (String key : keySet) {
-					JsonObject bucket = bucketsObject.getJsonObject(key);
-					long docCount = bucket.getJsonNumber("doc_count").longValueExact();
-					facets.add(new FacetLabel(key, docCount));
-				}
-				break;
-			default:
-				String msg = "Expected 'buckets' to have ARRAY or OBJECT type, but it was " + valueType;
-				throw new IcatException(IcatExceptionType.INTERNAL, msg);
-		}
-		results.add(facetDimension);
-	}
-
-	public SearchResult getResults(JsonObject query, int maxResults) throws IcatException {
-		return getResults(query, null, maxResults, null, Arrays.asList("id"));
-	}
-
-	public SearchResult getResults(JsonObject query, int maxResults, String sort) throws IcatException {
-		return getResults(query, null, maxResults, sort, Arrays.asList("id"));
-	}
-
+	@Override
 	public SearchResult getResults(JsonObject query, JsonValue searchAfter, Integer blockSize, String sort,
 			List<String> requestedFields) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			String index = query.containsKey("target") ? query.getString("target").toLowerCase() : "_all";
-			URIBuilder builder = new URIBuilder(server).setPath(basePath + "/" + index + "/_search");
-			StringBuilder sb = new StringBuilder();
-			requestedFields.forEach(f -> sb.append(f).append(","));
-			builder.addParameter("_source", sb.toString());
-			builder.addParameter("size", blockSize.toString());
-			URI uri = builder.build();
+		String index = query.containsKey("target") ? query.getString("target").toLowerCase() : "_all";
 
-			JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
-			bodyBuilder = parseSort(bodyBuilder, sort);
-			bodyBuilder = parseSearchAfter(bodyBuilder, searchAfter);
-			bodyBuilder = parseQuery(bodyBuilder, query, index);
-			String body = bodyBuilder.build().toString();
+		JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
+		bodyBuilder = parseSort(bodyBuilder, sort);
+		bodyBuilder = parseSearchAfter(bodyBuilder, searchAfter);
+		bodyBuilder = parseQuery(bodyBuilder, query, index);
+		String body = bodyBuilder.build().toString();
 
-			SearchResult result = new SearchResult();
-			List<ScoredEntityBaseBean> entities = result.getResults();
-			HttpPost httpPost = new HttpPost(uri);
-			httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-			logger.trace("Making call {} with body {}", uri, body);
-			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-				JsonReader jsonReader = Json.createReader(response.getEntity().getContent());
-				JsonObject jsonObject = jsonReader.readObject();
-				JsonArray hits = jsonObject.getJsonObject("hits").getJsonArray("hits");
-				for (JsonObject hit : hits.getValuesAs(JsonObject.class)) {
-					logger.trace("Hit {}", hit.toString());
-					Float score = Float.NaN;
-					if (!hit.isNull("_score")) {
-						score = hit.getJsonNumber("_score").bigDecimalValue().floatValue();
-					}
-					Integer id = new Integer(hit.getString("_id"));
-					entities.add(new ScoredEntityBaseBean(id, score, hit.getJsonObject("_source")));
-				}
+		Map<String, String> parameterMap = new HashMap<>();
+		StringBuilder sb = new StringBuilder();
+		requestedFields.forEach(f -> sb.append(f).append(","));
+		parameterMap.put("_source", sb.toString());
+		parameterMap.put("size", blockSize.toString());
 
-				// If we're returning as many results as were asked for, setSearchAfter so
-				// subsequent searches can continue from the last result
-				if (hits.size() == blockSize) {
-					JsonObject lastHit = hits.getJsonObject(blockSize - 1);
-					if (lastHit.containsKey("sort")) {
-						result.setSearchAfter(lastHit.getJsonArray("sort"));
-					} else {
-						ScoredEntityBaseBean lastEntity = entities.get(blockSize - 1);
-						long id = lastEntity.getEntityBaseBeanId();
-						float score = lastEntity.getScore();
-						result.setSearchAfter(Json.createArrayBuilder().add(score).add(id).build());
-					}
-				}
+		JsonObject postResponse = postResponse("/" + index + "/_search", body, parameterMap);
+
+		SearchResult result = new SearchResult();
+		List<ScoredEntityBaseBean> entities = result.getResults();
+		JsonArray hits = postResponse.getJsonObject("hits").getJsonArray("hits");
+		for (JsonObject hit : hits.getValuesAs(JsonObject.class)) {
+			Float score = Float.NaN;
+			if (!hit.isNull("_score")) {
+				score = hit.getJsonNumber("_score").bigDecimalValue().floatValue();
 			}
-			return result;
-		} catch (IOException | URISyntaxException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+			Integer id = new Integer(hit.getString("_id"));
+			entities.add(new ScoredEntityBaseBean(id, score, hit.getJsonObject("_source")));
 		}
+
+		// If we're returning as many results as were asked for, setSearchAfter so
+		// subsequent searches can continue from the last result
+		if (hits.size() == blockSize) {
+			JsonObject lastHit = hits.getJsonObject(blockSize - 1);
+			if (lastHit.containsKey("sort")) {
+				result.setSearchAfter(lastHit.getJsonArray("sort"));
+			} else {
+				ScoredEntityBaseBean lastEntity = entities.get(blockSize - 1);
+				long id = lastEntity.getEntityBaseBeanId();
+				float score = lastEntity.getScore();
+				result.setSearchAfter(Json.createArrayBuilder().add(score).add(id).build());
+			}
+		}
+		
+		return result;
 	}
 
 	private JsonObjectBuilder parseSort(JsonObjectBuilder builder, String sort) {
@@ -770,7 +536,7 @@ public class SearchApi {
 	public void initMappings() throws IcatException {
 		for (String index : indices) {
 			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-				URI uri = new URIBuilder(server).setPath(basePath + "/" + index).build();
+				URI uri = new URIBuilder(server).setPath("/" + index).build();
 				logger.trace("Making call {}", uri);
 				HttpHead httpHead = new HttpHead(uri);
 				try (CloseableHttpResponse response = httpclient.execute(httpHead)) {
@@ -790,7 +556,7 @@ public class SearchApi {
 			}
 
 			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-				URI uri = new URIBuilder(server).setPath(basePath + "/" + index).build();
+				URI uri = new URIBuilder(server).setPath("/" + index).build();
 				HttpPut httpPut = new HttpPut(uri);
 				JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
 				bodyBuilder.add("settings", indexSettings).add("mappings", buildMappings(index));
@@ -812,56 +578,34 @@ public class SearchApi {
 			ParentRelation relation = entry.getValue().get(0);
 			switch (relation.relationType) {
 				case CHILD:
-					postScript("update_" + childName, buildChildScript(relation.fields, true));
-					postScript("delete_" + childName, buildChildScript(relation.fields, false));
+					post("/_scripts/update_" + childName, buildChildScript(relation.fields, true));
+					post("/_scripts/delete_" + childName, buildChildScript(relation.fields, false));
 					break;
 				case NESTED_CHILD:
-					postScript("create_" + childName, buildCreateScript(childName));
-					postScript("update_" + childName, buildNestedChildScript(childName, true));
-					postScript("delete_" + childName, buildNestedChildScript(childName, false));
+					post("/_scripts/create_" + childName, buildCreateScript(childName));
+					post("/_scripts/update_" + childName, buildNestedChildScript(childName, true));
+					post("/_scripts/delete" + childName, buildNestedChildScript(childName, false));
 					break;
 				case NESTED_GRANDCHILD:
 					if (childName.equals("parametertype")) {
 						// Special case, as parametertype applies to investigationparameter,
 						// datasetparameter, datafileparameter
 						for (String index : indices) {
-							String updateScript = buildNestedGrandchildScript(index + "parameter", relation.fields, true);
-							String deleteScript = buildNestedGrandchildScript(index + "parameter", relation.fields, false);
-							postScript("update_" + index + childName, updateScript);
-							postScript("delete_" + index + childName, deleteScript);
-							break;
+							String target = index + "parameter";
+							String updateScript = buildNestedGrandchildScript(target, relation.fields, true);
+							String deleteScript = buildNestedGrandchildScript(target, relation.fields, false);
+							post("/_scripts/update_" + index + childName, updateScript);
+							post("/_scripts/delete_" + index + childName, deleteScript);
 						}
 					} else {
 						String updateScript = buildNestedGrandchildScript(relation.joinField, relation.fields, true);
 						String deleteScript = buildNestedGrandchildScript(relation.joinField, relation.fields, false);
-						postScript("update_" + childName, updateScript);
-						postScript("delete_" + childName, deleteScript);
-						break;
+						post("/_scripts/update_" + childName, updateScript);
+						post("/_scripts/delete_" + childName, deleteScript);
 					}
+					break;
 			}
 		}
-	}
-
-	private void postScript(String scriptKey, String body) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(basePath + "/_scripts/" + scriptKey).build();
-			logger.trace("Making call {}", uri);
-			HttpPost httpPost = new HttpPost(uri);
-			httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-			}
-		} catch (URISyntaxException | IOException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	public void lock(String entityName) throws IcatException {
-		logger.info("Manually locking index not supported, no request sent");
-	}
-
-	public void unlock(String entityName) throws IcatException {
-		logger.info("Manually unlocking index not supported, no request sent");
 	}
 
 	public void modify(String json) throws IcatException {
@@ -898,7 +642,7 @@ public class SearchApi {
 
 			if (sb.toString().length() > 0) {
 				// Perform simple bulk modifications
-				URI uri = new URIBuilder(server).setPath(basePath + "/_bulk").build();
+				URI uri = new URIBuilder(server).setPath("/_bulk").build();
 				HttpPost httpPost = new HttpPost(uri);
 				httpPost.setEntity(new StringEntity(sb.toString(), ContentType.APPLICATION_JSON));
 				// logger.trace("Making call {} with body {}", uri, sb.toString());
@@ -911,8 +655,6 @@ public class SearchApi {
 				// Ensure bulk changes are committed before performing updatesByQuery
 				commit();
 				for (HttpPost updateByQuery : updatesByQuery) {
-					// logger.trace("Making call {} with body {}",
-					// updateByQuery.getURI(), updateByQuery.getEntity().getContent().toString());
 					try (CloseableHttpResponse response = httpclient.execute(updateByQuery)) {
 						Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 					}
@@ -923,7 +665,7 @@ public class SearchApi {
 				// Ensure bulk changes are committed before checking for InvestigationUsers
 				commit();
 				for (String investigationId : investigationIds) {
-					URI uriGet = new URIBuilder(server).setPath(basePath + "/investigation/_source/" + investigationId)
+					URI uriGet = new URIBuilder(server).setPath("/investigation/_source/" + investigationId)
 							.build();
 					HttpGet httpGet = new HttpGet(uriGet);
 					try (CloseableHttpResponse responseGet = httpclient.execute(httpGet)) {
@@ -945,7 +687,7 @@ public class SearchApi {
 		if (responseObject.containsKey("investigationuser")) {
 			JsonArray jsonArray = responseObject.getJsonArray("investigationuser");
 			for (String index : new String[] { "datafile", "dataset" }) {
-				URI uri = new URIBuilder(server).setPath(basePath + "/" + index + "/_update_by_query").build();
+				URI uri = new URIBuilder(server).setPath("/" + index + "/_update_by_query").build();
 				HttpPost httpPost = new HttpPost(uri);
 				JsonObjectBuilder paramsBuilder = Json.createObjectBuilder().add("doc", jsonArray);
 				JsonObjectBuilder scriptBuilder = Json.createObjectBuilder();
@@ -971,7 +713,7 @@ public class SearchApi {
 				if (relation.parentName.equals(relation.joinField)) {
 					// If the target parent is the same as the joining field, we're appending the
 					// nested child to a list of objects which can be sent as a bulk update request
-					document = convertUnits(document);
+					document = convertDocumentUnits(document);
 					createNestedEntity(sb, id, index, document, relation);
 				} else if (index.equals("sampletype")) {
 					// Otherwise, in most cases we don't need to update, as User and ParameterType
@@ -1012,7 +754,7 @@ public class SearchApi {
 
 	private void updateNestedEntityByQuery(List<HttpPost> updatesByQuery, String id, String index, JsonObject document,
 			ParentRelation relation, boolean update) throws URISyntaxException {
-		String path = basePath + "/" + relation.parentName + "/_update_by_query";
+		String path = "/" + relation.parentName + "/_update_by_query";
 		URI uri = new URIBuilder(server).setPath(path).build();
 		HttpPost httpPost = new HttpPost(uri);
 
@@ -1022,28 +764,40 @@ public class SearchApi {
 		if (update) {
 			if (relation.fields == null) {
 				// Update affects all of the nested fields, so can add the entire document
-				document = convertUnits(document);
+				document = convertDocumentUnits(document);
 				paramsBuilder.add("doc", Json.createArrayBuilder().add(document));
 			} else {
 				// Need to update individual nested fields
-				paramsBuilder = convertUnits(paramsBuilder, document, relation.fields);
+				paramsBuilder = convertScriptUnits(paramsBuilder, document, relation.fields);
 			}
 		}
 		JsonObjectBuilder scriptBuilder = Json.createObjectBuilder().add("id", scriptId).add("params", paramsBuilder);
 		JsonObject queryObject;
 		String idField = relation.joinField.equals(relation.parentName) ? "id" : relation.joinField + ".id";
-		if (!Arrays.asList("parametertype", "sampletype", "user").contains(index)) { // TODO generalise?
-			queryObject = QueryBuilder.buildTermQuery(idField, id);
-		} else {
+		if (relation.relationType.equals(RelationType.NESTED_GRANDCHILD)) {
 			queryObject = QueryBuilder.buildNestedQuery(relation.joinField, QueryBuilder.buildTermQuery(idField, id));
+		} else {
+			queryObject = QueryBuilder.buildTermQuery(idField, id);
 		}
 		JsonObject bodyJson = Json.createObjectBuilder().add("query", queryObject).add("script", scriptBuilder).build();
-		logger.trace("updateByQuery script: {}", bodyJson.toString());
+		// logger.trace("updateByQuery script: {}", bodyJson.toString());
 		httpPost.setEntity(new StringEntity(bodyJson.toString(), ContentType.APPLICATION_JSON));
 		updatesByQuery.add(httpPost);
 	}
 
-	private static JsonObject convertUnits(JsonObject document) {
+	private void convertUnits(JsonObject document, JsonObjectBuilder rebuilder, String valueString,
+			Double numericValue) {
+		String unitString = document.getString("type.units");
+		SystemValue systemValue = icatUnits.new SystemValue(numericValue, unitString);
+		if (systemValue.units != null) {
+			rebuilder.add("type.unitsSI", systemValue.units);
+		}
+		if (systemValue.value != null) {
+			rebuilder.add(valueString, systemValue.value);
+		}
+	}
+
+	private JsonObject convertDocumentUnits(JsonObject document) {
 		if (!document.containsKey("type.units")) {
 			return document;
 		}
@@ -1052,45 +806,21 @@ public class SearchApi {
 		for (String key : document.keySet()) {
 			rebuilder.add(key, document.get(key));
 		}
-		String unitString = document.getString("type.units");
-		try {
-			Unit<?> unit = unitFormat.parse(unitString);
-			Unit<?> systemUnit = unit.getSystemUnit();
-			rebuilder.add("type.unitsSI", systemUnit.getName());
-			if (document.containsKey("numericValue")) {
-				double numericValue = document.getJsonNumber("numericValue").doubleValue();
-				UnitConverter converter = unit.getConverterToAny(systemUnit);
-				rebuilder.add("numericValueSI", converter.convert(numericValue));
-			}
-		} catch (IncommensurableException | MeasurementParseException e) {
-			logger.error("Unable to convert 'type.units' of {} due to {}", unitString,
-					e.getMessage());
-		}
+		Double numericValue = document.containsKey("numericValue")
+				? document.getJsonNumber("numericValue").doubleValue()
+				: null;
+		convertUnits(document, rebuilder, "numericValueSI", numericValue);
 		document = rebuilder.build();
 		return document;
 	}
 
-	private static JsonObjectBuilder convertUnits(JsonObjectBuilder paramsBuilder, JsonObject document,
+	private JsonObjectBuilder convertScriptUnits(JsonObjectBuilder paramsBuilder, JsonObject document,
 			Set<String> fields) {
-		UnitConverter converter = null;
 		for (String field : fields) {
 			if (field.equals("type.unitsSI")) {
-				String unitString = document.getString("type.units");
-				try {
-					Unit<?> unit = unitFormat.parse(unitString);
-					Unit<?> systemUnit = unit.getSystemUnit();
-					converter = unit.getConverterToAny(systemUnit);
-					paramsBuilder.add(field, systemUnit.getName());
-				} catch (IncommensurableException | MeasurementParseException e) {
-					logger.error("Unable to convert 'type.units' of {} due to {}", unitString,
-							e.getMessage());
-				}
+				convertUnits(document, paramsBuilder, "conversionFactor", 1.);
 			} else if (field.equals("numericValueSI")) {
-				if (converter != null) {
-					// If we convert 1, we then have the necessary factor and can do
-					// multiplication by script...
-					paramsBuilder.add("conversionFactor", converter.convert(1.));
-				}
+				continue;
 			} else {
 				paramsBuilder.add(field, document.get(field));
 			}
@@ -1122,78 +852,5 @@ public class SearchApi {
 				sb.append(Json.createObjectBuilder().add("delete", targetObject).build().toString()).append("\n");
 				break;
 		}
-	}
-
-	/**
-	 * Legacy function for building a Query from individual arguments
-	 * 
-	 * @param target
-	 * @param user
-	 * @param text
-	 * @param lower
-	 * @param upper
-	 * @param parameters
-	 * @param samples
-	 * @param userFullName
-	 * @return
-	 */
-	public static JsonObject buildQuery(String target, String user, String text, Date lower, Date upper,
-			List<ParameterPOJO> parameters, List<String> samples, String userFullName) {
-		JsonObjectBuilder builder = Json.createObjectBuilder();
-		if (target != null) {
-			builder.add("target", target);
-		}
-		if (user != null) {
-			builder.add("user", user);
-		}
-		if (text != null) {
-			builder.add("text", text);
-		}
-		if (lower != null) {
-			builder.add("lower", lower.getTime());
-		}
-		if (upper != null) {
-			builder.add("upper", upper.getTime());
-		}
-		if (parameters != null && !parameters.isEmpty()) {
-			JsonArrayBuilder parametersBuilder = Json.createArrayBuilder();
-			for (ParameterPOJO parameter : parameters) {
-				JsonObjectBuilder parameterBuilder = Json.createObjectBuilder();
-				if (parameter.name != null) {
-					parameterBuilder.add("name", parameter.name);
-				}
-				if (parameter.units != null) {
-					parameterBuilder.add("units", parameter.units);
-				}
-				if (parameter.stringValue != null) {
-					parameterBuilder.add("stringValue", parameter.stringValue);
-				}
-				if (parameter.lowerDateValue != null) {
-					parameterBuilder.add("lowerDateValue", parameter.lowerDateValue.getTime());
-				}
-				if (parameter.upperDateValue != null) {
-					parameterBuilder.add("upperDateValue", parameter.upperDateValue.getTime());
-				}
-				if (parameter.lowerNumericValue != null) {
-					parameterBuilder.add("lowerNumericValue", parameter.lowerNumericValue);
-				}
-				if (parameter.upperNumericValue != null) {
-					parameterBuilder.add("upperNumericValue", parameter.upperNumericValue);
-				}
-				parametersBuilder.add(parameterBuilder);
-			}
-			builder.add("parameters", parametersBuilder);
-		}
-		if (samples != null && !samples.isEmpty()) {
-			JsonArrayBuilder samplesBuilder = Json.createArrayBuilder();
-			for (String sample : samples) {
-				samplesBuilder.add(sample);
-			}
-			builder.add("samples", samplesBuilder);
-		}
-		if (userFullName != null) {
-			builder.add("userFullName", userFullName);
-		}
-		return builder.build();
 	}
 }

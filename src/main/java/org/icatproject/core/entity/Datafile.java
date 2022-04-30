@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.SearchApi;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A data file")
 @SuppressWarnings("serial")

@@ -20,10 +20,10 @@ import static org.hamcrest.CoreMatchers.isA;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,15 +46,16 @@ import java.util.regex.Pattern;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 
-import org.icatproject.core.manager.ElasticsearchApi;
-import org.icatproject.core.manager.LuceneApi;
-import org.icatproject.core.manager.SearchApi;
+import org.icatproject.core.manager.search.LuceneApi;
+import org.icatproject.core.manager.search.OpensearchApi;
+import org.icatproject.core.manager.search.SearchApi;
 import org.icatproject.icat.client.ICAT;
 import org.icatproject.icat.client.IcatException;
 import org.icatproject.icat.client.IcatException.IcatExceptionType;
@@ -72,6 +73,8 @@ import org.icatproject.PublicStep;
  */
 public class TestRS {
 
+	private static final String NO_DIMENSIONS = "Did not expect responseObject to contain 'dimensions', but it did";
+	private static final DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	private static WSession wSession;
 	private static long end;
 	private static long start;
@@ -93,13 +96,10 @@ public class TestRS {
 				String urlString = System.getProperty("luceneUrl");
 				URI uribase = new URI(urlString);
 				searchApi = new LuceneApi(uribase);
-			} else if (searchEngine.equals("OPENSEARCH")) {
+			} else if (searchEngine.equals("OPENSEARCH") || searchEngine.equals("ELASTICSEARCH")) {
 				String urlString = System.getProperty("opensearchUrl");
 				URI uribase = new URI(urlString);
-				searchApi = new SearchApi(uribase);
-			} else if (searchEngine.equals("ELASTICSEARCH")) {
-				String urlString = System.getProperty("elasticsearchUrl");
-				searchApi = new ElasticsearchApi(Arrays.asList(new URL(urlString)));
+				searchApi = new OpensearchApi(uribase);
 			} else {
 				throw new RuntimeException(
 						"searchEngine must be one of LUCENE, OPENSEARCH, ELASTICSEARCH, but it was " + searchEngine);
@@ -496,6 +496,9 @@ public class TestRS {
 
 	}
 
+	/**
+	 * Tests the old lucene/data endpoint
+	 */
 	@Test
 	public void testLuceneDatafiles() throws Exception {
 		Session session = setupLuceneTest();
@@ -519,30 +522,23 @@ public class TestRS {
 		checkResultFromLuceneSearch(session, "df2", array, "Datafile", "name");
 	}
 
+	/**
+	 * Tests the old lucene/data endpoint
+	 */
 	@Test
 	public void testLuceneDatasets() throws Exception {
-
 		Session session = setupLuceneTest();
-
-		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 		// All datasets
 		searchDatasets(session, null, null, null, null, null, 20, 5);
 
 		// Use the user
-		Set<String> names = new HashSet<>();
 		JsonArray array = searchDatasets(session, "db/tr", null, null, null, null, 20, 3);
-
 		for (int i = 0; i < 3; i++) {
-
 			long n = array.getJsonObject(i).getJsonNumber("id").longValueExact();
-			JsonObject result = Json.createReader(new ByteArrayInputStream(session.get("Dataset", n).getBytes()))
-					.readObject();
-			names.add(result.getJsonObject("Dataset").getString("name"));
+			JsonObject result = Json.createReader(new StringReader(session.get("Dataset", n))).readObject();
+			assertEquals("ds" + (i + 1), result.getJsonObject("Dataset").getString("name"));
 		}
-		assertTrue(names.contains("ds1"));
-		assertTrue(names.contains("ds2"));
-		assertTrue(names.contains("ds3"));
 
 		// Try a bad user
 		searchDatasets(session, "db/fred", null, null, null, null, 20, 0);
@@ -553,8 +549,8 @@ public class TestRS {
 		// Try parameters
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		ParameterForLucene stringParameter = new ParameterForLucene("colour", "name", "green");
-		ParameterForLucene dateParameter = new ParameterForLucene("birthday", "date",
-				dft.parse("2014-05-16T16:58:26+0000"), dft.parse("2014-05-16T16:58:26+0000"));
+		Date birthday = dft.parse("2014-05-16T16:58:26+0000");
+		ParameterForLucene dateParameter = new ParameterForLucene("birthday", "date", birthday, birthday);
 		ParameterForLucene numericParameter = new ParameterForLucene("current", "amps", 140, 165);
 		array = searchDatasets(session, null, null, null, null, Arrays.asList(stringParameter), 20, 1);
 		array = searchDatasets(session, null, null, null, null, Arrays.asList(dateParameter), 20, 1);
@@ -564,64 +560,72 @@ public class TestRS {
 		parameters.add(numericParameter);
 		array = searchDatasets(session, null, null, null, null, parameters, 20, 1);
 
-		array = searchDatasets(session, null, "gamma AND ds3", dft.parse("2014-05-16T05:09:03+0000"),
-				dft.parse("2014-05-16T05:15:26+0000"), parameters, 20, 1);
+		Date lower = dft.parse("2014-05-16T05:09:03+0000");
+		Date upper = dft.parse("2014-05-16T05:15:26+0000");
+		array = searchDatasets(session, null, "gamma AND ds3", lower, upper, parameters, 20, 1);
 		checkResultFromLuceneSearch(session, "gamma", array, "Dataset", "description");
 	}
 
+	/**
+	 * Tests the old lucene/data endpoint
+	 */
 	@Test
 	public void testLuceneInvestigations() throws Exception {
 		Session session = setupLuceneTest();
 
-		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		Date lowerOrigin = dft.parse("2011-01-01T00:00:00+0000");
+		Date lowerSecond = dft.parse("2011-01-01T00:00:01+0000");
+		Date lowerMinute = dft.parse("2011-01-01T00:01:00+0000");
+		Date upperOrigin = dft.parse("2011-12-31T23:59:59+0000");
+		Date upperSecond = dft.parse("2011-12-31T23:59:58+0000");
+		Date upperMinute = dft.parse("2011-12-31T23:58:00+0000");
+		List<String> samplesAnd = Arrays.asList("ford AND rust", "koh* AND diamond");
+		List<String> samplesPlus = Arrays.asList("ford + rust", "koh + diamond");
+		List<String> samplesBad = Arrays.asList("ford AND rust", "kog* AND diamond");
+		String textAnd = "title AND one";
+		String textTwo = "title AND two";
+		String textPlus = "title + one";
 
 		searchInvestigations(session, null, null, null, null, null, null, null, 20, 3);
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
 
-		JsonArray array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
-				dft.parse("2011-12-31T23:59:59+0000"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
-				"Professor", 20, 1);
+		JsonArray array = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
+				samplesAnd, "Professor", 20, 1);
 		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
 		// change user
-		searchInvestigations(session, "db/fred", "title AND one", null, null, parameters, null, null, 20, 0);
+		searchInvestigations(session, "db/fred", textAnd, null, null, parameters, null, null, 20, 0);
 
 		// change text
-		searchInvestigations(session, "db/tr", "title AND two", null, null, parameters, null, null, 20, 0);
+		searchInvestigations(session, "db/tr", textTwo, null, null, parameters, null, null, 20, 0);
 
 		// Only working to a minute
-		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:01+0000"),
-				dft.parse("2011-12-31T23:59:59+0000"), parameters, null, null, 20, 1);
+		array = searchInvestigations(session, "db/tr", textAnd, lowerSecond, upperOrigin, parameters, null, null, 20,
+				1);
 		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
-		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
-				dft.parse("2011-12-31T23:59:58+0000"), parameters, null, null, 20, 1);
+		array = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperSecond, parameters, null, null, 20,
+				1);
 		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
-		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:01:00+0000"),
-				dft.parse("2011-12-31T23:59:59+0000"), parameters, null, null, 20, 0);
+		searchInvestigations(session, "db/tr", textAnd, lowerMinute, upperOrigin, parameters, null, null, 20, 0);
 
-		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
-				dft.parse("2011-12-31T23:58:00+0000"), parameters, null, null, 20, 0);
+		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperMinute, parameters, null, null, 20, 0);
 
 		// Change parameters
 		List<ParameterForLucene> badParameters = new ArrayList<>();
 		badParameters.add(new ParameterForLucene("color", "name", "green"));
-		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
-				dft.parse("2011-12-31T23:59:59+0000"), badParameters, Arrays.asList("ford + rust", "koh + diamond"),
-				null, 20, 0);
+		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, badParameters, samplesPlus, null, 20,
+				0);
 
 		// Change samples
-		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
-				dft.parse("2011-12-31T23:59:59+0000"), parameters, Arrays.asList("ford AND rust", "kog* AND diamond"),
-				null, 20, 0);
+		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters, samplesBad, null, 20, 0);
 
 		// Change userFullName
-		searchInvestigations(session, "db/tr", "title + one", dft.parse("2011-01-01T00:00:00+0000"),
-				dft.parse("2011-12-31T23:59:59+0000"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
-				"Doctor", 20, 0);
+		searchInvestigations(session, "db/tr", textPlus, lowerOrigin, upperOrigin, parameters, samplesAnd, "Doctor", 20,
+				0);
 
 		// Try provoking an error
 		badParameters = new ArrayList<>();
@@ -634,6 +638,9 @@ public class TestRS {
 		}
 	}
 
+	/**
+	 * Tests the new search/documents endpoint
+	 */
 	@Test
 	public void testSearchDatafiles() throws Exception {
 		Session session = setupLuceneTest();
@@ -669,7 +676,8 @@ public class TestRS {
 		expectation.put("name", "df3");
 		checkResultsSource(responseObject, Arrays.asList(expectation), false);
 
-		responseObject = searchDatafiles(session, null, null, null, null, null, searchAfter.toString(), 1, sort, null, 1);
+		responseObject = searchDatafiles(session, null, null, null, null, null, searchAfter.toString(), 1, sort, null,
+				1);
 		searchAfter = responseObject.get("search_after");
 		assertNotNull(searchAfter);
 		expectation.put("name", "df2");
@@ -705,29 +713,19 @@ public class TestRS {
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		// Test searching with someone without authz for the Datafile(s)
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "piOne");
-		credentials.put("password", "piOne");
-		Session piSession = icat.login("db", credentials);
-		searchDatafiles(piSession, null, null, null, null, null, null, 10, null, null, 0);
+		searchDatafiles(piSession(), null, null, null, null, null, null, 10, null, null, 0);
 
 		// Test no facets match on Datafiles
-		JsonObjectBuilder target = Json.createObjectBuilder().add("target", "Datafile");
-		String facets = Json.createArrayBuilder().add(target).build().toString();
+		String facets = buildFacetRequest("Datafile");
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 10, null, facets, 3);
 		assertFalse(responseObject.containsKey("search_after"));
-		assertFalse("Did not expect responseObject to contain 'dimensions', but it did",
-				responseObject.containsKey("dimensions"));
+		assertFalse(NO_DIMENSIONS, responseObject.containsKey("dimensions"));
 
 		// Test no facets match on DatafileParameters due to lack of READ access
-		target = Json.createObjectBuilder()
-				.add("target", "DatafileParameter").add("dimensions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("dimension", "type.name")));
-		facets = Json.createArrayBuilder().add(target).build().toString();
+		facets = buildFacetRequest("DatafileParameter");
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 10, null, facets, 3);
 		assertFalse(responseObject.containsKey("search_after"));
-		assertFalse("Did not expect responseObject to contain 'dimensions', but it did",
-				responseObject.containsKey("dimensions"));
+		assertFalse(NO_DIMENSIONS, responseObject.containsKey("dimensions"));
 
 		// Test facets match on DatafileParameters
 		wSession.addRule(null, "DatafileParameter", "R");
@@ -736,10 +734,12 @@ public class TestRS {
 		checkFacets(responseObject, "DatafileParameter.type.name", Arrays.asList("colour"), Arrays.asList(1L));
 	}
 
+	/**
+	 * Tests the new search/documents endpoint
+	 */
 	@Test
 	public void testSearchDatasets() throws Exception {
 		Session session = setupLuceneTest();
-		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 		JsonObject responseObject;
 		JsonValue searchAfter;
 		Map<String, String> expectation = new HashMap<>();
@@ -804,7 +804,8 @@ public class TestRS {
 		assertNotNull(searchAfter);
 		expectation.put("name", "ds4");
 		checkResultsSource(responseObject, Arrays.asList(expectation), false);
-		responseObject = searchDatasets(session, null, null, null, null, null, searchAfter.toString(), 1, sort, null, 1);
+		responseObject = searchDatasets(session, null, null, null, null, null, searchAfter.toString(), 1, sort, null,
+				1);
 		searchAfter = responseObject.get("search_after");
 		assertNotNull(searchAfter);
 		expectation.put("name", "ds3");
@@ -841,28 +842,19 @@ public class TestRS {
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		// Test searching with someone without authz for the Dataset(s)
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "piOne");
-		credentials.put("password", "piOne");
-		Session piSession = icat.login("db", credentials);
-		searchDatasets(piSession, null, null, null, null, null, null, 10, null, null, 0);
+		searchDatasets(piSession(), null, null, null, null, null, null, 10, null, null, 0);
 
 		// Test facets match on Datasets
-		JsonObjectBuilder target = Json.createObjectBuilder()
-				.add("target", "Dataset").add("dimensions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("dimension", "type.name")));
-		String facets = Json.createArrayBuilder().add(target).build().toString();
+		String facets = buildFacetRequest("Dataset");
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 10, null, facets, 5);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkFacets(responseObject, "Dataset.type.name", Arrays.asList("calibration"), Arrays.asList(5L));
 
 		// Test no facets match on DatasetParameters due to lack of READ access
-		target = Json.createObjectBuilder()
-				.add("target", "DatasetParameter").add("dimensions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("dimension", "type.name")));
-		facets = Json.createArrayBuilder().add(target).build().toString();
+		facets = buildFacetRequest("DatasetParameter");
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 10, null, facets, 5);
 		assertFalse(responseObject.containsKey("search_after"));
-		assertFalse("Did not expect responseObject to contain 'dimensions', but it did",
+		assertFalse(NO_DIMENSIONS,
 				responseObject.containsKey("dimensions"));
 
 		// Test facets match on DatasetParameters
@@ -873,10 +865,12 @@ public class TestRS {
 				Arrays.asList(1L, 1L, 1L));
 	}
 
+	/**
+	 * Tests the new search/documents endpoint
+	 */
 	@Test
 	public void testSearchInvestigations() throws Exception {
 		Session session = setupLuceneTest();
-		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 		JsonObject responseObject;
 		Map<String, String> expectation = new HashMap<>();
 		expectation.put("name", "expt1");
@@ -952,10 +946,6 @@ public class TestRS {
 		searchInvestigations(session, "db/tr", textPlus, lowerOrigin, upperOrigin, parameters, samplesAnd, "Doctor",
 				null, 10, null, null, 0);
 
-		// TODO currently the only field we can access is name due to how
-		// Investigation.getDoc() encodes, but this is the same for all the
-		// investigations so testing sorting is not feasible
-
 		// Test that changes to the public steps/tables are reflected in returned fields
 		PublicStep ps = new PublicStep();
 		ps.setOrigin("Investigation");
@@ -990,31 +980,21 @@ public class TestRS {
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		// Test searching with someone without authz for the Investigation(s)
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "piOne");
-		credentials.put("password", "piOne");
-		Session piSession = icat.login("db", credentials);
-		searchInvestigations(piSession, null, null, null, null, null, null, null, null, 10, null, null, 0);
+		searchInvestigations(piSession(), null, null, null, null, null, null, null, null, 10, null, null, 0);
 
 		// Test facets match on Investigations
-		JsonObjectBuilder target = Json.createObjectBuilder()
-				.add("target", "Investigation").add("dimensions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("dimension", "type.name")));
-		String facets = Json.createArrayBuilder().add(target).build().toString();
+		String facets = buildFacetRequest("Investigation");
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkFacets(responseObject, "Investigation.type.name", Arrays.asList("atype"), Arrays.asList(3L));
 
 		// Test no facets match on InvestigationParameters due to lack of READ access
-		target = Json.createObjectBuilder().add("target", "InvestigationParameter")
-				.add("dimensions", Json.createArrayBuilder().add(Json.createObjectBuilder().add("dimension", "type.name")));
-		facets = Json.createArrayBuilder().add(target).build().toString();
+		facets = buildFacetRequest("InvestigationParameter");
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
-		assertFalse("Did not expect responseObject to contain 'dimensions', but it did",
-				responseObject.containsKey("dimensions"));
+		assertFalse(NO_DIMENSIONS, responseObject.containsKey("dimensions"));
 
 		// Test facets match on InvestigationParameters
 		wSession.addRule(null, "InvestigationParameter", "R");
@@ -1057,13 +1037,22 @@ public class TestRS {
 		}
 	}
 
+	private String buildFacetRequest(String target) {
+		JsonObjectBuilder builder = Json.createObjectBuilder();
+		JsonObjectBuilder dimension = Json.createObjectBuilder().add("dimension", "type.name");
+		JsonArrayBuilder dimensions = Json.createArrayBuilder().add(dimension);
+		builder.add("target", target).add("dimensions", dimensions);
+		return Json.createArrayBuilder().add(builder).build().toString();
+	}
+
 	private void checkFacets(JsonObject responseObject, String dimension, List<String> expectedLabels,
 			List<Long> expectedCounts) {
-		assertTrue("Expected responseObject to contain 'dimensions', but it did not",
-				responseObject.containsKey("dimensions"));
+		String dimensionsMessage = "Expected responseObject to contain 'dimensions', but it did not";
+		assertTrue(dimensionsMessage, responseObject.containsKey("dimensions"));
 		JsonObject dimensions = responseObject.getJsonObject("dimensions");
-		assertTrue("Expected 'dimensions' to contain " + dimension + " but keys were " + dimensions.keySet(),
-				dimensions.containsKey(dimension));
+		String dimensionMessage = "Expected 'dimensions' to contain " + dimension + " but keys were "
+				+ dimensions.keySet();
+		assertTrue(dimensionMessage, dimensions.containsKey(dimension));
 		JsonObject labelsObject = dimensions.getJsonObject(dimension);
 		assertEquals(expectedLabels.size(), labelsObject.size());
 		for (int i = 0; i < expectedLabels.size(); i++) {
@@ -1080,13 +1069,27 @@ public class TestRS {
 		assertEquals(val, result.getJsonObject(ename).getString(field));
 	}
 
+	private JsonArray checkResultsSize(int n, String responseString) {
+		JsonArray result = Json.createReader(new ByteArrayInputStream(responseString.getBytes())).readArray();
+		assertEquals(n, result.size());
+		return result;
+	}
+
+	private JsonObject checkResultsArraySize(int n, String responseString) {
+		JsonObject responseObject = Json.createReader(new ByteArrayInputStream(responseString.getBytes())).readObject();
+		JsonArray results = responseObject.getJsonArray("results");
+		assertEquals(n, results.size());
+		return responseObject;
+	}
+
 	private void checkResultsSource(JsonObject responseObject, List<Map<String, String>> expectations, Boolean scored) {
 		JsonArray results = responseObject.getJsonArray("results");
 		assertEquals(expectations.size(), results.size());
 		for (int i = 0; i < expectations.size(); i++) {
 			JsonObject result = results.getJsonObject(i);
-			assertTrue(result.containsKey("id"));
-			assertEquals(scored, result.containsKey("score"));
+			assertTrue("id not present in " + result.toString(), result.containsKey("id"));
+			String message = "score " + (scored ? "not " : "") + "present in " + result.toString();
+			assertEquals(message, scored, result.containsKey("score"));
 
 			assertTrue(result.containsKey("source"));
 			JsonObject source = result.getJsonObject("source");
@@ -1106,6 +1109,15 @@ public class TestRS {
 				}
 			}
 		}
+	}
+
+	private Session piSession() throws URISyntaxException, IcatException {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "piOne");
+		credentials.put("password", "piOne");
+		Session piSession = icat.login("db", credentials);
+		return piSession;
 	}
 
 	private Session setupLuceneTest() throws Exception {
@@ -1133,24 +1145,66 @@ public class TestRS {
 		return session;
 	}
 
-	private JsonArray searchDatasets(Session session, String user, String text, Date lower, Date upper,
-			List<ParameterForLucene> parameters, int maxResults, int n) throws IcatException {
-		JsonArray result = Json
-				.createReader(new ByteArrayInputStream(
-						session.searchDatasets(user, text, lower, upper, parameters, maxResults).getBytes()))
-				.readArray();
-		assertEquals(n, result.size());
-		return result;
-	}
-
+	/**
+	 * For use with the old lucene/data endpoint
+	 */
 	private JsonArray searchDatafiles(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, int maxResults, int n) throws IcatException {
-		JsonArray result = Json
-				.createReader(new ByteArrayInputStream(
-						session.searchDatafiles(user, text, lower, upper, parameters, maxResults).getBytes()))
-				.readArray();
-		assertEquals(n, result.size());
-		return result;
+		String responseString = session.searchDatafiles(user, text, lower, upper, parameters, maxResults);
+		return checkResultsSize(n, responseString);
+	}
+
+	/**
+	 * For use with the old lucene/data endpoint
+	 */
+	private JsonArray searchDatasets(Session session, String user, String text, Date lower, Date upper,
+			List<ParameterForLucene> parameters, int maxResults, int n) throws IcatException {
+		String responseString = session.searchDatasets(user, text, lower, upper, parameters, maxResults);
+		return checkResultsSize(n, responseString);
+	}
+
+	/**
+	 * For use with the old lucene/data endpoint
+	 */
+	private JsonArray searchInvestigations(Session session, String user, String text, Date lower, Date upper,
+			List<ParameterForLucene> parameters, List<String> samples, String userFullName, int maxResults, int n)
+			throws IcatException {
+		String responseString = session.searchInvestigations(user, text, lower, upper, parameters, samples,
+				userFullName, maxResults);
+		return checkResultsSize(n, responseString);
+	}
+
+	/**
+	 * For use with the new search/documents endpoint
+	 */
+	private JsonObject searchDatafiles(Session session, String user, String text, Date lower, Date upper,
+			List<ParameterForLucene> parameters, String searchAfter, int limit, String sort, String facets, int n)
+			throws IcatException {
+		String responseString = session.searchDatafiles(user, text, lower, upper, parameters, searchAfter, limit, sort,
+				facets);
+		return checkResultsArraySize(n, responseString);
+	}
+
+	/**
+	 * For use with the new search/documents endpoint
+	 */
+	private JsonObject searchDatasets(Session session, String user, String text, Date lower, Date upper,
+			List<ParameterForLucene> parameters, String searchAfter, int limit, String sort, String facets, int n)
+			throws IcatException {
+		String responseString = session.searchDatasets(user, text, lower, upper, parameters, searchAfter, limit, sort,
+				facets);
+		return checkResultsArraySize(n, responseString);
+	}
+
+	/**
+	 * For use with the new search/documents endpoint
+	 */
+	private JsonObject searchInvestigations(Session session, String user, String text, Date lower, Date upper,
+			List<ParameterForLucene> parameters, List<String> samples, String userFullName, String searchAfter,
+			int limit, String sort, String facets, int n) throws IcatException {
+		String responseString = session.searchInvestigations(user, text, lower, upper, parameters, samples,
+				userFullName, searchAfter, limit, sort, facets);
+		return checkResultsArraySize(n, responseString);
 	}
 
 	@Test
@@ -1689,50 +1743,6 @@ public class TestRS {
 		JsonArray result = Json.createReader(new ByteArrayInputStream(session.search(query).getBytes())).readArray();
 		assertEquals(n, result.size());
 		return result;
-	}
-
-	private JsonArray searchInvestigations(Session session, String user, String text, Date lower, Date upper,
-			List<ParameterForLucene> parameters, List<String> samples, String userFullName, int maxResults, int n)
-			throws IcatException {
-		JsonArray result = Json.createReader(new ByteArrayInputStream(
-				session.searchInvestigations(user, text, lower, upper, parameters, samples, userFullName, maxResults)
-						.getBytes()))
-				.readArray();
-		assertEquals(n, result.size());
-		return result;
-	}
-
-	private JsonObject searchDatafiles(Session session, String user, String text, Date lower, Date upper,
-			List<ParameterForLucene> parameters, String searchAfter, int limit, String sort, String facets, int n)
-			throws IcatException {
-		String response = session.searchDatafiles(user, text, lower, upper, parameters, searchAfter, limit, sort,
-				facets);
-		JsonObject responseObject = Json.createReader(new ByteArrayInputStream(response.getBytes())).readObject();
-		JsonArray results = responseObject.getJsonArray("results");
-		assertEquals(n, results.size());
-		return responseObject;
-	}
-
-	private JsonObject searchDatasets(Session session, String user, String text, Date lower, Date upper,
-			List<ParameterForLucene> parameters, String searchAfter, int limit, String sort, String facets, int n)
-			throws IcatException {
-		String response = session.searchDatasets(user, text, lower, upper, parameters, searchAfter, limit, sort,
-				facets);
-		JsonObject responseObject = Json.createReader(new ByteArrayInputStream(response.getBytes())).readObject();
-		JsonArray results = responseObject.getJsonArray("results");
-		assertEquals(n, results.size());
-		return responseObject;
-	}
-
-	private JsonObject searchInvestigations(Session session, String user, String text, Date lower, Date upper,
-			List<ParameterForLucene> parameters, List<String> samples, String userFullName, String searchAfter,
-			int limit, String sort, String facets, int n) throws IcatException {
-		String response = session.searchInvestigations(user, text, lower, upper, parameters, samples, userFullName,
-				searchAfter, limit, sort, facets);
-		JsonObject responseObject = Json.createReader(new ByteArrayInputStream(response.getBytes())).readObject();
-		JsonArray results = responseObject.getJsonArray("results");
-		assertEquals(n, results.size());
-		return responseObject;
 	}
 
 	@Test

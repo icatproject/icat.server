@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.icatproject.core.manager.SearchApi;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Many to many relationship between investigation and user. It is expected that this will show the association of "
 		+ "individual users with an investigation which might be derived from the proposal. It may also be used as the "

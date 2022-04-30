@@ -13,8 +13,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
+import org.icatproject.core.manager.search.SearchApi;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.SearchApi;
 
 @Comment("A parameter associated with an investigation")
 @SuppressWarnings("serial")

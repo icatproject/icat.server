@@ -1,4 +1,4 @@
-package org.icatproject.core.manager;
+package org.icatproject.core.manager.search;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,6 +46,9 @@ import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.PropertyHandler.SearchEngine;
 import org.slf4j.Logger;
@@ -448,10 +451,6 @@ public class SearchManager {
 		return searchApi.facetSearch(target, facetQuery, maxResults, maxLabels);
 	}
 
-	public void freeSearcher(String uid) throws IcatException {
-		searchApi.freeSearcher(uid);
-	}
-
 	public List<String> getPopulating() {
 		List<String> result = new ArrayList<>();
 		for (Entry<String, Long> e : populateMap.entrySet()) {
@@ -479,14 +478,11 @@ public class SearchManager {
 			try {
 				if (searchEngine == SearchEngine.LUCENE) {
 					searchApi = new LuceneApi(propertyHandler.getSearchUrls().get(0).toURI());
-				} else if (searchEngine == SearchEngine.ELASTICSEARCH) {
-					searchApi = new ElasticsearchApi(propertyHandler.getSearchUrls());
-				} else if (searchEngine == SearchEngine.OPENSEARCH) {
-					searchApi = new SearchApi(propertyHandler.getSearchUrls().get(0).toURI());
+				} else if (searchEngine == SearchEngine.ELASTICSEARCH || searchEngine == SearchEngine.OPENSEARCH) {
+					searchApi = new OpensearchApi(propertyHandler.getSearchUrls().get(0).toURI());
 				} else {
-					// TODO implement opensearch
 					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-							"Search engine {} not supported, must be one of LUCENE, ELASTICSEARCH");
+							"Search engine {} not supported, must be one of " + SearchEngine.values());
 				}
 
 				populateBlockSize = propertyHandler.getSearchPopulateBlockSize();

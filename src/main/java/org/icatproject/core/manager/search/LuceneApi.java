@@ -1,0 +1,204 @@
+package org.icatproject.core.manager.search;
+
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import javax.json.stream.JsonGenerator;
+import javax.persistence.EntityManager;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.icatproject.core.IcatException;
+import org.icatproject.core.IcatException.IcatExceptionType;
+import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.manager.Rest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class LuceneApi extends SearchApi {
+
+	public String basePath = "/icat.lucene";
+	private static final Logger logger = LoggerFactory.getLogger(LuceneApi.class);
+
+	private static String getTargetPath(JsonObject query) throws IcatException {
+		if (!query.containsKey("target")) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"'target' must be present in query for LuceneApi, but it was " + query.toString());
+		}
+		String path = query.getString("target").toLowerCase();
+		if (!indices.contains(path)) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"'target' must be one of " + indices + ", but it was " + path);
+		}
+		return path;
+	}
+
+	@Override
+	public JsonObject buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
+		// As icat.lucene always requires the Lucene id, shardIndex and score
+		// irrespective of the sort, override the default implementation
+		JsonObjectBuilder builder = Json.createObjectBuilder();
+		builder.add("doc", lastBean.getEngineDocId());
+		builder.add("shardIndex", -1);
+		float score = lastBean.getScore();
+		if (!Float.isNaN(score)) {
+			builder.add("score", score);
+		}
+		JsonArrayBuilder arrayBuilder;
+		if (sort == null || sort.equals("")) {
+			arrayBuilder = Json.createArrayBuilder().add(score);
+		} else {
+			arrayBuilder = searchAfterArrayBuilder(lastBean, sort);
+		}
+		builder.add("fields", arrayBuilder.add(lastBean.getEntityBaseBeanId()));
+		return builder.build();
+	}
+
+	public LuceneApi(URI server) {
+		super(server);
+	}
+
+	@Override
+	public void addNow(String entityName, List<Long> ids, EntityManager manager,
+			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor)
+			throws IcatException, IOException, URISyntaxException {
+		URI uri = new URIBuilder(server).setPath(basePath + "/addNow/" + entityName).build();
+
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			HttpPost httpPost = new HttpPost(uri);
+			PipedOutputStream beanDocs = new PipedOutputStream();
+			httpPost.setEntity(new InputStreamEntity(new PipedInputStream(beanDocs)));
+			getBeanDocExecutor.submit(() -> {
+				try (JsonGenerator gen = Json.createGenerator(beanDocs)) {
+					gen.writeStartArray();
+					for (Long id : ids) {
+						EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
+						if (bean != null) {
+							gen.writeStartObject();
+							bean.getDoc(gen);
+							gen.writeEnd();
+						}
+					}
+					gen.writeEnd();
+					return null;
+				} catch (Exception e) {
+					logger.error("About to throw internal exception because of", e);
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+				} finally {
+					manager.close();
+				}
+			});
+
+			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
+			}
+		}
+	}
+
+	@Override
+	public void clear() throws IcatException {
+		post(basePath + "/clear");	
+	}
+
+	@Override
+	public void commit() throws IcatException {
+		post(basePath + "/commit");		
+	}
+
+	@Override
+	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, Integer maxResults, Integer maxLabels)
+			throws IcatException {
+		String path = basePath + "/" + target + "/facet";
+
+		Map<String, String> parameterMap = new HashMap<>();
+		parameterMap.put("maxResults", maxResults.toString());
+		parameterMap.put("maxLabels", maxLabels.toString());
+
+		JsonObject postResponse = postResponse(path, facetQuery.toString(), parameterMap);
+
+		List<FacetDimension> results = new ArrayList<>();
+		JsonObject aggregations = postResponse.getJsonObject("aggregations");
+		for (String dimension : aggregations.keySet()) {
+			parseFacetsResponse(results, target, dimension, aggregations);
+		}
+		return results;
+	}
+
+	@Override
+	public SearchResult getResults(JsonObject query, JsonValue searchAfter, Integer blockSize, String sort,
+			List<String> fields) throws IcatException {
+		String indexPath = getTargetPath(query);
+
+		Map<String, String> parameterMap = new HashMap<>();
+		parameterMap.put("maxResults", blockSize.toString());
+		if (searchAfter != null) {
+			parameterMap.put("search_after", searchAfter.toString());
+		}
+		if (sort != null) {
+			parameterMap.put("sort", sort);
+		}
+	
+		JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+		objectBuilder.add("query", query);
+		if (fields != null && fields.size() > 0) {
+			JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+			fields.forEach((field) -> arrayBuilder.add(field));
+			objectBuilder.add("fields", arrayBuilder.build());
+		}
+		String queryString = objectBuilder.build().toString();
+
+		JsonObject postResponse = postResponse(basePath + "/" + indexPath, queryString, parameterMap);
+		SearchResult lsr = new SearchResult();
+		List<ScoredEntityBaseBean> results = lsr.getResults();
+		List<JsonObject> resultsArray = postResponse.getJsonArray("results").getValuesAs(JsonObject.class);
+		for (JsonObject resultObject : resultsArray) {
+			int luceneDocId = resultObject.getInt("_id");
+			Float score = Float.NaN;
+			if (resultObject.keySet().contains("_score")) {
+				score = resultObject.getJsonNumber("_score").bigDecimalValue().floatValue();
+			}
+			JsonObject source = resultObject.getJsonObject("_source");
+			ScoredEntityBaseBean result = new ScoredEntityBaseBean(luceneDocId, score, source);
+			results.add(result);
+			logger.trace("Result id {} with score {}", result.getEntityBaseBeanId(), score);
+		}
+		if (postResponse.containsKey("search_after")) {
+			lsr.setSearchAfter(postResponse.getJsonObject("search_after"));
+		}
+
+		return lsr;
+	}
+
+	@Override
+	public void lock(String entityName) throws IcatException {
+		post(basePath + "/lock/" + entityName);
+	}
+
+	@Override
+	public void unlock(String entityName) throws IcatException {
+		post(basePath + "/unlock/" + entityName);
+	}
+
+	@Override
+	public void modify(String json) throws IcatException {
+		post(basePath + "/modify", json);
+	}
+
+}

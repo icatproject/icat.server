@@ -15,7 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.icatproject.core.manager.SearchApi;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A user of the facility")
 @SuppressWarnings("serial")

@@ -18,7 +18,7 @@ import org.icatproject.core.IcatException.IcatExceptionType;
 
 public class Rest {
 
-	static void checkStatus(HttpResponse response, IcatExceptionType et) throws IcatException {
+	public static void checkStatus(HttpResponse response, IcatExceptionType et) throws IcatException {
 		StatusLine status = response.getStatusLine();
 		if (status == null) {
 			throw new IcatException(IcatExceptionType.INTERNAL, "Status line in response is empty");

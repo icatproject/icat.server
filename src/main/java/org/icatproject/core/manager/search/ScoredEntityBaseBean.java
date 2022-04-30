@@ -1,4 +1,4 @@
-package org.icatproject.core.manager;
+package org.icatproject.core.manager.search;
 
 import javax.json.JsonObject;
 

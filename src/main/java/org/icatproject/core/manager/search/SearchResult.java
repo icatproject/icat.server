@@ -1,4 +1,4 @@
-package org.icatproject.core.manager;
+package org.icatproject.core.manager.search;
 
 import java.util.ArrayList;
 import java.util.List;

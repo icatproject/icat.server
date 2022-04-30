@@ -12,6 +12,10 @@ public class QueryBuilder {
     private static JsonObject matchAllQuery = Json.createObjectBuilder().add("match_all", Json.createObjectBuilder())
             .build();
 
+    public static JsonObjectBuilder addQuery(JsonObject query) {
+        return Json.createObjectBuilder().add("query", query);
+    }
+
     public static JsonObject buildMatchAllQuery() {
         return matchAllQuery;
     }

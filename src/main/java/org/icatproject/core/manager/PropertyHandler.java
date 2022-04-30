@@ -308,6 +308,7 @@ public class PropertyHandler {
 	private int searchPopulateBlockSize;
 	private Path searchDirectory;
 	private long searchBacklogHandlerIntervalMillis;
+	private String unitAliasOptions;
 	private Map<String, String> cluster = new HashMap<>();
 	private long searchEnqueuedRequestIntervalMillis;
 
@@ -478,13 +479,15 @@ public class PropertyHandler {
 					}
 				}
 
-				if ((searchEngine.equals(SearchEngine.LUCENE) || searchEngine.equals(SearchEngine.OPENSEARCH))
-						&& searchUrls.size() != 1) {
+				// In principle, clustered engines like OPENSEARCH or ELASTICSEARCH should
+				// support multiple urls for the nodes in the cluster, however this is not yet
+				// implemented
+				if (searchUrls.size() != 1) {
 					String msg = "Exactly one value for search.urls must be provided when using " + searchEngine;
 					throw new IllegalStateException(msg);
-				} else if (searchUrls.size() == 0) {
-					String msg = "At least one value for search.urls must be provided";
-					throw new IllegalStateException(msg);
+				// } else if (searchUrls.size() == 0) {
+				// 	String msg = "At least one value for search.urls must be provided";
+				// 	throw new IllegalStateException(msg);
 				}
 				formattedProps.add("search.urls" + " " + searchUrls.toString());
 				logger.info("Using {} as search engine with url(s) {}", searchEngine, searchUrls);
@@ -510,6 +513,9 @@ public class PropertyHandler {
 			} else {
 				logger.info("'search.engine' entry not present so no free text search available");
 			}
+
+
+			unitAliasOptions = props.getString("units", "");
 
 			/*
 			 * maxEntities, importCacheSize, exportCacheSize, maxIdsInQuery, key

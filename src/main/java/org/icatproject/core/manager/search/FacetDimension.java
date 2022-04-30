@@ -1,4 +1,4 @@
-package org.icatproject.core.manager;
+package org.icatproject.core.manager.search;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +18,14 @@ public class FacetDimension {
 	public FacetDimension(String target, String dimension) {
 		this.target = target;
 		this.dimension = dimension;
+	}
+
+	public FacetDimension(String target, String dimension, FacetLabel... labels) {
+		this.target = target;
+		this.dimension = dimension;
+		for (FacetLabel label : labels) {
+			facets.add(label);
+		}
 	}
 
 	public List<FacetLabel> getFacets() {
