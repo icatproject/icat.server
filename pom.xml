@@ -296,6 +296,7 @@
 						<id>Generate doc</id>
 						<phase>process-classes</phase>
 						<configuration>
+							<classpathScope>compile</classpathScope>
 							<mainClass>org.icatproject.core.DocGenerator</mainClass>
 							<arguments>
 								<argument>${basedir}</argument>
