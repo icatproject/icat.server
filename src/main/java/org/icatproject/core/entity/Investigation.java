@@ -30,10 +30,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	private List<Dataset> datasets = new ArrayList<>();
 
 	@Comment("The cumulative total size of the datasets within this investigation")
-	private Long fileSize;
+	private Long fileSize = 0L;
 
 	@Comment("The total number of datafiles within this investigation")
-	private Long fileCount;
+	private Long fileCount = 0L;
 
 	@Comment("The Digital Object Identifier associated with this investigation")
 	private String doi;
