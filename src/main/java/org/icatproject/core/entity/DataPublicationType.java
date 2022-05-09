@@ -14,7 +14,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("A type of data publication, for example, whole investigation, user-selected datasets/files")
+@Comment("A type of data publication, for example, whole investigation, user-selected datasets/files. "
+		+ "This is likely to be for facility internal purposes following their own classification "
+		+ "scheme and allowing, for example, the front end to display them in different ways.")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME" }) })
