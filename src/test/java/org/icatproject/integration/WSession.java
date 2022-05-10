@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.json.Json;
-import javax.json.JsonString;
+import jakarta.json.Json;
+import jakarta.json.JsonString;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
+import jakarta.xml.ws.WebServiceException;
 
 import org.icatproject.AccessType;
 import org.icatproject.Application;

@@ -4,15 +4,15 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import javax.json.stream.JsonGenerator;
-import javax.persistence.Column;
-import javax.persistence.EntityManager;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.NamedQuery;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import jakarta.json.stream.JsonGenerator;
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;

@@ -2,12 +2,12 @@ package org.icatproject.exposed;
 
 import java.io.ByteArrayOutputStream;
 
-import javax.json.Json;
-import javax.json.stream.JsonGenerator;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import jakarta.json.Json;
+import jakarta.json.stream.JsonGenerator;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.slf4j.Logger;
