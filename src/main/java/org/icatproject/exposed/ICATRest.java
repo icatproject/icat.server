@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -46,7 +47,9 @@ import jakarta.json.stream.JsonParser;
 import jakarta.json.stream.JsonParser.Event;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 import jakarta.transaction.UserTransaction;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -62,11 +65,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.util.Streams;
 import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
@@ -664,23 +662,17 @@ public class ICATRest {
 	@Path("port")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public void importData(@Context HttpServletRequest request) throws IcatException {
-		if (!ServletFileUpload.isMultipartContent(request)) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Multipart content expected");
-		}
 
-		ServletFileUpload upload = new ServletFileUpload();
 		String jsonString = null;
 		String name = null;
 
 		// Parse the request
 		try {
-			FileItemIterator iter = upload.getItemIterator(request);
-			while (iter.hasNext()) {
-				FileItemStream item = iter.next();
-				String fieldName = item.getFieldName();
-				InputStream stream = item.openStream();
-				if (item.isFormField()) {
-					String value = Streams.asString(stream);
+			for (Part part : request.getParts()) {
+				String fieldName = part.getName();
+				InputStream stream = part.getInputStream();
+				if (part.getSubmittedFileName() == null) {
+					String value = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 					if (fieldName.equals("json")) {
 						jsonString = value;
 					} else {
@@ -689,13 +681,15 @@ public class ICATRest {
 					}
 				} else {
 					if (name == null) {
-						name = item.getName();
+						name = part.getSubmittedFileName();
 					}
 					porter.importData(jsonString, stream, manager, userTransaction, request.getRemoteAddr());
 				}
 			}
-		} catch (FileUploadException | IOException e) {
+		} catch (IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		} catch (ServletException e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Multipart content expected");
 		}
 	}
 
