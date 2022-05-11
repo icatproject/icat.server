@@ -500,7 +500,7 @@ public class TestRS {
 	@Test
 	public void testVersion() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		assertTrue(icat.getVersion().startsWith("5."));
+		assertTrue(icat.getVersion().startsWith("6."));
 	}
 
 	@Test
