@@ -64,6 +64,9 @@ public class Facility extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
 	private List<DataPublication> dataPublications = new ArrayList<DataPublication>();
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<DataPublicationType> dataPublicationTypes = new ArrayList<DataPublicationType>();
+
 	/* Needed for JPA */
 	public Facility() {
 	}
@@ -128,6 +131,10 @@ public class Facility extends EntityBaseBean implements Serializable {
 		return dataPublications;
 	}
 
+	public List<DataPublicationType> getDataPublicationTypes() {
+		return dataPublicationTypes;
+	}
+
 	public void setApplications(List<Application> applications) {
 		this.applications = applications;
 	}
@@ -186,6 +193,10 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	public void setDataPublications(List<DataPublication> dataPublications) {
 		this.dataPublications = dataPublications;
+	}
+
+	public void setDataPublicationTypes(List<DataPublicationType> dataPublicationTypes) {
+		this.dataPublicationTypes = dataPublicationTypes;
 	}
 
 }

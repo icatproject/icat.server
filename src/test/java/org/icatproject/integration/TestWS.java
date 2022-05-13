@@ -257,7 +257,7 @@ public class TestWS {
 	@Test
 	public void entities() throws Exception {
 		List<String> entities = session.getEntityNames();
-		assertEquals(49, entities.size());
+		assertEquals(51, entities.size());
 		assertTrue(entities.contains("Application"));
 	}
 
@@ -1930,7 +1930,7 @@ public class TestWS {
 		for (Constraint constraint : ei.getConstraints()) {
 			assertEquals(Arrays.asList("facility", "name", "visitId"), constraint.getFieldNames());
 		}
-		assertEquals(28, ei.getFields().size());
+		assertEquals(29, ei.getFields().size());
 		int n = 0;
 		for (EntityField field : ei.getFields()) {
 			if (field.getName().equals("id")) {
@@ -1961,7 +1961,7 @@ public class TestWS {
 				n++;
 			}
 		}
-		assertEquals(24, n);
+		assertEquals(25, n);
 	}
 
 	@Test

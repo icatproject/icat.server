@@ -86,6 +86,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<StudyInvestigation> studyInvestigations = new ArrayList<>();
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
+	private List<DataCollectionInvestigation> dataCollectionInvestigations = new ArrayList<DataCollectionInvestigation>();
+
 	@Comment("Summary or abstract")
 	@Column(length = 4000)
 	private String summary;
@@ -182,6 +185,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		return studyInvestigations;
 	}
 
+	public List<DataCollectionInvestigation> getDataCollectionInvestigations() {
+		return dataCollectionInvestigations;
+	}
+
 	public String getSummary() {
 		return summary;
 	}
@@ -272,6 +279,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setStudyInvestigations(List<StudyInvestigation> studyInvestigations) {
 		this.studyInvestigations = studyInvestigations;
+	}
+
+	public void setDataCollectionInvestigations(List<DataCollectionInvestigation> dataCollectionInvestigations) {
+		this.dataCollectionInvestigations = dataCollectionInvestigations;
 	}
 
 	public void setSummary(String summary) {

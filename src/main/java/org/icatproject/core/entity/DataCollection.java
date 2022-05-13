@@ -8,8 +8,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
-@Comment("A set of Datafiles and Datasets which can span investigations and facilities. Note that it has "
-		+ "no constraint fields. "
+@Comment("A set of Investigations, Datasets and Datafiles which can span Facilities. "
+		+ "Note that it has no constraint fields. "
 		+ "It is expected that a DataCollection would be identified by its parameters or its "
 		+ "relationship to a Job.")
 @SuppressWarnings("serial")
@@ -21,6 +21,9 @@ public class DataCollection extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataCollection")
 	private List<DataCollectionDataset> dataCollectionDatasets = new ArrayList<DataCollectionDataset>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataCollection")
+	private List<DataCollectionInvestigation> dataCollectionInvestigations = new ArrayList<DataCollectionInvestigation>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataCollection")
 	private List<DataCollectionParameter> parameters = new ArrayList<DataCollectionParameter>();
@@ -43,6 +46,10 @@ public class DataCollection extends EntityBaseBean implements Serializable {
 
 	public List<DataCollectionDataset> getDataCollectionDatasets() {
 		return dataCollectionDatasets;
+	}
+
+	public List<DataCollectionInvestigation> getDataCollectionInvestigations() {
+		return dataCollectionInvestigations;
 	}
 
 	public String getDoi() {
@@ -71,6 +78,10 @@ public class DataCollection extends EntityBaseBean implements Serializable {
 
 	public void setDataCollectionDatasets(List<DataCollectionDataset> dataCollectionDatasets) {
 		this.dataCollectionDatasets = dataCollectionDatasets;
+	}
+
+	public void setDataCollectionInvestigations(List<DataCollectionInvestigation> dataCollectionInvestigations) {
+		this.dataCollectionInvestigations = dataCollectionInvestigations;
 	}
 
 	public void setDoi(String doi) {
