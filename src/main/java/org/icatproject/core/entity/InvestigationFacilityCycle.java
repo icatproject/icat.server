@@ -9,9 +9,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Comment("Many to many relationship between investigation and facilityCycle. "
-        + "Allows investigations to belong to multiple cycles at once. "
-        + "This removes the need to calculate which cycle an investigation "
-        + "belongs to based on dates.")
+        + "Allows investigations to belong to multiple cycles at once.")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITYCYCLE_ID", "INVESTIGATION_ID" }) })
