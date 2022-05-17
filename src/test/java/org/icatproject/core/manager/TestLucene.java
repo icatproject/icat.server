@@ -209,7 +209,7 @@ public class TestLucene {
 		luceneApi.freeSearcher(lsr.getUid());
 
 		lsr = luceneApi.datafiles(null, null, new Date(now + 60000 * 3), new Date(now + 60000 * 6), null, 100);
-		checkLsr(lsr, 3L, 4L, 5L);
+		checkLsr(lsr, 3L, 4L, 5L, 6L);
 		luceneApi.freeSearcher(lsr.getUid());
 
 		lsr = luceneApi.datafiles("b1", "dsddd", new Date(now + 60000 * 3), new Date(now + 60000 * 6), null, 100);
@@ -563,8 +563,7 @@ public class TestLucene {
 						+ letters.substring(j, j + 1);
 				gen.writeStartArray();
 				LuceneApi.encodeTextfield(gen, "text", word);
-				LuceneApi.encodeStringField(gen, "startDate", new Date(now + i * 60000));
-				LuceneApi.encodeStringField(gen, "endDate", new Date(now + (i + 1) * 60000));
+				LuceneApi.encodeStringField(gen, "date", new Date(now + i * 60000));
 				LuceneApi.encodeStoredId(gen, new Long(i));
 				LuceneApi.encodeStringField(gen, "dataset", new Long(i % NUMDS));
 				gen.writeEnd();
