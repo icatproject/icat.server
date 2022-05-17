@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - mr-actions-test-new-lucene
+      - mr-actions-test-results-test
 
 jobs:
   build_and_tests:
