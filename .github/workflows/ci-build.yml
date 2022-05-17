@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - mr-actions-test-new-lucene
 
 jobs:
   build_and_tests:
