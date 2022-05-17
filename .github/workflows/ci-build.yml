@@ -79,11 +79,13 @@ jobs:
         run: |
           grep payara ~/.bash_profile > payara_path_command
           source payara_path_command
-          mvn install -DskipTests
+          mvn install -B -DskipTests
 
       - name: Run Unit Tests
         run: mvn test -B
 
+      # failsafe:integration-test to run the integration tests
+      # failsafe:verify required to check for test failures
       - name: Run Integration Tests
         run: mvn failsafe:integration-test failsafe:verify -B
 
