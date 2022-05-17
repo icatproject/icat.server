@@ -85,7 +85,7 @@ jobs:
         run: mvn test -B
 
       - name: Run Integration Tests
-        run: mvn failsafe:integration-test -B -e
+        run: mvn failsafe:integration-test -B -ff
 
       - name: After Failure
         if: ${{ failure() }}
