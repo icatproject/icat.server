@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - mr-actions-test
 
 jobs:
   build_and_tests:
@@ -38,7 +39,7 @@ jobs:
         with:
           repository: icatproject-contrib/icat-ansible
           path: icat-ansible
-          ref: master
+          ref: icat-server-lucene-test
       - name: Install Ansible
         run: pip install -r icat-ansible/requirements.txt
 
