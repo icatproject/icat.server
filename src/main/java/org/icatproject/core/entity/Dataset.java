@@ -37,10 +37,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	private List<Datafile> datafiles = new ArrayList<Datafile>();
 
 	@Comment("The cumulative total size of the data files within this dataset")
-	private Long fileSize;
+	private Long fileSize = 0L;
 
 	@Comment("The total number of datafiles within this dataset")
-	private Long fileCount;
+	private Long fileCount = 0L;
 
 	@Comment("An informal description of the data set")
 	private String description;
