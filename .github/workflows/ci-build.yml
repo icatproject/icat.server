@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - mr-actions-test-new-lucene
+      - mr-actions-test-results-test
 
 jobs:
   build_and_tests:
@@ -84,7 +85,7 @@ jobs:
         run: mvn test -B
 
       - name: Run Integration Tests
-        run: mvn failsafe:integration-test -B
+        run: mvn -Be failsafe:integration-test
 
       - name: After Failure
         if: ${{ failure() }}
