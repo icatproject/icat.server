@@ -62,6 +62,7 @@ import org.icatproject.core.entity.Instrument;
 import org.icatproject.core.entity.DatasetInstrument;
 import org.icatproject.core.entity.InstrumentScientist;
 import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.InvestigationFacilityCycle;
 import org.icatproject.core.entity.InvestigationFunding;
 import org.icatproject.core.entity.InvestigationGroup;
 import org.icatproject.core.entity.InvestigationInstrument;
@@ -216,7 +217,8 @@ public class EntityInfoHandler {
 			DataPublication.class, DataPublicationDate.class, DataPublicationUser.class, DataPublicationType.class, 
 			Affiliation.class, RelatedIdentifier.class,	FundingReference.class, DataPublicationFunding.class, 
 			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class, 
-			InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class);
+			InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class,
+			InvestigationFacilityCycle.class);
 	private static Set<String> entityNames = new HashSet<>();
 
 	private static String[] systemAttributes = { "createId", "createTime", "modId", "modTime" };

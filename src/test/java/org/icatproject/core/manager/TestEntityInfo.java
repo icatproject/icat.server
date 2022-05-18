@@ -173,7 +173,7 @@ public class TestEntityInfo {
 		testField("description,facility,investigations,name", InvestigationType.class);
 		testField(
 				"dataCollectionInvestigations,datasets,doi,endDate,facility,fileCount,fileSize,fundingReferences,"
-						+ "investigationGroups,investigationInstruments,"
+						+ "investigationFacilityCycles,investigationGroups,investigationInstruments,"
 						+ "investigationUsers,keywords,name,parameters,publications,releaseDate,samples,shifts,"
 						+ "startDate,studyInvestigations,summary,title,type,visitId",
 				Investigation.class);
@@ -252,7 +252,8 @@ public class TestEntityInfo {
 				"From Investigation to InvestigationGroup by investigationGroups many setInvestigation",
 				"From Investigation to InvestigationInstrument by investigationInstruments many setInvestigation",
 				"From Investigation to InvestigationType by type one", "From Investigation to Facility by facility one",
-				"From Investigation to InvestigationParameter by parameters many setInvestigation");
+				"From Investigation to InvestigationParameter by parameters many setInvestigation",
+				"From Investigation to InvestigationFacilityCycle by investigationFacilityCycles many setInvestigation");
 
 		testRel(Dataset.class, "From Dataset to DataCollectionDataset by dataCollectionDatasets many setDataset",
 				"From Dataset to DatasetParameter by parameters many setDataset",
@@ -386,7 +387,7 @@ public class TestEntityInfo {
 
 	@Test
 	public void getters() throws Exception {
-		testGetters(Investigation.class, 29);
+		testGetters(Investigation.class, 30);
 		testGetters(Dataset.class, 22);
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
@@ -398,7 +399,7 @@ public class TestEntityInfo {
 
 	@Test
 	public void setters() throws Exception {
-		testSetters(Investigation.class, 25);
+		testSetters(Investigation.class, 26);
 		testSetters(Dataset.class, 18);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);

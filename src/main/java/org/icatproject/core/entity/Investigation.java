@@ -57,6 +57,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Keyword> keywords = new ArrayList<>();
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
+	private List<InvestigationFacilityCycle> investigationFacilityCycles = new ArrayList<>();
+
 	@Comment("A short name for the investigation")
 	@Column(name = "NAME", nullable = false)
 	private String name;
@@ -147,6 +150,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public List<Keyword> getKeywords() {
 		return keywords;
+	}
+
+	public List<InvestigationFacilityCycle> getInvestigationFacilityCycles() {
+		return investigationFacilityCycles;
 	}
 
 	public String getName() {
@@ -243,6 +250,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setKeywords(List<Keyword> keywords) {
 		this.keywords = keywords;
+	}
+
+	public void setInvestigationFacilityCycles(List<InvestigationFacilityCycle> investigationFacilityCycles) {
+		this.investigationFacilityCycles = investigationFacilityCycles;
 	}
 
 	public void setName(String name) {
