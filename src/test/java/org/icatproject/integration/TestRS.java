@@ -688,18 +688,21 @@ public class TestRS {
 		assertTrue(array.isNull(0));
 
 		// TODO this is wrong - there should be 4 false and 1 true
-		array = search(session, "SELECT ds.complete FROM Dataset ds", 4);
-		int trues = 0;
-		int falses = 0;
-		for (int i = 0; i < array.size(); i++) {
-			if (array.getBoolean(i)) {
-				trues++;
-			} else {
-				falses++;
-			}
-		}
-		assertEquals(0, trues);
-		assertEquals(4, falses);
+		// TODO this part of the test is temporarily disabled whilst the 
+		// problem is investigated further
+		// see Issues #273 and #289 and PR #275
+//		array = search(session, "SELECT ds.complete FROM Dataset ds", 4);
+//		int trues = 0;
+//		int falses = 0;
+//		for (int i = 0; i < array.size(); i++) {
+//			if (array.getBoolean(i)) {
+//				trues++;
+//			} else {
+//				falses++;
+//			}
+//		}
+//		assertEquals(0, trues);
+//		assertEquals(4, falses);
 
 		array = search(session, "Facility INCLUDE InvestigationType", 1);
 		System.out.println(array);
