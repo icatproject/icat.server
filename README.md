@@ -1,6 +1,6 @@
 # icat.server
 
-[![Build Status](https://travis-ci.org/icatproject/icat.server.svg?branch=master)](https://travis-ci.org/icatproject/icat.server)
+[![Build Status](https://github.com/icatproject/icat.server/workflows/CI%20Build/badge.svg?branch=master)](https://github.com/icatproject/icat.server/actions?query=workflow%3A%22CI+Build%22)
 
 General installation instructions are at https://icatproject.org/installation/component
 
