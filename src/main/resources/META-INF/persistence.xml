@@ -13,9 +13,8 @@
 			<property name="eclipselink.logging.level" value="OFF" />
 			<property name="eclipselink.logging.level.sql" value="OFF" />
 			<property name="eclipselink.logging.parameters" value="false" />
-			<property name="eclipselink.ddl-generation" value="create-tables" />
-			<property name="eclipselink.ddl-generation.output_mode"
-				value="both" />
+			<property name="eclipselink.ddl-generation" value="create-or-extend-tables" />
+			<property name="eclipselink.ddl-generation.output_mode" value="both" />
 			<property name="eclipselink.deploy-on-startup" value="true" />
 			<property name="eclipselink.target-server" value="Glassfish" />
 			<property name="eclipselink.target-database" value="Auto" />

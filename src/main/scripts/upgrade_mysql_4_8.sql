@@ -1,1 +1,0 @@
-alter table RULE_ add ATTRIBUTE VARCHAR(255);
