@@ -29,6 +29,12 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Dataset> datasets = new ArrayList<>();
 
+	@Comment("The cumulative total size of the datasets within this investigation")
+	private Long fileSize = 0L;
+
+	@Comment("The total number of datafiles within this investigation")
+	private Long fileCount = 0L;
+
 	@Comment("The Digital Object Identifier associated with this investigation")
 	private String doi;
 
@@ -51,6 +57,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Keyword> keywords = new ArrayList<>();
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
+	private List<InvestigationFacilityCycle> investigationFacilityCycles = new ArrayList<>();
+
 	@Comment("A short name for the investigation")
 	@Column(name = "NAME", nullable = false)
 	private String name;
@@ -60,6 +69,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Publication> publications = new ArrayList<>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
+	private List<InvestigationFunding> fundingReferences = new ArrayList<>();
 
 	@Comment("When the data will be made freely available")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -76,6 +88,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<StudyInvestigation> studyInvestigations = new ArrayList<>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
+	private List<DataCollectionInvestigation> dataCollectionInvestigations = new ArrayList<DataCollectionInvestigation>();
 
 	@Comment("Summary or abstract")
 	@Column(length = 4000)
@@ -99,6 +114,14 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public List<Dataset> getDatasets() {
 		return datasets;
+	}
+
+	public Long getFileSize() {
+		return fileSize;
+	}
+
+	public Long getFileCount() {
+		return fileCount;
 	}
 
 	public String getDoi() {
@@ -129,6 +152,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		return keywords;
 	}
 
+	public List<InvestigationFacilityCycle> getInvestigationFacilityCycles() {
+		return investigationFacilityCycles;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -139,6 +166,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public List<Publication> getPublications() {
 		return publications;
+	}
+
+	public List<InvestigationFunding> getFundingReferences() {
+		return fundingReferences;
 	}
 
 	public Date getReleaseDate() {
@@ -161,6 +192,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		return studyInvestigations;
 	}
 
+	public List<DataCollectionInvestigation> getDataCollectionInvestigations() {
+		return dataCollectionInvestigations;
+	}
+
 	public String getSummary() {
 		return summary;
 	}
@@ -179,6 +214,14 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setDatasets(List<Dataset> datasets) {
 		this.datasets = datasets;
+	}
+
+	public void setFileSize(Long fileSize) {
+		this.fileSize = fileSize;
+	}
+
+	public void setFileCount(Long fileCount) {
+		this.fileCount = fileCount;
 	}
 
 	public void setDoi(String doi) {
@@ -209,6 +252,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		this.keywords = keywords;
 	}
 
+	public void setInvestigationFacilityCycles(List<InvestigationFacilityCycle> investigationFacilityCycles) {
+		this.investigationFacilityCycles = investigationFacilityCycles;
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -219,6 +266,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setPublications(List<Publication> publications) {
 		this.publications = publications;
+	}
+
+	public void setFundingReferences(List<InvestigationFunding> fundingReferences) {
+		this.fundingReferences = fundingReferences;
 	}
 
 	public void setReleaseDate(Date releaseDate) {
@@ -239,6 +290,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setStudyInvestigations(List<StudyInvestigation> studyInvestigations) {
 		this.studyInvestigations = studyInvestigations;
+	}
+
+	public void setDataCollectionInvestigations(List<DataCollectionInvestigation> dataCollectionInvestigations) {
+		this.dataCollectionInvestigations = dataCollectionInvestigations;
 	}
 
 	public void setSummary(String summary) {

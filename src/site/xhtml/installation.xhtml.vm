@@ -22,7 +22,7 @@
 		<li>Java 8</li>
 		<li>A suitable deployed container. The installation scripts
 			support Glassfish/Payara and to a lesser extent WildFly. Testing has
-			been carried out with Payara41.<a
+			been carried out with Payara 5.<a
 			href="https://icatproject.org/installation/glassfish/">Glassfish/Payara
 				installation instructions</a> are available.
 		</li>
@@ -91,174 +91,40 @@
 	</p>
 
 	<h2>Schema upgrade</h2>
-	<p>Any existing lucene database should be removed. The location of
+	<h3>Lucene database</h3>
+	<p>
+		Any existing lucene database should be removed. The location of
 		this would have been specified in the previous icat.properties file.
-		Ensure that the directory specified there is empty.</p>
-	<p>The database schema must be upgraded in steps depending upon how
-		old your icat installation is</p>
-	<h3>Upgrade 4.2.5 schema to 4.3.x</h3>
-
-	<p>This is for upgrading a 4.2.5 schema to 4.3.2. If you have
-		already upgraded to 4.3.x skip this step. Do not attempt to use this
-		procedure on a 4.3.x schema!</p>
-
-	<ol>
-		<li>Back up the database in case it should get into a state from
-			which recovery is impractical.</li>
-		<li>Run the get_rules program to save the rules in the format
-			accepted by icat-setup. This must be run as somebody who has read
-			access to the rules. For example: <code>./get_rules.py
-				https://example.com:8181 db username root password password</code> The
-			program should report how many rules it has saved and where.
-		</li>
-		<li>Ensure that nobody tries to use ICAT while it is being
-			upgraded - the simplest approach is to undeploy the old one which can
-			be done from the command line or by using a web browser and
-			connecting on the admin port (typically 4848) and undeploying from
-			there.</li>
-		<li>For MySQL edit username, password, schema and dbhost at the
-			top of the file <kbd>./upgrade_mysql_4_2_5.py</kbd> and run it or or
-			for Oracle, edit username , password and db at the top of the file <kbd>./upgrade_oracle_4_2_5.py</kbd>
-			and run that. Note that the procedure has been tested on ICAT 4.2.5
-			but should work for earlier 4.2 versions. The script will first check
-			that everything should go work. If it reports problems fix them and
-			try again. Once it gets past the checking stage it starts the
-			conversion which can take a long time (many hours for a production
-			system). At the end you should have a 4.3.2 database. Any indices
-			which had been created manually will have been removed.
-		</li>
-
-		<li>Install the new icat</li>
-
-		<li>Restore the rules using the <kbd>icat-setup</kbd> tool. For
-			example:
-
-			<blockquote>
-				<code> icat-setup -f rules.authz https://example.com:8181 db
-					username root password secret </code>
-			</blockquote>
-			<p>This assumes that you are in the directory where you ran
-				get_rules.py which will have created a file rules.authz. The
-				credentials (keyword value pairs following the authenticator
-				mnemonic) should be those of one of the users specified in the
-				rootUserNames of the icat.properties file.</p>
-			<p>Please check the rules.authz first as it will not work if it
-				references entities that no longer exist. For example "Group" must
-				be replaced by "Grouping" and InputDatafile is no longer part of
-				ICAT. Also because some problems have been found with conditions
-				containing dots (such as "InvestigationUser [user.name='fred']") in
-				rules these must now be re-expressed without dots.</p></li>
-	</ol>
-
-	<h3>Upgrade 4.3.x schema to 4.4.0</h3>
+		Ensure that the directory specified there is empty.
+	</p>
+	<h3>Database schema</h3>
 	<p>
-		You may increase the size of the "what" column of the Rule table to
-		1024 to match the size the column has on a brand new installation and
-		you <em>must</em> modify the INVESTIGATIONUSER table as role values
-		may no longer be null. Choose a name to use for the default role - for
-		example 'member' and for MySQL:
+		The direct upgrade of the database schema is supported for icat.server
+		4.7.0 and newer.  This is done automatically: the initialization of
+		icat.server will create all missing tables, indices, and columns when
+		the new version is deployed for the first time.
 	</p>
 	<p>
-		<code>
-			UPDATE INVESTIGATIONUSER SET ROLE = 'member' WHERE ROLE IS NULL; <br />
-			ALTER TABLE INVESTIGATIONUSER MODIFY COLUMN ROLE varchar(255) NOT
-			NULL; <br /> ALTER TABLE INVESTIGATIONUSER DROP FOREIGN KEY
-			FK_INVESTIGATIONUSER_USER_ID; <br /> ALTER TABLE INVESTIGATIONUSER
-			DROP INDEX UNQ_INVESTIGATIONUSER_0; <br /> ALTER TABLE
-			INVESTIGATIONUSER ADD CONSTRAINT UNQ_INVESTIGATIONUSER_0 UNIQUE
-			(USER_ID, INVESTIGATION_ID, ROLE); <br /> ALTER TABLE
-			INVESTIGATIONUSER ADD CONSTRAINT FK_INVESTIGATIONUSER_USER_ID FOREIGN
-			KEY (USER_ID) REFERENCES USER_ (ID)
-		</code>
+		For older ICAT installations, you need to upgrade to 4.7.0 first,
+		following the
+		<a href="https://repo.icatproject.org/site/icat/server/4.7.0/installation.html">install
+		instructions of that version</a>. In a second step, you can make use of
+		implied schema upgrade while installing the current version.
 	</p>
-	<p>or for Oracle:</p>
+	<h3>Database triggers (optional)</h3>
 	<p>
-		<code>
-			UPDATE INVESTIGATIONUSER SET ROLE = 'member' WHERE ROLE IS NULL; <br />
-			ALTER TABLE INVESTIGATIONUSER MODIFY (ROLE varchar2(255) NOT NULL); <br />
-			ALTER TABLE DROP CONSTRAINT UNQ_INVESTIGATIONUSER_0; <br /> ALTER
-			TABLE INVESTIGATIONUSER ADD CONSTRAINT UNQ_INVESTIGATIONUSER_0 UNIQUE
-			(USER_ID, INVESTIGATION_ID, ROLE); <br />
-		</code>
-	</p>
-	<h3>Upgrade 4.4.0 schema to 4.5.0</h3>
-	<p>
-		The mechanism for assigning unique id values for each entity in ICAT
-		has been changed. Previously a sequence table (called SEQUENCE) was
-		used to hold the last value used. This has been changed to make use of
-		the native DBMS mechanism which is making the id columns
-		AUTO_INCREMENT for MySQL or using a Sequence (rather than a table
-		called SEQUENCE) in the case of Oracle. Do not omit this step
-		otherwise the id values for new rows will not be set correctly and you
-		will run into problems with duplicate values. For MySQL run
-		<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_4.sql</kbd>
-		or for Oracle run
-		<kbd>sqlplus icat @upgrade_oracle_4_4.sql</kbd>
+		If you want the new attributes fileSize and fileCount in Dataset and
+		Investigation to be updated automatically whenever a datafile or
+		dataset is added/modified/deleted, you can also set up triggers in your
+		database.  This can be done for MySQL or MariaDB by running
+		<kbd>mysql -u icat -p icat &lt; create_triggers_mysql_5_0.sql</kbd>
+		or for Oracle by running
+		<kbd>sqlplus icat @create_triggers_oracle_5_0.sql</kbd>
 		where in both cases it is assumed that the tables are owned by user
-		"icat". The MySQL script is simply a list of alter table statements
-		for each table in the 4.4.0 schema. The oracle script takes the last
-		sequence number from the SEQUENCE table and uses this to initialize a
-		sequence. Note that the increment for the sequence must be exactly 50
-		and the start value must be at least 51 more than the number in the
-		old SEQUENCE table.
+		"icat".  This automatically initializes the fileSize and fileCount of all
+		existing datasets and investigations.  Note that ICAT should not be
+		running while this is done to avoid inconsistencies.
 	</p>
-	<h3>Upgrade 4.5.x or 4.6.x schema to 4.7.0</h3>
-	<p>
-		The Rule and DataCollection tables have changed. First dump the
-		existing rules with:
-		<kbd> ./rules.py dump https://example.com:8181 db username root
-			password secret &gt; rules.ie </kbd>
-
-		i.e. run the rules.py script in the unpacked distribution directory
-		with the "dump" parameter, the url of your icat and then the
-		authenticator plugin and credentials to identify a user specified in
-		the rootUserNames list in icat.properties. This will redirect the dump
-		into a file called rules.ie. Then undeploy the existing icat
-		<kbd>./setup uninstall -v</kbd>
-		. Edit the rules.ie file to remove rules (probably two of them)
-		referring to the Log table.
-	</p>
-	<p>
-		Then for MySQL run
-		<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_7.sql</kbd>
-		or for Oracle run
-		<kbd>sqlplus icat @upgrade_oracle_4_7.sql</kbd>
-		where in both cases it is assumed that the tables are owned by user
-		"icat". The script will drop the Rule table and add a DOI column to
-		the DataCollection table. Next install the new ICAT (which will
-		recreate an empty Rule table) Finally run
-		<kbd>./rules.py load https://example.com:8181 db username root
-			password secret &lt; rules.ie</kbd>
-		which will populate the Rule table. <em>Only run this script once
-			or you will get duplicate entries in the table.</em>
-	</p>
-	<p>
-		In addition the
-		<kbd>Log</kbd>
-		table is no longer used and may be dropped after you have extracted
-		any information from it that you need.
-	</p>
-	<h3>Upgrade 4.7.0 schema to 4.8.0</h3>
-	A column must be added to the RULE_ table. This can be done or MySQL or
-	MariaDB by
-	<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_8.sql</kbd>
-	or for Oracle run
-	<kbd>sqlplus icat @upgrade_oracle_4_8.sql</kbd>
-	where in both cases it is assumed that the tables are owned by user
-	"icat". This can be done be done while icat.server 4.7.0 is running as
-	the old code is unaware of the addition of the new column.
-	<h3>Upgrade 4.8.x or 4.9.x schema to 4.10.0</h3>
-	Some attributes have been added to Instrument, ParameterType,
-	Sample, Study and User and a many-to-one relationship from Shift to
-	Instrument.  So, the corresponding columns and constraints
-	must be added to the database tables.  This can be done or
-	MySQL or MariaDB by
-	<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_10.sql</kbd>
-	or for Oracle run
-	<kbd>sqlplus icat @upgrade_oracle_4_10.sql</kbd>
-	where in both cases it is assumed that the tables are owned by
-	user "icat".  This can be done be done while the older
-	icat.server is running as the changes are purely additive.
 
 	<h2>The setup.properties file</h2>
 	<dl>

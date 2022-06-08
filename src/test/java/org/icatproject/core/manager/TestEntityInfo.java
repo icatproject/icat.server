@@ -67,13 +67,13 @@ public class TestEntityInfo {
 		assertEquals("InvestigationType(description:0,facility(name:1),name:2)",
 				eiHandler.getExportHeader(InvestigationType.class));
 		assertEquals(
-				"Investigation(doi:0,endDate:1,facility(name:2),name:3,releaseDate:4,startDate:5,"
-						+ "summary:6,title:7,type(facility(name:8),name:9),visitId:10)",
+				"Investigation(doi:0,endDate:1,facility(name:2),fileCount:3,fileSize:4,name:5,releaseDate:6,"
+						+ "startDate:7,summary:8,title:9,type(facility(name:10),name:11),visitId:12)",
 				eiHandler.getExportHeader(Investigation.class));
 		assertEquals(
-				"Dataset(complete:0,description:1,doi:2,endDate:3,investigation(facility(name:4),"
-						+ "name:5,visitId:6),location:7,name:8,sample(investigation(facility(name:9),"
-						+ "name:10,visitId:11),name:12),startDate:13,type(facility(name:14),name:15))",
+				"Dataset(complete:0,description:1,doi:2,endDate:3,fileCount:4,fileSize:5,investigation(facility(name:6),"
+						+ "name:7,visitId:8),location:9,name:10,sample(investigation(facility(name:11),"
+						+ "name:12,visitId:13),name:14),startDate:15,type(facility(name:16),name:17))",
 				eiHandler.getExportHeader(Dataset.class));
 		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals(
@@ -109,15 +109,15 @@ public class TestEntityInfo {
 				eiHandler.getExportHeaderAll(InvestigationType.class));
 		assertEquals(
 				"Investigation(createId:0,createTime:1,modId:2,modTime:3,"
-						+ "doi:4,endDate:5,facility(name:6),name:7,releaseDate:8,startDate:9,"
-						+ "summary:10,title:11,type(facility(name:12),name:13),visitId:14)",
+						+ "doi:4,endDate:5,facility(name:6),fileCount:7,fileSize:8,name:9,releaseDate:10,"
+						+ "startDate:11,summary:12,title:13,type(facility(name:14),name:15),visitId:16)",
 				eiHandler.getExportHeaderAll(Investigation.class));
 		assertEquals(
 				"Dataset(createId:0,createTime:1,modId:2,modTime:3,"
-						+ "complete:4,description:5,doi:6,endDate:7,investigation(facility(name:8),"
-						+ "name:9,visitId:10),location:11,name:12,"
-						+ "sample(investigation(facility(name:13),name:14,visitId:15),"
-						+ "name:16),startDate:17,type(facility(name:18),name:19))",
+						+ "complete:4,description:5,doi:6,endDate:7,fileCount:8,fileSize:9,"
+						+ "investigation(facility(name:10),name:11,visitId:12),location:13,name:14,"
+						+ "sample(investigation(facility(name:15),name:16,visitId:17),"
+						+ "name:18),startDate:19,type(facility(name:20),name:21))",
 				eiHandler.getExportHeaderAll(Dataset.class));
 		assertEquals("DataCollection(?:0,createId:1,createTime:2,modId:3,modTime:4,doi:5)",
 				eiHandler.getExportHeaderAll(DataCollection.class));
@@ -167,18 +167,19 @@ public class TestEntityInfo {
 	@Test
 	public void testFields() throws Exception {
 		testField(
-				"applications,datafileFormats,datasetTypes,daysUntilRelease,description,facilityCycles,"
+				"applications,dataPublicationTypes,dataPublications,datafileFormats,datasetTypes,daysUntilRelease,description,facilityCycles,"
 						+ "fullName,instruments,investigationTypes,investigations,name,parameterTypes,sampleTypes,url",
 				Facility.class);
 		testField("description,facility,investigations,name", InvestigationType.class);
 		testField(
-				"datasets,doi,endDate,facility,investigationGroups,investigationInstruments,investigationUsers,keywords,"
-						+ "name,parameters,publications,releaseDate,samples,shifts,startDate,studyInvestigations,"
-						+ "summary,title,type,visitId",
+				"dataCollectionInvestigations,datasets,doi,endDate,facility,fileCount,fileSize,fundingReferences,"
+						+ "investigationFacilityCycles,investigationGroups,investigationInstruments,"
+						+ "investigationUsers,keywords,name,parameters,publications,releaseDate,samples,shifts,"
+						+ "startDate,studyInvestigations,summary,title,type,visitId",
 				Investigation.class);
-		testField("complete,dataCollectionDatasets,datafiles,description,doi,endDate,investigation,location,"
-				+ "name,parameters,sample,startDate,type", Dataset.class);
-		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
+		testField("complete,dataCollectionDatasets,datafiles,datasetInstruments,datasetTechniques,description,"
+				+ "doi,endDate,fileCount,fileSize,investigation,location,name,parameters,sample,startDate,type", Dataset.class);
+		testField("dataCollectionDatafiles,dataCollectionDatasets,dataCollectionInvestigations,dataPublications,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
 		testField( "description,endDate,name,pid,startDate,status,studyInvestigations,user",Study.class);
@@ -240,22 +241,27 @@ public class TestEntityInfo {
 	public void testRels() throws Exception {
 
 		testRel(Investigation.class, "From Investigation to Keyword by keywords many setInvestigation",
+				"From Investigation to DataCollectionInvestigation by dataCollectionInvestigations many setInvestigation",
 				"From Investigation to Sample by samples many setInvestigation",
 				"From Investigation to StudyInvestigation by studyInvestigations many setInvestigation",
 				"From Investigation to Shift by shifts many setInvestigation",
 				"From Investigation to Dataset by datasets many setInvestigation",
 				"From Investigation to Publication by publications many setInvestigation",
+				"From Investigation to InvestigationFunding by fundingReferences many setInvestigation",
 				"From Investigation to InvestigationUser by investigationUsers many setInvestigation",
 				"From Investigation to InvestigationGroup by investigationGroups many setInvestigation",
 				"From Investigation to InvestigationInstrument by investigationInstruments many setInvestigation",
 				"From Investigation to InvestigationType by type one", "From Investigation to Facility by facility one",
-				"From Investigation to InvestigationParameter by parameters many setInvestigation");
+				"From Investigation to InvestigationParameter by parameters many setInvestigation",
+				"From Investigation to InvestigationFacilityCycle by investigationFacilityCycles many setInvestigation");
 
 		testRel(Dataset.class, "From Dataset to DataCollectionDataset by dataCollectionDatasets many setDataset",
 				"From Dataset to DatasetParameter by parameters many setDataset",
+				"From Dataset to DatasetTechnique by datasetTechniques many setDataset",
 				"From Dataset to Investigation by investigation one",
-				"From Dataset to Datafile by datafiles many setDataset", "From Dataset to DatasetType by type one",
-				"From Dataset to Sample by sample one");
+				"From Dataset to Datafile by datafiles many setDataset",
+				"From Dataset to DatasetInstrument by datasetInstruments many setDataset",
+				"From Dataset to DatasetType by type one", "From Dataset to Sample by sample one");
 
 		testRel(Keyword.class, "From Keyword to Investigation by investigation one");
 
@@ -265,7 +271,8 @@ public class TestEntityInfo {
 		testRel(User.class, "From User to InvestigationUser by investigationUsers many setUser",
 				"From User to UserGroup by userGroups many setUser",
 				"From User to InstrumentScientist by instrumentScientists many setUser",
-				"From User to Study by studies many setUser");
+				"From User to Study by studies many setUser",
+				"From User to DataPublicationUser by dataPublicationUsers many setUser");
 
 		testRel(Job.class, "From Job to DataCollection by inputDataCollection one",
 				"From Job to Application by application one", "From Job to DataCollection by outputDataCollection one");
@@ -273,6 +280,7 @@ public class TestEntityInfo {
 		testRel(Instrument.class, "From Instrument to Facility by facility one",
 				"From Instrument to InstrumentScientist by instrumentScientists many setInstrument",
 				"From Instrument to InvestigationInstrument by investigationInstruments many setInstrument",
+				"From Instrument to DatasetInstrument by datasetInstruments many setInstrument",
 				"From Instrument to Shift by shifts many setInstrument");
 	}
 
@@ -379,11 +387,11 @@ public class TestEntityInfo {
 
 	@Test
 	public void getters() throws Exception {
-		testGetters(Investigation.class, 25);
-		testGetters(Dataset.class, 18);
+		testGetters(Investigation.class, 30);
+		testGetters(Dataset.class, 22);
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
-		testGetters(User.class, 16);
+		testGetters(User.class, 17);
 		testGetters(ParameterType.class, 27);
 		testGetters(Job.class, 9);
 		testGetters(Study.class, 13);
@@ -391,11 +399,11 @@ public class TestEntityInfo {
 
 	@Test
 	public void setters() throws Exception {
-		testSetters(Investigation.class, 21);
-		testSetters(Dataset.class, 14);
+		testSetters(Investigation.class, 26);
+		testSetters(Dataset.class, 18);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);
-		testSetters(User.class, 12);
+		testSetters(User.class, 13);
 		testSetters(ParameterType.class, 23);
 		testSetters(Job.class, 5);
 		testSetters(Study.class, 9);
@@ -403,8 +411,8 @@ public class TestEntityInfo {
 
 	@Test
 	public void updaters() throws Exception {
-		testSettersForUpdate(Investigation.class, 10);
-		testSettersForUpdate(Dataset.class, 10);
+		testSettersForUpdate(Investigation.class, 12);
+		testSettersForUpdate(Dataset.class, 12);
 		testSettersForUpdate(Keyword.class, 2);
 		testSettersForUpdate(InvestigationUser.class, 3);
 		testSettersForUpdate(User.class, 7);
