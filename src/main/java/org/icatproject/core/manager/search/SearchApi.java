@@ -172,7 +172,7 @@ public abstract class SearchApi {
 	 */
 	public JsonValue buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
 		JsonArrayBuilder arrayBuilder;
-		if (sort != null && !sort.equals("")) {
+		if (sort != null && !sort.equals("") || sort.equals("{}")) {
 			arrayBuilder = searchAfterArrayBuilder(lastBean, sort);
 		} else {
 			arrayBuilder = Json.createArrayBuilder();

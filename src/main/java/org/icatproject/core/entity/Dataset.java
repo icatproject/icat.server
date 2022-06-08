@@ -209,6 +209,13 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		}
 		SearchApi.encodeString(gen, "id", id);
 		SearchApi.encodeString(gen, "investigation.id", investigation.id);
+		SearchApi.encodeString(gen, "investigation.name", investigation.getName());
+		if (investigation.getStartDate() != null) {
+			SearchApi.encodeLong(gen, "investigation.startDate", investigation.getStartDate());
+		} else {
+			SearchApi.encodeLong(gen, "investigation.startDate", investigation.getCreateTime());
+		}
+		SearchApi.encodeString(gen, "investigation.title", investigation.getTitle());
 
 		if (sample != null) {
 			sample.getDoc(gen, "sample.");
@@ -234,6 +241,11 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			Relationship[] sampleTypeRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("sample"),
 					eiHandler.getRelationshipsByName(Sample.class).get("type") };
 			Relationship[] typeRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("type") };
+			Relationship[] investigationRelationships = {
+					eiHandler.getRelationshipsByName(Dataset.class).get("investigation") };
+			Relationship[] instrumentRelationships = {
+					eiHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"),
+					eiHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument") };
 			documentFields.put("name", null);
 			documentFields.put("description", null);
 			documentFields.put("doi", null);
@@ -241,6 +253,9 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			documentFields.put("endDate", null);
 			documentFields.put("id", null);
 			documentFields.put("investigation.id", null);
+			documentFields.put("investigation.title", investigationRelationships);
+			documentFields.put("investigation.name", investigationRelationships);
+			documentFields.put("investigation.startDate", investigationRelationships);
 			documentFields.put("sample.id", null);
 			documentFields.put("sample.name", sampleRelationships);
 			documentFields.put("sample.investigation.id", sampleRelationships);
@@ -248,6 +263,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			documentFields.put("sample.type.name", sampleTypeRelationships);
 			documentFields.put("type.id", null);
 			documentFields.put("type.name", typeRelationships);
+			documentFields.put("InvestigationInstrument instrument.id", instrumentRelationships);
 		}
 		return documentFields;
 	}

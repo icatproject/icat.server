@@ -1256,6 +1256,11 @@ public class ICATRest {
 	 *                    "range" key should denote an array of objects with "lower"
 	 *                    and "upper" values.
 	 * 
+	 * @param restrict
+	 *                    Whether to perform a quicker search which restricts the
+	 *                    results based on an InvestigationUser or
+	 *                    InstrumentScientist being able to read their "own" data.
+	 * 
 	 * @return Set of entity ids, relevance scores and Document source encoded as
 	 *         json.
 	 * 
@@ -1267,14 +1272,15 @@ public class ICATRest {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String search(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
 			@QueryParam("query") String query, @QueryParam("search_after") String searchAfter,
-			@QueryParam("limit") int limit, @QueryParam("sort") String sort, @QueryParam("facets") String facets)
+			@QueryParam("limit") int limit, @QueryParam("sort") String sort, @QueryParam("facets") String facets,
+			@QueryParam("restrict") boolean restrict)
 			throws IcatException {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}
 		String userName = beanManager.getUserName(sessionId, manager);
 		JsonValue searchAfterValue = null;
-		if (searchAfter.length() > 0) {
+		if (searchAfter != null && searchAfter.length() > 0) {
 			try (JsonReader jr = Json.createReader(new StringReader(searchAfter))) {
 				searchAfterValue = jr.read();
 			}
@@ -1282,6 +1288,13 @@ public class ICATRest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonReader jr = Json.createReader(new StringReader(query))) {
 			JsonObject jo = jr.readObject();
+			if (restrict && !jo.containsKey("user")) {
+				JsonObjectBuilder builder = Json.createObjectBuilder();
+				for (Entry<String, JsonValue> entry : jo.entrySet()) {
+					builder.add(entry.getKey(), entry.getValue());
+				}
+				jo = builder.add("user", userName).build();
+			}
 			String target = jo.getString("target", null);
 			if (jo.containsKey("parameters")) {
 				for (JsonValue val : jo.getJsonArray("parameters")) {
@@ -1318,7 +1331,7 @@ public class ICATRest {
 			} else {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
 			}
-			logger.debug("Free text search with query: {}", jo.toString());
+			logger.debug("Free text search with query: {}, facets: {}", jo.toString(), facets);
 			result = beanManager.freeTextSearchDocs(userName, jo, searchAfterValue, limit, sort, facets, manager,
 					request.getRemoteAddr(), klass);
 

@@ -62,7 +62,7 @@ public class LuceneApi extends SearchApi {
 			builder.add("score", score);
 		}
 		JsonArrayBuilder arrayBuilder;
-		if (sort == null || sort.equals("")) {
+		if (sort == null || sort.equals("") || sort.equals("{}")) {
 			arrayBuilder = Json.createArrayBuilder().add(score);
 		} else {
 			arrayBuilder = searchAfterArrayBuilder(lastBean, sort);
@@ -99,7 +99,7 @@ public class LuceneApi extends SearchApi {
 					gen.writeEnd();
 					return null;
 				} catch (Exception e) {
-					logger.error("About to throw internal exception because of", e);
+					logger.error("About to throw internal exception for ids {} because of", ids, e);
 					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
 				} finally {
 					manager.close();

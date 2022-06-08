@@ -2,12 +2,15 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Relationship between an ICAT user as an instrument scientist and the instrument")
 @SuppressWarnings("serial")
@@ -41,6 +44,13 @@ public class InstrumentScientist extends EntityBaseBean implements Serializable 
 
 	/* Needed for JPA */
 	public InstrumentScientist() {
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		user.getDoc(gen);
+		SearchApi.encodeString(gen, "instrument.id", instrument.id);
+		SearchApi.encodeString(gen, "id", id);
 	}
 
 }

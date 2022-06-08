@@ -397,8 +397,9 @@ public class PropertyHandler {
 				 * currently override the EntityBaseBean.getDoc() method. This should
 				 * result in no change to behaviour if the property is not specified.
 				 */
-				entitiesToIndex.addAll(Arrays.asList("Datafile", "Dataset", "Investigation", "InvestigationUser",
-						"DatafileParameter", "DatasetParameter", "InvestigationParameter", "Sample"));
+				entitiesToIndex.addAll(Arrays.asList("Datafile", "Dataset", "Investigation", "InvestigationInstrument",
+						"InstrumentScientist", "InvestigationUser", "DatafileParameter", "DatasetParameter",
+						"InvestigationParameter", "Sample", "Parameter", "User"));
 				logger.info("search.entitiesToIndex not set. Defaulting to: {}", entitiesToIndex.toString());
 			}
 			formattedProps.add("search.entitiesToIndex " + entitiesToIndex.toString());
@@ -485,9 +486,9 @@ public class PropertyHandler {
 				if (searchUrls.size() != 1) {
 					String msg = "Exactly one value for search.urls must be provided when using " + searchEngine;
 					throw new IllegalStateException(msg);
-				// } else if (searchUrls.size() == 0) {
-				// 	String msg = "At least one value for search.urls must be provided";
-				// 	throw new IllegalStateException(msg);
+					// } else if (searchUrls.size() == 0) {
+					// String msg = "At least one value for search.urls must be provided";
+					// throw new IllegalStateException(msg);
 				}
 				formattedProps.add("search.urls" + " " + searchUrls.toString());
 				logger.info("Using {} as search engine with url(s) {}", searchEngine, searchUrls);
@@ -513,7 +514,6 @@ public class PropertyHandler {
 			} else {
 				logger.info("'search.engine' entry not present so no free text search available");
 			}
-
 
 			unitAliasOptions = props.getString("units", "");
 

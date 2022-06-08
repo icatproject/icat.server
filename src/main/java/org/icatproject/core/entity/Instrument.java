@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Used by a user within an investigation")
 @SuppressWarnings("serial")
@@ -136,6 +139,15 @@ public class Instrument extends EntityBaseBean implements Serializable {
 
 	public void setShifts(List<Shift> shifts) {
 		this.shifts = shifts;
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		if (fullName != null) {
+			SearchApi.encodeText(gen, "instrument.fullName", fullName);
+		}
+		SearchApi.encodeString(gen, "instrument.name", name);
+		SearchApi.encodeString(gen, "instrument.id", id);
 	}
 
 }
