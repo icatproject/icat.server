@@ -310,8 +310,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			Relationship[] typeRelationships = { eiHandler.getRelationshipsByName(Investigation.class).get("type") };
 			Relationship[] facilityRelationships = {
 					eiHandler.getRelationshipsByName(Investigation.class).get("facility") };
-			Relationship[] sampleRelationships = { eiHandler.getRelationshipsByName(Investigation.class).get("samples") };
-			Relationship[] instrumentRelationships = { eiHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"), eiHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument") };
+			Relationship[] instrumentRelationships = {
+					eiHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"),
+					eiHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument") };
 			documentFields.put("name", null);
 			documentFields.put("visitId", null);
 			documentFields.put("title", null);
@@ -324,7 +325,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			documentFields.put("facility.id", null);
 			documentFields.put("type.name", typeRelationships);
 			documentFields.put("type.id", null);
-			documentFields.put("Sample name", sampleRelationships);
 			documentFields.put("InvestigationInstrument instrument.fullName", instrumentRelationships);
 			documentFields.put("InvestigationInstrument instrument.id", instrumentRelationships);
 			documentFields.put("InvestigationInstrument instrument.name", instrumentRelationships);

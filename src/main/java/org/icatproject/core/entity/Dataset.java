@@ -210,12 +210,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		SearchApi.encodeString(gen, "id", id);
 		SearchApi.encodeString(gen, "investigation.id", investigation.id);
 		SearchApi.encodeString(gen, "investigation.name", investigation.getName());
-		if (investigation.getStartDate() != null) {
-			SearchApi.encodeLong(gen, "investigation.startDate", investigation.getStartDate());
-		} else {
-			SearchApi.encodeLong(gen, "investigation.startDate", investigation.getCreateTime());
+		if (investigation != null) {
+			if (investigation.getStartDate() != null) {
+				SearchApi.encodeLong(gen, "investigation.startDate", investigation.getStartDate());
+			} else if (investigation.getCreateTime() != null) {
+				SearchApi.encodeLong(gen, "investigation.startDate", investigation.getCreateTime());
+			}
+			SearchApi.encodeString(gen, "investigation.title", investigation.getTitle());
 		}
-		SearchApi.encodeString(gen, "investigation.title", investigation.getTitle());
 
 		if (sample != null) {
 			sample.getDoc(gen, "sample.");

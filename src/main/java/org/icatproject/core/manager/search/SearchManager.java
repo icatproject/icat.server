@@ -479,7 +479,8 @@ public class SearchManager {
 				if (searchEngine == SearchEngine.LUCENE) {
 					searchApi = new LuceneApi(propertyHandler.getSearchUrls().get(0).toURI());
 				} else if (searchEngine == SearchEngine.ELASTICSEARCH || searchEngine == SearchEngine.OPENSEARCH) {
-					searchApi = new OpensearchApi(propertyHandler.getSearchUrls().get(0).toURI());
+					String unitAliasOptions = propertyHandler.getUnitAliasOptions();
+					searchApi = new OpensearchApi(propertyHandler.getSearchUrls().get(0).toURI(), unitAliasOptions);
 				} else {
 					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 							"Search engine {} not supported, must be one of " + SearchEngine.values());

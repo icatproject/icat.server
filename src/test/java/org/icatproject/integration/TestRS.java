@@ -731,7 +731,7 @@ public class TestRS {
 		wSession.addRule(null, "DatafileParameter", "R");
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 10, null, facets, 3);
 		assertFalse(responseObject.containsKey("search_after"));
-		checkFacets(responseObject, "DatafileParameter.type.name", Arrays.asList("colour"), Arrays.asList(1L));
+		checkFacets(responseObject, "DatafileParameter.type.name.keyword", Arrays.asList("colour"), Arrays.asList(1L));
 	}
 
 	/**
@@ -848,7 +848,7 @@ public class TestRS {
 		String facets = buildFacetRequest("Dataset");
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 10, null, facets, 5);
 		assertFalse(responseObject.containsKey("search_after"));
-		checkFacets(responseObject, "Dataset.type.name", Arrays.asList("calibration"), Arrays.asList(5L));
+		checkFacets(responseObject, "Dataset.type.name.keyword", Arrays.asList("calibration"), Arrays.asList(5L));
 
 		// Test no facets match on DatasetParameters due to lack of READ access
 		facets = buildFacetRequest("DatasetParameter");
@@ -861,7 +861,8 @@ public class TestRS {
 		wSession.addRule(null, "DatasetParameter", "R");
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 10, null, facets, 5);
 		assertFalse(responseObject.containsKey("search_after"));
-		checkFacets(responseObject, "DatasetParameter.type.name", Arrays.asList("colour", "birthday", "current"),
+		checkFacets(responseObject, "DatasetParameter.type.name.keyword",
+				Arrays.asList("colour", "birthday", "current"),
 				Arrays.asList(1L, 1L, 1L));
 	}
 
@@ -987,7 +988,7 @@ public class TestRS {
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
-		checkFacets(responseObject, "Investigation.type.name", Arrays.asList("atype"), Arrays.asList(3L));
+		checkFacets(responseObject, "Investigation.type.name.keyword", Arrays.asList("atype"), Arrays.asList(3L));
 
 		// Test no facets match on InvestigationParameters due to lack of READ access
 		facets = buildFacetRequest("InvestigationParameter");
@@ -1001,7 +1002,8 @@ public class TestRS {
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
-		checkFacets(responseObject, "InvestigationParameter.type.name", Arrays.asList("colour"), Arrays.asList(1L));
+		checkFacets(responseObject, "InvestigationParameter.type.name.keyword", Arrays.asList("colour"),
+				Arrays.asList(1L));
 	}
 
 	@Test
@@ -1039,7 +1041,7 @@ public class TestRS {
 
 	private String buildFacetRequest(String target) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
-		JsonObjectBuilder dimension = Json.createObjectBuilder().add("dimension", "type.name");
+		JsonObjectBuilder dimension = Json.createObjectBuilder().add("dimension", "type.name.keyword");
 		JsonArrayBuilder dimensions = Json.createArrayBuilder().add(dimension);
 		builder.add("target", target).add("dimensions", dimensions);
 		return Json.createArrayBuilder().add(builder).build().toString();
@@ -1047,7 +1049,8 @@ public class TestRS {
 
 	private void checkFacets(JsonObject responseObject, String dimension, List<String> expectedLabels,
 			List<Long> expectedCounts) {
-		String dimensionsMessage = "Expected responseObject to contain 'dimensions', but it did not";
+		String dimensionsMessage = "Expected responseObject to contain 'dimensions', but it had keys "
+				+ responseObject.keySet();
 		assertTrue(dimensionsMessage, responseObject.containsKey("dimensions"));
 		JsonObject dimensions = responseObject.getJsonObject("dimensions");
 		String dimensionMessage = "Expected 'dimensions' to contain " + dimension + " but keys were "

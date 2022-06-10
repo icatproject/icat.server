@@ -46,18 +46,18 @@ public class TestEntityInfo {
 
 	@Test
 	public void testHasSearchDoc() throws Exception {
-		Set<String> docdbeans = new HashSet<>(Arrays.asList("Investigation", "Dataset", "Datafile",
-				"InvestigationParameter", "DatasetParameter", "DatafileParameter", "ParameterType",
-				"InvestigationUser", "User", "Sample", "SampleType", "Facility", "InvestigationType", "DatasetType",
-				"DatafileFormat"));
+		Set<String> docdbeans = new HashSet<>(Arrays.asList("Datafile", "DatafileFormat", "DatafileParameter",
+				"Dataset", "DatasetParameter", "DatasetType", "Facility", "Instrument", "InstrumentScientist",
+				"Investigation", "InvestigationInstrument", "InvestigationParameter", "InvestigationType",
+				"InvestigationUser", "ParameterType", "Sample", "SampleType", "User"));
 		for (String beanName : EntityInfoHandler.getEntityNamesList()) {
 			@SuppressWarnings("unchecked")
 			Class<? extends EntityBaseBean> bean = (Class<? extends EntityBaseBean>) Class
 					.forName(Constants.ENTITY_PREFIX + beanName);
 			if (docdbeans.contains(beanName)) {
-				assertTrue(eiHandler.hasSearchDoc(bean));
+				assertTrue(beanName + " doesn't hasSearchDoc, but it should", eiHandler.hasSearchDoc(bean));
 			} else {
-				assertFalse(eiHandler.hasSearchDoc(bean));
+				assertFalse(beanName + " hasSearchDoc, but is not one of " + docdbeans, eiHandler.hasSearchDoc(bean));
 			}
 		}
 	}

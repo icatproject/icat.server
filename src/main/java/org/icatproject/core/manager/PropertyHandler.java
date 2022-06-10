@@ -397,9 +397,10 @@ public class PropertyHandler {
 				 * currently override the EntityBaseBean.getDoc() method. This should
 				 * result in no change to behaviour if the property is not specified.
 				 */
-				entitiesToIndex.addAll(Arrays.asList("Datafile", "Dataset", "Investigation", "InvestigationInstrument",
-						"InstrumentScientist", "InvestigationUser", "DatafileParameter", "DatasetParameter",
-						"InvestigationParameter", "Sample", "Parameter", "User"));
+				entitiesToIndex.addAll(Arrays.asList("Datafile", "DatafileFormat", "DatafileParameter",
+						"Dataset", "DatasetParameter", "DatasetType", "Facility", "Instrument", "InstrumentScientist",
+						"Investigation", "InvestigationInstrument", "InvestigationParameter", "InvestigationType",
+						"InvestigationUser", "ParameterType", "Sample", "SampleType", "User"));
 				logger.info("search.entitiesToIndex not set. Defaulting to: {}", entitiesToIndex.toString());
 			}
 			formattedProps.add("search.entitiesToIndex " + entitiesToIndex.toString());
@@ -663,6 +664,10 @@ public class PropertyHandler {
 
 	public Path getSearchDirectory() {
 		return searchDirectory;
+	}
+
+	public String getUnitAliasOptions() {
+		return unitAliasOptions;
 	}
 
 }

@@ -170,12 +170,13 @@ public class LuceneApi extends SearchApi {
 		List<JsonObject> resultsArray = postResponse.getJsonArray("results").getValuesAs(JsonObject.class);
 		for (JsonObject resultObject : resultsArray) {
 			int luceneDocId = resultObject.getInt("_id");
+			int shardIndex = resultObject.getInt("_shardIndex");
 			Float score = Float.NaN;
 			if (resultObject.keySet().contains("_score")) {
 				score = resultObject.getJsonNumber("_score").bigDecimalValue().floatValue();
 			}
 			JsonObject source = resultObject.getJsonObject("_source");
-			ScoredEntityBaseBean result = new ScoredEntityBaseBean(luceneDocId, score, source);
+			ScoredEntityBaseBean result = new ScoredEntityBaseBean(luceneDocId, shardIndex, score, source);
 			results.add(result);
 			logger.trace("Result id {} with score {}", result.getEntityBaseBeanId(), score);
 		}

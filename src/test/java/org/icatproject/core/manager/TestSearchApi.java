@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -30,7 +31,10 @@ import org.icatproject.core.entity.DatasetParameter;
 import org.icatproject.core.entity.DatasetType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Facility;
+import org.icatproject.core.entity.Instrument;
+import org.icatproject.core.entity.InstrumentScientist;
 import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.InvestigationParameter;
 import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.InvestigationUser;
@@ -58,11 +62,19 @@ import org.slf4j.LoggerFactory;
 public class TestSearchApi {
 
 	private static final String SEARCH_AFTER_NOT_NULL = "Expected searchAfter to be set, but it was null";
+	private static final List<String> datafileFields = Arrays.asList("id", "name", "location", "date", "dataset.id",
+			"dataset.name", "investigation.id", "investigation.name", "InvestigationInstrument instrument.id");
+	private static final List<String> datasetFields = Arrays.asList("id", "name", "startDate", "endDate",
+			"investigation.id", "investigation.name", "investigation.title", "investigation.startDate",
+			"InvestigationInstrument instrument.id");
+	private static final List<String> investigationFields = Arrays.asList("id", "name", "title", "startDate", "endDate",
+			"InvestigationInstrument instrument.id", "InvestigationInstrument instrument.name",
+			"InvestigationInstrument instrument.fullName");
 
 	final static Logger logger = LoggerFactory.getLogger(TestSearchApi.class);
 
 	@Parameterized.Parameters
-	public static Iterable<SearchApi> data() throws URISyntaxException {
+	public static Iterable<SearchApi> data() throws URISyntaxException, IcatException {
 		String luceneUrl = System.getProperty("luceneUrl");
 		logger.info("Using Lucene service at {}", luceneUrl);
 		URI luceneUri = new URI(luceneUrl);
@@ -183,26 +195,39 @@ public class TestSearchApi {
 	private void checkDatafile(ScoredEntityBaseBean datafile) {
 		JsonObject source = datafile.getSource();
 		assertNotNull(source);
-		Set<String> expectedKeys = new HashSet<>(
-				Arrays.asList("id", "investigation.id", "name", "date"));
+		Set<String> expectedKeys = new HashSet<>(Arrays.asList("id", "name", "location", "date", "dataset.id",
+				"dataset.name", "investigation.id", "investigation.name", "investigationinstrument"));
 		assertEquals(expectedKeys, source.keySet());
 		assertEquals("0", source.getString("id"));
-		assertEquals("0", source.getString("investigation.id"));
 		assertEquals("DFaaa", source.getString("name"));
+		assertEquals("/dir/DFaaa", source.getString("location"));
 		assertNotNull(source.getJsonNumber("date"));
+		assertEquals("0", source.getString("dataset.id"));
+		assertEquals("DSaaa", source.getString("dataset.name"));
+		assertEquals("0", source.getString("investigation.id"));
+		assertEquals("a h r", source.getString("investigation.name"));
+		JsonArray instruments = source.getJsonArray("investigationinstrument");
+		assertEquals(1, instruments.size());
+		assertEquals("0", instruments.getJsonObject(0).getString("instrument.id"));
 	}
 
 	private void checkDataset(ScoredEntityBaseBean dataset) {
 		JsonObject source = dataset.getSource();
 		assertNotNull(source);
-		Set<String> expectedKeys = new HashSet<>(
-				Arrays.asList("id", "investigation.id", "name", "startDate", "endDate"));
+		Set<String> expectedKeys = new HashSet<>(Arrays.asList("id", "name", "startDate", "endDate", "investigation.id",
+				"investigation.name", "investigation.title", "investigation.startDate", "investigationinstrument"));
 		assertEquals(expectedKeys, source.keySet());
 		assertEquals("0", source.getString("id"));
-		assertEquals("0", source.getString("investigation.id"));
 		assertEquals("DSaaa", source.getString("name"));
 		assertNotNull(source.getJsonNumber("startDate"));
 		assertNotNull(source.getJsonNumber("endDate"));
+		assertEquals("0", source.getString("investigation.id"));
+		assertEquals("a h r", source.getString("investigation.name"));
+		assertEquals("title", source.getString("investigation.title"));
+		assertNotNull(source.getJsonNumber("investigation.startDate"));
+		JsonArray instruments = source.getJsonArray("investigationinstrument");
+		assertEquals(1, instruments.size());
+		assertEquals("0", instruments.getJsonObject(0).getString("instrument.id"));
 	}
 
 	private void checkFacets(List<FacetDimension> facetDimensions, FacetDimension... dimensions) {
@@ -217,8 +242,12 @@ public class TestSearchApi {
 			for (int j = 0; j < expectedLabels.size(); j++) {
 				FacetLabel expectedLabel = expectedLabels.get(j);
 				FacetLabel actualLabel = actualLabels.get(j);
-				assertEquals(expectedLabel.getLabel(), actualLabel.getLabel());
-				assertEquals(expectedLabel.getValue(), actualLabel.getValue());
+				String label = expectedLabel.getLabel();
+				Long expectedValue = expectedLabel.getValue();
+				Long actualValue = actualLabel.getValue();
+				assertEquals(label, actualLabel.getLabel());
+				String message = "Label <" + label + ">: ";
+				assertEquals(message, expectedValue, actualValue);
 			}
 		}
 	}
@@ -226,12 +255,18 @@ public class TestSearchApi {
 	private void checkInvestigation(ScoredEntityBaseBean investigation) {
 		JsonObject source = investigation.getSource();
 		assertNotNull(source);
-		Set<String> expectedKeys = new HashSet<>(Arrays.asList("id", "name", "startDate", "endDate"));
+		Set<String> expectedKeys = new HashSet<>(
+				Arrays.asList("id", "name", "title", "startDate", "endDate", "investigationinstrument"));
 		assertEquals(expectedKeys, source.keySet());
 		assertEquals("0", source.getString("id"));
 		assertEquals("a h r", source.getString("name"));
 		assertNotNull(source.getJsonNumber("startDate"));
 		assertNotNull(source.getJsonNumber("endDate"));
+		JsonArray instruments = source.getJsonArray("investigationinstrument");
+		assertEquals(1, instruments.size());
+		assertEquals("0", instruments.getJsonObject(0).getString("instrument.id"));
+		assertEquals("bl0", instruments.getJsonObject(0).getString("instrument.name"));
+		assertEquals("Beamline 0", instruments.getJsonObject(0).getString("instrument.fullName"));
 	}
 
 	private void checkResults(SearchResult lsr, Long... n) {
@@ -276,10 +311,11 @@ public class TestSearchApi {
 		}
 	}
 
-	private Datafile datafile(long id, String name, Date date, Dataset dataset) {
+	private Datafile datafile(long id, String name, String location, Date date, Dataset dataset) {
 		Datafile datafile = new Datafile();
 		datafile.setId(id);
 		datafile.setName(name);
+		datafile.setLocation(location);
 		datafile.setDatafileModTime(date);
 		datafile.setDataset(dataset);
 		return datafile;
@@ -433,12 +469,25 @@ public class TestSearchApi {
 		List<String> queue = new ArrayList<>();
 		Long investigationUserId = 0L;
 
+		Instrument instrumentZero = populateInstrument(queue, 0L);
+		Instrument instrumentOne = populateInstrument(queue, 1L);
+
 		for (int investigationId = 0; investigationId < NUMINV; investigationId++) {
 			String word = word(investigationId % 26, (investigationId + 7) % 26, (investigationId + 17) % 26);
 			Date startDate = new Date(now + investigationId * 60000);
 			Date endDate = new Date(now + (investigationId + 1) * 60000);
 			Investigation investigation = investigation(investigationId, word, startDate, endDate);
 			queue.add(SearchApi.encodeOperation("create", investigation));
+
+			InvestigationInstrument investigationInstrument = new InvestigationInstrument();
+			investigationInstrument.setId(new Long(investigationId));
+			if (investigationId % 2 == 0) {
+				investigationInstrument.setInstrument(instrumentZero);
+			} else {
+				investigationInstrument.setInstrument(instrumentOne);
+			}
+			investigationInstrument.setInvestigation(investigation);
+			queue.add(SearchApi.encodeOperation("create", investigationInstrument));
 
 			for (int userId = 0; userId < NUMUSERS; userId++) {
 				if (investigationId % (userId + 1) == 1) {
@@ -487,7 +536,8 @@ public class TestSearchApi {
 						break;
 					}
 					word = word("DF", datafileId % 26);
-					Datafile datafile = datafile(datafileId, word, new Date(now + datafileId * 60000), dataset);
+					Datafile datafile = datafile(datafileId, word, "/dir/" + word, new Date(now + datafileId * 60000),
+							dataset);
 					queue.add(SearchApi.encodeOperation("create", datafile));
 
 					if (datafileId % 4 == 1) {
@@ -498,6 +548,31 @@ public class TestSearchApi {
 		}
 
 		modify(queue.toArray(new String[0]));
+	}
+
+	/**
+	 * Queues creation of an Instrument and a corresponding instrument scientist.
+	 * 
+	 * @param queue Queue to add create operations to.
+	 * @param instrumentId ICAT entity Id to use for the instrument/instrument scientist.
+	 * @return The Instrument entity created.
+	 * @throws IcatException
+	 */
+	private Instrument populateInstrument(List<String> queue, long instrumentId) throws IcatException {
+		Instrument instrument = new Instrument();
+		instrument.setId(instrumentId);
+		instrument.setName("bl" + instrumentId);
+		instrument.setFullName("Beamline " + instrumentId);
+		queue.add(SearchApi.encodeOperation("create", instrument));
+		User user = new User();
+		user.setId(new Long(NUMUSERS) + instrumentId);
+		user.setName("scientist_" + instrumentId);
+		InstrumentScientist instrumentScientist = new InstrumentScientist();
+		instrumentScientist.setId(instrumentId);
+		instrumentScientist.setInstrument(instrument);
+		instrumentScientist.setUser(user);
+		queue.add(SearchApi.encodeOperation("create", instrumentScientist));
+		return instrument;
 	}
 
 	private String word(int j, int k, int l) {
@@ -525,59 +600,58 @@ public class TestSearchApi {
 
 		// Test size and searchAfter
 		JsonObject query = buildQuery("Datafile", null, null, null, null, null, null, null);
-		List<String> fields = Arrays.asList("date", "name", "investigation.id", "id");
-		SearchResult lsr = searchApi.getResults(query, null, 5, null, fields);
+		SearchResult lsr = searchApi.getResults(query, null, 5, null, datafileFields);
 		JsonValue searchAfter = lsr.getSearchAfter();
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
 		checkDatafile(lsr.getResults().get(0));
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 
-		lsr = searchApi.getResults(query, searchAfter, 200, null, fields);
+		lsr = searchApi.getResults(query, searchAfter, 200, null, datafileFields);
 		assertNull(lsr.getSearchAfter());
 		assertEquals(95, lsr.getResults().size());
 
 		// Test searchAfter preserves the sorting of original search (asc)
 		sort = sortBuilder.add("date", "asc").build().toString();
-		lsr = searchApi.getResults(query, null, 5, sort, fields);
+		lsr = searchApi.getResults(query, null, 5, sort, datafileFields);
 		checkOrder(lsr, 0L, 1L, 2L, 3L, 4L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
-		lsr = searchApi.getResults(query, searchAfter, 5, sort, fields);
+		lsr = searchApi.getResults(query, searchAfter, 5, sort, datafileFields);
 		checkOrder(lsr, 5L, 6L, 7L, 8L, 9L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 
 		// Test searchAfter preserves the sorting of original search (desc)
 		sort = sortBuilder.add("date", "desc").build().toString();
-		lsr = searchApi.getResults(query, null, 5, sort, fields);
+		lsr = searchApi.getResults(query, null, 5, sort, datafileFields);
 		checkOrder(lsr, 99L, 98L, 97L, 96L, 95L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
-		lsr = searchApi.getResults(query, searchAfter, 5, sort, fields);
+		lsr = searchApi.getResults(query, searchAfter, 5, sort, datafileFields);
 		checkOrder(lsr, 94L, 93L, 92L, 91L, 90L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 
 		// Test tie breaks on fields with identical values (asc)
 		sort = sortBuilder.add("name", "asc").build().toString();
-		lsr = searchApi.getResults(query, null, 5, sort, fields);
+		lsr = searchApi.getResults(query, null, 5, sort, datafileFields);
 		checkOrder(lsr, 0L, 26L, 52L, 78L, 1L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 		sort = sortBuilder.add("name", "asc").add("date", "desc").build().toString();
-		lsr = searchApi.getResults(query, null, 5, sort, fields);
+		lsr = searchApi.getResults(query, null, 5, sort, datafileFields);
 		checkOrder(lsr, 78L, 52L, 26L, 0L, 79L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 
 		// Test tie breaks on fields with identical values (desc)
 		sort = sortBuilder.add("name", "desc").build().toString();
-		lsr = searchApi.getResults(query, null, 5, sort, fields);
+		lsr = searchApi.getResults(query, null, 5, sort, datafileFields);
 		checkOrder(lsr, 25L, 51L, 77L, 24L, 50L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 		sort = sortBuilder.add("name", "desc").add("date", "desc").build().toString();
-		lsr = searchApi.getResults(query, null, 5, sort, fields);
+		lsr = searchApi.getResults(query, null, 5, sort, datafileFields);
 		checkOrder(lsr, 77L, 51L, 25L, 76L, 50L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
@@ -586,6 +660,11 @@ public class TestSearchApi {
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 1L, 6L, 11L, 16L, 21L, 26L, 31L, 36L, 41L, 46L, 51L, 56L, 61L, 66L, 71L, 76L, 81L, 86L, 91L,
 				96L);
+
+		// Test instrumentScientists only see their data
+		query = buildQuery("Datafile", "scientist_0", null, null, null, null, null, null);
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 2L, 4L, 6L, 8L);
 
 		query = buildQuery("Datafile", "e4", "dfbbb", null, null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
@@ -632,13 +711,12 @@ public class TestSearchApi {
 		String sort;
 
 		JsonObject query = buildQuery("Dataset", null, null, null, null, null, null, null);
-		List<String> fields = Arrays.asList("startDate", "endDate", "name", "investigation.id", "id");
-		SearchResult lsr = searchApi.getResults(query, null, 5, null, fields);
+		SearchResult lsr = searchApi.getResults(query, null, 5, null, datasetFields);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
 		checkDataset(lsr.getResults().get(0));
 		JsonValue searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
-		lsr = searchApi.getResults(query, searchAfter, 100, null, fields);
+		lsr = searchApi.getResults(query, searchAfter, 100, null, datasetFields);
 		assertNull(lsr.getSearchAfter());
 		checkResults(lsr, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L, 20L, 21L, 22L, 23L, 24L,
 				25L, 26L, 27L, 28L, 29L);
@@ -649,7 +727,7 @@ public class TestSearchApi {
 		checkOrder(lsr, 0L, 1L, 2L, 3L, 4L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
-		lsr = searchApi.getResults(query, searchAfter, 5, sort, fields);
+		lsr = searchApi.getResults(query, searchAfter, 5, sort, datasetFields);
 		checkOrder(lsr, 5L, 6L, 7L, 8L, 9L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
@@ -660,14 +738,14 @@ public class TestSearchApi {
 		checkOrder(lsr, 29L, 28L, 27L, 26L, 25L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
-		lsr = searchApi.getResults(query, searchAfter, 5, sort, fields);
+		lsr = searchApi.getResults(query, searchAfter, 5, sort, datasetFields);
 		checkOrder(lsr, 24L, 23L, 22L, 21L, 20L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 
 		// Test tie breaks on fields with identical values (asc)
 		sort = sortBuilder.add("name", "asc").build().toString();
-		lsr = searchApi.getResults(query, null, 5, sort, fields);
+		lsr = searchApi.getResults(query, null, 5, sort, datasetFields);
 		checkOrder(lsr, 0L, 26L, 1L, 27L, 2L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
@@ -680,6 +758,11 @@ public class TestSearchApi {
 		lsr = searchApi.getResults(buildQuery("Dataset", "e4", null, null, null, null, null, null), 100,
 				null);
 		checkResults(lsr, 1L, 6L, 11L, 16L, 21L, 26L);
+
+		// Test instrumentScientists only see their data
+		query = buildQuery("Dataset", "scientist_0", null, null, null, null, null, null);
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 2L, 4L, 6L, 8L);
 
 		lsr = searchApi.getResults(buildQuery("Dataset", "e4", "dsbbb", null, null, null, null, null), 100,
 				null);
@@ -724,13 +807,12 @@ public class TestSearchApi {
 
 		/* Blocked results */
 		JsonObject query = buildQuery("Investigation", null, null, null, null, null, null, null);
-		List<String> fields = Arrays.asList("startDate", "endDate", "name", "id");
-		SearchResult lsr = searchApi.getResults(query, null, 5, null, fields);
+		SearchResult lsr = searchApi.getResults(query, null, 5, null, investigationFields);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
 		checkInvestigation(lsr.getResults().get(0));
 		JsonValue searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
-		lsr = searchApi.getResults(query, searchAfter, 6, null, fields);
+		lsr = searchApi.getResults(query, searchAfter, 6, null, investigationFields);
 		checkResults(lsr, 5L, 6L, 7L, 8L, 9L);
 		searchAfter = lsr.getSearchAfter();
 		assertNull(searchAfter);
@@ -741,7 +823,7 @@ public class TestSearchApi {
 		checkOrder(lsr, 0L, 1L, 2L, 3L, 4L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
-		lsr = searchApi.getResults(query, searchAfter, 5, sort, fields);
+		lsr = searchApi.getResults(query, searchAfter, 5, sort, investigationFields);
 		checkOrder(lsr, 5L, 6L, 7L, 8L, 9L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
@@ -752,10 +834,15 @@ public class TestSearchApi {
 		checkOrder(lsr, 9L, 8L, 7L, 6L, 5L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
-		lsr = searchApi.getResults(query, searchAfter, 5, sort, fields);
+		lsr = searchApi.getResults(query, searchAfter, 5, sort, investigationFields);
 		checkOrder(lsr, 4L, 3L, 2L, 1L, 0L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
+
+		// Test instrumentScientists only see their data
+		query = buildQuery("Investigation", "scientist_0", null, null, null, null, null, null);
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 2L, 4L, 6L, 8L);
 
 		query = buildQuery("Investigation", null, null, null, null, null, null, "b");
 		lsr = searchApi.getResults(query, 100, null);
@@ -884,8 +971,8 @@ public class TestSearchApi {
 		DatafileFormat pngFormat = datafileFormat(0, "png");
 		Investigation investigation = investigation(0, "name", date, date);
 		Dataset dataset = dataset(0, "name", date, date, investigation);
-		Datafile elephantDatafile = datafile(42, "Elephants and Aardvarks", new Date(0), dataset);
-		Datafile rhinoDatafile = datafile(42, "Rhinos and Aardvarks", new Date(3), dataset);
+		Datafile elephantDatafile = datafile(42, "Elephants and Aardvarks", "/dir", new Date(0), dataset);
+		Datafile rhinoDatafile = datafile(42, "Rhinos and Aardvarks", "/dir", new Date(3), dataset);
 		rhinoDatafile.setDatafileFormat(pdfFormat);
 
 		// Build queries
@@ -896,12 +983,12 @@ public class TestSearchApi {
 		JsonObject lowRange = buildFacetRangeObject("low", 0L, 2L);
 		JsonObject highRange = buildFacetRangeObject("high", 2L, 4L);
 		JsonObject rangeFacetRequest = buildFacetRangeRequest(buildFacetIdQuery("42"), "date", lowRange, highRange);
-		JsonObject stringFacetRequest = buildFacetStringRequest("42", "datafileFormat.name");
+		JsonObject stringFacetRequest = buildFacetStringRequest("42", "datafileFormat.name.keyword");
 		FacetDimension lowFacet = new FacetDimension("", "date", new FacetLabel("low", 1L), new FacetLabel("high", 0L));
 		FacetDimension highFacet = new FacetDimension("", "date", new FacetLabel("low", 0L),
 				new FacetLabel("high", 1L));
-		FacetDimension pdfFacet = new FacetDimension("", "datafileFormat.name", new FacetLabel("pdf", 1L));
-		FacetDimension pngFacet = new FacetDimension("", "datafileFormat.name", new FacetLabel("png", 1L));
+		FacetDimension pdfFacet = new FacetDimension("", "datafileFormat.name.keyword", new FacetLabel("pdf", 1L));
+		FacetDimension pngFacet = new FacetDimension("", "datafileFormat.name.keyword", new FacetLabel("png", 1L));
 
 		// Original
 		modify(SearchApi.encodeOperation("create", elephantDatafile));

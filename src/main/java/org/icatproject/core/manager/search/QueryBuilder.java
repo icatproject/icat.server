@@ -84,7 +84,7 @@ public class QueryBuilder {
 
     public static JsonObject buildStringFacet(String field, int maxLabels) {
         JsonObjectBuilder termsBuilder = Json.createObjectBuilder();
-        termsBuilder.add("field", field + ".keyword").add("size", maxLabels);
+        termsBuilder.add("field", field).add("size", maxLabels);
         return Json.createObjectBuilder().add("terms", termsBuilder).build();
     }
 
