@@ -553,8 +553,9 @@ public class TestSearchApi {
 	/**
 	 * Queues creation of an Instrument and a corresponding instrument scientist.
 	 * 
-	 * @param queue Queue to add create operations to.
-	 * @param instrumentId ICAT entity Id to use for the instrument/instrument scientist.
+	 * @param queue        Queue to add create operations to.
+	 * @param instrumentId ICAT entity Id to use for the instrument/instrument
+	 *                     scientist.
 	 * @return The Instrument entity created.
 	 * @throws IcatException
 	 */
@@ -984,6 +985,7 @@ public class TestSearchApi {
 		JsonObject highRange = buildFacetRangeObject("high", 2L, 4L);
 		JsonObject rangeFacetRequest = buildFacetRangeRequest(buildFacetIdQuery("42"), "date", lowRange, highRange);
 		JsonObject stringFacetRequest = buildFacetStringRequest("42", "datafileFormat.name.keyword");
+		JsonObject sparseFacetRequest = Json.createObjectBuilder().add("query", buildFacetIdQuery("42")).build();
 		FacetDimension lowFacet = new FacetDimension("", "date", new FacetLabel("low", 1L), new FacetLabel("high", 0L));
 		FacetDimension highFacet = new FacetDimension("", "date", new FacetLabel("low", 0L),
 				new FacetLabel("high", 1L));
@@ -997,6 +999,7 @@ public class TestSearchApi {
 		checkResults(searchApi.getResults(pdfQuery, 5));
 		checkResults(searchApi.getResults(pngQuery, 5));
 		checkFacets(searchApi.facetSearch("Datafile", stringFacetRequest, 5, 5));
+		checkFacets(searchApi.facetSearch("Datafile", sparseFacetRequest, 5, 5));
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), lowFacet);
 
 		// Change name and add a format
@@ -1006,6 +1009,7 @@ public class TestSearchApi {
 		checkResults(searchApi.getResults(pdfQuery, 5), 42L);
 		checkResults(searchApi.getResults(pngQuery, 5));
 		checkFacets(searchApi.facetSearch("Datafile", stringFacetRequest, 5, 5), pdfFacet);
+		checkFacets(searchApi.facetSearch("Datafile", sparseFacetRequest, 5, 5), pdfFacet);
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), highFacet);
 
 		// Change just the format
@@ -1015,6 +1019,7 @@ public class TestSearchApi {
 		checkResults(searchApi.getResults(pdfQuery, 5));
 		checkResults(searchApi.getResults(pngQuery, 5), 42L);
 		checkFacets(searchApi.facetSearch("Datafile", stringFacetRequest, 5, 5), pngFacet);
+		checkFacets(searchApi.facetSearch("Datafile", sparseFacetRequest, 5, 5), pngFacet);
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), highFacet);
 
 		// Remove the format
@@ -1024,6 +1029,7 @@ public class TestSearchApi {
 		checkResults(searchApi.getResults(pdfQuery, 5));
 		checkResults(searchApi.getResults(pngQuery, 5));
 		checkFacets(searchApi.facetSearch("Datafile", stringFacetRequest, 5, 5));
+		checkFacets(searchApi.facetSearch("Datafile", sparseFacetRequest, 5, 5));
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), highFacet);
 
 		// Remove the file

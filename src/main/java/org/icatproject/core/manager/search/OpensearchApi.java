@@ -96,6 +96,7 @@ public class OpensearchApi extends SearchApi {
 			.build();
 	private static Map<String, List<ParentRelation>> relations = new HashMap<>();
 	private static Map<String, List<String>> defaultFieldsMap = new HashMap<>();
+	private static Map<String, List<String>> defaultFacetsMap = new HashMap<>();
 	protected static final Set<String> indices = new HashSet<>(
 			Arrays.asList("datafile", "dataset", "investigation", "instrumentscientist"));
 
@@ -175,6 +176,10 @@ public class OpensearchApi extends SearchApi {
 				Arrays.asList("name", "description", "doi", "sample.name", "sample.type.name", "type.name"));
 		defaultFieldsMap.put("investigation",
 				Arrays.asList("name", "visitId", "title", "summary", "doi", "facility.name"));
+
+		defaultFacetsMap.put("datafile", Arrays.asList("datafileFormat.name.keyword"));
+		defaultFacetsMap.put("dataset", Arrays.asList("type.name.keyword"));
+		defaultFacetsMap.put("investigation", Arrays.asList("type.name.keyword"));
 	}
 
 	public OpensearchApi(URI server) throws IcatException {
@@ -298,10 +303,6 @@ public class OpensearchApi extends SearchApi {
 	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, Integer maxResults,
 			Integer maxLabels) throws IcatException {
 		List<FacetDimension> results = new ArrayList<>();
-		if (!facetQuery.containsKey("dimensions")) {
-			// If no dimensions were specified, return early
-			return results;
-		}
 		String dimensionPrefix = null;
 		String index = target.toLowerCase();
 		if (!indices.contains(index) && relations.containsKey(index)) {
@@ -311,10 +312,15 @@ public class OpensearchApi extends SearchApi {
 		}
 
 		JsonObject queryObject = facetQuery.getJsonObject("query");
-		JsonArray dimensions = facetQuery.getJsonArray("dimensions");
 		List<String> defaultFields = defaultFieldsMap.get(index);
 		JsonObjectBuilder bodyBuilder = parseQuery(Json.createObjectBuilder(), queryObject, index, defaultFields);
-		bodyBuilder = parseFacets(bodyBuilder, dimensions, maxLabels, dimensionPrefix);
+		if (facetQuery.containsKey("dimensions")) {
+			JsonArray dimensions = facetQuery.getJsonArray("dimensions");
+			bodyBuilder = parseFacets(bodyBuilder, dimensions, maxLabels, dimensionPrefix);
+		} else {
+			List<String> dimensions = defaultFacetsMap.get(index);
+			bodyBuilder = parseFacets(bodyBuilder, dimensions, maxLabels, dimensionPrefix);
+		}
 		String body = bodyBuilder.build().toString();
 
 		Map<String, String> parameterMap = new HashMap<>();
@@ -345,6 +351,21 @@ public class OpensearchApi extends SearchApi {
 				aggsBuilder.add(dimensionString, QueryBuilder.buildStringFacet(field, maxLabels));
 			}
 		}
+		return buildFacetRequestJson(bodyBuilder, dimensionPrefix, aggsBuilder);
+	}
+
+	private JsonObjectBuilder parseFacets(JsonObjectBuilder bodyBuilder, List<String> dimensions, int maxLabels,
+			String dimensionPrefix) {
+		JsonObjectBuilder aggsBuilder = Json.createObjectBuilder();
+		for (String dimensionString : dimensions) {
+			String field = dimensionPrefix == null ? dimensionString : dimensionPrefix + "." + dimensionString;
+			aggsBuilder.add(dimensionString, QueryBuilder.buildStringFacet(field, maxLabels));
+		}
+		return buildFacetRequestJson(bodyBuilder, dimensionPrefix, aggsBuilder);
+	}
+
+	private JsonObjectBuilder buildFacetRequestJson(JsonObjectBuilder bodyBuilder, String dimensionPrefix,
+			JsonObjectBuilder aggsBuilder) {
 		if (dimensionPrefix == null) {
 			bodyBuilder.add("aggs", aggsBuilder);
 		} else {

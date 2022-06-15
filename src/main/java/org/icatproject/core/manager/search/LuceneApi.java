@@ -56,7 +56,7 @@ public class LuceneApi extends SearchApi {
 		// irrespective of the sort, override the default implementation
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		builder.add("doc", lastBean.getEngineDocId());
-		builder.add("shardIndex", -1);
+		builder.add("shardIndex", lastBean.getShardIndex());
 		float score = lastBean.getScore();
 		if (!Float.isNaN(score)) {
 			builder.add("score", score);
