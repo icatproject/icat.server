@@ -61,6 +61,15 @@ import org.slf4j.LoggerFactory;
 @RunWith(Parameterized.class)
 public class TestSearchApi {
 
+	private class Filter {
+		private String fld;
+		private String value;
+		public Filter(String fld, String value) {
+			this.fld = fld;
+			this.value = value;
+		}
+	}
+
 	private static final String SEARCH_AFTER_NOT_NULL = "Expected searchAfter to be set, but it was null";
 	private static final List<String> datafileFields = Arrays.asList("id", "name", "location", "date", "dataset.id",
 			"dataset.name", "investigation.id", "investigation.name", "InvestigationInstrument instrument.id");
@@ -102,7 +111,7 @@ public class TestSearchApi {
 	 * Utility function for building a Query from individual arguments
 	 */
 	public static JsonObject buildQuery(String target, String user, String text, Date lower, Date upper,
-			List<ParameterPOJO> parameters, List<String> samples, String userFullName) {
+			List<ParameterPOJO> parameters, List<String> samples, String userFullName, Filter... filters) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		if (target != null) {
 			builder.add("target", target);
@@ -157,6 +166,13 @@ public class TestSearchApi {
 		}
 		if (userFullName != null) {
 			builder.add("userFullName", userFullName);
+		}
+		if (filters.length > 0 ) {
+			JsonObjectBuilder filterBuilder = Json.createObjectBuilder();
+			for (Filter filter : filters) {
+				filterBuilder.add(filter.fld, filter.value);
+			}
+			builder.add("filter", filterBuilder);
 		}
 		return builder.build();
 	}
@@ -765,6 +781,14 @@ public class TestSearchApi {
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 2L, 4L, 6L, 8L);
 
+		// Test filter
+		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("type.name.keyword", "type"));
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
+		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("type.name.keyword", "typo"));
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr);
+
 		lsr = searchApi.getResults(buildQuery("Dataset", "e4", "dsbbb", null, null, null, null, null), 100,
 				null);
 		checkResults(lsr, 1L);
@@ -844,6 +868,14 @@ public class TestSearchApi {
 		query = buildQuery("Investigation", "scientist_0", null, null, null, null, null, null);
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 2L, 4L, 6L, 8L);
+
+		// Test filter
+		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("type.name.keyword", "type"));
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
+		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("type.name.keyword", "typo"));
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr);
 
 		query = buildQuery("Investigation", null, null, null, null, null, null, "b");
 		lsr = searchApi.getResults(query, 100, null);

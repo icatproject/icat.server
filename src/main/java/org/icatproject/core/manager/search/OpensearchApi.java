@@ -548,6 +548,16 @@ public class OpensearchApi extends SearchApi {
 		JsonObjectBuilder queryBuilder = Json.createObjectBuilder();
 		JsonObjectBuilder boolBuilder = Json.createObjectBuilder();
 
+		// Non-scored elements are added to the "filter"
+		JsonArrayBuilder filterBuilder = Json.createArrayBuilder();
+
+		if (queryRequest.containsKey("filter")) {
+			JsonObject filterObject = queryRequest.getJsonObject("filter");
+			for (String fld : filterObject.keySet()) {
+				filterBuilder.add(QueryBuilder.buildTermQuery(fld, filterObject.getString(fld)));
+			}
+		}
+
 		if (queryRequest.containsKey("text")) {
 			// The free text is the only element we perform scoring on, so "must" occur
 			JsonArrayBuilder mustBuilder = Json.createArrayBuilder();
@@ -556,9 +566,6 @@ public class OpensearchApi extends SearchApi {
 							defaultFields.toArray(new String[0])));
 			boolBuilder.add("must", mustBuilder);
 		}
-
-		// Non-scored elements are added to the "filter"
-		JsonArrayBuilder filterBuilder = Json.createArrayBuilder();
 
 		Long lowerTime = parseDate(queryRequest, "lower", 0, Long.MIN_VALUE);
 		Long upperTime = parseDate(queryRequest, "upper", 59999, Long.MAX_VALUE);

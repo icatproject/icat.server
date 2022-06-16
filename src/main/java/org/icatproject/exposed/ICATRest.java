@@ -1337,6 +1337,10 @@ public class ICATRest {
 
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartObject();
+			if (result.isAborted()) {
+				gen.write("aborted", true).writeEnd();
+				return baos.toString();
+			}
 
 			JsonValue newSearchAfter = result.getSearchAfter();
 			if (newSearchAfter != null) {

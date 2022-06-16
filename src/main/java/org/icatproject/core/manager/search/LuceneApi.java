@@ -166,22 +166,26 @@ public class LuceneApi extends SearchApi {
 
 		JsonObject postResponse = postResponse(basePath + "/" + indexPath, queryString, parameterMap);
 		SearchResult lsr = new SearchResult();
-		List<ScoredEntityBaseBean> results = lsr.getResults();
-		List<JsonObject> resultsArray = postResponse.getJsonArray("results").getValuesAs(JsonObject.class);
-		for (JsonObject resultObject : resultsArray) {
-			int luceneDocId = resultObject.getInt("_id");
-			int shardIndex = resultObject.getInt("_shardIndex");
-			Float score = Float.NaN;
-			if (resultObject.keySet().contains("_score")) {
-				score = resultObject.getJsonNumber("_score").bigDecimalValue().floatValue();
+		if (postResponse.containsKey("aborted") && postResponse.getBoolean("aborted")) {
+			lsr.setAborted(true);
+		} else {
+			List<ScoredEntityBaseBean> results = lsr.getResults();
+			List<JsonObject> resultsArray = postResponse.getJsonArray("results").getValuesAs(JsonObject.class);
+			for (JsonObject resultObject : resultsArray) {
+				int luceneDocId = resultObject.getInt("_id");
+				int shardIndex = resultObject.getInt("_shardIndex");
+				Float score = Float.NaN;
+				if (resultObject.keySet().contains("_score")) {
+					score = resultObject.getJsonNumber("_score").bigDecimalValue().floatValue();
+				}
+				JsonObject source = resultObject.getJsonObject("_source");
+				ScoredEntityBaseBean result = new ScoredEntityBaseBean(luceneDocId, shardIndex, score, source);
+				results.add(result);
+				logger.trace("Result id {} with score {}", result.getEntityBaseBeanId(), score);
+			} 
+			if (postResponse.containsKey("search_after")) {
+				lsr.setSearchAfter(postResponse.getJsonObject("search_after"));
 			}
-			JsonObject source = resultObject.getJsonObject("_source");
-			ScoredEntityBaseBean result = new ScoredEntityBaseBean(luceneDocId, shardIndex, score, source);
-			results.add(result);
-			logger.trace("Result id {} with score {}", result.getEntityBaseBeanId(), score);
-		}
-		if (postResponse.containsKey("search_after")) {
-			lsr.setSearchAfter(postResponse.getJsonObject("search_after"));
 		}
 
 		return lsr;

@@ -1411,6 +1411,9 @@ public class EntityBeanManager {
 
 			do {
 				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, Arrays.asList("id"));
+				if (lastSearchResult.isAborted()) {
+					break;
+				}
 				allResults = lastSearchResult.getResults();
 				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, limit, userName, manager, klass);
 				if (lastBean == null) {
@@ -1462,6 +1465,9 @@ public class EntityBeanManager {
 
 			do {
 				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
+				if (lastSearchResult.isAborted()) {
+					break;
+				}
 				allResults = lastSearchResult.getResults();
 				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, limit, userName, manager, klass);
 				if (lastBean == null) {
