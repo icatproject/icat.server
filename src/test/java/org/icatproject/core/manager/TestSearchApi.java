@@ -64,9 +64,17 @@ public class TestSearchApi {
 	private class Filter {
 		private String fld;
 		private String value;
-		public Filter(String fld, String value) {
+		private JsonArray array;
+		public Filter(String fld, String... values) {
 			this.fld = fld;
-			this.value = value;
+			if (values.length == 1) {
+				this.value = values[0];
+			}
+			JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+			for (String value : values) {
+				arrayBuilder.add(value);
+			}
+			array = arrayBuilder.build();
 		}
 	}
 
@@ -170,7 +178,11 @@ public class TestSearchApi {
 		if (filters.length > 0 ) {
 			JsonObjectBuilder filterBuilder = Json.createObjectBuilder();
 			for (Filter filter : filters) {
-				filterBuilder.add(filter.fld, filter.value);
+				if (filter.value != null) {
+					filterBuilder.add(filter.fld, filter.value);
+				} else {
+					filterBuilder.add(filter.fld, filter.array);
+				}
 			}
 			builder.add("filter", filterBuilder);
 		}
@@ -785,6 +797,9 @@ public class TestSearchApi {
 		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("type.name.keyword", "type"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
+		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("type.name.keyword", "type", "typo"));
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
 		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("type.name.keyword", "typo"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr);
@@ -871,6 +886,9 @@ public class TestSearchApi {
 
 		// Test filter
 		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("type.name.keyword", "type"));
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
+		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("type.name.keyword", "type", "typo"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
 		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("type.name.keyword", "typo"));

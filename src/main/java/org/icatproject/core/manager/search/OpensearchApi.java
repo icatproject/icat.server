@@ -22,6 +22,7 @@ import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
+import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
@@ -554,7 +555,25 @@ public class OpensearchApi extends SearchApi {
 		if (queryRequest.containsKey("filter")) {
 			JsonObject filterObject = queryRequest.getJsonObject("filter");
 			for (String fld : filterObject.keySet()) {
-				filterBuilder.add(QueryBuilder.buildTermQuery(fld, filterObject.getString(fld)));
+				ValueType valueType = filterObject.get(fld).getValueType();
+				switch (valueType) {
+					case ARRAY:
+						JsonArrayBuilder shouldBuilder = Json.createArrayBuilder();
+						for (JsonString value : filterObject.getJsonArray(fld).getValuesAs(JsonString.class)) {
+							shouldBuilder.add(QueryBuilder.buildTermQuery(fld, value.getString()));
+						}
+						filterBuilder.add(Json.createObjectBuilder().add("bool",
+								Json.createObjectBuilder().add("should", shouldBuilder)));
+						break;
+
+					case STRING:
+						filterBuilder.add(QueryBuilder.buildTermQuery(fld, filterObject.getString(fld)));
+						break;
+
+					default:
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+								"filter object values should be STRING or ARRAY, but were " + valueType);
+				}
 			}
 		}
 
