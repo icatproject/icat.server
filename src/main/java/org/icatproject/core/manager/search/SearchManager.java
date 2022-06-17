@@ -332,7 +332,9 @@ public class SearchManager {
 					buildPublicSearchFields(gateKeeper, Investigation.getDocumentFields()));
 			gateKeeper.markPublicSearchFieldsFresh();
 		}
-		return publicSearchFields.get(simpleName);
+		List<String> requestedFields = publicSearchFields.get(simpleName);
+		logger.trace("{} has public fields {}", simpleName, requestedFields);
+		return requestedFields;
 	}
 
 	public void addDocument(EntityBaseBean bean) throws IcatException {

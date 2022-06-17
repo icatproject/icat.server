@@ -1338,7 +1338,7 @@ public class ICATRest {
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartObject();
 			if (result.isAborted()) {
-				gen.write("aborted", true).writeEnd();
+				gen.write("aborted", true).writeEnd().close();
 				return baos.toString();
 			}
 

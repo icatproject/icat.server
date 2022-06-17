@@ -1466,7 +1466,7 @@ public class EntityBeanManager {
 			do {
 				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
 				if (lastSearchResult.isAborted()) {
-					break;
+					return lastSearchResult;
 				}
 				allResults = lastSearchResult.getResults();
 				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, limit, userName, manager, klass);
