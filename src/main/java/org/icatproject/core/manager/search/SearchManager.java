@@ -323,6 +323,16 @@ public class SearchManager {
 
 	private static final Map<String, List<String>> publicSearchFields = new HashMap<>();
 
+	/**
+	 * Gets (and if necessary, builds) the fields which should be returned as part
+	 * of the document source from a search.
+	 * 
+	 * @param gateKeeper GateKeeper instance.
+	 * @param simpleName Name of the entity to get public fields for.
+	 * @return List of fields which can be shown in search results provided the main
+	 *         entity is authorised.
+	 * @throws IcatException
+	 */
 	public static List<String> getPublicSearchFields(GateKeeper gateKeeper, String simpleName) throws IcatException {
 		if (gateKeeper.getPublicSearchFieldsStale() || publicSearchFields.size() == 0) {
 			logger.info("Building public search fields from public tables and steps");
@@ -383,6 +393,16 @@ public class SearchManager {
 		}
 	}
 
+	/**
+	 * Builds a JsonObject for performing faceting against results from a previous
+	 * search.
+	 * 
+	 * @param results   List of results from a previous search, containing entity
+	 *                  ids.
+	 * @param idField   The field to perform id querying against.
+	 * @param facetJson JsonObject containing the dimensions to facet.
+	 * @return <code>{"query": {`idField`: [...]}, "dimensions": [...]}</code>
+	 */
 	public static JsonObject buildFacetQuery(List<ScoredEntityBaseBean> results, String idField, JsonObject facetJson) {
 		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 		results.forEach(r -> arrayBuilder.add(Long.toString(r.getEntityBaseBeanId())));
@@ -394,6 +414,32 @@ public class SearchManager {
 		return objectBuilder.build();
 	}
 
+	/**
+	 * Builds a JsonObject for performing faceting against results from a previous
+	 * search.
+	 * 
+	 * @param filterObject JsonObject to be used as a query.
+	 * @param idField      The field to perform id querying against.
+	 * @param facetJson    JsonObject containing the dimensions to facet.
+	 * @return <code>{"query": `filterObject`, "dimensions": [...]}</code>
+	 */
+	public static JsonObject buildFacetQuery(JsonObject filterObject, String idField, JsonObject facetJson) {
+		JsonObjectBuilder objectBuilder = Json.createObjectBuilder().add("query", filterObject);
+		if (facetJson.containsKey("dimensions")) {
+			objectBuilder.add("dimensions", facetJson.getJsonArray("dimensions"));
+		}
+		return objectBuilder.build();
+	}
+
+	/**
+	 * Checks if the underlying Relationship is allowed for a field on an entity.
+	 * 
+	 * @param gateKeeper GateKeeper instance.
+	 * @param map        Map of fields to the Relationship that must be allowed in
+	 *                   order to return the fields with search results for a
+	 *                   particular entity.
+	 * @return List of fields (keys) from map that have an allowed relationship
+	 */
 	private static List<String> buildPublicSearchFields(GateKeeper gateKeeper, Map<String, Relationship[]> map) {
 		List<String> fields = new ArrayList<>();
 		for (Entry<String, Relationship[]> entry : map.entrySet()) {
@@ -402,7 +448,8 @@ public class SearchManager {
 				for (Relationship relationship : entry.getValue()) {
 					if (!gateKeeper.allowed(relationship)) {
 						includeField = false;
-						logger.debug("Access to {} blocked by disallowed relationship between {} and {}", entry.getKey(),
+						logger.debug("Access to {} blocked by disallowed relationship between {} and {}",
+								entry.getKey(),
 								relationship.getOriginBean().getSimpleName(),
 								relationship.getDestinationBean().getSimpleName());
 						break;
@@ -416,6 +463,18 @@ public class SearchManager {
 		return fields;
 	}
 
+	/**
+	 * Builds a Json representation of the final search result based on the sort
+	 * criteria used. This allows future searches to efficiently "search after" this
+	 * result.
+	 * 
+	 * @param lastBean The last ScoredEntityBaseBean of the current search results.
+	 * @param sort     String representing a JsonObject of sort criteria.
+	 * @return JsonValue representing the lastBean to allow future searches to
+	 *         search after it.
+	 * @throws IcatException If the score of the lastBean is NaN, or one of the sort
+	 *                       fields is not present in the source of the lastBean.
+	 */
 	public JsonValue buildSearchAfter(ScoredEntityBaseBean lastBean, String sort) throws IcatException {
 		return searchApi.buildSearchAfter(lastBean, sort);
 	}
@@ -448,6 +507,21 @@ public class SearchManager {
 		}
 	}
 
+	/**
+	 * Perform faceting on an entity/index. The query associated with the request
+	 * should determine which Documents to consider, and optionally the dimensions
+	 * to facet. If no dimensions are provided, "sparse" faceting is performed
+	 * across relevant string fields (but no Range faceting occurs).
+	 * 
+	 * @param target     Name of the entity/index to facet on.
+	 * @param facetQuery JsonObject containing the criteria to facet on.
+	 * @param maxResults The maximum number of results to include in the returned
+	 *                   Json.
+	 * @param maxLabels  The maximum number of labels to return for each dimension
+	 *                   of the facets.
+	 * @return List of FacetDimensions that were collected for the query.
+	 * @throws IcatException
+	 */
 	public List<FacetDimension> facetSearch(String target, JsonObject facetQuery, int maxResults, int maxLabels)
 			throws IcatException {
 		return searchApi.facetSearch(target, facetQuery, maxResults, maxLabels);
@@ -461,13 +535,36 @@ public class SearchManager {
 		return result;
 	}
 
-	public SearchResult freeTextSearch(JsonObject jo, int blockSize, String sort) throws IcatException {
-		return searchApi.getResults(jo, blockSize, sort);
+
+	/**
+	 * Gets SearchResult for query without searchAfter (pagination).
+	 * 
+	 * @param query      JsonObject containing the criteria to search on.
+	 * @param maxResults Maximum number of results to retrieve from the engine.
+	 * @param sort       String of Json representing the sort criteria.
+	 * @return SearchResult for the query.
+	 * @throws IcatException
+	 */
+	public SearchResult freeTextSearch(JsonObject query, int maxResults, String sort) throws IcatException {
+		return searchApi.getResults(query, maxResults, sort);
 	}
 
-	public SearchResult freeTextSearch(JsonObject jo, JsonValue searchAfter, int blockSize, String sort,
-			List<String> fields) throws IcatException {
-		return searchApi.getResults(jo, searchAfter, blockSize, sort, fields);
+	/**
+	 * Gets SearchResult for query.
+	 * 
+	 * @param query           JsonObject containing the criteria to search on.
+	 * @param searchAfter     JsonValue representing the last result of a previous
+	 *                        search in order to skip results that have already been
+	 *                        returned.
+	 * @param blockSize       Maximum number of results to retrieve from the engine.
+	 * @param sort            String of Json representing the sort criteria.
+	 * @param requestedFields List of fields to return in the document source.
+	 * @return SearchResult for the query.
+	 * @throws IcatException
+	 */
+	public SearchResult freeTextSearch(JsonObject query, JsonValue searchAfter, int blockSize, String sort,
+			List<String> requestedFields) throws IcatException {
+		return searchApi.getResults(query, searchAfter, blockSize, sort, requestedFields);
 	}
 
 	@PostConstruct

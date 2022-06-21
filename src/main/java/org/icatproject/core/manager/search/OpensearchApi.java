@@ -178,9 +178,9 @@ public class OpensearchApi extends SearchApi {
 		defaultFieldsMap.put("investigation",
 				Arrays.asList("name", "visitId", "title", "summary", "doi", "facility.name"));
 
-		defaultFacetsMap.put("datafile", Arrays.asList("datafileFormat.name.keyword"));
-		defaultFacetsMap.put("dataset", Arrays.asList("type.name.keyword"));
-		defaultFacetsMap.put("investigation", Arrays.asList("type.name.keyword"));
+		defaultFacetsMap.put("datafile", Arrays.asList("datafileFormat.name"));
+		defaultFacetsMap.put("dataset", Arrays.asList("type.name"));
+		defaultFacetsMap.put("investigation", Arrays.asList("type.name"));
 	}
 
 	public OpensearchApi(URI server) throws IcatException {
@@ -197,6 +197,15 @@ public class OpensearchApi extends SearchApi {
 		initScripts();
 	}
 
+	/**
+	 * Builds a JsonObject representation of the mapping of fields to their type.
+	 * The default behaviour is for a field to be treated as text with a string
+	 * field automatically generated with the suffix ".keyword". Therefore only
+	 * nested and long fields need to be explicitly accounted for.
+	 * 
+	 * @param index Index to build the mapping for.
+	 * @return JsonObject of the document mapping.
+	 */
 	private static JsonObject buildMappings(String index) {
 		JsonObject typeLong = Json.createObjectBuilder().add("type", "long").build();
 		JsonObjectBuilder propertiesBuilder = Json.createObjectBuilder()
@@ -232,6 +241,13 @@ public class OpensearchApi extends SearchApi {
 		return Json.createObjectBuilder().add("properties", propertiesBuilder).build();
 	}
 
+	/**
+	 * Builds a JsonObject representation of the fields on a nested object.
+	 * 
+	 * @param idFields Id fields on the nested object which require the long type
+	 *                 mapping.
+	 * @return JsonObject for the nested object.
+	 */
 	private static JsonObject buildNestedMapping(String... idFields) {
 		JsonObject typeLong = Json.createObjectBuilder().add("type", "long").build();
 		JsonObjectBuilder propertiesBuilder = Json.createObjectBuilder().add("id", typeLong);
@@ -241,6 +257,21 @@ public class OpensearchApi extends SearchApi {
 		return Json.createObjectBuilder().add("type", "nested").add("properties", propertiesBuilder).build();
 	}
 
+	/**
+	 * Extracts and parses a date value from jsonObject. If the value is a NUMBER
+	 * (ms since epoch), then it is taken as is. If it is a STRING, then it is
+	 * expected in the yyyyMMddHHmm format.
+	 * 
+	 * @param jsonObject   JsonObject to extract the date from.
+	 * @param key          Key of the date field to extract.
+	 * @param offset       In the event of the date being a string, we do not have
+	 *                     second or ms precision. To ensure ranges are successful,
+	 *                     it may be necessary to add 59999 ms to the parsed value
+	 *                     as an offset.
+	 * @param defaultValue The value to return if key is not present in jsonObject.
+	 * @return Time since epoch in ms.
+	 * @throws IcatException
+	 */
 	private static Long parseDate(JsonObject jsonObject, String key, int offset, Long defaultValue)
 			throws IcatException {
 		if (jsonObject.containsKey(key)) {
@@ -291,7 +322,7 @@ public class OpensearchApi extends SearchApi {
 	@Override
 	public void clear() throws IcatException {
 		commit();
-		String body = QueryBuilder.addQuery(QueryBuilder.buildMatchAllQuery()).build().toString();
+		String body = OpensearchQueryBuilder.addQuery(OpensearchQueryBuilder.buildMatchAllQuery()).build().toString();
 		post("/_all/_delete_by_query", body);
 	}
 
@@ -339,6 +370,22 @@ public class OpensearchApi extends SearchApi {
 		return results;
 	}
 
+	/**
+	 * Parses incoming Json encoding the requested facets and uses bodyBuilder to
+	 * construct Json that can be understood by Opensearch.
+	 * 
+	 * @param bodyBuilder     JsonObjectBuilder being used to build the body of the
+	 *                        request.
+	 * @param dimensions      JsonArray of JsonObjects representing dimensions to be
+	 *                        faceted.
+	 * @param maxLabels       The maximum number of labels to collect for each
+	 *                        dimension.
+	 * @param dimensionPrefix Optional prefix to apply to the dimension names. This
+	 *                        is needed to distinguish between potentially ambiguous
+	 *                        dimensions, such as "(investigation.)type.name" and
+	 *                        "(investigationparameter.)type.name".
+	 * @return The bodyBuilder originally passed with facet information added to it.
+	 */
 	private JsonObjectBuilder parseFacets(JsonObjectBuilder bodyBuilder, JsonArray dimensions, int maxLabels,
 			String dimensionPrefix) {
 		JsonObjectBuilder aggsBuilder = Json.createObjectBuilder();
@@ -347,24 +394,53 @@ public class OpensearchApi extends SearchApi {
 			String field = dimensionPrefix == null ? dimensionString : dimensionPrefix + "." + dimensionString;
 			if (dimensionObject.containsKey("ranges")) {
 				JsonArray ranges = dimensionObject.getJsonArray("ranges");
-				aggsBuilder.add(dimensionString, QueryBuilder.buildRangeFacet(field, ranges));
+				aggsBuilder.add(dimensionString, OpensearchQueryBuilder.buildRangeFacet(field, ranges));
 			} else {
-				aggsBuilder.add(dimensionString, QueryBuilder.buildStringFacet(field, maxLabels));
+				aggsBuilder.add(dimensionString,
+						OpensearchQueryBuilder.buildStringFacet(field + ".keyword", maxLabels));
 			}
 		}
 		return buildFacetRequestJson(bodyBuilder, dimensionPrefix, aggsBuilder);
 	}
 
+	/**
+	 * Uses bodyBuilder to construct Json for faceting string fields.
+	 * 
+	 * @param bodyBuilder     JsonObjectBuilder being used to build the body of the
+	 *                        request.
+	 * @param dimensions      List of dimensions to perform string based faceting
+	 *                        on.
+	 * @param maxLabels       The maximum number of labels to collect for each
+	 *                        dimension.
+	 * @param dimensionPrefix Optional prefix to apply to the dimension names. This
+	 *                        is needed to distinguish between potentially ambiguous
+	 *                        dimensions, such as "(investigation.)type.name" and
+	 *                        "(investigationparameter.)type.name".
+	 * @return The bodyBuilder originally passed with facet information added to it.
+	 */
 	private JsonObjectBuilder parseFacets(JsonObjectBuilder bodyBuilder, List<String> dimensions, int maxLabels,
 			String dimensionPrefix) {
 		JsonObjectBuilder aggsBuilder = Json.createObjectBuilder();
 		for (String dimensionString : dimensions) {
 			String field = dimensionPrefix == null ? dimensionString : dimensionPrefix + "." + dimensionString;
-			aggsBuilder.add(dimensionString, QueryBuilder.buildStringFacet(field, maxLabels));
+			aggsBuilder.add(dimensionString, OpensearchQueryBuilder.buildStringFacet(field + ".keyword", maxLabels));
 		}
 		return buildFacetRequestJson(bodyBuilder, dimensionPrefix, aggsBuilder);
 	}
 
+	/**
+	 * Finalises the construction of faceting Json by handling the possibility of
+	 * faceting a nested object.
+	 * 
+	 * @param bodyBuilder     JsonObjectBuilder being used to build the body of the
+	 *                        request.
+	 * @param dimensionPrefix Optional prefix to apply to the dimension names. This
+	 *                        is needed to distinguish between potentially ambiguous
+	 *                        dimensions, such as "(investigation.)type.name" and
+	 *                        "(investigationparameter.)type.name".
+	 * @param aggsBuilder     JsonObjectBuilder that has the faceting details.
+	 * @return The bodyBuilder originally passed with facet information added to it.
+	 */
 	private JsonObjectBuilder buildFacetRequestJson(JsonObjectBuilder bodyBuilder, String dimensionPrefix,
 			JsonObjectBuilder aggsBuilder) {
 		if (dimensionPrefix == null) {
@@ -427,7 +503,7 @@ public class OpensearchApi extends SearchApi {
 					parentId = source.getString("id");
 				}
 				// Search for joined entities matching the id
-				JsonObject termQuery = QueryBuilder.buildTermQuery(fld, parentId);
+				JsonObject termQuery = OpensearchQueryBuilder.buildTermQuery(fld, parentId);
 				String joinedBody = Json.createObjectBuilder().add("query", termQuery).build().toString();
 				buildParameterMap(blockSize, requestedJoinedFields, joinedParameterMap, null);
 				JsonObject joinedResponse = postResponse("/" + joinedIndex + "/_search", joinedBody,
@@ -502,6 +578,13 @@ public class OpensearchApi extends SearchApi {
 		parameterMap.put("size", blockSize.toString());
 	}
 
+	/**
+	 * Parse sort criteria and add it to the request body.
+	 * 
+	 * @param builder JsonObjectBuilder being used to build the body of the request.
+	 * @param sort    String of JsonObject containing the sort criteria.
+	 * @return The bodyBuilder originally passed with facet criteria added to it.
+	 */
 	private JsonObjectBuilder parseSort(JsonObjectBuilder builder, String sort) {
 		if (sort == null || sort.equals("")) {
 			return builder.add("sort", Json.createArrayBuilder()
@@ -522,6 +605,15 @@ public class OpensearchApi extends SearchApi {
 		}
 	}
 
+	/**
+	 * Add searchAfter to the request body.
+	 * 
+	 * @param builder     JsonObjectBuilder being used to build the body of the
+	 *                    request.
+	 * @param searchAfter Possibly null JsonValue representing the last document of
+	 *                    a previous search.
+	 * @return The bodyBuilder originally passed with searchAfter added to it.
+	 */
 	private JsonObjectBuilder parseSearchAfter(JsonObjectBuilder builder, JsonValue searchAfter) {
 		if (searchAfter == null) {
 			return builder;
@@ -556,18 +648,21 @@ public class OpensearchApi extends SearchApi {
 			JsonObject filterObject = queryRequest.getJsonObject("filter");
 			for (String fld : filterObject.keySet()) {
 				ValueType valueType = filterObject.get(fld).getValueType();
+				String field = fld.replace(index + ".", "");
 				switch (valueType) {
 					case ARRAY:
 						JsonArrayBuilder shouldBuilder = Json.createArrayBuilder();
 						for (JsonString value : filterObject.getJsonArray(fld).getValuesAs(JsonString.class)) {
-							shouldBuilder.add(QueryBuilder.buildTermQuery(fld, value.getString()));
+							shouldBuilder
+									.add(OpensearchQueryBuilder.buildTermQuery(field + ".keyword", value.getString()));
 						}
 						filterBuilder.add(Json.createObjectBuilder().add("bool",
 								Json.createObjectBuilder().add("should", shouldBuilder)));
 						break;
 
 					case STRING:
-						filterBuilder.add(QueryBuilder.buildTermQuery(fld, filterObject.getString(fld)));
+						filterBuilder.add(
+								OpensearchQueryBuilder.buildTermQuery(field + ".keyword", filterObject.getString(fld)));
 						break;
 
 					default:
@@ -581,7 +676,7 @@ public class OpensearchApi extends SearchApi {
 			// The free text is the only element we perform scoring on, so "must" occur
 			JsonArrayBuilder mustBuilder = Json.createArrayBuilder();
 			mustBuilder
-					.add(QueryBuilder.buildStringQuery(queryRequest.getString("text"),
+					.add(OpensearchQueryBuilder.buildStringQuery(queryRequest.getString("text"),
 							defaultFields.toArray(new String[0])));
 			boolBuilder.add("must", mustBuilder);
 		}
@@ -591,10 +686,10 @@ public class OpensearchApi extends SearchApi {
 		if (lowerTime != Long.MIN_VALUE || upperTime != Long.MAX_VALUE) {
 			if (index.equals("datafile")) {
 				// datafile has only one date field
-				filterBuilder.add(QueryBuilder.buildLongRangeQuery("date", lowerTime, upperTime));
+				filterBuilder.add(OpensearchQueryBuilder.buildLongRangeQuery("date", lowerTime, upperTime));
 			} else {
-				filterBuilder.add(QueryBuilder.buildLongRangeQuery("startDate", lowerTime, upperTime));
-				filterBuilder.add(QueryBuilder.buildLongRangeQuery("endDate", lowerTime, upperTime));
+				filterBuilder.add(OpensearchQueryBuilder.buildLongRangeQuery("startDate", lowerTime, upperTime));
+				filterBuilder.add(OpensearchQueryBuilder.buildLongRangeQuery("endDate", lowerTime, upperTime));
 			}
 		}
 
@@ -602,7 +697,7 @@ public class OpensearchApi extends SearchApi {
 			String name = queryRequest.getString("user");
 			// Because InstrumentScientist is on a separate index, we need to explicitly
 			// perform a search here
-			JsonObject termQuery = QueryBuilder.buildTermQuery("user.name.keyword", name);
+			JsonObject termQuery = OpensearchQueryBuilder.buildTermQuery("user.name.keyword", name);
 			String body = Json.createObjectBuilder().add("query", termQuery).build().toString();
 			Map<String, String> parameterMap = new HashMap<>();
 			parameterMap.put("_source", "instrument.id");
@@ -613,13 +708,15 @@ public class OpensearchApi extends SearchApi {
 				String instrumentId = hit.getJsonObject("_source").getString("instrument.id");
 				instrumentIdsBuilder.add(instrumentId);
 			}
-			JsonObject instrumentQuery = QueryBuilder.buildTermsQuery("investigationinstrument.instrument.id",
+			JsonObject instrumentQuery = OpensearchQueryBuilder.buildTermsQuery("investigationinstrument.instrument.id",
 					instrumentIdsBuilder.build());
-			JsonObject nestedInstrumentQuery = QueryBuilder.buildNestedQuery("investigationinstrument",
+			JsonObject nestedInstrumentQuery = OpensearchQueryBuilder.buildNestedQuery("investigationinstrument",
 					instrumentQuery);
 			// InvestigationUser should be a nested field on the main Document
-			JsonObject investigationUserQuery = QueryBuilder.buildMatchQuery("investigationuser.user.name", name);
-			JsonObject nestedUserQuery = QueryBuilder.buildNestedQuery("investigationuser", investigationUserQuery);
+			JsonObject investigationUserQuery = OpensearchQueryBuilder.buildMatchQuery("investigationuser.user.name",
+					name);
+			JsonObject nestedUserQuery = OpensearchQueryBuilder.buildNestedQuery("investigationuser",
+					investigationUserQuery);
 			// At least one of being an InstrumentScientist or an InvestigationUser is
 			// necessary
 			JsonArrayBuilder array = Json.createArrayBuilder().add(nestedInstrumentQuery).add(nestedUserQuery);
@@ -627,16 +724,18 @@ public class OpensearchApi extends SearchApi {
 		}
 		if (queryRequest.containsKey("userFullName")) {
 			String fullName = queryRequest.getString("userFullName");
-			JsonObject fullNameQuery = QueryBuilder.buildStringQuery(fullName, "investigationuser.user.fullName");
-			filterBuilder.add(QueryBuilder.buildNestedQuery("investigationuser", fullNameQuery));
+			JsonObject fullNameQuery = OpensearchQueryBuilder.buildStringQuery(fullName,
+					"investigationuser.user.fullName");
+			filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery("investigationuser", fullNameQuery));
 		}
 
 		if (queryRequest.containsKey("samples")) {
 			JsonArray samples = queryRequest.getJsonArray("samples");
 			for (int i = 0; i < samples.size(); i++) {
 				String sample = samples.getString(i);
-				JsonObject stringQuery = QueryBuilder.buildStringQuery(sample, "sample.name", "sample.type.name");
-				filterBuilder.add(QueryBuilder.buildNestedQuery("sample", stringQuery));
+				JsonObject stringQuery = OpensearchQueryBuilder.buildStringQuery(sample, "sample.name",
+						"sample.type.name");
+				filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery("sample", stringQuery));
 			}
 		}
 
@@ -646,33 +745,37 @@ public class OpensearchApi extends SearchApi {
 				List<JsonObject> parameterQueries = new ArrayList<>();
 				if (parameterObject.containsKey("name")) {
 					String name = parameterObject.getString("name");
-					parameterQueries.add(QueryBuilder.buildMatchQuery(path + ".type.name", name));
+					parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".type.name", name));
 				}
 				if (parameterObject.containsKey("units")) {
 					String units = parameterObject.getString("units");
-					parameterQueries.add(QueryBuilder.buildMatchQuery(path + ".type.units", units));
+					parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".type.units", units));
 				}
 				if (parameterObject.containsKey("stringValue")) {
 					String stringValue = parameterObject.getString("stringValue");
-					parameterQueries.add(QueryBuilder.buildMatchQuery(path + ".stringValue", stringValue));
+					parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".stringValue", stringValue));
 				} else if (parameterObject.containsKey("lowerDateValue")
 						&& parameterObject.containsKey("upperDateValue")) {
 					Long lower = parseDate(parameterObject, "lowerDateValue", 0, Long.MIN_VALUE);
 					Long upper = parseDate(parameterObject, "upperDateValue", 59999, Long.MAX_VALUE);
-					parameterQueries.add(QueryBuilder.buildLongRangeQuery(path + ".dateTimeValue", lower, upper));
+					parameterQueries
+							.add(OpensearchQueryBuilder.buildLongRangeQuery(path + ".dateTimeValue", lower, upper));
 				} else if (parameterObject.containsKey("lowerNumericValue")
 						&& parameterObject.containsKey("upperNumericValue")) {
 					JsonNumber lower = parameterObject.getJsonNumber("lowerNumericValue");
 					JsonNumber upper = parameterObject.getJsonNumber("upperNumericValue");
-					parameterQueries.add(QueryBuilder.buildRangeQuery(path + ".numericValue", lower, upper));
+					parameterQueries.add(OpensearchQueryBuilder.buildRangeQuery(path + ".numericValue", lower, upper));
 				}
-				filterBuilder.add(QueryBuilder.buildNestedQuery(path, parameterQueries.toArray(new JsonObject[0])));
+				filterBuilder.add(
+						OpensearchQueryBuilder.buildNestedQuery(path, parameterQueries.toArray(new JsonObject[0])));
 			}
 		}
 
 		if (queryRequest.containsKey("id")) {
-			filterBuilder.add(QueryBuilder.buildTermsQuery("id", queryRequest.getJsonArray("id")));
+			filterBuilder.add(OpensearchQueryBuilder.buildTermsQuery("id", queryRequest.getJsonArray("id")));
 		}
+
+		// TODO add in support for specific terms?
 
 		JsonArray filterArray = filterBuilder.build();
 		if (filterArray.size() > 0) {
@@ -681,6 +784,11 @@ public class OpensearchApi extends SearchApi {
 		return builder.add("query", queryBuilder.add("bool", boolBuilder));
 	}
 
+	/**
+	 * Create mappings for indices that do not already have them.
+	 * 
+	 * @throws IcatException
+	 */
 	public void initMappings() throws IcatException {
 		for (String index : indices) {
 			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
@@ -720,6 +828,11 @@ public class OpensearchApi extends SearchApi {
 		}
 	}
 
+	/**
+	 * Create scripts for indices that do not already have them.
+	 * 
+	 * @throws IcatException
+	 */
 	public void initScripts() throws IcatException {
 		for (Entry<String, List<ParentRelation>> entry : relations.entrySet()) {
 			String key = entry.getKey();
@@ -868,7 +981,7 @@ public class OpensearchApi extends SearchApi {
 				JsonObjectBuilder paramsBuilder = Json.createObjectBuilder().add("doc", jsonArray);
 				JsonObjectBuilder scriptBuilder = Json.createObjectBuilder();
 				scriptBuilder.add("id", "create_investigationuser").add("params", paramsBuilder);
-				JsonObject queryObject = QueryBuilder.buildTermQuery("investigation.id", investigationId);
+				JsonObject queryObject = OpensearchQueryBuilder.buildTermQuery("investigation.id", investigationId);
 				JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
 				String body = bodyBuilder.add("query", queryObject).add("script", scriptBuilder).build().toString();
 				httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
@@ -887,7 +1000,7 @@ public class OpensearchApi extends SearchApi {
 				JsonObjectBuilder paramsBuilder = Json.createObjectBuilder().add("doc", jsonArray);
 				JsonObjectBuilder scriptBuilder = Json.createObjectBuilder();
 				scriptBuilder.add("id", "create_investigationinstrument").add("params", paramsBuilder);
-				JsonObject queryObject = QueryBuilder.buildTermQuery("investigation.id", investigationId);
+				JsonObject queryObject = OpensearchQueryBuilder.buildTermQuery("investigation.id", investigationId);
 				JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
 				String body = bodyBuilder.add("query", queryObject).add("script", scriptBuilder).build().toString();
 				logger.trace("Making call {} with body {}", uri, body);
@@ -900,6 +1013,22 @@ public class OpensearchApi extends SearchApi {
 		}
 	}
 
+	/**
+	 * Performs more complex update of an entity nested to a parent, for example
+	 * parameters.
+	 * 
+	 * @param sb               StringBuilder used for bulk modifications.
+	 * @param updatesByQuery   List of HttpPost that cannot be bulked, and update
+	 *                         existing documents based on a query.
+	 * @param id               Id of the entity.
+	 * @param index            Index of the entity.
+	 * @param document         JsonObject containing the key value pairs of the
+	 *                         document fields.
+	 * @param modificationType The type of operation to be performed.
+	 * @param relation         The relation between the nested entity and its
+	 *                         parent.
+	 * @throws URISyntaxException
+	 */
 	private void modifyNestedEntity(StringBuilder sb, List<HttpPost> updatesByQuery, String id, String index,
 			JsonObject document, ModificationType modificationType, ParentRelation relation)
 			throws URISyntaxException {
@@ -930,9 +1059,18 @@ public class OpensearchApi extends SearchApi {
 		}
 	}
 
+	/**
+	 * Create a new nested entity in an array on its parent.
+	 * 
+	 * @param sb       StringBuilder used for bulk modifications.
+	 * @param id       Id of the entity.
+	 * @param index    Index of the entity.
+	 * @param document JsonObject containing the key value pairs of the document
+	 *                 fields.
+	 * @param relation The relation between the nested entity and its parent.
+	 */
 	private static void createNestedEntity(StringBuilder sb, String id, String index, JsonObject document,
 			ParentRelation relation) {
-
 		String parentId = document.getString(relation.parentName + ".id");
 		JsonObjectBuilder innerBuilder = Json.createObjectBuilder()
 				.add("_id", parentId).add("_index", relation.parentName);
@@ -949,6 +1087,21 @@ public class OpensearchApi extends SearchApi {
 		sb.append(payloadBuilder.build().toString()).append("\n");
 	}
 
+	/**
+	 * For existing nested objects, painless scripting must be used to update or
+	 * delete them.
+	 * 
+	 * @param updatesByQuery List of HttpPost that cannot be bulked, and update
+	 *                       existing documents based on a query.
+	 * @param id             Id of the entity.
+	 * @param index          Index of the entity.
+	 * @param document       JsonObject containing the key value pairs of the
+	 *                       document fields.
+	 * @param relation       The relation between the nested entity and its parent.
+	 * @param update         Whether to update, or if false delete nested entity
+	 *                       with the specified id.
+	 * @throws URISyntaxException
+	 */
 	private void updateNestedEntityByQuery(List<HttpPost> updatesByQuery, String id, String index, JsonObject document,
 			ParentRelation relation, boolean update) throws URISyntaxException {
 		String path = "/" + relation.parentName + "/_update_by_query";
@@ -975,9 +1128,10 @@ public class OpensearchApi extends SearchApi {
 		JsonObject queryObject;
 		String idField = relation.joinField.equals(relation.parentName) ? "id" : relation.joinField + ".id";
 		if (relation.relationType.equals(RelationType.NESTED_GRANDCHILD)) {
-			queryObject = QueryBuilder.buildNestedQuery(relation.joinField, QueryBuilder.buildTermQuery(idField, id));
+			queryObject = OpensearchQueryBuilder.buildNestedQuery(relation.joinField,
+					OpensearchQueryBuilder.buildTermQuery(idField, id));
 		} else {
-			queryObject = QueryBuilder.buildTermQuery(idField, id);
+			queryObject = OpensearchQueryBuilder.buildTermQuery(idField, id);
 		}
 		JsonObject bodyJson = Json.createObjectBuilder().add("query", queryObject).add("script", scriptBuilder).build();
 		logger.trace("Making call {} with body {}", path, bodyJson.toString());
@@ -985,6 +1139,16 @@ public class OpensearchApi extends SearchApi {
 		updatesByQuery.add(httpPost);
 	}
 
+	/**
+	 * Gets "type.units" from the existing document, and adds "type.unitsSI" and the
+	 * SI numeric value to the rebuilder if possible.
+	 * 
+	 * @param document     JsonObject of the original document.
+	 * @param rebuilder    JsonObjectBuilder being used to create a new document
+	 *                     with converted units.
+	 * @param valueString  Field name of the numeric value.
+	 * @param numericValue Value to possibly be converted.
+	 */
 	private void convertUnits(JsonObject document, JsonObjectBuilder rebuilder, String valueString,
 			Double numericValue) {
 		String unitString = document.getString("type.units");
@@ -997,6 +1161,13 @@ public class OpensearchApi extends SearchApi {
 		}
 	}
 
+	/**
+	 * If appropriate, rebuilds document with conversion into SI units.
+	 * 
+	 * @param document JsonObject containing the document field/values.
+	 * @return Either the original JsonDocument, or a copy with SI units and values
+	 *         set.
+	 */
 	private JsonObject convertDocumentUnits(JsonObject document) {
 		if (!document.containsKey("type.units")) {
 			return document;
@@ -1014,6 +1185,15 @@ public class OpensearchApi extends SearchApi {
 		return document;
 	}
 
+	/**
+	 * Builds the parameters for a painless script, converting into SI units if
+	 * appropriate.
+	 * 
+	 * @param paramsBuilder JsonObjectBuilder for the painless script parameters.
+	 * @param document      JsonObject containing the field/values.
+	 * @param fields        List of fields to be included in the parameters.
+	 * @return paramsBuilder with fields added.
+	 */
 	private JsonObjectBuilder convertScriptUnits(JsonObjectBuilder paramsBuilder, JsonObject document,
 			Set<String> fields) {
 		for (String field : fields) {
@@ -1030,6 +1210,20 @@ public class OpensearchApi extends SearchApi {
 		return paramsBuilder;
 	}
 
+	/**
+	 * Adds modification command to sb. If relevant, also adds to the list of
+	 * investigationIds which may contain relevant information (e.g. nested
+	 * InvestigationUsers).
+	 * 
+	 * @param sb               StringBuilder used for bulk modifications.
+	 * @param investigationIds List of investigationIds to check for relevant
+	 *                         fields.
+	 * @param id               Id of the entity.
+	 * @param index            Index of the entity.
+	 * @param document         JsonObject containing the key value pairs of the
+	 *                         document fields.
+	 * @param modificationType The type of operation to be performed.
+	 */
 	private static void modifyEntity(StringBuilder sb, Set<String> investigationIds, String id, String index,
 			JsonObject document, ModificationType modificationType) {
 

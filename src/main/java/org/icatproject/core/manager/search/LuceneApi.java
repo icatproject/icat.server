@@ -37,6 +37,14 @@ public class LuceneApi extends SearchApi {
 	public String basePath = "/icat.lucene";
 	private static final Logger logger = LoggerFactory.getLogger(LuceneApi.class);
 
+	/**
+	 * Gets the target index from query and checks its validity.
+	 * 
+	 * @param query JsonObject containing the criteria to search on.
+	 * @return The lowercase target index.
+	 * @throws IcatException If "target" was not a key in query, or if the value was
+	 *                       not a supported index.
+	 */
 	private static String getTargetPath(JsonObject query) throws IcatException {
 		if (!query.containsKey("target")) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
@@ -114,12 +122,12 @@ public class LuceneApi extends SearchApi {
 
 	@Override
 	public void clear() throws IcatException {
-		post(basePath + "/clear");	
+		post(basePath + "/clear");
 	}
 
 	@Override
 	public void commit() throws IcatException {
-		post(basePath + "/commit");		
+		post(basePath + "/commit");
 	}
 
 	@Override
@@ -154,7 +162,7 @@ public class LuceneApi extends SearchApi {
 		if (sort != null) {
 			parameterMap.put("sort", sort);
 		}
-	
+
 		JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
 		objectBuilder.add("query", query);
 		if (fields != null && fields.size() > 0) {
@@ -182,7 +190,7 @@ public class LuceneApi extends SearchApi {
 				ScoredEntityBaseBean result = new ScoredEntityBaseBean(luceneDocId, shardIndex, score, source);
 				results.add(result);
 				logger.trace("Result id {} with score {}", result.getEntityBaseBeanId(), score);
-			} 
+			}
 			if (postResponse.containsKey("search_after")) {
 				lsr.setSearchAfter(postResponse.getJsonObject("search_after"));
 			}
@@ -191,11 +199,27 @@ public class LuceneApi extends SearchApi {
 		return lsr;
 	}
 
+	/**
+	 * Locks the index for entityName, removing all existing documents. While
+	 * locked, document modifications will fail (excluding addNow as a result of a
+	 * populate thread).
+	 * 
+	 * @param entityName Index to lock.
+	 * @throws IcatException
+	 */
 	@Override
 	public void lock(String entityName) throws IcatException {
 		post(basePath + "/lock/" + entityName);
 	}
 
+	/**
+	 * Unlocks the index for entityName, committing all pending documents. While
+	 * locked, document modifications will fail (excluding addNow as a result of a
+	 * populate thread).
+	 * 
+	 * @param entityName Index to lock.
+	 * @throws IcatException
+	 */
 	@Override
 	public void unlock(String entityName) throws IcatException {
 		post(basePath + "/unlock/" + entityName);

@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -792,6 +791,7 @@ public class EntityBeanManager {
 		for (ScoredEntityBaseBean sr : allResults) {
 			long entityId = sr.getEntityBaseBeanId();
 			EntityBaseBean beanManaged = manager.find(klass, entityId);
+			logger.trace("{} {} {}", klass, entityId, beanManaged);
 			if (beanManaged != null) {
 				try {
 					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
@@ -801,6 +801,7 @@ public class EntityBeanManager {
 								"attempt to return more than " + maxEntities + " entities");
 					}
 					if (results.size() == maxCount) {
+						logger.debug("maxCount {} reached", maxCount);
 						return sr;
 					}
 				} catch (IcatException e) {
@@ -1124,6 +1125,9 @@ public class EntityBeanManager {
 			Session session = getSession(sessionId, manager);
 			String userName = session.getUserName();
 			logger.debug("user: " + userName + " is associated with: " + sessionId);
+			// TODO RM
+			// logger.trace("userName: {}", userName);
+			// userName = userName.equals("db/notroot") ? "notroot" : userName;
 			return userName;
 		} catch (IcatException e) {
 			logger.debug("sessionId " + sessionId + " is not associated with valid session " + e.getMessage());
@@ -1394,6 +1398,22 @@ public class EntityBeanManager {
 		}
 	}
 
+	/**
+	 * Performs a search on a single entity, and authorises the results before
+	 * returning. Does not support sorting or searchAfter.
+	 * 
+	 * @param userName User performing the search, used for authorisation.
+	 * @param jo       JsonObject containing the details of the query to be used.
+	 * @param limit    The maximum number of results to collect before returning. If
+	 *                 a batch from the search engine has more than this many
+	 *                 authorised results, then the excess results will be
+	 *                 discarded.
+	 * @param manager  EntityManager for finding entities from their Id.
+	 * @param ip       Used for logging only.
+	 * @param klass    Class of the entity to search.
+	 * @return SearchResult for the query.
+	 * @throws IcatException
+	 */
 	public List<ScoredEntityBaseBean> freeTextSearch(String userName, JsonObject jo, int limit, String sort,
 			EntityManager manager, String ip, Class<? extends EntityBaseBean> klass) throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
@@ -1446,13 +1466,35 @@ public class EntityBeanManager {
 		return results;
 	}
 
-	public SearchResult freeTextSearchDocs(String userName, JsonObject jo, JsonValue searchAfter, int limit, String sort,
-			String facets, EntityManager manager, String ip, Class<? extends EntityBaseBean> klass)
-			throws IcatException {
+	/**
+	 * Performs a search on a single entity, and authorises the results before
+	 * returning.
+	 * 
+	 * @param userName    User performing the search, used for authorisation.
+	 * @param jo          JsonObject containing the details of the query to be used.
+	 * @param searchAfter JsonValue representation of the final result from a
+	 *                    previous search.
+	 * @param minCount    The minimum number of results to collect before returning.
+	 *                    If a batch from the search engine has at least this many
+	 *                    authorised results, no further batches will be requested.
+	 * @param maxCount    The maximum number of results to collect before returning.
+	 *                    If a batch from the search engine has more than this many
+	 *                    authorised results, then the excess results will be
+	 *                    discarded.
+	 * @param sort        String of Json representing sort criteria.
+	 * @param manager     EntityManager for finding entities from their Id.
+	 * @param ip          Used for logging only.
+	 * @param klass       Class of the entity to search.
+	 * @return SearchResult for the query.
+	 * @throws IcatException
+	 */
+	public SearchResult freeTextSearchDocs(String userName, JsonObject jo, JsonValue searchAfter, int minCount,
+			int maxCount, String sort, EntityManager manager, String ip,
+			Class<? extends EntityBaseBean> klass) throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		JsonValue lastSearchAfter = null;
-		List<FacetDimension> dimensions = null;
+		List<FacetDimension> dimensions = new ArrayList<>();
 		if (searchActive) {
 			SearchResult lastSearchResult = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
@@ -1461,7 +1503,7 @@ public class EntityBeanManager {
 			 * As results may be rejected and maxCount may be 1 ensure that we
 			 * don't make a huge number of calls to search engine
 			 */
-			int blockSize = Math.max(1000, limit);
+			int blockSize = Math.max(1000, maxCount);
 
 			do {
 				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
@@ -1469,7 +1511,8 @@ public class EntityBeanManager {
 					return lastSearchResult;
 				}
 				allResults = lastSearchResult.getResults();
-				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, limit, userName, manager, klass);
+				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, maxCount, userName, manager,
+						klass);
 				if (lastBean == null) {
 					// Haven't stopped early, so use the Lucene provided searchAfter document
 					lastSearchAfter = lastSearchResult.getSearchAfter();
@@ -1482,11 +1525,10 @@ public class EntityBeanManager {
 					lastSearchAfter = searchManager.buildSearchAfter(lastBean, sort);
 					break;
 				}
-			} while (results.size() < limit);
+			} while (results.size() < minCount);
 
-			if (facets != null && !facets.equals("") && results.size() > 0) {
-				JsonReader reader = Json.createReader(new StringReader(facets));
-				List<JsonObject> jsonFacets = reader.readArray().getValuesAs(JsonObject.class);
+			if (jo.containsKey("facets")) {
+				List<JsonObject> jsonFacets = jo.getJsonArray("facets").getValuesAs(JsonObject.class);
 
 				for (JsonObject jsonFacet : jsonFacets) {
 					JsonObject facetQuery;
@@ -1498,9 +1540,7 @@ public class EntityBeanManager {
 						if (target.contains("Parameter")) {
 							relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
 						} else {
-							// TODO allow more types here, as we decide what to support
-							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-									"Facet target should be a Parameter, but it was " + target);
+							relationship = eiHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
 						}
 
 						if (gateKeeper.allowed(relationship)) {
@@ -1512,7 +1552,7 @@ public class EntityBeanManager {
 							continue;
 						}
 					}
-					dimensions = searchManager.facetSearch(target, facetQuery, results.size(), 10);
+					dimensions.addAll(searchManager.facetSearch(target, facetQuery, results.size(), 10));
 				}
 			}
 		}
@@ -1529,6 +1569,49 @@ public class EntityBeanManager {
 		}
 		logger.debug("Returning {} results", results.size());
 		return new SearchResult(lastSearchAfter, results, dimensions);
+	}
+
+	/**
+	 * Perform faceting on entities of klass using the criteria contained in jo.
+	 * 
+	 * @param jo    JsonObject containing "facets" key with a value of a JsonArray
+	 *              of JsonObjects.
+	 * @param klass Class of the entity to facet.
+	 * @return SearchResult with only the dimensions set.
+	 * @throws IcatException
+	 */
+	public SearchResult facetDocs(JsonObject jo, Class<? extends EntityBaseBean> klass) throws IcatException {
+		JsonValue lastSearchAfter = null;
+		List<FacetDimension> dimensions = new ArrayList<>();
+		if (searchActive && jo.containsKey("facets")) {
+			List<JsonObject> jsonFacets = jo.getJsonArray("facets").getValuesAs(JsonObject.class);
+			for (JsonObject jsonFacet : jsonFacets) {
+				JsonObject facetQuery;
+				String target = jsonFacet.getString("target");
+				JsonObject filterObject = jo.getJsonObject("filter");
+				if (target.equals(klass.getSimpleName())) {
+					facetQuery = SearchManager.buildFacetQuery(filterObject, "id", jsonFacet);
+				} else {
+					Relationship relationship;
+					if (target.contains("Parameter")) {
+						relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
+					} else {
+						relationship = eiHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
+					}
+
+					if (gateKeeper.allowed(relationship)) {
+						facetQuery = SearchManager.buildFacetQuery(filterObject,
+								klass.getSimpleName().toLowerCase() + ".id", jsonFacet);
+					} else {
+						logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed",
+								target, klass.getSimpleName());
+						continue;
+					}
+				}
+				dimensions.addAll(searchManager.facetSearch(target, facetQuery, 1000, 10));
+			}
+		}
+		return new SearchResult(lastSearchAfter, new ArrayList<>(), dimensions);
 	}
 
 	public List<String> searchGetPopulating() {

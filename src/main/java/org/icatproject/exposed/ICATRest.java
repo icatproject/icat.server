@@ -1244,17 +1244,11 @@ public class ICATRest {
 	 *                    then results will be returned in order of relevance to the
 	 *                    search query, with their search engine id as a tiebreaker.
 	 * 
-	 * @param limit
+	 * @param minCount
+	 *                    minimum number of entities to return
+	 * 
+	 * @param maxCount
 	 *                    maximum number of entities to return
-	 * @param facets
-	 *                    String representing a JsonArray of JsonObjects. Each
-	 *                    should define the "target" entity name, and optionally
-	 *                    another JsonArray of JsonObjects representing specific
-	 *                    fields to facet. If absent, then all applicable String
-	 *                    fields will be faceted. These objects must have the
-	 *                    "dimension" key, and if the field is numeric than the
-	 *                    "range" key should denote an array of objects with "lower"
-	 *                    and "upper" values.
 	 * 
 	 * @param restrict
 	 *                    Whether to perform a quicker search which restricts the
@@ -1272,11 +1266,16 @@ public class ICATRest {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String search(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
 			@QueryParam("query") String query, @QueryParam("search_after") String searchAfter,
-			@QueryParam("limit") int limit, @QueryParam("sort") String sort, @QueryParam("facets") String facets,
-			@QueryParam("restrict") boolean restrict)
-			throws IcatException {
+			@QueryParam("minCount") int minCount, @QueryParam("maxCount") int maxCount, @QueryParam("sort") String sort,
+			@QueryParam("restrict") boolean restrict) throws IcatException {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
+		}
+		if (minCount == 0) {
+			minCount = 10;
+		}
+		if (maxCount == 0) {
+			maxCount = 100;
 		}
 		String userName = beanManager.getUserName(sessionId, manager);
 		JsonValue searchAfterValue = null;
@@ -1331,9 +1330,9 @@ public class ICATRest {
 			} else {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
 			}
-			logger.debug("Free text search with query: {}, facets: {}", jo.toString(), facets);
-			result = beanManager.freeTextSearchDocs(userName, jo, searchAfterValue, limit, sort, facets, manager,
-					request.getRemoteAddr(), klass);
+
+			result = beanManager.freeTextSearchDocs(userName, jo, searchAfterValue, minCount, maxCount, sort,
+					manager, request.getRemoteAddr(), klass);
 
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartObject();
@@ -1371,6 +1370,92 @@ public class ICATRest {
 				gen.writeEnd();
 			}
 			gen.writeEnd().writeEnd().close();
+			return baos.toString();
+		} catch (JsonException e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "JsonException " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Performs subsequent faceting for a particular query containing a list of ids.
+	 * 
+	 * @summary Document faceting.
+	 * 
+	 * @param sessionId a sessionId of a user which takes the form <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 * @param query Json of the format 
+	 * <code>{
+	 *   "target": `target`,
+	 *   "facets": [
+	 *     {
+	 *       "target": `facetTarget`,
+	 *       "dimensions": [
+	 *         {"dimension": `dimension`, "ranges": [{"key": `key`, "from": `from`, "to": `to`}, ...]},
+	 *         ...
+	 *       ]
+	 *     },
+	 *     ...
+	 *   ],
+	 *   "filter": {`termField`: `value`, `termsField`: [...], ...}
+	 * }</code>
+	 * @return Facet labels and counts for the provided query
+	 * @throws IcatException If something goes wrong
+	 */
+	@GET
+	@Path("facet/documents")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String facet(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
+			@QueryParam("query") String query) throws IcatException {
+		if (query == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
+		}
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonReader jr = Json.createReader(new StringReader(query))) {
+			JsonObject jo = jr.readObject();
+
+			String target = jo.getString("target", null);
+
+			SearchResult result;
+			Class<? extends EntityBaseBean> klass;
+
+			if (target.equals("Investigation")) {
+				klass = Investigation.class;
+			} else if (target.equals("Dataset")) {
+				klass = Dataset.class;
+			} else if (target.equals("Datafile")) {
+				klass = Datafile.class;
+			} else {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
+			}
+
+			result = beanManager.facetDocs(jo, klass);
+
+			JsonGenerator gen = Json.createGenerator(baos);
+			gen.writeStartObject();
+			if (result.isAborted()) {
+				gen.write("aborted", true).writeEnd().close();
+				return baos.toString();
+			}
+
+			List<FacetDimension> dimensions = result.getDimensions();
+			if (dimensions != null && dimensions.size() > 0) {
+				gen.writeStartObject("dimensions");
+				for (FacetDimension dimension : dimensions) {
+					gen.writeStartObject(dimension.getTarget() + "." + dimension.getDimension());
+					for (FacetLabel label : dimension.getFacets()) {
+						logger.debug("From and to: ", label.getFrom(), label.getTo());
+						if (label.getFrom() != null && label.getTo() != null) {
+							gen.writeStartObject(label.getLabel()).write("from", label.getFrom()).write("to", label.getTo()).write("count", label.getValue()).writeEnd();
+						} else {
+							gen.write(label.getLabel(), label.getValue());
+						}
+					}
+					gen.writeEnd();
+				}
+				gen.writeEnd();
+			}
+
+			gen.writeEnd().close();
 			return baos.toString();
 		} catch (JsonException e) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "JsonException " + e.getMessage());

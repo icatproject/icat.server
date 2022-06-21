@@ -5,6 +5,11 @@ import java.util.List;
 
 import javax.json.JsonValue;
 
+/**
+ * Represents the results from a single search performed against the engine.
+ * Stores a list of ScoredEntityBaseBean, FacetDimension, and a JsonValue
+ * representing the last document returned if appropriate.
+ */
 public class SearchResult {
 
 	private JsonValue searchAfter;
@@ -12,7 +17,8 @@ public class SearchResult {
 	private List<FacetDimension> dimensions;
 	private boolean aborted;
 
-	public SearchResult() {}
+	public SearchResult() {
+	}
 
 	public SearchResult(JsonValue searchAfter, List<ScoredEntityBaseBean> results, List<FacetDimension> dimensions) {
 		this.searchAfter = searchAfter;

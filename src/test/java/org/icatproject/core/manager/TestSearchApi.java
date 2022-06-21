@@ -794,13 +794,13 @@ public class TestSearchApi {
 		checkResults(lsr, 0L, 2L, 4L, 6L, 8L);
 
 		// Test filter
-		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("type.name.keyword", "type"));
+		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("dataset.type.name", "type"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
-		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("type.name.keyword", "type", "typo"));
+		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("dataset.type.name", "type", "typo"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
-		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("type.name.keyword", "typo"));
+		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("dataset.type.name", "typo"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr);
 
@@ -885,13 +885,13 @@ public class TestSearchApi {
 		checkResults(lsr, 0L, 2L, 4L, 6L, 8L);
 
 		// Test filter
-		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("type.name.keyword", "type"));
+		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("investigation.type.name", "type"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
-		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("type.name.keyword", "type", "typo"));
+		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("investigation.type.name", "type", "typo"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
-		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("type.name.keyword", "typo"));
+		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("investigation.type.name", "typo"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr);
 
@@ -1034,13 +1034,13 @@ public class TestSearchApi {
 		JsonObject lowRange = buildFacetRangeObject("low", 0L, 2L);
 		JsonObject highRange = buildFacetRangeObject("high", 2L, 4L);
 		JsonObject rangeFacetRequest = buildFacetRangeRequest(buildFacetIdQuery("42"), "date", lowRange, highRange);
-		JsonObject stringFacetRequest = buildFacetStringRequest("42", "datafileFormat.name.keyword");
+		JsonObject stringFacetRequest = buildFacetStringRequest("42", "datafileFormat.name");
 		JsonObject sparseFacetRequest = Json.createObjectBuilder().add("query", buildFacetIdQuery("42")).build();
 		FacetDimension lowFacet = new FacetDimension("", "date", new FacetLabel("low", 1L), new FacetLabel("high", 0L));
 		FacetDimension highFacet = new FacetDimension("", "date", new FacetLabel("low", 0L),
 				new FacetLabel("high", 1L));
-		FacetDimension pdfFacet = new FacetDimension("", "datafileFormat.name.keyword", new FacetLabel("pdf", 1L));
-		FacetDimension pngFacet = new FacetDimension("", "datafileFormat.name.keyword", new FacetLabel("png", 1L));
+		FacetDimension pdfFacet = new FacetDimension("", "datafileFormat.name", new FacetLabel("pdf", 1L));
+		FacetDimension pngFacet = new FacetDimension("", "datafileFormat.name", new FacetLabel("png", 1L));
 
 		// Original
 		modify(SearchApi.encodeOperation("create", elephantDatafile));

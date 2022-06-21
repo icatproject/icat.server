@@ -716,7 +716,7 @@ public class TestRS {
 		searchDatafiles(piSession(), null, null, null, null, null, null, 10, null, null, 0);
 
 		// Test no facets match on Datafiles
-		String facets = buildFacetRequest("Datafile");
+		JsonArray facets = buildFacetRequest("Datafile");
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 10, null, facets, 3);
 		assertFalse(responseObject.containsKey("search_after"));
 		assertFalse(NO_DIMENSIONS, responseObject.containsKey("dimensions"));
@@ -731,7 +731,7 @@ public class TestRS {
 		wSession.addRule(null, "DatafileParameter", "R");
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 10, null, facets, 3);
 		assertFalse(responseObject.containsKey("search_after"));
-		checkFacets(responseObject, "DatafileParameter.type.name.keyword", Arrays.asList("colour"), Arrays.asList(1L));
+		checkFacets(responseObject, "DatafileParameter.type.name", Arrays.asList("colour"), Arrays.asList(1L));
 	}
 
 	/**
@@ -845,10 +845,10 @@ public class TestRS {
 		searchDatasets(piSession(), null, null, null, null, null, null, 10, null, null, 0);
 
 		// Test facets match on Datasets
-		String facets = buildFacetRequest("Dataset");
+		JsonArray facets = buildFacetRequest("Dataset");
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 10, null, facets, 5);
 		assertFalse(responseObject.containsKey("search_after"));
-		checkFacets(responseObject, "Dataset.type.name.keyword", Arrays.asList("calibration"), Arrays.asList(5L));
+		checkFacets(responseObject, "Dataset.type.name", Arrays.asList("calibration"), Arrays.asList(5L));
 
 		// Test no facets match on DatasetParameters due to lack of READ access
 		facets = buildFacetRequest("DatasetParameter");
@@ -861,7 +861,7 @@ public class TestRS {
 		wSession.addRule(null, "DatasetParameter", "R");
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 10, null, facets, 5);
 		assertFalse(responseObject.containsKey("search_after"));
-		checkFacets(responseObject, "DatasetParameter.type.name.keyword",
+		checkFacets(responseObject, "DatasetParameter.type.name",
 				Arrays.asList("colour", "birthday", "current"),
 				Arrays.asList(1L, 1L, 1L));
 	}
@@ -984,11 +984,11 @@ public class TestRS {
 		searchInvestigations(piSession(), null, null, null, null, null, null, null, null, 10, null, null, 0);
 
 		// Test facets match on Investigations
-		String facets = buildFacetRequest("Investigation");
+		JsonArray facets = buildFacetRequest("Investigation");
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
-		checkFacets(responseObject, "Investigation.type.name.keyword", Arrays.asList("atype"), Arrays.asList(3L));
+		checkFacets(responseObject, "Investigation.type.name", Arrays.asList("atype"), Arrays.asList(3L));
 
 		// Test no facets match on InvestigationParameters due to lack of READ access
 		facets = buildFacetRequest("InvestigationParameter");
@@ -1002,7 +1002,7 @@ public class TestRS {
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
-		checkFacets(responseObject, "InvestigationParameter.type.name.keyword", Arrays.asList("colour"),
+		checkFacets(responseObject, "InvestigationParameter.type.name", Arrays.asList("colour"),
 				Arrays.asList(1L));
 	}
 
@@ -1039,12 +1039,12 @@ public class TestRS {
 		}
 	}
 
-	private String buildFacetRequest(String target) {
+	private JsonArray buildFacetRequest(String target) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
-		JsonObjectBuilder dimension = Json.createObjectBuilder().add("dimension", "type.name.keyword");
+		JsonObjectBuilder dimension = Json.createObjectBuilder().add("dimension", "type.name");
 		JsonArrayBuilder dimensions = Json.createArrayBuilder().add(dimension);
 		builder.add("target", target).add("dimensions", dimensions);
-		return Json.createArrayBuilder().add(builder).build().toString();
+		return Json.createArrayBuilder().add(builder).build();
 	}
 
 	private void checkFacets(JsonObject responseObject, String dimension, List<String> expectedLabels,
@@ -1181,9 +1181,9 @@ public class TestRS {
 	 * For use with the new search/documents endpoint
 	 */
 	private JsonObject searchDatafiles(Session session, String user, String text, Date lower, Date upper,
-			List<ParameterForLucene> parameters, String searchAfter, int limit, String sort, String facets, int n)
+			List<ParameterForLucene> parameters, String searchAfter, int maxCount, String sort, JsonArray facets, int n)
 			throws IcatException {
-		String responseString = session.searchDatafiles(user, text, lower, upper, parameters, searchAfter, limit, sort,
+		String responseString = session.searchDatafiles(user, text, lower, upper, parameters, searchAfter, maxCount, sort,
 				facets);
 		return checkResultsArraySize(n, responseString);
 	}
@@ -1192,9 +1192,9 @@ public class TestRS {
 	 * For use with the new search/documents endpoint
 	 */
 	private JsonObject searchDatasets(Session session, String user, String text, Date lower, Date upper,
-			List<ParameterForLucene> parameters, String searchAfter, int limit, String sort, String facets, int n)
+			List<ParameterForLucene> parameters, String searchAfter, int maxCount, String sort, JsonArray facets, int n)
 			throws IcatException {
-		String responseString = session.searchDatasets(user, text, lower, upper, parameters, searchAfter, limit, sort,
+		String responseString = session.searchDatasets(user, text, lower, upper, parameters, searchAfter, maxCount, sort,
 				facets);
 		return checkResultsArraySize(n, responseString);
 	}
@@ -1204,9 +1204,9 @@ public class TestRS {
 	 */
 	private JsonObject searchInvestigations(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, List<String> samples, String userFullName, String searchAfter,
-			int limit, String sort, String facets, int n) throws IcatException {
+			int maxCount, String sort, JsonArray facets, int n) throws IcatException {
 		String responseString = session.searchInvestigations(user, text, lower, upper, parameters, samples,
-				userFullName, searchAfter, limit, sort, facets);
+				userFullName, searchAfter, maxCount, sort, facets);
 		return checkResultsArraySize(n, responseString);
 	}
 
