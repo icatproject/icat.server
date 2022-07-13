@@ -65,6 +65,7 @@ public class TestSearchApi {
 		private String fld;
 		private String value;
 		private JsonArray array;
+
 		public Filter(String fld, String... values) {
 			this.fld = fld;
 			if (values.length == 1) {
@@ -119,7 +120,7 @@ public class TestSearchApi {
 	 * Utility function for building a Query from individual arguments
 	 */
 	public static JsonObject buildQuery(String target, String user, String text, Date lower, Date upper,
-			List<ParameterPOJO> parameters, List<String> samples, String userFullName, Filter... filters) {
+			List<ParameterPOJO> parameters, String userFullName, Filter... filters) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		if (target != null) {
 			builder.add("target", target);
@@ -165,17 +166,10 @@ public class TestSearchApi {
 			}
 			builder.add("parameters", parametersBuilder);
 		}
-		if (samples != null && !samples.isEmpty()) {
-			JsonArrayBuilder samplesBuilder = Json.createArrayBuilder();
-			for (String sample : samples) {
-				samplesBuilder.add(sample);
-			}
-			builder.add("samples", samplesBuilder);
-		}
 		if (userFullName != null) {
 			builder.add("userFullName", userFullName);
 		}
-		if (filters.length > 0 ) {
+		if (filters.length > 0) {
 			JsonObjectBuilder filterBuilder = Json.createObjectBuilder();
 			for (Filter filter : filters) {
 				if (filter.value != null) {
@@ -538,9 +532,6 @@ public class TestSearchApi {
 				if (sampleId >= NUMSAMP) {
 					break;
 				}
-				word = word("SType ", sampleId % 26);
-				Sample sample = sample(sampleId, word, investigation);
-				queue.add(SearchApi.encodeOperation("create", sample));
 			}
 
 			for (int datasetBatch = 0; datasetBatch * NUMINV < NUMDS; datasetBatch++) {
@@ -552,6 +543,14 @@ public class TestSearchApi {
 				endDate = new Date(now + (datasetId + 1) * 60000);
 				word = word("DS", datasetId % 26);
 				Dataset dataset = dataset(datasetId, word, startDate, endDate, investigation);
+
+				if (datasetId < NUMSAMP) {
+					word = word("SType ", datasetId);
+					Sample sample = sample(datasetId, word, investigation);
+					queue.add(SearchApi.encodeOperation("create", sample));
+					dataset.setSample(sample);
+				}
+
 				queue.add(SearchApi.encodeOperation("create", dataset));
 
 				if (datasetId % 3 == 1) {
@@ -628,7 +627,7 @@ public class TestSearchApi {
 		String sort;
 
 		// Test size and searchAfter
-		JsonObject query = buildQuery("Datafile", null, null, null, null, null, null, null);
+		JsonObject query = buildQuery("Datafile", null, null, null, null, null, null);
 		SearchResult lsr = searchApi.getResults(query, null, 5, null, datafileFields);
 		JsonValue searchAfter = lsr.getSearchAfter();
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
@@ -685,50 +684,78 @@ public class TestSearchApi {
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 
-		query = buildQuery("Datafile", "e4", null, null, null, null, null, null);
+		query = buildQuery("Datafile", "e4", null, null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 1L, 6L, 11L, 16L, 21L, 26L, 31L, 36L, 41L, 46L, 51L, 56L, 61L, 66L, 71L, 76L, 81L, 86L, 91L,
 				96L);
 
 		// Test instrumentScientists only see their data
-		query = buildQuery("Datafile", "scientist_0", null, null, null, null, null, null);
+		query = buildQuery("Datafile", "scientist_0", null, null, null, null, null);
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 2L, 4L, 6L, 8L);
 
-		query = buildQuery("Datafile", "e4", "dfbbb", null, null, null, null, null);
+		query = buildQuery("Datafile", "e4", "dfbbb", null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 1L);
 
-		query = buildQuery("Datafile", null, "dfbbb", null, null, null, null, null);
+		query = buildQuery("Datafile", null, "dfbbb", null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 1L, 27L, 53L, 79L);
 
 		query = buildQuery("Datafile", null, null, new Date(now + 60000 * 3),
-				new Date(now + 60000 * 6), null, null, null);
+				new Date(now + 60000 * 6), null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L, 4L, 5L, 6L);
 
 		query = buildQuery("Datafile", "b1", "dsddd", new Date(now + 60000 * 3),
-				new Date(now + 60000 * 6), null, null, null);
+				new Date(now + 60000 * 6), null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr);
+
+		// Target visitId
+		query = buildQuery("Datafile", null, "visitId:visitId", null, null, null, null);
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
+		query = buildQuery("Datafile", null, "visitId:qwerty", null, null, null, null);
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr);
+
+		// Target sample.name
+		query = buildQuery("Datafile", null, "sample.name:ddd", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L, 33L, 63L, 93L);
+
+		// Multiple samples associated with investigation 3
+		query = buildQuery("Datafile", null, "ddd nnn", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L, 13L, 33L, 43L, 63L, 73L, 93L);
+
+		// By default, sample ddd OR sample mmm gives two
+		query = buildQuery("Datafile", null, "ddd mmm", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L, 12L, 33L, 42L, 63L, 72L, 93L);
+
+		// AND logic should not return any results
+		query = buildQuery("Datafile", null, "+ddd +mmm", null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr);
 
 		List<ParameterPOJO> pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v25"));
 		query = buildQuery("Datafile", null, null, new Date(now + 60000 * 3),
-				new Date(now + 60000 * 6), pojos, null, null);
+				new Date(now + 60000 * 6), pojos, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 5L);
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v25"));
-		query = buildQuery("Datafile", null, null, null, null, pojos, null, null);
+		query = buildQuery("Datafile", null, null, null, null, pojos, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 5L);
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, "u sss", null));
-		query = buildQuery("Datafile", null, null, null, null, pojos, null, null);
+		query = buildQuery("Datafile", null, null, null, null, pojos, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 13L, 65L);
 	}
@@ -739,7 +766,7 @@ public class TestSearchApi {
 		JsonObjectBuilder sortBuilder = Json.createObjectBuilder();
 		String sort;
 
-		JsonObject query = buildQuery("Dataset", null, null, null, null, null, null, null);
+		JsonObject query = buildQuery("Dataset", null, null, null, null, null, null);
 		SearchResult lsr = searchApi.getResults(query, null, 5, null, datasetFields);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
 		checkDataset(lsr.getResults().get(0));
@@ -751,7 +778,7 @@ public class TestSearchApi {
 				25L, 26L, 27L, 28L, 29L);
 
 		// Test searchAfter preserves the sorting of original search (asc)
-		sort = sortBuilder.add("startDate", "asc").build().toString();
+		sort = sortBuilder.add("date", "asc").build().toString();
 		lsr = searchApi.getResults(query, 5, sort);
 		checkOrder(lsr, 0L, 1L, 2L, 3L, 4L);
 		searchAfter = lsr.getSearchAfter();
@@ -762,7 +789,7 @@ public class TestSearchApi {
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 
 		// Test searchAfter preserves the sorting of original search (desc)
-		sort = sortBuilder.add("endDate", "desc").build().toString();
+		sort = sortBuilder.add("date", "desc").build().toString();
 		lsr = searchApi.getResults(query, 5, sort);
 		checkOrder(lsr, 29L, 28L, 27L, 26L, 25L);
 		searchAfter = lsr.getSearchAfter();
@@ -778,64 +805,93 @@ public class TestSearchApi {
 		checkOrder(lsr, 0L, 26L, 1L, 27L, 2L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
-		sort = sortBuilder.add("name", "asc").add("endDate", "desc").build().toString();
+		sort = sortBuilder.add("name", "asc").add("date", "desc").build().toString();
 		lsr = searchApi.getResults(query, 5, sort);
 		checkOrder(lsr, 26L, 0L, 27L, 1L, 28L);
 		searchAfter = lsr.getSearchAfter();
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 
-		lsr = searchApi.getResults(buildQuery("Dataset", "e4", null, null, null, null, null, null), 100,
+		lsr = searchApi.getResults(buildQuery("Dataset", "e4", null, null, null, null, null), 100,
 				null);
 		checkResults(lsr, 1L, 6L, 11L, 16L, 21L, 26L);
 
 		// Test instrumentScientists only see their data
-		query = buildQuery("Dataset", "scientist_0", null, null, null, null, null, null);
+		query = buildQuery("Dataset", "scientist_0", null, null, null, null, null);
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 2L, 4L, 6L, 8L);
 
 		// Test filter
-		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("dataset.type.name", "type"));
+		query = buildQuery("Dataset", null, null, null, null, null, null, new Filter("dataset.type.name", "type"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
-		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("dataset.type.name", "type", "typo"));
+		query = buildQuery("Dataset", null, null, null, null, null, null,
+				new Filter("dataset.type.name", "type", "typo"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
-		query = buildQuery("Dataset", null, null, null, null, null, null, null, new Filter("dataset.type.name", "typo"));
+		query = buildQuery("Dataset", null, null, null, null, null, null, new Filter("dataset.type.name", "typo"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr);
 
-		lsr = searchApi.getResults(buildQuery("Dataset", "e4", "dsbbb", null, null, null, null, null), 100,
+		lsr = searchApi.getResults(buildQuery("Dataset", "e4", "dsbbb", null, null, null, null), 100,
 				null);
 		checkResults(lsr, 1L);
 
-		lsr = searchApi.getResults(buildQuery("Dataset", null, "dsbbb", null, null, null, null, null), 100,
+		lsr = searchApi.getResults(buildQuery("Dataset", null, "dsbbb", null, null, null, null), 100,
 				null);
 		checkResults(lsr, 1L, 27L);
 
 		lsr = searchApi.getResults(buildQuery("Dataset", null, null, new Date(now + 60000 * 3),
-				new Date(now + 60000 * 6), null, null, null), 100, null);
+				new Date(now + 60000 * 6), null, null), 100, null);
 		checkResults(lsr, 3L, 4L, 5L);
 
 		lsr = searchApi.getResults(buildQuery("Dataset", "b1", "dsddd", new Date(now + 60000 * 3),
-				new Date(now + 60000 * 6), null, null, null), 100, null);
+				new Date(now + 60000 * 6), null, null), 100, null);
 		checkResults(lsr, 3L);
+
+		// Target visitId
+		query = buildQuery("Dataset", null, "visitId:visitId", null, null, null, null);
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
+		query = buildQuery("Dataset", null, "visitId:qwerty", null, null, null, null);
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr);
+
+		// Target sample.name
+		query = buildQuery("Dataset", null, "sample.name:ddd", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L);
+
+		// Multiple samples associated with investigation 3
+		query = buildQuery("Dataset", null, "ddd nnn", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L, 13L);
+
+		// By default, sample ddd OR sample mmm gives two
+		query = buildQuery("Dataset", null, "ddd mmm", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L, 12L);
+
+		// AND logic should not return any results
+		query = buildQuery("Dataset", null, "+ddd +mmm", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr);
 
 		List<ParameterPOJO> pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v16"));
-		lsr = searchApi.getResults(buildQuery("Dataset", null, null, null, null, pojos, null, null), 100,
+		lsr = searchApi.getResults(buildQuery("Dataset", null, null, null, null, pojos, null), 100,
 				null);
 		checkResults(lsr, 4L);
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v16"));
 		lsr = searchApi.getResults(buildQuery("Dataset", null, null, new Date(now + 60000 * 3),
-				new Date(now + 60000 * 6), pojos, null, null), 100, null);
+				new Date(now + 60000 * 6), pojos, null), 100, null);
 		checkResults(lsr, 4L);
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v16"));
 		lsr = searchApi.getResults(buildQuery("Dataset", "b1", "dsddd", new Date(now + 60000 * 3),
-				new Date(now + 60000 * 6), pojos, null, null), 100, null);
+				new Date(now + 60000 * 6), pojos, null), 100, null);
 		checkResults(lsr);
 	}
 
@@ -846,7 +902,7 @@ public class TestSearchApi {
 		String sort;
 
 		/* Blocked results */
-		JsonObject query = buildQuery("Investigation", null, null, null, null, null, null, null);
+		JsonObject query = buildQuery("Investigation", null, null, null, null, null, null);
 		SearchResult lsr = searchApi.getResults(query, null, 5, null, investigationFields);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
 		checkInvestigation(lsr.getResults().get(0));
@@ -858,7 +914,7 @@ public class TestSearchApi {
 		assertNull(searchAfter);
 
 		// Test searchAfter preserves the sorting of original search (asc)
-		sort = sortBuilder.add("startDate", "asc").build().toString();
+		sort = sortBuilder.add("date", "asc").build().toString();
 		lsr = searchApi.getResults(query, 5, sort);
 		checkOrder(lsr, 0L, 1L, 2L, 3L, 4L);
 		searchAfter = lsr.getSearchAfter();
@@ -869,7 +925,7 @@ public class TestSearchApi {
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 
 		// Test searchAfter preserves the sorting of original search (desc)
-		sort = sortBuilder.add("endDate", "desc").build().toString();
+		sort = sortBuilder.add("date", "desc").build().toString();
 		lsr = searchApi.getResults(query, 5, sort);
 		checkOrder(lsr, 9L, 8L, 7L, 6L, 5L);
 		searchAfter = lsr.getSearchAfter();
@@ -880,62 +936,65 @@ public class TestSearchApi {
 		assertNotNull(SEARCH_AFTER_NOT_NULL, searchAfter);
 
 		// Test instrumentScientists only see their data
-		query = buildQuery("Investigation", "scientist_0", null, null, null, null, null, null);
+		query = buildQuery("Investigation", "scientist_0", null, null, null, null, null);
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 2L, 4L, 6L, 8L);
 
 		// Test filter
-		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("investigation.type.name", "type"));
+		query = buildQuery("Investigation", null, null, null, null, null, null,
+				new Filter("investigation.type.name", "type"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
-		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("investigation.type.name", "type", "typo"));
+		query = buildQuery("Investigation", null, null, null, null, null, null,
+				new Filter("investigation.type.name", "type", "typo"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
-		query = buildQuery("Investigation", null, null, null, null, null, null, null, new Filter("investigation.type.name", "typo"));
+		query = buildQuery("Investigation", null, null, null, null, null, null,
+				new Filter("investigation.type.name", "typo"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr);
 
-		query = buildQuery("Investigation", null, null, null, null, null, null, "b");
+		query = buildQuery("Investigation", null, null, null, null, null, "b");
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 1L, 3L, 5L, 7L, 9L);
 
-		query = buildQuery("Investigation", null, null, null, null, null, null, "FN");
+		query = buildQuery("Investigation", null, null, null, null, null, "FN");
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 1L, 3L, 4L, 5L, 6L, 7L, 9L);
 
-		query = buildQuery("Investigation", null, null, null, null, null, null, "FN AND \"b b\"");
+		query = buildQuery("Investigation", null, null, null, null, null, "FN AND \"b b\"");
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 1L, 3L, 5L, 7L, 9L);
 
-		query = buildQuery("Investigation", "b1", null, null, null, null, null, "b");
+		query = buildQuery("Investigation", "b1", null, null, null, null, "b");
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 1L, 3L, 5L, 7L, 9L);
 
-		query = buildQuery("Investigation", "c1", null, null, null, null, null, "b");
+		query = buildQuery("Investigation", "c1", null, null, null, null, "b");
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr);
 
-		query = buildQuery("Investigation", null, "l v", null, null, null, null, null);
+		query = buildQuery("Investigation", null, "l v", null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 4L);
 
-		query = buildQuery("Investigation", "b1", "d", null, null, null, null, "b");
+		query = buildQuery("Investigation", "b1", "d", null, null, null, "b");
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L);
 
 		query = buildQuery("Investigation", "b1", "d", new Date(now + 60000 * 3), new Date(now + 60000 * 6),
-				null, null, "b");
+				null, "b");
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L);
 
 		query = buildQuery("Investigation", null, null, new Date(now + 60000 * 3), new Date(now + 60000 * 6),
-				null, null, null);
+				null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L, 4L, 5L);
 
 		List<ParameterPOJO> pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v9"));
-		query = buildQuery("Investigation", null, null, null, null, pojos, null, null);
+		query = buildQuery("Investigation", null, null, null, null, pojos, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L);
 
@@ -949,38 +1008,79 @@ public class TestSearchApi {
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v9"));
 		query = buildQuery("Investigation", "b1", "d", new Date(now + 60000 * 3), new Date(now + 60000 * 6),
-				pojos, null, "b");
+				pojos, "b");
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L);
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO(null, null, "v9"));
 		pojos.add(new ParameterPOJO(null, null, "v81"));
-		query = buildQuery("Investigation", null, null, null, null, pojos, null, null);
+		query = buildQuery("Investigation", null, null, null, null, pojos, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr);
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO("Snm ddd", "u iii", "v9"));
-		query = buildQuery("Investigation", null, null, null, null, pojos, null, null);
+		query = buildQuery("Investigation", null, null, null, null, pojos, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L);
 
-		List<String> samples = Arrays.asList("ddd", "nnn");
-		query = buildQuery("Investigation", null, null, null, null, null, samples, null);
+		// Target visitId
+		query = buildQuery("Investigation", null, "visitId:visitId", null, null, null, null);
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
+		query = buildQuery("Investigation", null, "visitId:qwerty", null, null, null, null);
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr);
+
+		// Target sample.name
+		query = buildQuery("Investigation", null, "sample.name:ddd", null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L);
 
-		samples = Arrays.asList("ddd", "mmm");
-		query = buildQuery("Investigation", null, null, null, null, null, samples, null);
+		// Multiple samples associated with investigation 3
+		query = buildQuery("Investigation", null, "ddd nnn", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L);
+
+		// By default, sample ddd OR sample mmm gives two investigations
+		query = buildQuery("Investigation", null, "ddd mmm", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 2L, 3L);
+
+		// AND logic should not return any results
+		query = buildQuery("Investigation", null, "+ddd +mmm", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr);
+
+		// Fields on Investigation and Sample
+		query = buildQuery("Investigation", null, "visitId ddd", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
+		// ID 3 should be most relevant since it matches both terms
+		lsr = searchApi.getResults(query, 1, null);
+		checkResults(lsr, 3L);
+		// Specifying fields should not alter behaviour
+		query = buildQuery("Investigation", null, "visitId:visitId sample.name:ddd", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
+		// Individual MUST should work when applied to either an Investigation or Sample field
+		query = buildQuery("Investigation", null, "+visitId:visitId", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
+		query = buildQuery("Investigation", null, "+sample.name:ddd", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L);
+		// This query is expected to fail, as we apply both terms to Investigation and Sample
+		// (since we have no fields) and neither possesses both terms.
+		query = buildQuery("Investigation", null, "+visitId +ddd", null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr);
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO("Snm ddd", "u iii", "v9"));
-		samples = Arrays.asList("ddd", "nnn");
-		query = buildQuery("Investigation", "b1", "d", new Date(now + 60000 * 3), new Date(now + 60000 * 6),
-				pojos, samples, "b");
+		query = buildQuery("Investigation", "b1", "d ddd nnnn", new Date(now + 60000 * 3), new Date(now + 60000 * 6),
+				pojos, "b");
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L);
 	}
@@ -1027,10 +1127,10 @@ public class TestSearchApi {
 		rhinoDatafile.setDatafileFormat(pdfFormat);
 
 		// Build queries
-		JsonObject elephantQuery = buildQuery("Datafile", null, "elephant", null, null, null, null, null);
-		JsonObject rhinoQuery = buildQuery("Datafile", null, "rhino", null, null, null, null, null);
-		JsonObject pdfQuery = buildQuery("Datafile", null, "datafileFormat.name:pdf", null, null, null, null, null);
-		JsonObject pngQuery = buildQuery("Datafile", null, "datafileFormat.name:png", null, null, null, null, null);
+		JsonObject elephantQuery = buildQuery("Datafile", null, "elephant", null, null, null, null);
+		JsonObject rhinoQuery = buildQuery("Datafile", null, "rhino", null, null, null, null);
+		JsonObject pdfQuery = buildQuery("Datafile", null, "datafileFormat.name:pdf", null, null, null, null);
+		JsonObject pngQuery = buildQuery("Datafile", null, "datafileFormat.name:png", null, null, null, null);
 		JsonObject lowRange = buildFacetRangeObject("low", 0L, 2L);
 		JsonObject highRange = buildFacetRangeObject("high", 2L, 4L);
 		JsonObject rangeFacetRequest = buildFacetRangeRequest(buildFacetIdQuery("42"), "date", lowRange, highRange);

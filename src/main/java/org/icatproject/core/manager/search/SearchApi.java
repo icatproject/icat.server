@@ -109,10 +109,21 @@ public abstract class SearchApi {
 	 * 
 	 * @param gen   JsonGenerator being used to encode.
 	 * @param name  Name of the field.
-	 * @param value Long value to encode as a long.
+	 * @param value Date value to encode as a long.
 	 */
 	public static void encodeLong(JsonGenerator gen, String name, Date value) {
 		gen.write(name, value.getTime());
+	}
+
+	/**
+	 * Writes a key value pair to the JsonGenerator being used to encode an entity.
+	 * 
+	 * @param gen   JsonGenerator being used to encode.
+	 * @param name  Name of the field.
+	 * @param value Long value to encode as a long.
+	 */
+	public static void encodeLong(JsonGenerator gen, String name, Long value) {
+		gen.write(name, value);
 	}
 
 	/**

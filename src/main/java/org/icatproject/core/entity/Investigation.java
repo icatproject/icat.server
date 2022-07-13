@@ -278,8 +278,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 		if (startDate != null) {
 			SearchApi.encodeLong(gen, "startDate", startDate);
+			SearchApi.encodeLong(gen, "date", startDate);
 		} else {
 			SearchApi.encodeLong(gen, "startDate", createTime);
+			SearchApi.encodeLong(gen, "date", createTime);
 		}
 
 		if (endDate != null) {
@@ -287,6 +289,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		} else {
 			SearchApi.encodeLong(gen, "endDate", modTime);
 		}
+		SearchApi.encodeLong(gen, "fileSize", -1L); // This is a placeholder to allow us to dynamically build size
 
 		SearchApi.encodeString(gen, "id", id);
 		facility.getDoc(gen);
@@ -328,6 +331,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			documentFields.put("doi", null);
 			documentFields.put("startDate", null);
 			documentFields.put("endDate", null);
+			documentFields.put("date", null);
+			documentFields.put("fileSize", null);
 			documentFields.put("id", null);
 			documentFields.put("facility.name", facilityRelationships);
 			documentFields.put("facility.id", null);

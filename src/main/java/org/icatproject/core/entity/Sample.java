@@ -2,7 +2,10 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.json.stream.JsonGenerator;
 import javax.persistence.CascadeType;
@@ -42,6 +45,9 @@ public class Sample extends EntityBaseBean implements Serializable {
 	@JoinColumn(name = "SAMPLETYPE_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private SampleType type;
+
+	public static Set<String> docFields = new HashSet<>(
+			Arrays.asList("sample.name", "sample.id", "sample.investigation.id"));
 
 	/* Needed for JPA */
 	public Sample() {
@@ -97,29 +103,11 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void getDoc(JsonGenerator gen) {
-		SearchApi.encodeString(gen, "name", name);
-		SearchApi.encodeString(gen, "id", id);
-		SearchApi.encodeString(gen, "investigation.id", investigation.id);
+		SearchApi.encodeString(gen, "sample.name", name);
+		SearchApi.encodeString(gen, "sample.id", id);
+		SearchApi.encodeString(gen, "sample.investigation.id", investigation.id);
 		if (type != null) {
 			type.getDoc(gen);
-		}
-	}
-
-	/**
-	 * Alternative method for encoding that applies a prefix to potentially
-	 * ambiguous fields: "id" and "investigation.id". In the case of a single
-	 * Dataset Sample, these fields will already be used by the Dataset and so
-	 * cannot be overwritten by the Sample.
-	 * 
-	 * @param gen    JsonGenerator
-	 * @param prefix String to precede all ambiguous field names.
-	 */
-	public void getDoc(JsonGenerator gen, String prefix) {
-		SearchApi.encodeString(gen, prefix + "name", name);
-		SearchApi.encodeString(gen, prefix + "id", id);
-		SearchApi.encodeString(gen, prefix + "investigation.id", investigation.id);
-		if (type != null) {
-			type.getDoc(gen, prefix);
 		}
 	}
 

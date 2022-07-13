@@ -199,28 +199,32 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		}
 		if (startDate != null) {
 			SearchApi.encodeLong(gen, "startDate", startDate);
+			SearchApi.encodeLong(gen, "date", startDate);
 		} else {
 			SearchApi.encodeLong(gen, "startDate", createTime);
+			SearchApi.encodeLong(gen, "date", createTime);
 		}
 		if (endDate != null) {
 			SearchApi.encodeLong(gen, "endDate", endDate);
 		} else {
 			SearchApi.encodeLong(gen, "endDate", modTime);
 		}
+		SearchApi.encodeLong(gen, "fileSize", -1L); // This is a placeholder to allow us to dynamically build size
 		SearchApi.encodeString(gen, "id", id);
-		SearchApi.encodeString(gen, "investigation.id", investigation.id);
-		SearchApi.encodeString(gen, "investigation.name", investigation.getName());
 		if (investigation != null) {
+			SearchApi.encodeString(gen, "investigation.id", investigation.id);
+			SearchApi.encodeString(gen, "investigation.name", investigation.getName());
+			SearchApi.encodeString(gen, "investigation.title", investigation.getTitle());
+			SearchApi.encodeString(gen, "visitId", investigation.getVisitId());
 			if (investigation.getStartDate() != null) {
 				SearchApi.encodeLong(gen, "investigation.startDate", investigation.getStartDate());
 			} else if (investigation.getCreateTime() != null) {
 				SearchApi.encodeLong(gen, "investigation.startDate", investigation.getCreateTime());
 			}
-			SearchApi.encodeString(gen, "investigation.title", investigation.getTitle());
 		}
 
 		if (sample != null) {
-			sample.getDoc(gen, "sample.");
+			sample.getDoc(gen);
 		}
 		type.getDoc(gen);
 	}
@@ -253,11 +257,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			documentFields.put("doi", null);
 			documentFields.put("startDate", null);
 			documentFields.put("endDate", null);
+			documentFields.put("date", null);
+			documentFields.put("fileSize", null);
 			documentFields.put("id", null);
 			documentFields.put("investigation.id", null);
 			documentFields.put("investigation.title", investigationRelationships);
 			documentFields.put("investigation.name", investigationRelationships);
 			documentFields.put("investigation.startDate", investigationRelationships);
+			documentFields.put("visitId", investigationRelationships);
 			documentFields.put("sample.id", null);
 			documentFields.put("sample.name", sampleRelationships);
 			documentFields.put("sample.investigation.id", sampleRelationships);

@@ -579,9 +579,6 @@ public class TestRS {
 		Date upperOrigin = dft.parse("2011-12-31T23:59:59+0000");
 		Date upperSecond = dft.parse("2011-12-31T23:59:58+0000");
 		Date upperMinute = dft.parse("2011-12-31T23:58:00+0000");
-		List<String> samplesAnd = Arrays.asList("ford AND rust", "koh* AND diamond");
-		List<String> samplesPlus = Arrays.asList("ford + rust", "koh + diamond");
-		List<String> samplesBad = Arrays.asList("ford AND rust", "kog* AND diamond");
 		String textAnd = "title AND one";
 		String textTwo = "title AND two";
 		String textPlus = "title + one";
@@ -592,7 +589,7 @@ public class TestRS {
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
 
 		JsonArray array = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
-				samplesAnd, "Professor", 20, 1);
+				null, "Professor", 20, 1);
 		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
 		// change user
@@ -617,15 +614,10 @@ public class TestRS {
 		// Change parameters
 		List<ParameterForLucene> badParameters = new ArrayList<>();
 		badParameters.add(new ParameterForLucene("color", "name", "green"));
-		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, badParameters, samplesPlus, null, 20,
-				0);
-
-		// Change samples
-		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters, samplesBad, null, 20, 0);
+		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, badParameters, null, null, 20, 0);
 
 		// Change userFullName
-		searchInvestigations(session, "db/tr", textPlus, lowerOrigin, upperOrigin, parameters, samplesAnd, "Doctor", 20,
-				0);
+		searchInvestigations(session, "db/tr", textPlus, lowerOrigin, upperOrigin, parameters, null, "Doctor", 20, 0);
 
 		// Try provoking an error
 		badParameters = new ArrayList<>();
@@ -669,7 +661,8 @@ public class TestRS {
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		// Try sorting and searchAfter
-		String sort = Json.createObjectBuilder().add("name", "desc").add("date", "asc").build().toString();
+		String sort = Json.createObjectBuilder().add("name", "desc").add("date", "asc").add("fileSize", "asc").build()
+				.toString();
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 1, sort, null, 1);
 		searchAfter = responseObject.get("search_after");
 		assertNotNull(searchAfter);
@@ -798,12 +791,14 @@ public class TestRS {
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		// Try sorting and searchAfter
-		String sort = Json.createObjectBuilder().add("name", "desc").add("startDate", "asc").build().toString();
+		String sort = Json.createObjectBuilder().add("name", "desc").add("date", "asc").add("fileSize", "asc").build()
+				.toString();
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 1, sort, null, 1);
 		searchAfter = responseObject.get("search_after");
 		assertNotNull(searchAfter);
 		expectation.put("name", "ds4");
 		checkResultsSource(responseObject, Arrays.asList(expectation), false);
+
 		responseObject = searchDatasets(session, null, null, null, null, null, searchAfter.toString(), 1, sort, null,
 				1);
 		searchAfter = responseObject.get("search_after");
@@ -873,6 +868,7 @@ public class TestRS {
 	public void testSearchInvestigations() throws Exception {
 		Session session = setupLuceneTest();
 		JsonObject responseObject;
+		JsonValue searchAfter;
 		Map<String, String> expectation = new HashMap<>();
 		expectation.put("name", "expt1");
 		expectation.put("startDate", "notNull");
@@ -886,66 +882,79 @@ public class TestRS {
 		Date upperOrigin = dft.parse("2011-12-31T23:59:59+0000");
 		Date upperSecond = dft.parse("2011-12-31T23:59:58+0000");
 		Date upperMinute = dft.parse("2011-12-31T23:58:00+0000");
-		List<String> samplesAnd = Arrays.asList("ford AND rust", "koh* AND diamond");
-		List<String> samplesPlus = Arrays.asList("ford + rust", "koh + diamond");
-		List<String> samplesBad = Arrays.asList("ford AND rust", "kog* AND diamond");
+		String samplesSingular = "sample.name:ford AND sample.type.name:rust";
+		String samplesMultiple = "sample.name:ford sample.type.name:rust sample.name:koh sample.type.name:diamond";
+		String samplesBad = "sample.name:kog* AND sample.type.name:diamond";
 		String textAnd = "title AND one";
 		String textTwo = "title AND two";
 		String textPlus = "title + one";
 
-		searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, null, 3);
+		searchInvestigations(session, null, null, null, null, null, null, null, 10, null, null, 3);
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
 		responseObject = searchInvestigations(session, "db/tr", null, lowerOrigin, upperOrigin, null,
-				null, null, null, 10, null, null, 1);
+				null, null, 10, null, null, 1);
 		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, null,
-				null, null, null, 10, null, null, 1);
+				null, null, 10, null, null, 1);
 		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
-				null, null, null, 10, null, null, 1);
+				null, null, 10, null, null, 1);
 		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
-				null, "Professor", null, 10, null, null, 1);
-		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
-				samplesAnd, "Professor", null, 10, null, null, 1);
+				"Professor", null, 10, null, null, 1);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		// change user
-		searchInvestigations(session, "db/fred", textAnd, null, null, parameters, null, null, null, 10, null, null, 0);
+		searchInvestigations(session, "db/fred", textAnd, null, null, parameters, null, null, 10, null, null, 0);
 
 		// change text
-		searchInvestigations(session, "db/tr", textTwo, null, null, parameters, null, null, null, 10, null, null, 0);
+		searchInvestigations(session, "db/tr", textTwo, null, null, parameters, null, null, 10, null, null, 0);
 
 		// Only working to a minute
-		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerSecond, upperOrigin, parameters, null,
+		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerSecond, upperOrigin, parameters,
 				null, null, 10, null, null, 1);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
-		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperSecond, parameters, null,
+		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperSecond, parameters,
 				null, null, 10, null, null, 1);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
-		searchInvestigations(session, "db/tr", textAnd, lowerMinute, upperOrigin, parameters, null, null, null,
+		searchInvestigations(session, "db/tr", textAnd, lowerMinute, upperOrigin, parameters, null, null,
 				10, null, null, 0);
 
-		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperMinute, parameters, null, null, null,
+		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperMinute, parameters, null, null,
 				10, null, null, 0);
 
 		// Change parameters
 		List<ParameterForLucene> badParameters = new ArrayList<>();
 		badParameters.add(new ParameterForLucene("color", "name", "green"));
-		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, badParameters, samplesPlus, null,
+		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, badParameters, null,
 				null, 10, null, null, 0);
 
 		// Change samples
-		searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters, samplesBad, null, null,
+		searchInvestigations(session, "db/tr", samplesSingular, lowerOrigin, upperOrigin, parameters, null, null,
+				10, null, null, 1);
+		searchInvestigations(session, "db/tr", samplesMultiple, lowerOrigin, upperOrigin, parameters, null, null,
+				10, null, null, 1);
+		searchInvestigations(session, "db/tr", samplesBad, lowerOrigin, upperOrigin, parameters, null, null,
 				10, null, null, 0);
 
 		// Change userFullName
-		searchInvestigations(session, "db/tr", textPlus, lowerOrigin, upperOrigin, parameters, samplesAnd, "Doctor",
+		searchInvestigations(session, "db/tr", textPlus, lowerOrigin, upperOrigin, parameters, "Doctor",
 				null, 10, null, null, 0);
+
+		// Try sorting and searchAfter
+		// Note as all the investigations have the same name/date, we cannot
+		// meaningfully sort them, however still check that the search succeeds in
+		// returning a non-null searchAfter object
+		String sort = Json.createObjectBuilder().add("name", "desc").add("date", "asc").add("fileSize", "asc").build()
+				.toString();
+		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 1, sort, null, 1);
+		searchAfter = responseObject.get("search_after");
+		assertNotNull(searchAfter);
+		checkResultsSource(responseObject, Arrays.asList(expectation), false);
 
 		// Test that changes to the public steps/tables are reflected in returned fields
 		PublicStep ps = new PublicStep();
@@ -953,53 +962,53 @@ public class TestRS {
 		ps.setField("type");
 
 		ps.setId(wSession.create(ps));
-		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null,
+		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, 10, null,
 				null, 1);
 		assertFalse(responseObject.containsKey("search_after"));
 		expectation.put("type.name", "atype");
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		wSession.addRule(null, "Facility", "R");
-		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null,
+		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, 10, null,
 				null, 1);
 		assertFalse(responseObject.containsKey("search_after"));
 		expectation.put("facility.name", "Test port facility");
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		wSession.delete(ps);
-		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null,
+		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, 10, null,
 				null, 1);
 		assertFalse(responseObject.containsKey("search_after"));
 		expectation.put("type.name", null);
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		wSession.delRule(null, "Facility", "R");
-		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, null, 10, null,
+		responseObject = searchInvestigations(session, null, textAnd, null, null, null, null, null, 10, null,
 				null, 1);
 		assertFalse(responseObject.containsKey("search_after"));
 		expectation.put("facility.name", null);
 		checkResultsSource(responseObject, Arrays.asList(expectation), true);
 
 		// Test searching with someone without authz for the Investigation(s)
-		searchInvestigations(piSession(), null, null, null, null, null, null, null, null, 10, null, null, 0);
+		searchInvestigations(piSession(), null, null, null, null, null, null, null, 10, null, null, 0);
 
 		// Test facets match on Investigations
 		JsonArray facets = buildFacetRequest("Investigation");
-		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
+		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkFacets(responseObject, "Investigation.type.name", Arrays.asList("atype"), Arrays.asList(3L));
 
 		// Test no facets match on InvestigationParameters due to lack of READ access
 		facets = buildFacetRequest("InvestigationParameter");
-		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
+		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
 		assertFalse(NO_DIMENSIONS, responseObject.containsKey("dimensions"));
 
 		// Test facets match on InvestigationParameters
 		wSession.addRule(null, "InvestigationParameter", "R");
-		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, null, 10, null, facets,
+		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
 		checkFacets(responseObject, "InvestigationParameter.type.name", Arrays.asList("colour"),
@@ -1013,7 +1022,7 @@ public class TestRS {
 
 		badParameters = Arrays.asList(new ParameterForLucene(null, null, null));
 		try {
-			searchInvestigations(session, null, null, null, null, badParameters, null, null, null, 10, null, null, 0);
+			searchInvestigations(session, null, null, null, null, badParameters, null, null, 10, null, null, 0);
 			fail("BAD_PARAMETER exception not caught");
 		} catch (IcatException e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
@@ -1022,7 +1031,7 @@ public class TestRS {
 
 		badParameters = Arrays.asList(new ParameterForLucene("color", null, null));
 		try {
-			searchInvestigations(session, null, null, null, null, badParameters, null, null, null, 10, null, null, 0);
+			searchInvestigations(session, null, null, null, null, badParameters, null, null,10, null, null, 0);
 			fail("BAD_PARAMETER exception not caught");
 		} catch (IcatException e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
@@ -1031,7 +1040,7 @@ public class TestRS {
 
 		badParameters = Arrays.asList(new ParameterForLucene("color", "string", null));
 		try {
-			searchInvestigations(session, null, null, null, null, badParameters, null, null, null, 10, null, null, 0);
+			searchInvestigations(session, null, null, null, null, badParameters, null, null, 10, null, null, 0);
 			fail("BAD_PARAMETER exception not caught");
 		} catch (IcatException e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
@@ -1183,7 +1192,8 @@ public class TestRS {
 	private JsonObject searchDatafiles(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, String searchAfter, int maxCount, String sort, JsonArray facets, int n)
 			throws IcatException {
-		String responseString = session.searchDatafiles(user, text, lower, upper, parameters, searchAfter, maxCount, sort,
+		String responseString = session.searchDatafiles(user, text, lower, upper, parameters, searchAfter, maxCount,
+				sort,
 				facets);
 		return checkResultsArraySize(n, responseString);
 	}
@@ -1194,7 +1204,8 @@ public class TestRS {
 	private JsonObject searchDatasets(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, String searchAfter, int maxCount, String sort, JsonArray facets, int n)
 			throws IcatException {
-		String responseString = session.searchDatasets(user, text, lower, upper, parameters, searchAfter, maxCount, sort,
+		String responseString = session.searchDatasets(user, text, lower, upper, parameters, searchAfter, maxCount,
+				sort,
 				facets);
 		return checkResultsArraySize(n, responseString);
 	}
@@ -1203,10 +1214,10 @@ public class TestRS {
 	 * For use with the new search/documents endpoint
 	 */
 	private JsonObject searchInvestigations(Session session, String user, String text, Date lower, Date upper,
-			List<ParameterForLucene> parameters, List<String> samples, String userFullName, String searchAfter,
-			int maxCount, String sort, JsonArray facets, int n) throws IcatException {
-		String responseString = session.searchInvestigations(user, text, lower, upper, parameters, samples,
-				userFullName, searchAfter, maxCount, sort, facets);
+			List<ParameterForLucene> parameters, String userFullName, String searchAfter, int maxCount, String sort,
+			JsonArray facets, int n) throws IcatException {
+		String responseString = session.searchInvestigations(user, text, lower, upper, parameters, userFullName,
+				searchAfter, maxCount, sort, facets);
 		return checkResultsArraySize(n, responseString);
 	}
 

@@ -46,7 +46,7 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<Sample> samples = new ArrayList<>();
 
-	public static Set<String> docFields = new HashSet<>(Arrays.asList("sample.type.name", "type.id"));
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("sample.type.name", "sample.type.id"));
 
 	/* Needed for JPA */
 	public SampleType() {
@@ -94,23 +94,8 @@ public class SampleType extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void getDoc(JsonGenerator gen) {
-		SearchApi.encodeString(gen, "type.name", name);
-		SearchApi.encodeString(gen, "type.id", id);
-	}
-
-
-	/**
-	 * Alternative method for encoding that applies a prefix to potentially
-	 * ambiguous fields: "type.id". In the case of a single
-	 * Dataset Sample, this fields will already be used by the Dataset and so
-	 * cannot be overwritten by the Sample.
-	 * 
-	 * @param gen    JsonGenerator
-	 * @param prefix String to precede all ambiguous field names.
-	 */
-	public void getDoc(JsonGenerator gen, String prefix) {
-		SearchApi.encodeString(gen, prefix + "type.name", name);
-		SearchApi.encodeString(gen, prefix + "type.id", id);
+		SearchApi.encodeString(gen, "sample.type.name", name);
+		SearchApi.encodeString(gen, "sample.type.id", id);
 	}
 
 }

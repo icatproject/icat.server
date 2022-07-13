@@ -212,6 +212,11 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		if (doi != null) {
 			SearchApi.encodeString(gen, "doi", doi);
 		}
+		if (fileSize != null) {
+			SearchApi.encodeLong(gen, "fileSize", fileSize);
+		} else {
+			SearchApi.encodeLong(gen, "fileSize", -1L);
+		}
 		if (datafileFormat != null) {
 			datafileFormat.getDoc(gen);
 		}
@@ -226,10 +231,15 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		if (dataset != null) {
 			SearchApi.encodeString(gen, "dataset.id", dataset.id);
 			SearchApi.encodeString(gen, "dataset.name", dataset.getName());
+			Sample sample = dataset.getSample();
+			if (sample != null) {
+				sample.getDoc(gen);
+			}
 			Investigation investigation = dataset.getInvestigation();
 			if (investigation != null) {
 				SearchApi.encodeString(gen, "investigation.id", investigation.id);
 				SearchApi.encodeString(gen, "investigation.name", investigation.getName());
+				SearchApi.encodeString(gen, "visitId", investigation.getVisitId());
 			}
 		}
 	}
@@ -256,18 +266,34 @@ public class Datafile extends EntityBaseBean implements Serializable {
 					eiHandler.getRelationshipsByName(Datafile.class).get("dataset"),
 					eiHandler.getRelationshipsByName(Dataset.class).get("investigation") };
 			Relationship[] instrumentRelationships = {
+					eiHandler.getRelationshipsByName(Datafile.class).get("dataset"),
+					eiHandler.getRelationshipsByName(Dataset.class).get("investigation"),
 					eiHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"),
 					eiHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument") };
+			Relationship[] sampleRelationships = {
+					eiHandler.getRelationshipsByName(Datafile.class).get("dataset"),
+					eiHandler.getRelationshipsByName(Dataset.class).get("sample"),
+					eiHandler.getRelationshipsByName(Sample.class).get("type") };
+			Relationship[] sampleTypeRelationships = {
+					eiHandler.getRelationshipsByName(Datafile.class).get("dataset"),
+					eiHandler.getRelationshipsByName(Dataset.class).get("sample") };
 			documentFields.put("name", null);
 			documentFields.put("description", null);
 			documentFields.put("location", null);
 			documentFields.put("doi", null);
 			documentFields.put("date", null);
+			documentFields.put("fileSize", null);
 			documentFields.put("id", null);
 			documentFields.put("dataset.id", null);
 			documentFields.put("dataset.name", datasetRelationships);
+			documentFields.put("sample.id", datasetRelationships);
+			documentFields.put("sample.name", sampleRelationships);
+			documentFields.put("sample.investigation.id", sampleRelationships);
+			documentFields.put("sample.type.id", sampleRelationships);
+			documentFields.put("sample.type.name", sampleTypeRelationships);
 			documentFields.put("investigation.id", datasetRelationships);
 			documentFields.put("investigation.name", investigationRelationships);
+			documentFields.put("visitId", investigationRelationships);
 			documentFields.put("datafileFormat.id", null);
 			documentFields.put("datafileFormat.name", datafileFormatRelationships);
 			documentFields.put("InvestigationInstrument instrument.id", instrumentRelationships);
