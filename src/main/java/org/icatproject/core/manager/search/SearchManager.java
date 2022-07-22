@@ -34,7 +34,9 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonString;
 import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
@@ -416,14 +418,45 @@ public class SearchManager {
 
 	/**
 	 * Builds a JsonObject for performing faceting against results from a previous
+	 * search. Has specific logic for handling the nesting of Samples.
+	 * 
+	 * @param results   List of results from a previous search, containing sample
+	 *                  ids.
+	 * @param facetJson JsonObject containing the dimensions to facet.
+	 * @return
+	 */
+	public static JsonObject buildSampleFacetQuery(List<ScoredEntityBaseBean> results, JsonObject facetJson) {
+		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+		results.forEach(r -> {
+			JsonObject source = r.getSource();
+			if (source.containsKey("sample.id")) {
+				ValueType valueType = source.get("sample.id").getValueType();
+				if (valueType.equals(ValueType.STRING)) {
+					arrayBuilder.add(source.getString("sample.id"));
+				} else if (valueType.equals(ValueType.ARRAY)) {
+					source.getJsonArray("sample.id").getValuesAs(JsonString.class).forEach(sampleId -> {
+						arrayBuilder.add(sampleId);
+					});
+				}
+			}
+		});
+		JsonObject terms = Json.createObjectBuilder().add("sample.id", arrayBuilder.build()).build();
+		JsonObjectBuilder objectBuilder = Json.createObjectBuilder().add("query", terms);
+		if (facetJson.containsKey("dimensions")) {
+			objectBuilder.add("dimensions", facetJson.getJsonArray("dimensions"));
+		}
+		return objectBuilder.build();
+	}
+
+	/**
+	 * Builds a JsonObject for performing faceting against results from a previous
 	 * search.
 	 * 
 	 * @param filterObject JsonObject to be used as a query.
-	 * @param idField      The field to perform id querying against.
 	 * @param facetJson    JsonObject containing the dimensions to facet.
 	 * @return <code>{"query": `filterObject`, "dimensions": [...]}</code>
 	 */
-	public static JsonObject buildFacetQuery(JsonObject filterObject, String idField, JsonObject facetJson) {
+	public static JsonObject buildFacetQuery(JsonObject filterObject, JsonObject facetJson) {
 		JsonObjectBuilder objectBuilder = Json.createObjectBuilder().add("query", filterObject);
 		if (facetJson.containsKey("dimensions")) {
 			objectBuilder.add("dimensions", facetJson.getJsonArray("dimensions"));

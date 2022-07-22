@@ -215,8 +215,9 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		if (fileSize != null) {
 			SearchApi.encodeLong(gen, "fileSize", fileSize);
 		} else {
-			SearchApi.encodeLong(gen, "fileSize", -1L);
+			SearchApi.encodeLong(gen, "fileSize", 0L);
 		}
+		SearchApi.encodeLong(gen, "fileCount", 1L); // Always 1, but makes sorting on fields consistent
 		if (datafileFormat != null) {
 			datafileFormat.getDoc(gen);
 		}
@@ -240,6 +241,11 @@ public class Datafile extends EntityBaseBean implements Serializable {
 				SearchApi.encodeString(gen, "investigation.id", investigation.id);
 				SearchApi.encodeString(gen, "investigation.name", investigation.getName());
 				SearchApi.encodeString(gen, "visitId", investigation.getVisitId());
+				if (investigation.getStartDate() != null) {
+					SearchApi.encodeLong(gen, "investigation.startDate", investigation.getStartDate());
+				} else if (investigation.getCreateTime() != null) {
+					SearchApi.encodeLong(gen, "investigation.startDate", investigation.getCreateTime());
+				}
 			}
 		}
 	}
@@ -283,6 +289,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 			documentFields.put("doi", null);
 			documentFields.put("date", null);
 			documentFields.put("fileSize", null);
+			documentFields.put("fileCount", null);
 			documentFields.put("id", null);
 			documentFields.put("dataset.id", null);
 			documentFields.put("dataset.name", datasetRelationships);
@@ -293,6 +300,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 			documentFields.put("sample.type.name", sampleTypeRelationships);
 			documentFields.put("investigation.id", datasetRelationships);
 			documentFields.put("investigation.name", investigationRelationships);
+			documentFields.put("investigation.startDate", investigationRelationships);
 			documentFields.put("visitId", investigationRelationships);
 			documentFields.put("datafileFormat.id", null);
 			documentFields.put("datafileFormat.name", datafileFormatRelationships);

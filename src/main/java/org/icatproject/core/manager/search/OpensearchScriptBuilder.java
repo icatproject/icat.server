@@ -22,12 +22,20 @@ public class OpensearchScriptBuilder {
      * In order to access a specific nested child entity, access `childIndex` in
      * later parts of the painless script.
      * 
-     * @param childName The name of the nested child entity.
+     * @param childName      The name of the nested child entity.
+     * @param declareChildId Should be true for only the first time a child is found
+     *                       during a script so that the variable can be reused.
      * @return Painless code for determining the id of a given child within a nested
      *         array.
      */
-    private static String findNestedChild(String childName) {
-        return "int childIndex = -1; int i = 0; if (ctx._source." + childName + " != null) "
+    private static String findNestedChild(String childName, boolean declareChildId) {
+        String source;
+        if (declareChildId) {
+            source = "int childIndex = -1; int i = 0;";
+        } else {
+            source = "childIndex = -1; i = 0;";
+        }
+        return source + " if (ctx._source." + childName + " != null) "
                 + "{while (childIndex == -1 && i < ctx._source." + childName + ".size()) "
                 + "{if (ctx._source." + childName + ".get(i).id == params.id) {childIndex = i;} i++;}}";
     }
@@ -38,7 +46,7 @@ public class OpensearchScriptBuilder {
      *         on its id.
      */
     private static String removeNestedChild(String childName) {
-        return findNestedChild(childName) + " if (childIndex != -1) {ctx._source." + childName
+        return findNestedChild(childName, true) + " if (childIndex != -1) {ctx._source." + childName
                 + ".remove(childIndex);}";
     }
 
@@ -114,8 +122,7 @@ public class OpensearchScriptBuilder {
 
     /**
      * Builds a script which updates specific fields on a nested child entity that
-     * are set
-     * by a single grandchild.
+     * are set by a single grandchild.
      * 
      * @param childName The name of the nested child entity.
      * @param docFields The fields belonging to the grandchild entity to be
@@ -125,12 +132,79 @@ public class OpensearchScriptBuilder {
      * @return The painless script as a String.
      */
     public static String buildGrandchildScript(String childName, Set<String> docFields, boolean update) {
-        String source = findNestedChild(childName);
+        String source = findNestedChild(childName, true);
         String ctxSource = "ctx._source." + childName + ".get(childIndex)";
-        for (String field : docFields) {
-            source += updateField(field, ctxSource, update);
+        if (docFields != null) {
+            source += "if (childIndex != -1) { ";
+            for (String field : docFields) {
+                source += updateField(field, ctxSource, update);
+            }
+            source += " } ";
         }
         return buildScript(source);
     }
 
+    /**
+     * Builds a script which increments fileSize by deltaFileSize. If
+     * fileSize is null then deltaFileSize is taken as its new value.
+     * 
+     * @return The painless script as a String.
+     */
+    public static String buildFileSizeScript() {
+        String source = "if (ctx._source.fileSize != null) ";
+        source += "{ctx._source.fileSize += params.deltaFileSize;} else {ctx._source.fileSize = params.deltaFileSize;}";
+        source += "if (ctx._source.fileCount != null) ";
+        source += "{ctx._source.fileCount += params.deltaFileCount;} else {ctx._source.fileCount = params.deltaFileCount;}";
+        return buildScript(source);
+    }
+
+    /**
+     * Modifies ParameterTypes with logic to ensure the update is applied to all
+     * possible Parameters (Investigation, Dataset, Datafile, Sample).
+     * 
+     * @param fields The fields belonging to the ParameterType to be
+     *               modified.
+     * @param update If true the script will replace a nested entity, else the
+     *               nested entity will be removed from the array.
+     * @return
+     */
+    public static String buildParameterTypeScript(Set<String> docFields, boolean update) {
+        String source = findNestedChild("investigationparameter", true);
+        String ctxSource = "ctx._source.investigationparameter.get(childIndex)";
+        if (docFields != null) {
+            source += "if (childIndex != -1) { ";
+            for (String field : docFields) {
+                source += updateField(field, ctxSource, update);
+            }
+            source += " } ";
+        }
+        source += findNestedChild("datasetparameter", false);
+        ctxSource = "ctx._source.datasetparameter.get(childIndex)";
+        if (docFields != null) {
+            source += "if (childIndex != -1) { ";
+            for (String field : docFields) {
+                source += updateField(field, ctxSource, update);
+            }
+            source += " } ";
+        }
+        source += findNestedChild("datafileparameter", false);
+        ctxSource = "ctx._source.datafileparameter.get(childIndex)";
+        if (docFields != null) {
+            source += "if (childIndex != -1) { ";
+            for (String field : docFields) {
+                source += updateField(field, ctxSource, update);
+            }
+            source += " } ";
+        }
+        source += findNestedChild("sampleparameter", false);
+        ctxSource = "ctx._source.sampleparameter.get(childIndex)";
+        if (docFields != null) {
+            source += "if (childIndex != -1) { ";
+            for (String field : docFields) {
+                source += updateField(field, ctxSource, update);
+            }
+            source += " } ";
+        }
+        return buildScript(source);
+    }
 }

@@ -170,6 +170,12 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 		} else if (dateTimeValue != null) {
 			SearchApi.encodeLong(gen, "dateTimeValue", dateTimeValue);
 		}
+		if (rangeTop != null) {
+			SearchApi.encodeDouble(gen, "rangeTop", rangeTop);
+		}
+		if (rangeBottom != null) {
+			SearchApi.encodeDouble(gen, "rangeBottom", rangeBottom);
+		}
 		type.getDoc(gen);
 		SearchApi.encodeString(gen, "id", id);
 	}

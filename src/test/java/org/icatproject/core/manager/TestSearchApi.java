@@ -41,6 +41,7 @@ import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Parameter;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.Sample;
+import org.icatproject.core.entity.SampleParameter;
 import org.icatproject.core.entity.SampleType;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.manager.search.FacetDimension;
@@ -73,6 +74,15 @@ public class TestSearchApi {
 			}
 			JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 			for (String value : values) {
+				arrayBuilder.add(value);
+			}
+			array = arrayBuilder.build();
+		}
+
+		public Filter(String fld, JsonObject... values) {
+			this.fld = fld;
+			JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+			for (JsonObject value : values) {
 				arrayBuilder.add(value);
 			}
 			array = arrayBuilder.build();
@@ -414,6 +424,14 @@ public class TestSearchApi {
 		return parameter;
 	}
 
+	private Parameter parameter(long id, String value, double rangeBottom, double rangeTop, ParameterType parameterType, EntityBaseBean parent) {
+		Parameter parameter = parameter(id, parameterType, parent);
+		parameter.setStringValue(value);
+		parameter.setRangeBottom(rangeBottom);
+		parameter.setRangeTop(rangeTop);
+		return parameter;
+	}
+
 	private Parameter parameter(long id, ParameterType parameterType, EntityBaseBean parent) {
 		Parameter parameter;
 		if (parent instanceof Datafile) {
@@ -425,6 +443,9 @@ public class TestSearchApi {
 		} else if (parent instanceof Investigation) {
 			parameter = new InvestigationParameter();
 			((InvestigationParameter) parameter).setInvestigation((Investigation) parent);
+		} else if (parent instanceof Sample) {
+			parameter = new SampleParameter();
+			((SampleParameter) parameter).setSample((Sample) parent);
 		} else {
 			fail(parent.getClass().getSimpleName() + " is not valid");
 			return null;
@@ -1116,6 +1137,50 @@ public class TestSearchApi {
 	}
 
 	@Test
+	public void fileSizeAggregation() throws IcatException {
+		// Build entities
+		Investigation investigation = investigation(0, "name", date, date);
+		Dataset dataset = dataset(0, "name", date, date, investigation);
+		Datafile datafile = datafile(0, "name", "/dir", new Date(0), dataset);
+		datafile.setFileSize(123L);
+
+		// Build queries
+		JsonObject datafileQuery = buildQuery("Datafile", null, "*", null, null, null, null);
+		JsonObject datasetQuery = buildQuery("Dataset", null, "*", null, null, null, null);
+		JsonObject investigationQuery = buildQuery("Investigation", null, "*", null, null, null, null);
+		List<String> fields = Arrays.asList("id", "fileSize", "fileCount");
+
+		// Create
+		modify(SearchApi.encodeOperation("create", investigation), SearchApi.encodeOperation("create", dataset), SearchApi.encodeOperation("create", datafile));
+		checkFileSize(datafileQuery, fields, 123, 1);
+		checkFileSize(datasetQuery, fields, 123, 1);
+		checkFileSize(investigationQuery, fields, 123, 1);
+
+		// Update
+		datafile.setFileSize(456L);
+		modify(SearchApi.encodeOperation("update", datafile));
+		checkFileSize(datafileQuery, fields, 456, 1);
+		checkFileSize(datasetQuery, fields, 456, 1);
+		checkFileSize(investigationQuery, fields, 456, 1);
+
+		// Delete
+		modify(SearchApi.encodeOperation("delete", datafile));
+		checkFileSize(datasetQuery, fields, 0, 0);
+		checkFileSize(investigationQuery, fields, 0, 0);
+	}
+
+	private void checkFileSize(JsonObject query, List<String> fields, long expectedFileSize, long expectedFileCount) throws IcatException {
+		SearchResult results = searchApi.getResults(query, null, 5, null, fields);
+		checkResults(results, 0L);
+		JsonObject source = results.getResults().get(0).getSource();
+		long fileSize = source.getJsonNumber("fileSize").longValueExact();
+		long fileCount = source.getJsonNumber("fileCount").longValueExact();
+		assertEquals(expectedFileSize,fileSize);
+		assertEquals(expectedFileCount,fileCount);
+	}
+
+	
+	@Test
 	public void modifyDatafile() throws IcatException {
 		// Build entities
 		DatafileFormat pdfFormat = datafileFormat(0, "pdf");
@@ -1258,6 +1323,100 @@ public class TestSearchApi {
 		checkFacets(searchApi.facetSearch("InvestigationParameter", wrongFacetQuery, 5, 5), rawExpectedFacet);
 		// Assert that the SI value has not been set due to conversion failing
 		checkFacets(searchApi.facetSearch("InvestigationParameter", systemFacetQuery, 5, 5), noneExpectedFacet);
+	}
+
+	@Test
+	public void exactFilter() throws IcatException {
+		// Build entities
+		Investigation numericInvestigation = investigation(0, "numeric", date, date);
+		Investigation rangeInvestigation = investigation(1, "range", date, date);
+		ParameterType numericParameterType = parameterType(0, "numericParameter", "K");
+		ParameterType rangeParameterType = parameterType(1, "rangeParameter", "K");
+		Parameter numericParameter = parameter(0, 273, numericParameterType, numericInvestigation);
+		Parameter rangeParameter = parameter(1, "270 - 275", 270, 275, rangeParameterType, rangeInvestigation);
+
+		JsonObjectBuilder filterBuilder = Json.createObjectBuilder();
+		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+		JsonObject value = Json.createObjectBuilder().add("field", "numericValue").add("exact", 273).build();
+		JsonObject numericName = Json.createObjectBuilder().add("field", "type.name").add("value", "numericParameter").build();
+		arrayBuilder.add(numericName).add(value);
+		filterBuilder.add("key", "key").add("label", "label").add("filter", arrayBuilder);
+		JsonObject numericFilter = filterBuilder.build();
+
+		filterBuilder = Json.createObjectBuilder();
+		arrayBuilder = Json.createArrayBuilder();
+		JsonObject rangeName = Json.createObjectBuilder().add("field", "type.name").add("value", "rangeParameter").build();
+		arrayBuilder.add(rangeName).add(value);
+		filterBuilder.add("key", "key").add("label", "label").add("filter", arrayBuilder);
+		JsonObject rangeFilter = filterBuilder.build();
+
+		// Create
+		modify(SearchApi.encodeOperation("create", numericInvestigation),
+				SearchApi.encodeOperation("create", rangeInvestigation),
+				SearchApi.encodeOperation("create", numericParameter),
+				SearchApi.encodeOperation("create", rangeParameter));
+
+		JsonObject query = buildQuery("Investigation", null, null, null, null, null, null,
+				new Filter("investigationparameter", numericFilter));
+		SearchResult lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L);
+
+		query = buildQuery("Investigation", null, null, null, null, null, null,
+				new Filter("investigationparameter", rangeFilter));
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 1L);
+	}
+
+	@Test
+	public void sampleParameters() throws IcatException {
+		// Build entities
+		Investigation investigation = investigation(0, "investigation", date, date);
+		Dataset dataset = dataset(1, "dataset", date, date, investigation);
+		Datafile datafile = datafile(2, "datafile", "datafile.txt", date, dataset);
+		Sample sample = sample(3, "sample", investigation);
+		ParameterType parameterType = parameterType(4, "parameter", "K");
+		SampleParameter parameter = (SampleParameter) parameter(5, "stringValue", parameterType, sample);
+		dataset.setSample(sample);
+
+		// Queries and expected responses
+		JsonObjectBuilder query = Json.createObjectBuilder().add("sample.id", Json.createArrayBuilder().add("3"));
+		JsonObjectBuilder dimension = Json.createObjectBuilder().add("dimension", "type.name");
+		JsonArrayBuilder dimensions = Json.createArrayBuilder().add(dimension);
+		JsonObject facet = Json.createObjectBuilder().add("query", query).add("dimensions", dimensions).build();
+
+		JsonObjectBuilder filterBuilder = Json.createObjectBuilder();
+		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+		JsonObject value = Json.createObjectBuilder().add("field", "stringValue").add("value", "stringValue").build();
+		JsonObject numericName = Json.createObjectBuilder().add("field", "type.name").add("value", "parameter").build();
+		arrayBuilder.add(numericName).add(value);
+		filterBuilder.add("key", "key").add("label", "label").add("filter", arrayBuilder);
+		JsonObject filter = filterBuilder.build();
+
+		FacetDimension expectedFacet = new FacetDimension("", "type.name", new FacetLabel("parameter", 1L));
+		JsonObject investigationQuery = buildQuery("Investigation", null, null, null, null, null, null,
+				new Filter("sampleparameter", filter));
+		JsonObject datasetQuery = buildQuery("Dataset", null, null, null, null, null, null,
+				new Filter("sampleparameter", filter));
+		JsonObject datafileQuery = buildQuery("Datafile", null, null, null, null, null, null,
+				new Filter("sampleparameter", filter));
+
+		// Create
+		modify(SearchApi.encodeOperation("create", investigation),
+				SearchApi.encodeOperation("create", dataset),
+				SearchApi.encodeOperation("create", datafile),
+				SearchApi.encodeOperation("create", sample),
+				SearchApi.encodeOperation("create", parameterType),
+				SearchApi.encodeOperation("create", parameter));
+
+		// Test
+		checkFacets(searchApi.facetSearch("SampleParameter", facet, 5, 5), expectedFacet);
+
+		SearchResult lsr = searchApi.getResults(investigationQuery, null, 5, null, investigationFields);
+		checkResults(lsr, 0L);
+		lsr = searchApi.getResults(datasetQuery, null, 5, null, datasetFields);
+		checkResults(lsr, 1L);
+		lsr = searchApi.getResults(datafileQuery, null, 5, null, datafileFields);
+		checkResults(lsr, 2L);
 	}
 
 }

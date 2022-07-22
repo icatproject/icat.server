@@ -1,5 +1,7 @@
 package org.icatproject.core.manager.search;
 
+import java.util.List;
+
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -21,6 +23,33 @@ public class OpensearchQueryBuilder {
      */
     public static JsonObjectBuilder addQuery(JsonObject query) {
         return Json.createObjectBuilder().add("query", query);
+    }
+
+    /**
+     * @param filter Path to nested Object.
+     * @param should Any number of pre-built queries.
+     * @return <code>{"bool": {"filter": [...filter], "should": [...should]}}</code>
+     */
+    public static JsonObject buildBoolQuery(List<JsonObject> filter, List<JsonObject> should) {
+        JsonObjectBuilder boolBuilder = Json.createObjectBuilder();
+        buildBoolArray("should", should, boolBuilder);
+        buildBoolArray("filter", filter, boolBuilder);
+        return Json.createObjectBuilder().add("bool", boolBuilder).build();
+    }
+
+    /**
+     * @param occur String of an occurance keyword ("filter", "should", "must" etc.)
+     * @param queries List of JsonObjects representing the queries to occur.
+     * @param boolBuilder Builder of the main boolean query.
+     */
+    private static void buildBoolArray(String occur, List<JsonObject> queries, JsonObjectBuilder boolBuilder) {
+        if (queries != null && queries.size() > 0) {
+            JsonArrayBuilder filterBuilder = Json.createArrayBuilder();
+            for (JsonObject queryObject : queries) {
+                filterBuilder.add(queryObject);
+            }
+            boolBuilder.add(occur, filterBuilder);
+        }
     }
 
     /**
@@ -91,6 +120,24 @@ public class OpensearchQueryBuilder {
     }
 
     /**
+     * @param field Field containing the number.
+     * @param value Number to match.
+     * @return <code>{"term": {`field`: `value`}}</code>
+     */
+    public static JsonObject buildTermQuery(String field, JsonNumber value) {
+        return Json.createObjectBuilder().add("term", Json.createObjectBuilder().add(field, value)).build();
+    }
+
+    /**
+     * @param field Field containing the double value.
+     * @param value Double to match.
+     * @return <code>{"term": {`field`: `value`}}</code>
+     */
+    public static JsonObject buildTermQuery(String field, double value) {
+        return Json.createObjectBuilder().add("term", Json.createObjectBuilder().add(field, value)).build();
+    }
+
+    /**
      * @param field Field containing on of the terms.
      * @param values JsonArrat of possible terms.
      * @return <code>{"terms": {`field`: `values`}}</code>
@@ -105,8 +152,24 @@ public class OpensearchQueryBuilder {
      * @param upperValue Highest allowed value in the range.
      * @return <code>{"range": {`field`: {"gte": `upperValue`, "lte": `lowerValue`}}}</code>
      */
+    public static JsonObject buildDoubleRangeQuery(String field, Double lowerValue, Double upperValue) {
+        JsonObjectBuilder fieldBuilder = Json.createObjectBuilder();
+        if (lowerValue != null) fieldBuilder.add("gte", lowerValue);
+        if (upperValue != null) fieldBuilder.add("lte", upperValue);
+        JsonObjectBuilder rangeBuilder = Json.createObjectBuilder().add(field, fieldBuilder);
+        return Json.createObjectBuilder().add("range", rangeBuilder).build();
+    }
+
+    /**
+     * @param field Field to apply the range to.
+     * @param lowerValue Lowest allowed value in the range.
+     * @param upperValue Highest allowed value in the range.
+     * @return <code>{"range": {`field`: {"gte": `upperValue`, "lte": `lowerValue`}}}</code>
+     */
     public static JsonObject buildLongRangeQuery(String field, Long lowerValue, Long upperValue) {
-        JsonObjectBuilder fieldBuilder = Json.createObjectBuilder().add("gte", lowerValue).add("lte", upperValue);
+        JsonObjectBuilder fieldBuilder = Json.createObjectBuilder();
+        if (lowerValue != null) fieldBuilder.add("gte", lowerValue);
+        if (upperValue != null) fieldBuilder.add("lte", upperValue);
         JsonObjectBuilder rangeBuilder = Json.createObjectBuilder().add(field, fieldBuilder);
         return Json.createObjectBuilder().add("range", rangeBuilder).build();
     }
@@ -118,7 +181,9 @@ public class OpensearchQueryBuilder {
      * @return <code>{"range": {`field`: {"gte": `upperValue`, "lte": `lowerValue`}}}</code>
      */
     public static JsonObject buildRangeQuery(String field, JsonNumber lowerValue, JsonNumber upperValue) {
-        JsonObjectBuilder fieldBuilder = Json.createObjectBuilder().add("gte", lowerValue).add("lte", upperValue);
+        JsonObjectBuilder fieldBuilder = Json.createObjectBuilder();
+        if (lowerValue != null) fieldBuilder.add("gte", lowerValue);
+        if (upperValue != null) fieldBuilder.add("lte", upperValue);
         JsonObjectBuilder rangeBuilder = Json.createObjectBuilder().add(field, fieldBuilder);
         return Json.createObjectBuilder().add("range", rangeBuilder).build();
     }

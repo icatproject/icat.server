@@ -893,6 +893,8 @@ public class TestRS {
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
+		responseObject = searchInvestigations(session, "db/tr", null, null, null, null,
+				null, null, 10, null, null, 2);
 		responseObject = searchInvestigations(session, "db/tr", null, lowerOrigin, upperOrigin, null,
 				null, null, 10, null, null, 1);
 		responseObject = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, null,

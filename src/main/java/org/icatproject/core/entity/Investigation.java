@@ -289,7 +289,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		} else {
 			SearchApi.encodeLong(gen, "endDate", modTime);
 		}
-		SearchApi.encodeLong(gen, "fileSize", -1L); // This is a placeholder to allow us to dynamically build size
+		SearchApi.encodeLong(gen, "fileSize", 0L); // This is a placeholder to allow us to dynamically build size
+		SearchApi.encodeLong(gen, "fileCount", 0L); // This is a placeholder to allow us to dynamically build count
 
 		SearchApi.encodeString(gen, "id", id);
 		facility.getDoc(gen);
@@ -322,6 +323,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 					eiHandler.getRelationshipsByName(Investigation.class).get("parameters"),
 					eiHandler.getRelationshipsByName(InvestigationParameter.class).get("type") };
 			Relationship[] sampleRelationships = {
+					eiHandler.getRelationshipsByName(Investigation.class).get("samples") };
+			Relationship[] sampleTypeRelationships = {
 					eiHandler.getRelationshipsByName(Investigation.class).get("samples"),
 					eiHandler.getRelationshipsByName(Sample.class).get("type") };
 			documentFields.put("name", null);
@@ -333,6 +336,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			documentFields.put("endDate", null);
 			documentFields.put("date", null);
 			documentFields.put("fileSize", null);
+			documentFields.put("fileCount", null);
 			documentFields.put("id", null);
 			documentFields.put("facility.name", facilityRelationships);
 			documentFields.put("facility.id", null);
@@ -345,7 +349,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			documentFields.put("InvestigationParameter stringValue", parameterRelationships);
 			documentFields.put("InvestigationParameter numericValue", parameterRelationships);
 			documentFields.put("InvestigationParameter dateTimeValue", parameterRelationships);
-			documentFields.put("Sample type.name", sampleRelationships);
+			documentFields.put("Sample sample.id", sampleRelationships);
+			documentFields.put("Sample sample.name", sampleRelationships);
+			documentFields.put("Sample type.name", sampleTypeRelationships);
 		}
 		return documentFields;
 	}

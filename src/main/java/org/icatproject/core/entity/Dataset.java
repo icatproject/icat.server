@@ -209,7 +209,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		} else {
 			SearchApi.encodeLong(gen, "endDate", modTime);
 		}
-		SearchApi.encodeLong(gen, "fileSize", -1L); // This is a placeholder to allow us to dynamically build size
+		SearchApi.encodeLong(gen, "fileSize", 0L); // This is a placeholder to allow us to dynamically build size
+		SearchApi.encodeLong(gen, "fileCount", 0L); // This is a placeholder to allow us to dynamically build count
 		SearchApi.encodeString(gen, "id", id);
 		if (investigation != null) {
 			SearchApi.encodeString(gen, "investigation.id", investigation.id);
@@ -259,6 +260,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			documentFields.put("endDate", null);
 			documentFields.put("date", null);
 			documentFields.put("fileSize", null);
+			documentFields.put("fileCount", null);
 			documentFields.put("id", null);
 			documentFields.put("investigation.id", null);
 			documentFields.put("investigation.title", investigationRelationships);

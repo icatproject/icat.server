@@ -400,7 +400,7 @@ public class PropertyHandler {
 				entitiesToIndex.addAll(Arrays.asList("Datafile", "DatafileFormat", "DatafileParameter",
 						"Dataset", "DatasetParameter", "DatasetType", "Facility", "Instrument", "InstrumentScientist",
 						"Investigation", "InvestigationInstrument", "InvestigationParameter", "InvestigationType",
-						"InvestigationUser", "ParameterType", "Sample", "SampleType", "User"));
+						"InvestigationUser", "ParameterType", "Sample", "SampleType", "SampleParameter", "User"));
 				logger.info("search.entitiesToIndex not set. Defaulting to: {}", entitiesToIndex.toString());
 			}
 			formattedProps.add("search.entitiesToIndex " + entitiesToIndex.toString());

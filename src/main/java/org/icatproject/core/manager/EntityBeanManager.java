@@ -61,8 +61,10 @@ import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.Datafile;
+import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.ParameterValueType;
+import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.PropertyHandler.CallType;
@@ -1529,30 +1531,12 @@ public class EntityBeanManager {
 
 			if (jo.containsKey("facets")) {
 				List<JsonObject> jsonFacets = jo.getJsonArray("facets").getValuesAs(JsonObject.class);
-
 				for (JsonObject jsonFacet : jsonFacets) {
-					JsonObject facetQuery;
 					String target = jsonFacet.getString("target");
-					if (target.equals(klass.getSimpleName())) {
-						facetQuery = SearchManager.buildFacetQuery(results, "id", jsonFacet);
-					} else {
-						Relationship relationship;
-						if (target.contains("Parameter")) {
-							relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
-						} else {
-							relationship = eiHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
-						}
-
-						if (gateKeeper.allowed(relationship)) {
-							facetQuery = SearchManager.buildFacetQuery(results,
-									klass.getSimpleName().toLowerCase() + ".id", jsonFacet);
-						} else {
-							logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed",
-									target, klass.getSimpleName());
-							continue;
-						}
+					JsonObject facetQuery = buildFacetQuery(klass, target, results, jsonFacet);
+					if (facetQuery != null) {
+						dimensions.addAll(searchManager.facetSearch(target, facetQuery, results.size(), 10));
 					}
-					dimensions.addAll(searchManager.facetSearch(target, facetQuery, results.size(), 10));
 				}
 			}
 		}
@@ -1586,32 +1570,125 @@ public class EntityBeanManager {
 		if (searchActive && jo.containsKey("facets")) {
 			List<JsonObject> jsonFacets = jo.getJsonArray("facets").getValuesAs(JsonObject.class);
 			for (JsonObject jsonFacet : jsonFacets) {
-				JsonObject facetQuery;
 				String target = jsonFacet.getString("target");
 				JsonObject filterObject = jo.getJsonObject("filter");
-				if (target.equals(klass.getSimpleName())) {
-					facetQuery = SearchManager.buildFacetQuery(filterObject, "id", jsonFacet);
-				} else {
-					Relationship relationship;
-					if (target.contains("Parameter")) {
-						relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
-					} else {
-						relationship = eiHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
-					}
-
-					if (gateKeeper.allowed(relationship)) {
-						facetQuery = SearchManager.buildFacetQuery(filterObject,
-								klass.getSimpleName().toLowerCase() + ".id", jsonFacet);
-					} else {
-						logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed",
-								target, klass.getSimpleName());
-						continue;
-					}
+				JsonObject facetQuery = buildFacetQuery(klass, target, filterObject, jsonFacet);
+				if (facetQuery != null) {
+					dimensions.addAll(searchManager.facetSearch(target, facetQuery, 1000, 10));
 				}
-				dimensions.addAll(searchManager.facetSearch(target, facetQuery, 1000, 10));
 			}
 		}
 		return new SearchResult(lastSearchAfter, new ArrayList<>(), dimensions);
+	}
+
+	/**
+	 * Formats Json for requesting faceting. Performs the logic needed to ensure
+	 * that we do not facet on a field that should not be visible.
+	 * 
+	 * @param klass        Class of the entity to facet.
+	 * @param target       The entity which directly posses the dimensions of
+	 *                     interest. Note this may be different than the klass, for
+	 *                     example if klass is Investigation then target might be
+	 *                     InvestigationParameter.
+	 * @param filterObject JsonObject to be used as the query.
+	 * @param jsonFacet    JsonObject containing the dimensions to facet.
+	 * @return JsonObject with the format
+	 *         <code>{"query": `filterObject`, "dimensions": [...]}</code>
+	 * @throws IcatException
+	 */
+	private JsonObject buildFacetQuery(Class<? extends EntityBaseBean> klass, String target, JsonObject filterObject,
+			JsonObject jsonFacet) throws IcatException {
+		if (target.equals(klass.getSimpleName())) {
+			return SearchManager.buildFacetQuery(filterObject, jsonFacet);
+		} else {
+			Relationship relationship;
+			if (target.equals("SampleParameter")) {
+				Relationship sampleRelationship;
+				if (klass.getSimpleName().equals("Investigation")) {
+					sampleRelationship = eiHandler.getRelationshipsByName(klass).get("samples");
+				} else {
+					if (klass.getSimpleName().equals("Datafile")) {
+						Relationship datasetRelationship = eiHandler.getRelationshipsByName(klass).get("dataset");
+						if (!gateKeeper.allowed(datasetRelationship)) {
+							return null;
+						}
+					}
+					sampleRelationship = eiHandler.getRelationshipsByName(Dataset.class).get("sample");
+				}
+				Relationship parameterRelationship = eiHandler.getRelationshipsByName(Sample.class).get("parameters");
+				if (!gateKeeper.allowed(sampleRelationship) || !gateKeeper.allowed(parameterRelationship)) {
+					return null;
+				}
+				return SearchManager.buildFacetQuery(filterObject, jsonFacet);
+			} else if (target.contains("Parameter")) {
+				relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
+			} else {
+				relationship = eiHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
+			}
+
+			if (gateKeeper.allowed(relationship)) {
+				return SearchManager.buildFacetQuery(filterObject, jsonFacet);
+			} else {
+				logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed",
+						target, klass.getSimpleName());
+				return null;
+			}
+		}
+	}
+
+	/**
+	 * Formats Json for requesting faceting. Performs the logic needed to ensure
+	 * that we do not facet on a field that should not be visible.
+	 * 
+	 * @param klass     Class of the entity to facet.
+	 * @param target    The entity which directly posses the dimensions of interest.
+	 *                  Note this may be different than the klass, for example if
+	 *                  klass is Investigation then target might be
+	 *                  InvestigationParameter.
+	 * @param results   List of results from a previous search, containing entity
+	 *                  ids.
+	 * @param jsonFacet JsonObject containing the dimensions to facet.
+	 * @return <code>{"query": {`idField`: [...]}, "dimensions": [...]}</code>
+	 * @throws IcatException
+	 */
+	private JsonObject buildFacetQuery(Class<? extends EntityBaseBean> klass, String target,
+			List<ScoredEntityBaseBean> results, JsonObject jsonFacet) throws IcatException {
+		if (target.equals(klass.getSimpleName())) {
+			return SearchManager.buildFacetQuery(results, "id", jsonFacet);
+		} else {
+			Relationship relationship;
+			if (target.equals("SampleParameter")) {
+				Relationship sampleRelationship;
+				if (klass.getSimpleName().equals("Investigation")) {
+					sampleRelationship = eiHandler.getRelationshipsByName(klass).get("samples");
+				} else {
+					if (klass.getSimpleName().equals("Datafile")) {
+						Relationship datasetRelationship = eiHandler.getRelationshipsByName(klass).get("dataset");
+						if (!gateKeeper.allowed(datasetRelationship)) {
+							return null;
+						}
+					}
+					sampleRelationship = eiHandler.getRelationshipsByName(Dataset.class).get("sample");
+				}
+				Relationship parameterRelationship = eiHandler.getRelationshipsByName(Sample.class).get("parameters");
+				if (!gateKeeper.allowed(sampleRelationship) || !gateKeeper.allowed(parameterRelationship)) {
+					return null;
+				}
+				return SearchManager.buildSampleFacetQuery(results, jsonFacet);
+			} else if (target.contains("Parameter")) {
+				relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
+			} else {
+				relationship = eiHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
+			}
+
+			if (gateKeeper.allowed(relationship)) {
+				return SearchManager.buildFacetQuery(results, klass.getSimpleName().toLowerCase() + ".id", jsonFacet);
+			} else {
+				logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed",
+						target, klass.getSimpleName());
+				return null;
+			}
+		}
 	}
 
 	public List<String> searchGetPopulating() {
