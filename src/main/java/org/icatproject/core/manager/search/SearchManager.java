@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -88,6 +89,7 @@ public class SearchManager {
 
 					try {
 						searchApi.modify(sb.toString());
+						logger.info("Enqueued search documents now all indexed");
 					} catch (Exception e) {
 						// Catch all exceptions so the Timer doesn't end unexpectedly
 						// Record failures in a flat file to be examined periodically
@@ -100,6 +102,7 @@ public class SearchManager {
 						}
 					} finally {
 						queueFile.delete();
+						logger.debug("finish processing, queue File removed");
 					}
 				}
 			}
@@ -172,12 +175,16 @@ public class SearchManager {
 	 */
 	private class AggregateFilesHandler extends TimerTask {
 
+		private EntityManager entityManager;
+
+		public AggregateFilesHandler(EntityManager entityManager) {
+			this.entityManager = entityManager;
+		}
+
 		@Override
 		public void run() {
-			EntityManager entityManager = entityManagerFactory.createEntityManager();
-			aggregate(entityManager, datasetAggregationFileLock, datasetAggregationFile, Dataset.class);
-			aggregate(entityManager, investigationAggregationFileLock, investigationAggregationFile,
-					Investigation.class);
+			aggregate(datasetAggregationFileLock, datasetAggregationFile, Dataset.class);
+			aggregate(investigationAggregationFileLock, investigationAggregationFile, Investigation.class);
 		}
 
 		/**
@@ -185,25 +192,27 @@ public class SearchManager {
 		 * the DB for the full entity (including fileSize and fileCount fields). This is
 		 * then submitted as an update to the search engine.
 		 * 
-		 * @param entityManager JPQL EntityManager for querying
-		 * @param fileLock      Lock for the file
-		 * @param file          File to read the ids of entities from
-		 * @param klass         Class of the entity to be aggregated
+		 * @param fileLock Lock for the file
+		 * @param file     File to read the ids of entities from
+		 * @param klass    Class of the entity to be aggregated
 		 */
-		private void aggregate(EntityManager entityManager, Long fileLock, File file,
-				Class<? extends EntityBaseBean> klass) {
+		private void aggregate(Long fileLock, File file, Class<? extends EntityBaseBean> klass) {
 			String entityName = klass.getSimpleName();
 			synchronized (fileLock) {
 				if (file.length() != 0) {
 					logger.debug("Will attempt to process {}", file);
 					try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 						String line;
-						Set<String> datasetIds = new HashSet<>();
+						Set<String> ids = new HashSet<>();
 						while ((line = reader.readLine()) != null) {
-							if (datasetIds.add(line)) {
+							if (ids.add(line)) { // True if id not yet encountered
 								String query = "SELECT e FROM " + entityName + " e WHERE e.id = " + line;
-								EntityBaseBean dataset = entityManager.createQuery(query, klass).getSingleResult();
-								updateDocument(dataset);
+								try {
+									EntityBaseBean entity = entityManager.createQuery(query, klass).getSingleResult();
+									updateDocument(entity);
+								} catch (Exception e) {
+									logger.error("{} with id {} not found, continue", entityName, line);
+								}
 							}
 						}
 						file.delete();
@@ -259,7 +268,7 @@ public class SearchManager {
 
 					if (populatingClassEntry != null) {
 						PopulateBucket bucket = populatingClassEntry.getValue();
-						Long start = bucket.minId != null ? bucket.minId : 0;
+						Long start = bucket.minId != null && bucket.minId > 0 ? bucket.minId : 0;
 						long currentId = searchApi.lock(populatingClassEntry.getKey(), bucket.delete);
 						if (currentId > start) {
 							searchApi.unlock(populatingClassEntry.getKey());
@@ -732,11 +741,15 @@ public class SearchManager {
 		active = urls != null && urls.size() > 0;
 		if (active) {
 			try {
+				URI uri = propertyHandler.getSearchUrls().get(0).toURI();
 				if (searchEngine == SearchEngine.LUCENE) {
-					searchApi = new LuceneApi(propertyHandler.getSearchUrls().get(0).toURI());
+					searchApi = new LuceneApi(uri);
 				} else if (searchEngine == SearchEngine.ELASTICSEARCH || searchEngine == SearchEngine.OPENSEARCH) {
 					String unitAliasOptions = propertyHandler.getUnitAliasOptions();
-					searchApi = new OpensearchApi(propertyHandler.getSearchUrls().get(0).toURI(), unitAliasOptions);
+					// If interval is not set then aggregate in real time
+					long aggregateFilesInterval = propertyHandler.getSearchAggregateFilesIntervalMillis();
+					boolean aggregateFiles = aggregateFilesInterval == 0;
+					searchApi = new OpensearchApi(uri, unitAliasOptions, aggregateFiles);
 				} else {
 					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 							"Search engine {} not supported, must be one of " + SearchEngine.values());
@@ -758,7 +771,8 @@ public class SearchManager {
 						propertyHandler.getSearchEnqueuedRequestIntervalMillis());
 				aggregateFilesIntervalMillis = propertyHandler.getSearchAggregateFilesIntervalMillis();
 				if (aggregateFilesIntervalMillis > 0) {
-					timer.schedule(new AggregateFilesHandler(), 0L, aggregateFilesIntervalMillis);
+					EntityManager entityManager = entityManagerFactory.createEntityManager();
+					timer.schedule(new AggregateFilesHandler(entityManager), 0L, aggregateFilesIntervalMillis);
 				}
 				entitiesToIndex = propertyHandler.getEntitiesToIndex();
 				logger.info("Initialised SearchManager at {}", urls);

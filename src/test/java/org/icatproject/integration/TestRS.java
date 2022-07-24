@@ -2417,9 +2417,9 @@ public class TestRS {
 
 		assertTrue(session.luceneGetPopulating().isEmpty());
 
-		session.lucenePopulate("Dataset", -1);
-		session.lucenePopulate("Datafile", -1);
-		session.lucenePopulate("Investigation", -1);
+		session.lucenePopulate("Dataset", 0);
+		session.lucenePopulate("Datafile", 0);
+		session.lucenePopulate("Investigation", 0);
 
 		do {
 			Thread.sleep(1000);

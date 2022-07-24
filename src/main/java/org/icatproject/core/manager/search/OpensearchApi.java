@@ -80,6 +80,7 @@ public class OpensearchApi extends SearchApi {
 		}
 	}
 
+	private boolean aggregateFiles = false;
 	private IcatUnits icatUnits;
 	protected static final Logger logger = LoggerFactory.getLogger(OpensearchApi.class);
 	private static JsonObject indexSettings = Json.createObjectBuilder().add("analysis", Json.createObjectBuilder()
@@ -206,9 +207,10 @@ public class OpensearchApi extends SearchApi {
 		initScripts();
 	}
 
-	public OpensearchApi(URI server, String unitAliasOptions) throws IcatException {
+	public OpensearchApi(URI server, String unitAliasOptions, boolean aggregateFiles) throws IcatException {
 		super(server);
 		icatUnits = new IcatUnits(unitAliasOptions);
+		this.aggregateFiles = aggregateFiles;
 		initMappings();
 		initScripts();
 	}
@@ -1577,7 +1579,7 @@ public class OpensearchApi extends SearchApi {
 					// entities are attached to an Investigation, so need to check for those
 					investigationIds.add(document.getString("investigation.id"));
 				}
-				if (index.equals("datafile") && document.containsKey("fileSize")) {
+				if (aggregateFiles && index.equals("datafile") && document.containsKey("fileSize")) {
 					long newFileSize = document.getJsonNumber("fileSize").longValueExact();
 					if (document.containsKey("investigation.id")) {
 						String investigationId = document.getString("investigation.id");
@@ -1597,7 +1599,7 @@ public class OpensearchApi extends SearchApi {
 			case UPDATE:
 				docAsUpsert = Json.createObjectBuilder().add("doc", document).add("doc_as_upsert", true).build();
 				sb.append(update.toString()).append("\n").append(docAsUpsert.toString()).append("\n");
-				if (index.equals("datafile") && document.containsKey("fileSize")) {
+				if (aggregateFiles && index.equals("datafile") && document.containsKey("fileSize")) {
 					long newFileSize = document.getJsonNumber("fileSize").longValueExact();
 					long oldFileSize;
 					JsonObject source = extractSource(httpclient, id);
@@ -1625,7 +1627,7 @@ public class OpensearchApi extends SearchApi {
 				break;
 			case DELETE:
 				sb.append(Json.createObjectBuilder().add("delete", targetObject).build().toString()).append("\n");
-				if (index.equals("datafile")) {
+				if (aggregateFiles && index.equals("datafile")) {
 					JsonObject source = extractSource(httpclient, id);
 					if (source != null && source.containsKey("fileSize")) {
 						long oldFileSize = source.getJsonNumber("fileSize").longValueExact();

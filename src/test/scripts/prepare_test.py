@@ -54,6 +54,7 @@ with open("src/test/install/run.properties", "w") as f:
         "search.directory = %s/data/search" % subst["HOME"],
         "search.backlogHandlerIntervalSeconds = 60",
         "search.enqueuedRequestIntervalSeconds = 3",
+        "search.aggregateFilesIntervalSeconds = 3600",
         "key = wombat"
     ]
     f.write("\n".join(contents))

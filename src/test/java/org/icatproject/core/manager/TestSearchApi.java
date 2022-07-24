@@ -53,6 +53,7 @@ import org.icatproject.core.manager.search.ScoredEntityBaseBean;
 import org.icatproject.core.manager.search.SearchApi;
 import org.icatproject.core.manager.search.SearchResult;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -111,7 +112,7 @@ public class TestSearchApi {
 		logger.info("Using Opensearch/Elasticsearch service at {}", opensearchUrl);
 		URI opensearchUri = new URI(opensearchUrl);
 
-		return Arrays.asList(new LuceneApi(luceneUri), new OpensearchApi(opensearchUri, "\u2103: celsius"));
+		return Arrays.asList(new LuceneApi(luceneUri), new OpensearchApi(opensearchUri, "\u2103: celsius", false));
 	}
 
 	@Parameterized.Parameter
@@ -1117,9 +1118,9 @@ public class TestSearchApi {
 			} catch (IcatException e) {
 				assertEquals("Lucene is not currently locked for Dataset", e.getMessage());
 			}
-			searchApi.lock("Dataset");
+			searchApi.lock("Dataset", true);
 			try {
-				searchApi.lock("Dataset");
+				searchApi.lock("Dataset", true);
 				fail();
 			} catch (IcatException e) {
 				assertEquals("Lucene already locked for Dataset", e.getMessage());
@@ -1136,6 +1137,7 @@ public class TestSearchApi {
 		}
 	}
 
+	@Ignore // Aggregating in real time is really slow, so don't test
 	@Test
 	public void fileSizeAggregation() throws IcatException {
 		// Build entities

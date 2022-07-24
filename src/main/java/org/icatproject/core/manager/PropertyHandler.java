@@ -514,7 +514,7 @@ public class PropertyHandler {
 				formattedProps.add("search.enqueuedRequestIntervalSeconds" + " " + searchEnqueuedRequestIntervalMillis);
 				searchEnqueuedRequestIntervalMillis *= 1000;
 
-				searchAggregateFilesIntervalMillis = props.getNonNegativeLong("search.searchAggregateFilesIntervalSeconds");
+				searchAggregateFilesIntervalMillis = props.getNonNegativeLong("search.aggregateFilesIntervalSeconds");
 				searchAggregateFilesIntervalMillis *= 1000;
 			} else {
 				logger.info("'search.engine' entry not present so no free text search available");
