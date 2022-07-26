@@ -32,6 +32,12 @@ public class RelatedIdentifier extends EntityBaseBean implements Serializable {
 	@Column(length = 1023)
 	private String fullReference;
 
+	@Comment("The type of the related item")
+	private String relatedItemType;
+
+	@Comment("Title or name of the related item")
+	private String title;
+
 	/* Needed for JPA */
 	public RelatedIdentifier() {
 	}
@@ -52,6 +58,14 @@ public class RelatedIdentifier extends EntityBaseBean implements Serializable {
 		return fullReference;
 	}
 
+	public String getRelatedItemType() {
+		return relatedItemType;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
 	public void setPublication(DataPublication publication) {
 		this.publication = publication;
 	}
@@ -66,5 +80,13 @@ public class RelatedIdentifier extends EntityBaseBean implements Serializable {
 
 	public void setFullReference(String fullReference) {
 		this.fullReference = fullReference;
+	}
+
+	public void setRelatedItemType(String relatedItemType) {
+		this.relatedItemType = relatedItemType;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 }
