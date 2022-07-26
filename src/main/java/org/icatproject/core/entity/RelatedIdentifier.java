@@ -32,10 +32,10 @@ public class RelatedIdentifier extends EntityBaseBean implements Serializable {
 	@Column(length = 1023)
 	private String fullReference;
 
-	@Comment("The type of the related item")
+	@Comment("The type of the related resource")
 	private String relatedItemType;
 
-	@Comment("Title or name of the related item")
+	@Comment("Title or name of the related resource")
 	private String title;
 
 	/* Needed for JPA */
