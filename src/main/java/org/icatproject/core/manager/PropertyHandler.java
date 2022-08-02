@@ -308,6 +308,7 @@ public class PropertyHandler {
 	private int searchPopulateBlockSize;
 	private Path searchDirectory;
 	private long searchBacklogHandlerIntervalMillis;
+	private long searchAggregateFilesIntervalMillis;
 	private String unitAliasOptions;
 	private Map<String, String> cluster = new HashMap<>();
 	private long searchEnqueuedRequestIntervalMillis;
@@ -512,6 +513,9 @@ public class PropertyHandler {
 				searchEnqueuedRequestIntervalMillis = props.getPositiveLong("search.enqueuedRequestIntervalSeconds");
 				formattedProps.add("search.enqueuedRequestIntervalSeconds" + " " + searchEnqueuedRequestIntervalMillis);
 				searchEnqueuedRequestIntervalMillis *= 1000;
+
+				searchAggregateFilesIntervalMillis = props.getNonNegativeLong("search.searchAggregateFilesIntervalSeconds");
+				searchAggregateFilesIntervalMillis *= 1000;
 			} else {
 				logger.info("'search.engine' entry not present so no free text search available");
 			}
@@ -660,6 +664,10 @@ public class PropertyHandler {
 
 	public long getSearchEnqueuedRequestIntervalMillis() {
 		return searchEnqueuedRequestIntervalMillis;
+	}
+
+	public long getSearchAggregateFilesIntervalMillis() {
+		return searchAggregateFilesIntervalMillis;
 	}
 
 	public Path getSearchDirectory() {

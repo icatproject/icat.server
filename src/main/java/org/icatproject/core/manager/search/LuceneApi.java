@@ -200,16 +200,20 @@ public class LuceneApi extends SearchApi {
 	}
 
 	/**
-	 * Locks the index for entityName, removing all existing documents. While
+	 * Locks the index for entityName, optionally removing all existing documents. While
 	 * locked, document modifications will fail (excluding addNow as a result of a
 	 * populate thread).
 	 * 
 	 * @param entityName Index to lock.
+	 * @param delete     If true, all existing documents of entityName are deleted.
+	 * @return The largest ICAT id currently stored in the index.
 	 * @throws IcatException
 	 */
 	@Override
-	public void lock(String entityName) throws IcatException {
-		post(basePath + "/lock/" + entityName);
+	public long lock(String entityName, boolean delete) throws IcatException {
+		String json = Json.createObjectBuilder().add("delete", delete).build().toString();
+		JsonObject postResponse = postResponse(basePath + "/lock/" + entityName, json);
+		return postResponse.getJsonNumber("currentId").longValueExact();
 	}
 
 	/**

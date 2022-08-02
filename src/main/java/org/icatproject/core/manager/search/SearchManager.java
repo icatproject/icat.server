@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 import java.util.Map;
@@ -92,14 +93,10 @@ public class SearchManager {
 						// Record failures in a flat file to be examined periodically
 						logger.error("Search engine failed to modify documents with error {} : {}", e.getClass(),
 								e.getMessage());
-						synchronized (backlogHandlerFileLock) {
-							try {
-								FileWriter output = new FileWriter(backlogHandlerFile, true);
-								output.write(sb.toString() + "\n");
-								output.close();
-							} catch (IOException e2) {
-								logger.error("Problems writing to {} : {}", backlogHandlerFile, e2.getMessage());
-							}
+						try {
+							synchronizedWrite(sb.toString(), backlogHandlerFileLock, backlogHandlerFile);
+						} catch (IcatException e2) {
+							// Already logged the error
 						}
 					} finally {
 						queueFile.delete();
@@ -121,7 +118,7 @@ public class SearchManager {
 		public IndexSome(String entityName, List<Long> ids, EntityManagerFactory entityManagerFactory, long start)
 				throws IcatException {
 			try {
-				logger.debug("About to index {} {} records", ids.size(), entityName);
+				logger.debug("About to index {} {} records after id {}", ids.size(), entityName, start);
 				this.entityName = entityName;
 				klass = (Class<? extends EntityBaseBean>) Class.forName(Constants.ENTITY_PREFIX + entityName);
 				this.ids = ids;
@@ -169,8 +166,76 @@ public class SearchManager {
 		}
 	}
 
+	/**
+	 * Handles the the aggregation of the fileSize and fileCount fields for Dataset
+	 * and Investigation entities.
+	 */
+	private class AggregateFilesHandler extends TimerTask {
+
+		@Override
+		public void run() {
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			aggregate(entityManager, datasetAggregationFileLock, datasetAggregationFile, Dataset.class);
+			aggregate(entityManager, investigationAggregationFileLock, investigationAggregationFile,
+					Investigation.class);
+		}
+
+		/**
+		 * Performs aggregation by reading the unique id values from file and querying
+		 * the DB for the full entity (including fileSize and fileCount fields). This is
+		 * then submitted as an update to the search engine.
+		 * 
+		 * @param entityManager JPQL EntityManager for querying
+		 * @param fileLock      Lock for the file
+		 * @param file          File to read the ids of entities from
+		 * @param klass         Class of the entity to be aggregated
+		 */
+		private void aggregate(EntityManager entityManager, Long fileLock, File file,
+				Class<? extends EntityBaseBean> klass) {
+			String entityName = klass.getSimpleName();
+			synchronized (fileLock) {
+				if (file.length() != 0) {
+					logger.debug("Will attempt to process {}", file);
+					try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+						String line;
+						Set<String> datasetIds = new HashSet<>();
+						while ((line = reader.readLine()) != null) {
+							if (datasetIds.add(line)) {
+								String query = "SELECT e FROM " + entityName + " e WHERE e.id = " + line;
+								EntityBaseBean dataset = entityManager.createQuery(query, klass).getSingleResult();
+								updateDocument(dataset);
+							}
+						}
+						file.delete();
+						logger.info(entityName + " aggregations performed");
+					} catch (IOException e) {
+						logger.error("Problems reading from {} : {}", file, e.getMessage());
+					} catch (Throwable e) {
+						logger.error("Something unexpected happened " + e.getClass() + " " + e.getMessage());
+					}
+					logger.debug("finish processing");
+				}
+			}
+		}
+	}
+
 	private enum PopState {
 		STOPPING, STOPPED
+	}
+
+	/**
+	 * Holds relevant values for a Populate thread.
+	 */
+	private class PopulateBucket {
+		private Long minId;
+		private Long maxId;
+		private boolean delete;
+
+		public PopulateBucket(Long minId, Long maxId, boolean delete) {
+			this.minId = minId;
+			this.maxId = maxId;
+			this.delete = delete;
+		}
 	}
 
 	public class PopulateThread extends Thread {
@@ -193,9 +258,15 @@ public class SearchManager {
 					populatingClassEntry = populateMap.firstEntry();
 
 					if (populatingClassEntry != null) {
-						searchApi.lock(populatingClassEntry.getKey());
-
-						Long start = populatingClassEntry.getValue();
+						PopulateBucket bucket = populatingClassEntry.getValue();
+						Long start = bucket.minId != null ? bucket.minId : 0;
+						long currentId = searchApi.lock(populatingClassEntry.getKey(), bucket.delete);
+						if (currentId > start) {
+							searchApi.unlock(populatingClassEntry.getKey());
+							populateMap.remove(populatingClassEntry.getKey());
+							throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Populate called starting from id "
+									+ start + " but current id is greater: " + currentId);
+						}
 
 						logger.info("Search engine populating " + populatingClassEntry);
 
@@ -209,9 +280,16 @@ public class SearchManager {
 								break;
 							}
 							/* Get next block of ids */
+							String query = "SELECT e.id from " + populatingClassEntry.getKey() + " e";
+							if (bucket.maxId != null) {
+								// Add 1 from lower limit to get a half interval
+								query += " WHERE e.id BETWEEN " + (start + 1) + " AND " + (bucket.maxId);
+							} else {
+								query += " WHERE e.id > " + start;
+							}
+							query += " ORDER BY e.id";
 							List<Long> ids = manager
-									.createQuery("SELECT e.id from " + populatingClassEntry.getKey()
-											+ " e WHERE e.id > " + start + " ORDER BY e.id", Long.class)
+									.createQuery(query, Long.class)
 									.setMaxResults(populateBlockSize).getResultList();
 							if (ids.size() == 0) {
 								break;
@@ -222,7 +300,8 @@ public class SearchManager {
 							while ((fut = threads.poll()) != null) {
 								Long s = fut.get();
 								if (s.equals(tasks.first())) {
-									populateMap.put(populatingClassEntry.getKey(), s);
+									PopulateBucket populateBucket = new PopulateBucket(s, bucket.maxId, bucket.delete);
+									populateMap.put(populatingClassEntry.getKey(), populateBucket);
 								}
 								tasks.remove(s);
 							}
@@ -232,12 +311,14 @@ public class SearchManager {
 								fut = threads.take();
 								Long s = fut.get();
 								if (s.equals(tasks.first())) {
-									populateMap.put(populatingClassEntry.getKey(), s);
+									PopulateBucket populateBucket = new PopulateBucket(s, bucket.maxId, bucket.delete);
+									populateMap.put(populatingClassEntry.getKey(), populateBucket);
 								}
 								tasks.remove(s);
 							}
 
-							logger.debug("About to submit " + ids.size() + " " + populatingClassEntry + " documents");
+							logger.debug("About to submit {} {} documents from id {} onwards", ids.size(),
+									populatingClassEntry, start);
 							threads.submit(
 									new IndexSome(populatingClassEntry.getKey(), ids, entityManagerFactory, start));
 							tasks.add(start);
@@ -252,7 +333,8 @@ public class SearchManager {
 							fut = threads.take();
 							Long s = fut.get();
 							if (s.equals(tasks.first())) {
-								populateMap.put(populatingClassEntry.getKey(), s);
+								PopulateBucket populateBucket = new PopulateBucket(s, bucket.maxId, bucket.delete);
+								populateMap.put(populatingClassEntry.getKey(), populateBucket);
 							}
 							tasks.remove(s);
 						}
@@ -282,11 +364,11 @@ public class SearchManager {
 	/**
 	 * The Set of classes for which population is requested
 	 */
-	private ConcurrentSkipListMap<String, Long> populateMap = new ConcurrentSkipListMap<>();
+	private ConcurrentSkipListMap<String, PopulateBucket> populateMap = new ConcurrentSkipListMap<>();
 	/** The thread which does the population */
 	private PopulateThread populateThread;
 
-	private Entry<String, Long> populatingClassEntry;
+	private Entry<String, PopulateBucket> populatingClassEntry;
 
 	@PersistenceUnit(unitName = "icat")
 	private EntityManagerFactory entityManagerFactory;
@@ -307,9 +389,15 @@ public class SearchManager {
 
 	private boolean active;
 
+	private long aggregateFilesIntervalMillis;
+
 	private Long backlogHandlerFileLock = 0L;
 
 	private Long queueFileLock = 0L;
+
+	private Long datasetAggregationFileLock = 0L;
+
+	private Long investigationAggregationFileLock = 0L;
 
 	private Timer timer;
 
@@ -318,6 +406,10 @@ public class SearchManager {
 	private File backlogHandlerFile;
 
 	private File queueFile;
+
+	private File datasetAggregationFile;
+
+	private File investigationAggregationFile;
 
 	private SearchEngine searchEngine;
 
@@ -353,14 +445,25 @@ public class SearchManager {
 		Class<? extends EntityBaseBean> klass = bean.getClass();
 		if (eiHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
 			enqueue(SearchApi.encodeOperation("create", bean));
+			enqueueAggregation(bean);
 		}
 	}
 
-	public void enqueue(String json) throws IcatException {
-		synchronized (queueFileLock) {
+	private void enqueue(String json) throws IcatException {
+		synchronizedWrite(json, queueFileLock, queueFile);
+	}
+
+	/**
+	 * @param line     String to write to file, followed by \n.
+	 * @param fileLock Lock for the file
+	 * @param file     File to write to
+	 * @throws IcatException
+	 */
+	private void synchronizedWrite(String line, Long fileLock, File file) throws IcatException {
+		synchronized (fileLock) {
 			try {
-				FileWriter output = new FileWriter(queueFile, true);
-				output.write(json + "\n");
+				FileWriter output = new FileWriter(file, true);
+				output.write(line + "\n");
 				output.close();
 			} catch (IOException e) {
 				String msg = "Problems writing to " + queueFile + " " + e.getMessage();
@@ -368,7 +471,28 @@ public class SearchManager {
 				throw new IcatException(IcatExceptionType.INTERNAL, msg);
 			}
 		}
+	}
 
+	/**
+	 * If bean is a Datafile and an aggregation interval is set, then the Datafile's
+	 * Dataset and Investigation ids are written to file to be aggregated at a later
+	 * date.
+	 * 
+	 * @param bean Entity to consider for aggregation.
+	 * @throws IcatException
+	 */
+	private void enqueueAggregation(EntityBaseBean bean) throws IcatException {
+		if (bean.getClass().getSimpleName().equals("Datafile") && aggregateFilesIntervalMillis > 0) {
+			Dataset dataset = ((Datafile) bean).getDataset();
+			if (dataset != null) {
+				synchronizedWrite(dataset.getId().toString(), datasetAggregationFileLock, datasetAggregationFile);
+				Investigation investigation = dataset.getInvestigation();
+				if (investigation != null) {
+					synchronizedWrite(investigation.getId().toString(), investigationAggregationFileLock,
+							investigationAggregationFile);
+				}
+			}
+		}
 	}
 
 	public void clear() throws IcatException {
@@ -392,6 +516,7 @@ public class SearchManager {
 	public void deleteDocument(EntityBaseBean bean) throws IcatException {
 		if (eiHandler.hasSearchDoc(bean.getClass())) {
 			enqueue(SearchApi.encodeDeletion(bean));
+			enqueueAggregation(bean);
 		}
 	}
 
@@ -562,12 +687,11 @@ public class SearchManager {
 
 	public List<String> getPopulating() {
 		List<String> result = new ArrayList<>();
-		for (Entry<String, Long> e : populateMap.entrySet()) {
+		for (Entry<String, PopulateBucket> e : populateMap.entrySet()) {
 			result.add(e.getKey() + " " + e.getValue());
 		}
 		return result;
 	}
-
 
 	/**
 	 * Gets SearchResult for query without searchAfter (pagination).
@@ -622,6 +746,8 @@ public class SearchManager {
 				Path searchDirectory = propertyHandler.getSearchDirectory();
 				backlogHandlerFile = searchDirectory.resolve("backLog").toFile();
 				queueFile = searchDirectory.resolve("queue").toFile();
+				datasetAggregationFile = searchDirectory.resolve("datasetAggregation").toFile();
+				investigationAggregationFile = searchDirectory.resolve("investigationAggregation").toFile();
 				maxThreads = Runtime.getRuntime().availableProcessors();
 				populateExecutor = Executors.newWorkStealingPool(maxThreads);
 				getBeanDocExecutor = Executors.newCachedThreadPool();
@@ -630,6 +756,10 @@ public class SearchManager {
 						propertyHandler.getSearchBacklogHandlerIntervalMillis());
 				timer.schedule(new EnqueuedSearchRequestHandler(), 0L,
 						propertyHandler.getSearchEnqueuedRequestIntervalMillis());
+				aggregateFilesIntervalMillis = propertyHandler.getSearchAggregateFilesIntervalMillis();
+				if (aggregateFilesIntervalMillis > 0) {
+					timer.schedule(new AggregateFilesHandler(), 0L, aggregateFilesIntervalMillis);
+				}
 				entitiesToIndex = propertyHandler.getEntitiesToIndex();
 				logger.info("Initialised SearchManager at {}", urls);
 			} catch (Exception e) {
@@ -645,7 +775,7 @@ public class SearchManager {
 		return active;
 	}
 
-	public void populate(String entityName, long minid) throws IcatException {
+	public void populate(String entityName, Long minId, Long maxId, boolean delete) throws IcatException {
 		if (popState == PopState.STOPPING) {
 			while (populateThread != null && populateThread.getState() != Thread.State.TERMINATED) {
 				try {
@@ -655,7 +785,7 @@ public class SearchManager {
 				}
 			}
 		}
-		if (populateMap.put(entityName, minid) == null) {
+		if (populateMap.put(entityName, new PopulateBucket(minId, maxId, delete)) == null) {
 			logger.debug("Search engine population of {} requested", entityName);
 		} else {
 			throw new IcatException(IcatExceptionType.OBJECT_ALREADY_EXISTS,
@@ -671,6 +801,7 @@ public class SearchManager {
 		Class<? extends EntityBaseBean> klass = bean.getClass();
 		if (eiHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
 			enqueue(SearchApi.encodeOperation("update", bean));
+			enqueueAggregation(bean);
 		}
 	}
 

@@ -1699,14 +1699,15 @@ public class EntityBeanManager {
 		}
 	}
 
-	public void searchPopulate(String entityName, long minid, EntityManager manager) throws IcatException {
+	public void searchPopulate(String entityName, Long minId, Long maxId, boolean delete, EntityManager manager)
+			throws IcatException {
 		if (searchActive) {
 			try {
 				Class.forName(Constants.ENTITY_PREFIX + entityName);
 			} catch (ClassNotFoundException e) {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
 			}
-			searchManager.populate(entityName, minid);
+			searchManager.populate(entityName, minId, maxId, delete);
 		}
 	}
 

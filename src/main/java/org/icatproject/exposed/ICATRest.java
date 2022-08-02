@@ -1381,9 +1381,10 @@ public class ICATRest {
 	 * 
 	 * @summary Document faceting.
 	 * 
-	 * @param sessionId a sessionId of a user which takes the form <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
-	 * @param query Json of the format 
-	 * <code>{
+	 * @param sessionId a sessionId of a user which takes the form
+	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 * @param query     Json of the format
+	 *                  <code>{
 	 *   "target": `target`,
 	 *   "facets": [
 	 *     {
@@ -1445,7 +1446,11 @@ public class ICATRest {
 					for (FacetLabel label : dimension.getFacets()) {
 						logger.debug("From and to: ", label.getFrom(), label.getTo());
 						if (label.getFrom() != null && label.getTo() != null) {
-							gen.writeStartObject(label.getLabel()).write("from", label.getFrom()).write("to", label.getTo()).write("count", label.getValue()).writeEnd();
+							gen.writeStartObject(label.getLabel());
+							gen.write("from", label.getFrom());
+							gen.write("to", label.getTo());
+							gen.write("count", label.getValue());
+							gen.writeEnd();
 						} else {
 							gen.write(label.getLabel(), label.getValue());
 						}
@@ -1584,27 +1589,29 @@ public class ICATRest {
 	}
 
 	/**
-	 * Clear and repopulate search engine documents for the specified entityName
+	 * Populates search engine documents for the specified entityName.
 	 * 
-	 * @summary Search engine populate
+	 * Optionally, this will also delete all existing documents of entityName. This
+	 * should only be used when repopulating from scratch is needed.
 	 * 
-	 * @param sessionId
-	 *                   a sessionId of a user listed in rootUserNames
-	 * @param entityName
-	 *                   the name of the entity
-	 * @param minid
-	 *                   only process entities with id values greater than this
-	 *                   value
-	 * 
-	 * @throws IcatException
-	 *                       when something is wrong
+	 * @param sessionId  a sessionId of a user listed in rootUserNames
+	 * @param entityName the name of the entity
+	 * @param minId      Process entities with id values greater than (NOT equal to)
+	 *                   this value
+	 * @param maxId      Process entities up to and including with id up to and
+	 *                   including this value
+	 * @param delete     If true, then all existing documents of this type will be
+	 *                   deleted before adding new ones.
+	 * @throws IcatException when something is wrong
 	 */
 	@POST
-	@Path("lucene/db/{entityName}/{minid}")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Path("lucene/db/{entityName}")
 	public void searchPopulate(@FormParam("sessionId") String sessionId, @PathParam("entityName") String entityName,
-			@PathParam("minid") long minid) throws IcatException {
+			@FormParam("minId") Long minId, @FormParam("maxId") Long maxId, @FormParam("delete") boolean delete)
+			throws IcatException {
 		checkRoot(sessionId);
-		beanManager.searchPopulate(entityName, minid, manager);
+		beanManager.searchPopulate(entityName, minId, maxId, delete, manager);
 	}
 
 	/**

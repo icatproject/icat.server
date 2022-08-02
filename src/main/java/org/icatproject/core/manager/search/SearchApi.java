@@ -398,10 +398,13 @@ public abstract class SearchApi {
 	 * Not implemented.
 	 * 
 	 * @param entityName
+	 * @param delete
+	 * @return long
 	 * @throws IcatException
 	 */
-	public void lock(String entityName) throws IcatException {
+	public long lock(String entityName, boolean delete) throws IcatException {
 		logger.info("Manually locking index not supported, no request sent");
+		return 0;
 	}
 
 	/**
@@ -462,6 +465,31 @@ public abstract class SearchApi {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
+
+	/**
+	 * POST to path with a body and response handling.
+	 * 
+	 * @param path         Path on the search engine to POST to.
+	 * @param body         String of Json to send as the request body.
+	 * @return JsonObject returned by the search engine.
+	 * @throws IcatException
+	 */
+	protected JsonObject postResponse(String path, String body) throws IcatException {
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			URI uri = new URIBuilder(server).setPath(path).build();
+			HttpPost httpPost = new HttpPost(uri);
+			httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
+			logger.trace("Making call {} with body {}", uri, body);
+			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
+				JsonReader jsonReader = Json.createReader(response.getEntity().getContent());
+				return jsonReader.readObject();
+			}
+		} catch (URISyntaxException | IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
 
 	/**
 	 * POST to path with a body and response handling.
