@@ -309,6 +309,7 @@ public class PropertyHandler {
 	private Path searchDirectory;
 	private long searchBacklogHandlerIntervalMillis;
 	private long searchAggregateFilesIntervalMillis;
+	private long searchMaxSearchTimeMillis;
 	private String unitAliasOptions;
 	private Map<String, String> cluster = new HashMap<>();
 	private long searchEnqueuedRequestIntervalMillis;
@@ -516,6 +517,10 @@ public class PropertyHandler {
 
 				searchAggregateFilesIntervalMillis = props.getNonNegativeLong("search.aggregateFilesIntervalSeconds");
 				searchAggregateFilesIntervalMillis *= 1000;
+
+				searchMaxSearchTimeMillis = props.getPositiveLong("search.maxSearchTimeSeconds");
+				formattedProps.add("search.maxSearchTimeSeconds" + " " + searchMaxSearchTimeMillis);
+				searchMaxSearchTimeMillis *= 1000;
 			} else {
 				logger.info("'search.engine' entry not present so no free text search available");
 			}
@@ -668,6 +673,10 @@ public class PropertyHandler {
 
 	public long getSearchAggregateFilesIntervalMillis() {
 		return searchAggregateFilesIntervalMillis;
+	}
+
+	public long getSearchMaxSearchTimeMillis() {
+		return searchMaxSearchTimeMillis;
 	}
 
 	public Path getSearchDirectory() {

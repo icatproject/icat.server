@@ -511,7 +511,8 @@ public abstract class SearchApi {
 			httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
 			logger.trace("Making call {} with body {}", uri, body);
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
+				int code = response.getStatusLine().getStatusCode();
+				Rest.checkStatus(response, code == 400 ? IcatExceptionType.BAD_PARAMETER : IcatExceptionType.INTERNAL);
 				JsonReader jsonReader = Json.createReader(response.getEntity().getContent());
 				return jsonReader.readObject();
 			}
