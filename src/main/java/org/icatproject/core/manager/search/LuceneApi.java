@@ -200,16 +200,45 @@ public class LuceneApi extends SearchApi {
 	 * locked, document modifications will fail (excluding addNow as a result of a
 	 * populate thread).
 	 * 
+	 * A check is also performed against the minId and maxId used for population.
+	 * This ensures that no data is duplicated in the index.
+	 * 
 	 * @param entityName Index to lock.
+	 * @param minId      The exclusive minimum ICAT id being populated for. If
+	 *                   Documents already exist with an id greater than this, the
+	 *                   lock will fail. If null, treated as if it were
+	 *                   Long.MIN_VALUE
+	 * @param maxId      The inclusive maximum ICAT id being populated for. If
+	 *                   Documents already exist with an id less than or equal to
+	 *                   this, the lock will fail. If null, treated as if it were
+	 *                   Long.MAX_VALUE
 	 * @param delete     If true, all existing documents of entityName are deleted.
-	 * @return The largest ICAT id currently stored in the index.
 	 * @throws IcatException
 	 */
 	@Override
-	public long lock(String entityName, boolean delete) throws IcatException {
-		String json = Json.createObjectBuilder().add("delete", delete).build().toString();
-		JsonObject postResponse = postResponse(basePath + "/lock/" + entityName, json);
-		return postResponse.getJsonNumber("currentId").longValueExact();
+	public void lock(String entityName, Long minId, Long maxId, Boolean delete) throws IcatException {
+		String path = basePath + "/lock/" + entityName;
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			URIBuilder builder = new URIBuilder(server).setPath(path);
+			if (minId != null) {
+				builder.addParameter("minId", minId.toString());
+			}
+			if (maxId != null) {
+				builder.addParameter("maxId", maxId.toString());
+			}
+			if (delete != null) {
+				builder.addParameter("delete", delete.toString());
+			}
+			URI uri = builder.build();
+			logger.debug("Making call {}", uri);
+			HttpPost httpPost = new HttpPost(uri);
+			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+				int code = response.getStatusLine().getStatusCode();
+				Rest.checkStatus(response, code == 400 ? IcatExceptionType.BAD_PARAMETER : IcatExceptionType.INTERNAL);
+			}
+		} catch (URISyntaxException | IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
 	}
 
 	/**

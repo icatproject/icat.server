@@ -398,13 +398,13 @@ public abstract class SearchApi {
 	 * Not implemented.
 	 * 
 	 * @param entityName
+	 * @param minId
+	 * @param maxId
 	 * @param delete
-	 * @return long
 	 * @throws IcatException
 	 */
-	public long lock(String entityName, boolean delete) throws IcatException {
+	public void lock(String entityName, Long minId, Long maxId, Boolean delete) throws IcatException {
 		logger.info("Manually locking index not supported, no request sent");
-		return 0;
 	}
 
 	/**
