@@ -150,6 +150,7 @@ public class EntityBeanManager {
 	private Map<String, NotificationRequest> notificationRequests;
 
 	private boolean searchActive;
+	private long searchMaxSearchTimeMillis;
 
 	private int maxEntities;
 
@@ -1163,6 +1164,7 @@ public class EntityBeanManager {
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
 		searchActive = searchManager.isActive();
+		searchMaxSearchTimeMillis = propertyHandler.getSearchMaxSearchTimeMillis();
 		maxEntities = propertyHandler.getMaxEntities();
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
@@ -1418,7 +1420,7 @@ public class EntityBeanManager {
 	 */
 	public List<ScoredEntityBaseBean> freeTextSearch(String userName, JsonObject jo, int limit, String sort,
 			EntityManager manager, String ip, Class<? extends EntityBaseBean> klass) throws IcatException {
-		long startMillis = log ? System.currentTimeMillis() : 0;
+		long startMillis = System.currentTimeMillis();
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		JsonValue searchAfter = null;
 		JsonValue lastSearchAfter = null;
@@ -1433,9 +1435,6 @@ public class EntityBeanManager {
 
 			do {
 				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, Arrays.asList("id"));
-				if (lastSearchResult.isAborted()) {
-					break;
-				}
 				allResults = lastSearchResult.getResults();
 				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, limit, userName, manager, klass);
 				if (lastBean == null) {
@@ -1449,6 +1448,10 @@ public class EntityBeanManager {
 					// Have stopped early by reaching the limit, so build a searchAfter document
 					lastSearchAfter = searchManager.buildSearchAfter(lastBean, sort);
 					break;
+				}
+				if (System.currentTimeMillis() - startMillis > searchMaxSearchTimeMillis) {
+					String msg = "Search cancelled for exceeding " + searchMaxSearchTimeMillis / 1000 + " seconds";
+					throw new IcatException(IcatExceptionType.INTERNAL, msg);
 				}
 			} while (results.size() < limit);
 		}
@@ -1493,7 +1496,7 @@ public class EntityBeanManager {
 	public SearchResult freeTextSearchDocs(String userName, JsonObject jo, JsonValue searchAfter, int minCount,
 			int maxCount, String sort, EntityManager manager, String ip,
 			Class<? extends EntityBaseBean> klass) throws IcatException {
-		long startMillis = log ? System.currentTimeMillis() : 0;
+		long startMillis = System.currentTimeMillis();
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		JsonValue lastSearchAfter = null;
 		List<FacetDimension> dimensions = new ArrayList<>();
@@ -1509,9 +1512,6 @@ public class EntityBeanManager {
 
 			do {
 				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
-				if (lastSearchResult.isAborted()) {
-					return lastSearchResult;
-				}
 				allResults = lastSearchResult.getResults();
 				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, maxCount, userName, manager,
 						klass);
@@ -1526,6 +1526,10 @@ public class EntityBeanManager {
 					// Have stopped early by reaching the limit, so build a searchAfter document
 					lastSearchAfter = searchManager.buildSearchAfter(lastBean, sort);
 					break;
+				}
+				if (System.currentTimeMillis() - startMillis > searchMaxSearchTimeMillis) {
+					String msg = "Search cancelled for exceeding " + searchMaxSearchTimeMillis / 1000 + " seconds";
+					throw new IcatException(IcatExceptionType.INTERNAL, msg);
 				}
 			} while (results.size() < minCount);
 

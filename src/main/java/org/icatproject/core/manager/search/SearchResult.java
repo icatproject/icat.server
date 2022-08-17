@@ -15,7 +15,6 @@ public class SearchResult {
 	private JsonValue searchAfter;
 	private List<ScoredEntityBaseBean> results = new ArrayList<>();
 	private List<FacetDimension> dimensions;
-	private boolean aborted;
 
 	public SearchResult() {
 	}
@@ -44,14 +43,6 @@ public class SearchResult {
 
 	public void setSearchAfter(JsonValue searchAfter) {
 		this.searchAfter = searchAfter;
-	}
-
-	public boolean isAborted() {
-		return aborted;
-	}
-
-	public void setAborted(boolean aborted) {
-		this.aborted = aborted;
 	}
 
 }

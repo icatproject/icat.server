@@ -269,13 +269,7 @@ public class SearchManager {
 					if (populatingClassEntry != null) {
 						PopulateBucket bucket = populatingClassEntry.getValue();
 						Long start = bucket.minId != null && bucket.minId > 0 ? bucket.minId : 0;
-						long currentId = searchApi.lock(populatingClassEntry.getKey(), bucket.delete);
-						if (currentId > start) {
-							searchApi.unlock(populatingClassEntry.getKey());
-							populateMap.remove(populatingClassEntry.getKey());
-							throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Populate called starting from id "
-									+ start + " but current id is greater: " + currentId);
-						}
+						searchApi.lock(populatingClassEntry.getKey(), bucket.minId, bucket.maxId, bucket.delete);
 
 						logger.info("Search engine populating " + populatingClassEntry);
 
@@ -327,7 +321,7 @@ public class SearchManager {
 							}
 
 							logger.debug("About to submit {} {} documents from id {} onwards", ids.size(),
-									populatingClassEntry, start);
+									populatingClassEntry.getKey(), start);
 							threads.submit(
 									new IndexSome(populatingClassEntry.getKey(), ids, entityManagerFactory, start));
 							tasks.add(start);
@@ -357,6 +351,7 @@ public class SearchManager {
 				}
 			} catch (Throwable t) {
 				logger.error("Problem encountered in", t);
+				populateMap.remove(populatingClassEntry.getKey());
 			} finally {
 				manager.close();
 				popState = PopState.STOPPED;

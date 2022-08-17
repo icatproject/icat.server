@@ -1336,11 +1336,6 @@ public class ICATRest {
 
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartObject();
-			if (result.isAborted()) {
-				gen.write("aborted", true).writeEnd().close();
-				return baos.toString();
-			}
-
 			JsonValue newSearchAfter = result.getSearchAfter();
 			if (newSearchAfter != null) {
 				gen.write("search_after", newSearchAfter);
@@ -1433,11 +1428,6 @@ public class ICATRest {
 
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartObject();
-			if (result.isAborted()) {
-				gen.write("aborted", true).writeEnd().close();
-				return baos.toString();
-			}
-
 			List<FacetDimension> dimensions = result.getDimensions();
 			if (dimensions != null && dimensions.size() > 0) {
 				gen.writeStartObject("dimensions");

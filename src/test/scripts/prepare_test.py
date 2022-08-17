@@ -52,6 +52,7 @@ with open("src/test/install/run.properties", "w") as f:
         "search.backlogHandlerIntervalSeconds = 60",
         "search.enqueuedRequestIntervalSeconds = 3",
         "search.aggregateFilesIntervalSeconds = 3600",
+        "search.maxSearchTimeSeconds = 5",
         "key = wombat"
     ]
     f.write("\n".join(contents))

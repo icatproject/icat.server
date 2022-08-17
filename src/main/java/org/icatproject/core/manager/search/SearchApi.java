@@ -398,13 +398,13 @@ public abstract class SearchApi {
 	 * Not implemented.
 	 * 
 	 * @param entityName
+	 * @param minId
+	 * @param maxId
 	 * @param delete
-	 * @return long
 	 * @throws IcatException
 	 */
-	public long lock(String entityName, boolean delete) throws IcatException {
+	public void lock(String entityName, Long minId, Long maxId, Boolean delete) throws IcatException {
 		logger.info("Manually locking index not supported, no request sent");
-		return 0;
 	}
 
 	/**
@@ -511,7 +511,8 @@ public abstract class SearchApi {
 			httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
 			logger.trace("Making call {} with body {}", uri, body);
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
+				int code = response.getStatusLine().getStatusCode();
+				Rest.checkStatus(response, code == 400 ? IcatExceptionType.BAD_PARAMETER : IcatExceptionType.INTERNAL);
 				JsonReader jsonReader = Json.createReader(response.getEntity().getContent());
 				return jsonReader.readObject();
 			}
