@@ -93,3 +93,7 @@ jobs:
           cat /home/runner/logs/lucene.log
           cat /home/runner/logs/icat.log
           cat /home/runner/payara*/glassfish/domains/domain1/logs/server.log
+ 
+      - name: SSH
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() }}
