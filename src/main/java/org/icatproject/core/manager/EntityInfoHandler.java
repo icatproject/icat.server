@@ -76,7 +76,7 @@ import org.icatproject.core.entity.PermissibleStringValue;
 import org.icatproject.core.entity.PublicStep;
 import org.icatproject.core.entity.Publication;
 import org.icatproject.core.entity.RelatedDatafile;
-import org.icatproject.core.entity.RelatedIdentifier;
+import org.icatproject.core.entity.RelatedItem;
 import org.icatproject.core.entity.Rule;
 import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.SampleParameter;
@@ -215,7 +215,7 @@ public class EntityInfoHandler {
 			Job.class, Keyword.class, Technique.class, DatasetTechnique.class, PermissibleStringValue.class, 
 			Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class, Study.class, 
 			DataPublication.class, DataPublicationDate.class, DataPublicationUser.class, DataPublicationType.class, 
-			Affiliation.class, RelatedIdentifier.class,	FundingReference.class, DataPublicationFunding.class, 
+			Affiliation.class, RelatedItem.class, FundingReference.class, DataPublicationFunding.class,
 			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class, 
 			InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class,
 			InvestigationFacilityCycle.class);
