@@ -54,7 +54,6 @@ import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 
 import org.icatproject.core.manager.search.LuceneApi;
-import org.icatproject.core.manager.search.OpensearchApi;
 import org.icatproject.core.manager.search.SearchApi;
 import org.icatproject.icat.client.ICAT;
 import org.icatproject.icat.client.IcatException;
@@ -96,13 +95,9 @@ public class TestRS {
 				String urlString = System.getProperty("luceneUrl");
 				URI uribase = new URI(urlString);
 				searchApi = new LuceneApi(uribase);
-			} else if (searchEngine.equals("OPENSEARCH") || searchEngine.equals("ELASTICSEARCH")) {
-				String urlString = System.getProperty("opensearchUrl");
-				URI uribase = new URI(urlString);
-				searchApi = new OpensearchApi(uribase);
 			} else {
 				throw new RuntimeException(
-						"searchEngine must be one of LUCENE, OPENSEARCH, ELASTICSEARCH, but it was " + searchEngine);
+						"searchEngine must be LUCENE, but it was " + searchEngine);
 			}
 		}
 		searchApi.clear();

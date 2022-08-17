@@ -744,12 +744,6 @@ public class SearchManager {
 				URI uri = propertyHandler.getSearchUrls().get(0).toURI();
 				if (searchEngine == SearchEngine.LUCENE) {
 					searchApi = new LuceneApi(uri);
-				} else if (searchEngine == SearchEngine.ELASTICSEARCH || searchEngine == SearchEngine.OPENSEARCH) {
-					String unitAliasOptions = propertyHandler.getUnitAliasOptions();
-					// If interval is not set then aggregate in real time
-					long aggregateFilesInterval = propertyHandler.getSearchAggregateFilesIntervalMillis();
-					boolean aggregateFiles = aggregateFilesInterval == 0;
-					searchApi = new OpensearchApi(uri, unitAliasOptions, aggregateFiles);
 				} else {
 					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 							"Search engine {} not supported, must be one of " + SearchEngine.values());

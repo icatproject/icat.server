@@ -47,7 +47,6 @@ import org.icatproject.core.entity.User;
 import org.icatproject.core.manager.search.FacetDimension;
 import org.icatproject.core.manager.search.FacetLabel;
 import org.icatproject.core.manager.search.LuceneApi;
-import org.icatproject.core.manager.search.OpensearchApi;
 import org.icatproject.core.manager.search.ParameterPOJO;
 import org.icatproject.core.manager.search.ScoredEntityBaseBean;
 import org.icatproject.core.manager.search.SearchApi;
@@ -108,11 +107,7 @@ public class TestSearchApi {
 		logger.info("Using Lucene service at {}", luceneUrl);
 		URI luceneUri = new URI(luceneUrl);
 
-		String opensearchUrl = System.getProperty("opensearchUrl");
-		logger.info("Using Opensearch/Elasticsearch service at {}", opensearchUrl);
-		URI opensearchUri = new URI(opensearchUrl);
-
-		return Arrays.asList(new LuceneApi(luceneUri), new OpensearchApi(opensearchUri, "\u2103: celsius", false));
+		return Arrays.asList(new LuceneApi(luceneUri));
 	}
 
 	@Parameterized.Parameter

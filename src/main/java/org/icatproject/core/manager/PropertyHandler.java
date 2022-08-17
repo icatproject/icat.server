@@ -226,7 +226,7 @@ public class PropertyHandler {
 	}
 
 	public enum SearchEngine {
-		LUCENE, ELASTICSEARCH, OPENSEARCH
+		LUCENE
 	}
 
 	public class ExtendedAuthenticator {
