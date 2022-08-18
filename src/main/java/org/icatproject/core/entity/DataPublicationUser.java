@@ -47,6 +47,9 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 	@Comment("The family name of the user")
 	private String familyName;
 
+	@Comment("The email address for the user that should be exposed in the publication, if any")
+	private String email;
+
 	/* Needed for JPA */
 	public DataPublicationUser() {
 	}
@@ -83,6 +86,10 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 		return familyName;
 	}
 
+	public String getEmail() {
+		return email;
+	}
+
 	public void setPublication(DataPublication publication) {
 		this.publication = publication;
 	}
@@ -113,5 +120,9 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 
 	public void setFamilyName(String familyName) {
 		this.familyName = familyName;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }

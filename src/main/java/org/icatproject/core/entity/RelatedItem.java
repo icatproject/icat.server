@@ -10,11 +10,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("Identifier of a related resource to a data publication")
+@Comment("A reference to an external resource or item that is related to a data publication, "
+		+ "such as a scientific article that is based on the data or the instrument "
+		+ "that has been used to collect the data")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATAPUBLICATION_ID", "IDENTIFIER" }) })
-public class RelatedIdentifier extends EntityBaseBean implements Serializable {
+public class RelatedItem extends EntityBaseBean implements Serializable {
 
 	@JoinColumn(name = "DATAPUBLICATION_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -32,8 +34,14 @@ public class RelatedIdentifier extends EntityBaseBean implements Serializable {
 	@Column(length = 1023)
 	private String fullReference;
 
+	@Comment("The type of the related resource, see DataCite property resourceTypeGeneral for suggested values")
+	private String relatedItemType;
+
+	@Comment("Title or name of the related resource")
+	private String title;
+
 	/* Needed for JPA */
-	public RelatedIdentifier() {
+	public RelatedItem() {
 	}
 
 	public DataPublication getPublication() {
@@ -52,6 +60,14 @@ public class RelatedIdentifier extends EntityBaseBean implements Serializable {
 		return fullReference;
 	}
 
+	public String getRelatedItemType() {
+		return relatedItemType;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
 	public void setPublication(DataPublication publication) {
 		this.publication = publication;
 	}
@@ -66,5 +82,13 @@ public class RelatedIdentifier extends EntityBaseBean implements Serializable {
 
 	public void setFullReference(String fullReference) {
 		this.fullReference = fullReference;
+	}
+
+	public void setRelatedItemType(String relatedItemType) {
+		this.relatedItemType = relatedItemType;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 }
