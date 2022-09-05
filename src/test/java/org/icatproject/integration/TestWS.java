@@ -71,7 +71,7 @@ import org.junit.After;
  */
 public class TestWS {
 
-	private static final String version = "4.11.";
+	private static final String version = "5.0.";
 	private static Random random;
 	private static WSession session;
 
@@ -257,7 +257,7 @@ public class TestWS {
 	@Test
 	public void entities() throws Exception {
 		List<String> entities = session.getEntityNames();
-		assertEquals(38, entities.size());
+		assertEquals(52, entities.size());
 		assertTrue(entities.contains("Application"));
 	}
 
@@ -1930,7 +1930,7 @@ public class TestWS {
 		for (Constraint constraint : ei.getConstraints()) {
 			assertEquals(Arrays.asList("facility", "name", "visitId"), constraint.getFieldNames());
 		}
-		assertEquals(25, ei.getFields().size());
+		assertEquals(30, ei.getFields().size());
 		int n = 0;
 		for (EntityField field : ei.getFields()) {
 			if (field.getName().equals("id")) {
@@ -1961,7 +1961,7 @@ public class TestWS {
 				n++;
 			}
 		}
-		assertEquals(21, n);
+		assertEquals(26, n);
 	}
 
 	@Test

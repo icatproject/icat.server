@@ -67,6 +67,12 @@ public class Facility extends EntityBaseBean implements Serializable {
 	@Comment("A URL associated with this facility")
 	private String url;
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<DataPublication> dataPublications = new ArrayList<DataPublication>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<DataPublicationType> dataPublicationTypes = new ArrayList<DataPublicationType>();
+
 	public static Set<String> docFields = new HashSet<>(Arrays.asList("facility.name", "facility.id"));
 
 	/* Needed for JPA */
@@ -129,6 +135,14 @@ public class Facility extends EntityBaseBean implements Serializable {
 		return url;
 	}
 
+	public List<DataPublication> getDataPublications() {
+		return dataPublications;
+	}
+
+	public List<DataPublicationType> getDataPublicationTypes() {
+		return dataPublicationTypes;
+	}
+
 	public void setApplications(List<Application> applications) {
 		this.applications = applications;
 	}
@@ -183,12 +197,6 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	@Override
-	public void getDoc(JsonGenerator gen) {
-		SearchApi.encodeString(gen, "facility.name", name);
-		SearchApi.encodeString(gen, "facility.id", id);
 	}
 
 }

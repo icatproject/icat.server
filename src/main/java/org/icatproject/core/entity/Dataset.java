@@ -41,6 +41,12 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<Datafile> datafiles = new ArrayList<Datafile>();
 
+	@Comment("The cumulative total size of the data files within this dataset")
+	private Long fileSize = 0L;
+
+	@Comment("The total number of datafiles within this dataset")
+	private Long fileCount = 0L;
+
 	@Comment("An informal description of the data set")
 	private String description;
 
@@ -74,6 +80,12 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	private List<DataCollectionDataset> dataCollectionDatasets = new ArrayList<DataCollectionDataset>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
+	private List<DatasetInstrument> datasetInstruments = new ArrayList<DatasetInstrument>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
+	private List<DatasetTechnique> datasetTechniques = new ArrayList<DatasetTechnique>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<DatasetParameter> parameters = new ArrayList<DatasetParameter>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -94,6 +106,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public List<Datafile> getDatafiles() {
 		return datafiles;
+	}
+
+	public Long getFileSize() {
+		return this.fileSize;
+	}
+
+	public Long getFileCount() {
+		return this.fileCount;
 	}
 
 	public String getDescription() {
@@ -118,6 +138,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public String getName() {
 		return this.name;
+	}
+
+	public List<DatasetInstrument> getDatasetInstruments() {
+		return datasetInstruments;
+	}
+
+	public List<DatasetTechnique> getDatasetTechniques() {
+		return datasetTechniques;
 	}
 
 	public List<DatasetParameter> getParameters() {
@@ -148,6 +176,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		this.datafiles = datafiles;
 	}
 
+	public void setFileSize(Long fileSize) {
+		this.fileSize = fileSize;
+	}
+
+	public void setFileCount(Long fileCount) {
+		this.fileCount = fileCount;
+	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
@@ -170,6 +206,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setDatasetInstruments(List<DatasetInstrument> datasetInstruments) {
+		this.datasetInstruments = datasetInstruments;
+	}
+
+	public void setDatasetTechniques(List<DatasetTechnique> datasetTechniques) {
+		this.datasetTechniques = datasetTechniques;
 	}
 
 	public void setParameters(List<DatasetParameter> parameters) {

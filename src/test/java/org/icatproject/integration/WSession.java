@@ -18,6 +18,10 @@ import org.icatproject.AuthenticatorInfo;
 import org.icatproject.DataCollection;
 import org.icatproject.DataCollectionDatafile;
 import org.icatproject.DataCollectionDataset;
+import org.icatproject.DataCollectionInvestigation;
+import org.icatproject.DataPublication;
+import org.icatproject.DataPublicationDate;
+import org.icatproject.DataPublicationType;
 import org.icatproject.Datafile;
 import org.icatproject.DatafileFormat;
 import org.icatproject.Dataset;
@@ -368,6 +372,7 @@ public class WSession {
 		this.addFastRule("SELECT x FROM Job x", "CRUD");
 		this.addFastRule("SELECT x FROM DataCollection x", "CRUD");
 		this.addFastRule("SELECT x FROM DataCollectionParameter x", "CRUD");
+		this.addFastRule("SELECT x FROM DataCollectionInvestigation x", "CRUD");
 		this.addFastRule("SELECT x FROM DataCollectionDataset x", "CRUD");
 		this.addFastRule("SELECT x FROM DataCollectionDatafile x", "CRUD");
 		this.addFastRule("SELECT x FROM InvestigationParameter x", "CRUD");
@@ -379,6 +384,9 @@ public class WSession {
 		this.addFastRule("PublicStep", "CRUD");
 		this.addFastRule("Study", "CRUD");
 		this.addFastRule("StudyInvestigation", "CRUD");
+		this.addFastRule("DataPublication", "CRUD");
+		this.addFastRule("DataPublicationType", "CRUD");
+		this.addFastRule("DataPublicationDate", "CRUD");
 		snooze();
 	}
 
@@ -461,8 +469,12 @@ public class WSession {
 				DataCollectionDataset dataCollectionDataset = new DataCollectionDataset();
 				dataCollectionDataset.setDataset((Dataset) bean);
 				dataCollection.getDataCollectionDatasets().add(dataCollectionDataset);
+			} else if (bean instanceof Investigation) {
+				DataCollectionInvestigation dataCollectionInvestigation = new DataCollectionInvestigation();
+				dataCollectionInvestigation.setInvestigation((Investigation) bean);
+				dataCollection.getDataCollectionInvestigations().add(dataCollectionInvestigation);
 			} else {
-				throw new IllegalArgumentException(bean + " must be a Dataset or a Datafile");
+				throw new IllegalArgumentException(bean + " must be an Investigation, Dataset or Datafile");
 			}
 		}
 		dataCollection.setId(this.icat.create(this.sessionId, dataCollection));
@@ -546,6 +558,45 @@ public class WSession {
 		si.setInvestigation(inv);
 		icat.create(sessionId, si);
 
+	}
+
+	public DataPublicationType createDataPublicationType(Facility facility, 
+			String name, String description) throws IcatException_Exception {
+		DataPublicationType dataPubType = new DataPublicationType();
+		dataPubType.setFacility(facility);
+		dataPubType.setName(name);
+		dataPubType.setDescription(description);
+		dataPubType.setId(icat.create(sessionId, dataPubType));
+		return dataPubType;
+	}
+
+	public DataPublication createDataPublication(Facility facility, 
+			DataCollection dataCollection, DataPublicationType dataPubType, 
+			String title, String pid) throws IcatException_Exception {
+		DataPublication dataPublication = new DataPublication();
+		// facility and content (data collection) are 1 to 1 relationships
+		dataPublication.setFacility(facility);
+		dataPublication.setContent(dataCollection);
+		// data publication type is an optional relationship
+		if (dataPubType != null) {
+			dataPublication.setType(dataPubType);
+		}
+		// title and pid are mandatory fields
+		dataPublication.setTitle(title);
+		dataPublication.setPid(pid);
+		// create it
+		dataPublication.setId(icat.create(sessionId, dataPublication));
+		return dataPublication;
+	}
+
+	public DataPublicationDate createDataPublicationDate(DataPublication dataPublication,
+			String dateType, String dateValue) throws IcatException_Exception {
+		DataPublicationDate dataPubDate = new DataPublicationDate();
+		dataPubDate.setPublication(dataPublication);
+		dataPubDate.setDateType(dateType);
+		dataPubDate.setDate(dateValue);
+		dataPubDate.setId(icat.create(sessionId, dataPubDate));
+		return dataPubDate;
 	}
 
 	public List<AuthenticatorInfo> getAuthenticatorInfo() throws IcatException_Exception {

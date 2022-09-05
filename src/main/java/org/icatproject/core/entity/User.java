@@ -57,6 +57,9 @@ public class User extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<Study> studies = new ArrayList<Study>();
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+	private List<DataPublicationUser> dataPublicationUsers = new ArrayList<DataPublicationUser>();
+
 	public static Set<String> docFields = new HashSet<>(Arrays.asList("user.name", "user.fullName", "user.id"));
 
 	public User() {
@@ -80,6 +83,10 @@ public class User extends EntityBaseBean implements Serializable {
 
 	public String getAffiliation() {
 		return affiliation;
+	}
+
+	public List<DataPublicationUser> getDataPublicationUsers() {
+		return dataPublicationUsers;
 	}
 
 	public List<InstrumentScientist> getInstrumentScientists() {
@@ -124,6 +131,10 @@ public class User extends EntityBaseBean implements Serializable {
 
 	public void setAffiliation(String affiliation) {
 		this.affiliation = affiliation;
+	}
+
+	public void setDataPublicationUsers(List<DataPublicationUser> dataPublicationUsers) {
+		this.dataPublicationUsers = dataPublicationUsers;
 	}
 
 	public void setInstrumentScientists(List<InstrumentScientist> instrumentScientists) {

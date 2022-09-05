@@ -67,7 +67,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	private String doi;
 
 	@Comment("Expressed in bytes")
-	private Long fileSize;
+	private Long fileSize = 0L;
 
 	@Comment("The logical location of the file - which may also be the physical location")
 	private String location;
