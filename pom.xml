@@ -319,7 +319,7 @@
 
 						<configuration>
 							<skip>${maven.install.skip}</skip>
-							<executable>python</executable>
+							<executable>python3</executable>
 							<arguments>
 								<argument>src/test/scripts/prepare_test.py</argument>
 								<argument>${containerHome}</argument>

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from __future__ import print_function
 
 import json
@@ -44,7 +44,7 @@ def getConn(relativeUrl, method, parameters=None):
 def getResponse(conn):
     response = conn.getresponse()
     rc = response.status
-    if (rc / 100 != 2):
+    if (rc // 100 != 2):
         try:
             responseContent = response.read()
             om = json.loads(responseContent)
