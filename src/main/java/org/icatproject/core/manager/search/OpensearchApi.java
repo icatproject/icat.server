@@ -49,6 +49,7 @@ import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.SampleType;
+import org.icatproject.core.entity.Technique;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.manager.Rest;
 import org.icatproject.utils.IcatUnits;
@@ -142,6 +143,8 @@ public class OpensearchApi extends SearchApi {
 				new ParentRelation(RelationType.NESTED_CHILD, "datafile", "datafile", null)));
 		relations.put("datasetparameter", Arrays.asList(
 				new ParentRelation(RelationType.NESTED_CHILD, "dataset", "dataset", null)));
+		relations.put("datasettechnique", Arrays.asList(
+				new ParentRelation(RelationType.NESTED_CHILD, "dataset", "dataset", null)));
 		relations.put("investigationparameter", Arrays.asList(
 				new ParentRelation(RelationType.NESTED_CHILD, "investigation", "investigation", null)));
 		relations.put("sampleparameter", Arrays.asList(
@@ -174,6 +177,9 @@ public class OpensearchApi extends SearchApi {
 						ParameterType.docFields),
 				new ParentRelation(RelationType.NESTED_GRANDCHILD, "datafile", "sampleparameter",
 						ParameterType.docFields)));
+		relations.put("technique", Arrays.asList(
+				new ParentRelation(RelationType.NESTED_GRANDCHILD, "dataset", "datasettechnique",
+						Technique.docFields)));
 		relations.put("user", Arrays.asList(
 				new ParentRelation(RelationType.NESTED_GRANDCHILD, "investigation", "investigationuser",
 						User.docFields),
@@ -249,6 +255,7 @@ public class OpensearchApi extends SearchApi {
 					.add("fileSize", typeLong)
 					.add("fileCount", typeLong)
 					.add("datasetparameter", buildNestedMapping("dataset.id", "type.id"))
+					.add("datasettechnique", buildNestedMapping("dataset.id", "technique.id"))
 					.add("investigationuser", buildNestedMapping("investigation.id", "user.id"))
 					.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"))
 					.add("sampleparameter", buildNestedMapping("sample.id", "type.id"));
@@ -385,7 +392,7 @@ public class OpensearchApi extends SearchApi {
 
 		JsonObject queryObject = facetQuery.getJsonObject("query");
 		List<String> defaultFields = defaultFieldsMap.get(index);
-		JsonObjectBuilder bodyBuilder = parseQuery(Json.createObjectBuilder(), queryObject, index, defaultFields);
+		JsonObjectBuilder bodyBuilder = parseQuery(Json.createObjectBuilder(), queryObject, index, dimensionPrefix, defaultFields);
 		if (facetQuery.containsKey("dimensions")) {
 			JsonArray dimensions = facetQuery.getJsonArray("dimensions");
 			bodyBuilder = parseFacets(bodyBuilder, dimensions, maxLabels, dimensionPrefix);
@@ -503,7 +510,7 @@ public class OpensearchApi extends SearchApi {
 		JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
 		bodyBuilder = parseSort(bodyBuilder, sort);
 		bodyBuilder = parseSearchAfter(bodyBuilder, searchAfter);
-		bodyBuilder = parseQuery(bodyBuilder, query, index, defaultFields);
+		bodyBuilder = parseQuery(bodyBuilder, query, index, null, defaultFields);
 		String body = bodyBuilder.build().toString();
 
 		Map<String, String> parameterMap = new HashMap<>();
@@ -671,12 +678,13 @@ public class OpensearchApi extends SearchApi {
 	 * @param queryRequest  The Json object containing the information on the
 	 *                      requested query, NOT formatted for the search cluster.
 	 * @param index         The index to search.
+	 * @param dimensionPrefix Used to build nested queries for arbitrary fields.
 	 * @param defaultFields Default fields to apply parsed string queries to.
 	 * @return The JsonObjectBuilder initially passed with the "query" added to it.
 	 * @throws IcatException If the query cannot be parsed.
 	 */
 	private JsonObjectBuilder parseQuery(JsonObjectBuilder builder, JsonObject queryRequest, String index,
-			List<String> defaultFields) throws IcatException {
+			String dimensionPrefix, List<String> defaultFields) throws IcatException {
 		// In general, we use a boolean query to compound queries on individual fields
 		JsonObjectBuilder queryBuilder = Json.createObjectBuilder();
 		JsonObjectBuilder boolBuilder = Json.createObjectBuilder();
@@ -684,49 +692,172 @@ public class OpensearchApi extends SearchApi {
 		// Non-scored elements are added to the "filter"
 		JsonArrayBuilder filterBuilder = Json.createArrayBuilder();
 
-		if (queryRequest.containsKey("filter")) {
-			JsonObject filterObject = queryRequest.getJsonObject("filter");
-			for (String fld : filterObject.keySet()) {
-				JsonValue value = filterObject.get(fld);
-				String field = fld.replace(index + ".", "");
-				switch (value.getValueType()) {
-					case ARRAY:
-						JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-						for (JsonValue arrayValue : ((JsonArray) value).getValuesAs(JsonString.class)) {
-							parseFilter(arrayBuilder, field, arrayValue);
+		Long lowerTime = Long.MIN_VALUE;
+		Long upperTime = Long.MAX_VALUE;
+        for (String queryKey: queryRequest.keySet()) {
+            switch (queryKey) {
+				case "target":
+					break; // Avoid using the target index as a term in the search
+				case "lower":
+					lowerTime = parseDate(queryRequest, "lower", 0, Long.MIN_VALUE);
+					break;
+				case "upper":
+					upperTime = parseDate(queryRequest, "upper", 59999, Long.MAX_VALUE);
+					break;
+                case "filter":
+					JsonObject filterObject = queryRequest.getJsonObject("filter");
+					for (String fld : filterObject.keySet()) {
+						JsonValue value = filterObject.get(fld);
+						String field = fld.replace(index + ".", "");
+						switch (value.getValueType()) {
+							case ARRAY:
+								JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+								for (JsonValue arrayValue : ((JsonArray) value).getValuesAs(JsonString.class)) {
+									parseFilter(arrayBuilder, field, arrayValue);
+								}
+								// If the key was just a nested entity (no ".") then we should FILTER all of our
+								// queries on that entity.
+								String occur = fld.contains(".") ? "should" : "filter";
+								filterBuilder.add(Json.createObjectBuilder().add("bool",
+										Json.createObjectBuilder().add(occur, arrayBuilder)));
+								break;
+		
+							default:
+								parseFilter(filterBuilder, field, value);
 						}
-						// If the key was just a nested entity (no ".") then we should FILTER all of our
-						// queries on that entity.
-						String occur = fld.contains(".") ? "should" : "filter";
-						filterBuilder.add(Json.createObjectBuilder().add("bool",
-								Json.createObjectBuilder().add(occur, arrayBuilder)));
-						break;
-
-					default:
-						parseFilter(filterBuilder, field, value);
-				}
+					}
+					break;
+				case "text":
+					// The free text is the only element we perform scoring on, so "must" occur
+					JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+					String text = queryRequest.getString("text");
+					arrayBuilder.add(OpensearchQueryBuilder.buildStringQuery(text, defaultFields.toArray(new String[0])));
+					if (index.equals("investigation")) {
+						JsonObject stringQuery = OpensearchQueryBuilder.buildStringQuery(text, "sample.name",
+								"sample.type.name");
+						arrayBuilder.add(OpensearchQueryBuilder.buildNestedQuery("sample", stringQuery));
+						JsonObjectBuilder textBoolBuilder = Json.createObjectBuilder().add("should", arrayBuilder);
+						JsonObjectBuilder textMustBuilder = Json.createObjectBuilder().add("bool", textBoolBuilder);
+						boolBuilder.add("must", Json.createArrayBuilder().add(textMustBuilder));
+					} else {
+						boolBuilder.add("must", arrayBuilder);
+					}
+					break;
+				case "user":
+					String user = queryRequest.getString("user");
+					// Because InstrumentScientist is on a separate index, we need to explicitly
+					// perform a search here
+					JsonObject termQuery = OpensearchQueryBuilder.buildTermQuery("user.name.keyword", user);
+					String body = Json.createObjectBuilder().add("query", termQuery).build().toString();
+					Map<String, String> parameterMap = new HashMap<>();
+					parameterMap.put("_source", "instrument.id");
+					JsonObject postResponse = postResponse("/instrumentscientist/_search", body, parameterMap);
+					JsonArray hits = postResponse.getJsonObject("hits").getJsonArray("hits");
+					JsonArrayBuilder instrumentIdsBuilder = Json.createArrayBuilder();
+					for (JsonObject hit : hits.getValuesAs(JsonObject.class)) {
+						String instrumentId = hit.getJsonObject("_source").getString("instrument.id");
+						instrumentIdsBuilder.add(instrumentId);
+					}
+					JsonObject instrumentQuery = OpensearchQueryBuilder.buildTermsQuery("investigationinstrument.instrument.id",
+							instrumentIdsBuilder.build());
+					JsonObject nestedInstrumentQuery = OpensearchQueryBuilder.buildNestedQuery("investigationinstrument",
+							instrumentQuery);
+					// InvestigationUser should be a nested field on the main Document
+					JsonObject investigationUserQuery = OpensearchQueryBuilder.buildMatchQuery("investigationuser.user.name",
+							user);
+					JsonObject nestedUserQuery = OpensearchQueryBuilder.buildNestedQuery("investigationuser",
+							investigationUserQuery);
+					// At least one of being an InstrumentScientist or an InvestigationUser is
+					// necessary
+					JsonArrayBuilder array = Json.createArrayBuilder().add(nestedInstrumentQuery).add(nestedUserQuery);
+					filterBuilder.add(Json.createObjectBuilder().add("bool", Json.createObjectBuilder().add("should", array)));
+					break;
+				case "userFullName":
+					String fullName = queryRequest.getString("userFullName");
+					JsonObject fullNameQuery = OpensearchQueryBuilder.buildStringQuery(fullName,
+							"investigationuser.user.fullName");
+					filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery("investigationuser", fullNameQuery));
+					break;
+				case "samples":
+					JsonArray samples = queryRequest.getJsonArray("samples");
+					for (int i = 0; i < samples.size(); i++) {
+						String sample = samples.getString(i);
+						JsonObject stringQuery = OpensearchQueryBuilder.buildStringQuery(sample, "sample.name",
+								"sample.type.name");
+						filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery("sample", stringQuery));
+					}
+					break;
+				case "parameters":
+					for (JsonObject parameterObject : queryRequest.getJsonArray("parameters").getValuesAs(JsonObject.class)) {
+						String path = index + "parameter";
+						List<JsonObject> parameterQueries = new ArrayList<>();
+						if (parameterObject.containsKey("name")) {
+							String name = parameterObject.getString("name");
+							parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".type.name", name));
+						}
+						if (parameterObject.containsKey("units")) {
+							String units = parameterObject.getString("units");
+							parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".type.units", units));
+						}
+						if (parameterObject.containsKey("stringValue")) {
+							String stringValue = parameterObject.getString("stringValue");
+							parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".stringValue", stringValue));
+						} else if (parameterObject.containsKey("lowerDateValue")
+								&& parameterObject.containsKey("upperDateValue")) {
+							Long lower = parseDate(parameterObject, "lowerDateValue", 0, Long.MIN_VALUE);
+							Long upper = parseDate(parameterObject, "upperDateValue", 59999, Long.MAX_VALUE);
+							parameterQueries
+									.add(OpensearchQueryBuilder.buildLongRangeQuery(path + ".dateTimeValue", lower, upper));
+						} else if (parameterObject.containsKey("lowerNumericValue")
+								&& parameterObject.containsKey("upperNumericValue")) {
+							JsonNumber lower = parameterObject.getJsonNumber("lowerNumericValue");
+							JsonNumber upper = parameterObject.getJsonNumber("upperNumericValue");
+							parameterQueries.add(OpensearchQueryBuilder.buildRangeQuery(path + ".numericValue", lower, upper));
+						}
+						filterBuilder.add(
+								OpensearchQueryBuilder.buildNestedQuery(path, parameterQueries.toArray(new JsonObject[0])));
+					}
+					break;
+				default:
+					// If the term doesn't require special logic, handle according to type
+					JsonObject defaultTermQuery;
+					String field = queryKey;
+					if (dimensionPrefix != null) {
+						field = dimensionPrefix + "." + field;
+					}
+					ValueType valueType = queryRequest.get(queryKey).getValueType();
+					// if (queryKey.contains(".")) {
+					// 	int pathEnd = queryKey.indexOf(".");
+					// 	path = queryKey.substring(0, pathEnd);
+					// 	if (path.equals(index)) {
+					// 		// e.g. "dataset.id" should be interpretted as "id" iff we're searching Datasets
+					// 		field = queryKey.substring(pathEnd + 1);
+					// 	}
+					// }
+					switch (valueType) {
+						case STRING:
+							defaultTermQuery = OpensearchQueryBuilder.buildTermQuery(field + ".keyword", queryRequest.getString(queryKey));
+							break;
+						case NUMBER:
+							defaultTermQuery = OpensearchQueryBuilder.buildTermQuery(field, queryRequest.getJsonNumber(queryKey));
+							break;
+						case ARRAY:
+							// Only support array of String as list of ICAT ids is currently only use case
+							defaultTermQuery = OpensearchQueryBuilder.buildTermsQuery(field, queryRequest.getJsonArray(queryKey));
+							break;
+						default:
+							throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Query values should be ARRAY, STRING or NUMBER, but had value of type " + valueType);
+					}
+					if (dimensionPrefix != null) {
+						// e.g. "sample.id" should use a nested query as sample is nested on other entities
+						filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery(dimensionPrefix, defaultTermQuery));
+					} else {
+						// Otherwise, we can associate the query directly with the searched entity
+						filterBuilder.add(defaultTermQuery);
+					}
 			}
 		}
 
-		if (queryRequest.containsKey("text")) {
-			// The free text is the only element we perform scoring on, so "must" occur
-			JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-			String text = queryRequest.getString("text");
-			arrayBuilder.add(OpensearchQueryBuilder.buildStringQuery(text, defaultFields.toArray(new String[0])));
-			if (index.equals("investigation")) {
-				JsonObject stringQuery = OpensearchQueryBuilder.buildStringQuery(text, "sample.name",
-						"sample.type.name");
-				arrayBuilder.add(OpensearchQueryBuilder.buildNestedQuery("sample", stringQuery));
-				JsonObjectBuilder textBoolBuilder = Json.createObjectBuilder().add("should", arrayBuilder);
-				JsonObjectBuilder textMustBuilder = Json.createObjectBuilder().add("bool", textBoolBuilder);
-				boolBuilder.add("must", Json.createArrayBuilder().add(textMustBuilder));
-			} else {
-				boolBuilder.add("must", arrayBuilder);
-			}
-		}
-
-		Long lowerTime = parseDate(queryRequest, "lower", 0, Long.MIN_VALUE);
-		Long upperTime = parseDate(queryRequest, "upper", 59999, Long.MAX_VALUE);
 		if (lowerTime != Long.MIN_VALUE || upperTime != Long.MAX_VALUE) {
 			if (index.equals("datafile")) {
 				// datafile has only one date field
@@ -736,90 +867,6 @@ public class OpensearchApi extends SearchApi {
 				filterBuilder.add(OpensearchQueryBuilder.buildLongRangeQuery("endDate", lowerTime, upperTime));
 			}
 		}
-
-		if (queryRequest.containsKey("user")) {
-			String name = queryRequest.getString("user");
-			// Because InstrumentScientist is on a separate index, we need to explicitly
-			// perform a search here
-			JsonObject termQuery = OpensearchQueryBuilder.buildTermQuery("user.name.keyword", name);
-			String body = Json.createObjectBuilder().add("query", termQuery).build().toString();
-			Map<String, String> parameterMap = new HashMap<>();
-			parameterMap.put("_source", "instrument.id");
-			JsonObject postResponse = postResponse("/instrumentscientist/_search", body, parameterMap);
-			JsonArray hits = postResponse.getJsonObject("hits").getJsonArray("hits");
-			JsonArrayBuilder instrumentIdsBuilder = Json.createArrayBuilder();
-			for (JsonObject hit : hits.getValuesAs(JsonObject.class)) {
-				String instrumentId = hit.getJsonObject("_source").getString("instrument.id");
-				instrumentIdsBuilder.add(instrumentId);
-			}
-			JsonObject instrumentQuery = OpensearchQueryBuilder.buildTermsQuery("investigationinstrument.instrument.id",
-					instrumentIdsBuilder.build());
-			JsonObject nestedInstrumentQuery = OpensearchQueryBuilder.buildNestedQuery("investigationinstrument",
-					instrumentQuery);
-			// InvestigationUser should be a nested field on the main Document
-			JsonObject investigationUserQuery = OpensearchQueryBuilder.buildMatchQuery("investigationuser.user.name",
-					name);
-			JsonObject nestedUserQuery = OpensearchQueryBuilder.buildNestedQuery("investigationuser",
-					investigationUserQuery);
-			// At least one of being an InstrumentScientist or an InvestigationUser is
-			// necessary
-			JsonArrayBuilder array = Json.createArrayBuilder().add(nestedInstrumentQuery).add(nestedUserQuery);
-			filterBuilder.add(Json.createObjectBuilder().add("bool", Json.createObjectBuilder().add("should", array)));
-		}
-		if (queryRequest.containsKey("userFullName")) {
-			String fullName = queryRequest.getString("userFullName");
-			JsonObject fullNameQuery = OpensearchQueryBuilder.buildStringQuery(fullName,
-					"investigationuser.user.fullName");
-			filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery("investigationuser", fullNameQuery));
-		}
-
-		if (queryRequest.containsKey("samples")) {
-			JsonArray samples = queryRequest.getJsonArray("samples");
-			for (int i = 0; i < samples.size(); i++) {
-				String sample = samples.getString(i);
-				JsonObject stringQuery = OpensearchQueryBuilder.buildStringQuery(sample, "sample.name",
-						"sample.type.name");
-				filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery("sample", stringQuery));
-			}
-		}
-
-		if (queryRequest.containsKey("parameters")) {
-			for (JsonObject parameterObject : queryRequest.getJsonArray("parameters").getValuesAs(JsonObject.class)) {
-				String path = index + "parameter";
-				List<JsonObject> parameterQueries = new ArrayList<>();
-				if (parameterObject.containsKey("name")) {
-					String name = parameterObject.getString("name");
-					parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".type.name", name));
-				}
-				if (parameterObject.containsKey("units")) {
-					String units = parameterObject.getString("units");
-					parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".type.units", units));
-				}
-				if (parameterObject.containsKey("stringValue")) {
-					String stringValue = parameterObject.getString("stringValue");
-					parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".stringValue", stringValue));
-				} else if (parameterObject.containsKey("lowerDateValue")
-						&& parameterObject.containsKey("upperDateValue")) {
-					Long lower = parseDate(parameterObject, "lowerDateValue", 0, Long.MIN_VALUE);
-					Long upper = parseDate(parameterObject, "upperDateValue", 59999, Long.MAX_VALUE);
-					parameterQueries
-							.add(OpensearchQueryBuilder.buildLongRangeQuery(path + ".dateTimeValue", lower, upper));
-				} else if (parameterObject.containsKey("lowerNumericValue")
-						&& parameterObject.containsKey("upperNumericValue")) {
-					JsonNumber lower = parameterObject.getJsonNumber("lowerNumericValue");
-					JsonNumber upper = parameterObject.getJsonNumber("upperNumericValue");
-					parameterQueries.add(OpensearchQueryBuilder.buildRangeQuery(path + ".numericValue", lower, upper));
-				}
-				filterBuilder.add(
-						OpensearchQueryBuilder.buildNestedQuery(path, parameterQueries.toArray(new JsonObject[0])));
-			}
-		}
-
-		if (queryRequest.containsKey("id")) {
-			filterBuilder.add(OpensearchQueryBuilder.buildTermsQuery("id", queryRequest.getJsonArray("id")));
-		}
-
-		// TODO add in support for specific terms?
 
 		JsonArray filterArray = filterBuilder.build();
 		if (filterArray.size() > 0) {

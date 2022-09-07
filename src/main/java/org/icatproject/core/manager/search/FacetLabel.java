@@ -58,4 +58,8 @@ public class FacetLabel {
 		return to;
 	}
 
+	public String toString() {
+		return label + ": " + value;
+	}
+
 }

@@ -28,6 +28,7 @@ import org.icatproject.core.entity.DatafileFormat;
 import org.icatproject.core.entity.DatafileParameter;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.DatasetParameter;
+import org.icatproject.core.entity.DatasetTechnique;
 import org.icatproject.core.entity.DatasetType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Facility;
@@ -43,6 +44,7 @@ import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.SampleParameter;
 import org.icatproject.core.entity.SampleType;
+import org.icatproject.core.entity.Technique;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.manager.search.FacetDimension;
 import org.icatproject.core.manager.search.FacetLabel;
@@ -194,8 +196,8 @@ public class TestSearchApi {
 		return builder.build();
 	}
 
-	private static JsonObject buildFacetIdQuery(String id) {
-		return Json.createObjectBuilder().add("id", Json.createArrayBuilder().add(id)).build();
+	private static JsonObject buildFacetIdQuery(String idField, String idValue) {
+		return Json.createObjectBuilder().add(idField, Json.createArrayBuilder().add(idValue)).build();
 	}
 
 	private static JsonObject buildFacetRangeObject(String key, double from, double to) {
@@ -218,8 +220,8 @@ public class TestSearchApi {
 		return Json.createObjectBuilder().add("query", queryObject).add("dimensions", rangedDimensionsBuilder).build();
 	}
 
-	private static JsonObject buildFacetStringRequest(String id, String dimension) {
-		JsonObject idQuery = buildFacetIdQuery(id);
+	private static JsonObject buildFacetStringRequest(String idField, String idValue, String dimension) {
+		JsonObject idQuery = buildFacetIdQuery(idField, idValue);
 		JsonObjectBuilder stringDimensionBuilder = Json.createObjectBuilder().add("dimension", dimension);
 		JsonArrayBuilder stringDimensionsBuilder = Json.createArrayBuilder().add(stringDimensionBuilder);
 		return Json.createObjectBuilder().add("query", idQuery).add("dimensions", stringDimensionsBuilder).build();
@@ -271,7 +273,8 @@ public class TestSearchApi {
 			assertEquals(expectedFacet.getDimension(), actualFacet.getDimension());
 			List<FacetLabel> expectedLabels = expectedFacet.getFacets();
 			List<FacetLabel> actualLabels = actualFacet.getFacets();
-			assertEquals(expectedLabels.size(), actualLabels.size());
+			String message = "Expected " + expectedLabels.toString() + " but got " + actualLabels.toString();
+			assertEquals(message, expectedLabels.size(), actualLabels.size());
 			for (int j = 0; j < expectedLabels.size(); j++) {
 				FacetLabel expectedLabel = expectedLabels.get(j);
 				FacetLabel actualLabel = actualLabels.get(j);
@@ -279,7 +282,7 @@ public class TestSearchApi {
 				Long expectedValue = expectedLabel.getValue();
 				Long actualValue = actualLabel.getValue();
 				assertEquals(label, actualLabel.getLabel());
-				String message = "Label <" + label + ">: ";
+				message = "Label <" + label + ">: ";
 				assertEquals(message, expectedValue, actualValue);
 			}
 		}
@@ -425,7 +428,8 @@ public class TestSearchApi {
 		return parameter;
 	}
 
-	private Parameter parameter(long id, String value, double rangeBottom, double rangeTop, ParameterType parameterType, EntityBaseBean parent) {
+	private Parameter parameter(long id, String value, double rangeBottom, double rangeTop, ParameterType parameterType,
+			EntityBaseBean parent) {
 		Parameter parameter = parameter(id, parameterType, parent);
 		parameter.setStringValue(value);
 		parameter.setRangeBottom(rangeBottom);
@@ -515,6 +519,8 @@ public class TestSearchApi {
 
 		Instrument instrumentZero = populateInstrument(queue, 0L);
 		Instrument instrumentOne = populateInstrument(queue, 1L);
+		Technique techniqueZero = populateTechnique(queue, 0L);
+		Technique techniqueOne = populateTechnique(queue, 1L);
 
 		for (int investigationId = 0; investigationId < NUMINV; investigationId++) {
 			String word = word(investigationId % 26, (investigationId + 7) % 26, (investigationId + 17) % 26);
@@ -565,6 +571,12 @@ public class TestSearchApi {
 				endDate = new Date(now + (datasetId + 1) * 60000);
 				word = word("DS", datasetId % 26);
 				Dataset dataset = dataset(datasetId, word, startDate, endDate, investigation);
+
+				if (datasetId % 2 == 0) {
+					populateDatasetTechnique(queue, techniqueZero, dataset);
+				} else {
+					populateDatasetTechnique(queue, techniqueOne, dataset);
+				}
 
 				if (datasetId < NUMSAMP) {
 					word = word("SType ", datasetId);
@@ -623,6 +635,41 @@ public class TestSearchApi {
 		instrumentScientist.setUser(user);
 		queue.add(SearchApi.encodeOperation("create", instrumentScientist));
 		return instrument;
+	}
+
+	/**
+	 * Queues creation of an Technique.
+	 * 
+	 * @param queue       Queue to add create operations to.
+	 * @param techniqueId ICAT entity Id to use for the Technique.
+	 * @return The Technique entity created.
+	 * @throws IcatException
+	 */
+	private Technique populateTechnique(List<String> queue, long techniqueId) throws IcatException {
+		Technique technique = new Technique();
+		technique.setId(techniqueId);
+		technique.setName("technique" + techniqueId);
+		technique.setDescription("Technique number " + techniqueId);
+		technique.setPid(Long.toString(techniqueId));
+		queue.add(SearchApi.encodeOperation("create", technique));
+		return technique;
+	}
+
+	/**
+	 * Queues creation of an DatasetTechnique.
+	 * 
+	 * @param queue Queue to add create operations to.
+	 * @return The DatasetTechnique entity created.
+	 * @throws IcatException
+	 */
+	private DatasetTechnique populateDatasetTechnique(List<String> queue, Technique technique, Dataset dataset)
+			throws IcatException {
+		DatasetTechnique datasetTechnique = new DatasetTechnique();
+		datasetTechnique.setId(technique.getId() * 100 + dataset.getId());
+		datasetTechnique.setTechnique(technique);
+		datasetTechnique.setDataset(dataset);
+		queue.add(SearchApi.encodeOperation("create", datasetTechnique));
+		return datasetTechnique;
 	}
 
 	private String word(int j, int k, int l) {
@@ -915,6 +962,14 @@ public class TestSearchApi {
 		lsr = searchApi.getResults(buildQuery("Dataset", "b1", "dsddd", new Date(now + 60000 * 3),
 				new Date(now + 60000 * 6), pojos, null), 100, null);
 		checkResults(lsr);
+
+		// Test DatasetTechnique Facets
+		JsonObject stringFacetRequestZero = buildFacetStringRequest("dataset.id", "0", "technique.name");
+		JsonObject stringFacetRequestOne = buildFacetStringRequest("dataset.id", "1", "technique.name");
+		FacetDimension facetZero = new FacetDimension("", "technique.name", new FacetLabel("technique0", 1L));
+		FacetDimension facetOne = new FacetDimension("", "technique.name", new FacetLabel("technique1", 1L));
+		checkFacets(searchApi.facetSearch("DatasetTechnique", stringFacetRequestZero, 5, 5), facetZero);
+		checkFacets(searchApi.facetSearch("DatasetTechnique", stringFacetRequestOne, 5, 5), facetOne);
 	}
 
 	@Test
@@ -1086,15 +1141,15 @@ public class TestSearchApi {
 		query = buildQuery("Investigation", null, "visitId:visitId sample.name:ddd", null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
-		// Individual MUST should work when applied to either an Investigation or Sample field
+		// Individual MUST should work when applied to either an Investigation or Sample
 		query = buildQuery("Investigation", null, "+visitId:visitId", null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
 		query = buildQuery("Investigation", null, "+sample.name:ddd", null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L);
-		// This query is expected to fail, as we apply both terms to Investigation and Sample
-		// (since we have no fields) and neither possesses both terms.
+		// This query is expected to fail, as we apply both terms to Investigation and
+		// Sample (since we have no fields) and neither possesses both terms.
 		query = buildQuery("Investigation", null, "+visitId +ddd", null, null, null, null);
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr);
@@ -1118,9 +1173,9 @@ public class TestSearchApi {
 			} catch (IcatException e) {
 				assertEquals("Lucene is not currently locked for Dataset", e.getMessage());
 			}
-			searchApi.lock("Dataset", true);
+			searchApi.lock("Dataset", 0L, 1L, true);
 			try {
-				searchApi.lock("Dataset", true);
+				searchApi.lock("Dataset", 0L, 1L, true);
 				fail();
 			} catch (IcatException e) {
 				assertEquals("Lucene already locked for Dataset", e.getMessage());
@@ -1153,7 +1208,10 @@ public class TestSearchApi {
 		List<String> fields = Arrays.asList("id", "fileSize", "fileCount");
 
 		// Create
-		modify(SearchApi.encodeOperation("create", investigation), SearchApi.encodeOperation("create", dataset), SearchApi.encodeOperation("create", datafile));
+		String createInvestigation = SearchApi.encodeOperation("create", investigation);
+		String createDataset = SearchApi.encodeOperation("create", dataset);
+		String createDatafile = SearchApi.encodeOperation("create", datafile);
+		modify(createInvestigation, createDataset, createDatafile);
 		checkFileSize(datafileQuery, fields, 123, 1);
 		checkFileSize(datasetQuery, fields, 123, 1);
 		checkFileSize(investigationQuery, fields, 123, 1);
@@ -1171,17 +1229,17 @@ public class TestSearchApi {
 		checkFileSize(investigationQuery, fields, 0, 0);
 	}
 
-	private void checkFileSize(JsonObject query, List<String> fields, long expectedFileSize, long expectedFileCount) throws IcatException {
+	private void checkFileSize(JsonObject query, List<String> fields, long expectedFileSize, long expectedFileCount)
+			throws IcatException {
 		SearchResult results = searchApi.getResults(query, null, 5, null, fields);
 		checkResults(results, 0L);
 		JsonObject source = results.getResults().get(0).getSource();
 		long fileSize = source.getJsonNumber("fileSize").longValueExact();
 		long fileCount = source.getJsonNumber("fileCount").longValueExact();
-		assertEquals(expectedFileSize,fileSize);
-		assertEquals(expectedFileCount,fileCount);
+		assertEquals(expectedFileSize, fileSize);
+		assertEquals(expectedFileCount, fileCount);
 	}
 
-	
 	@Test
 	public void modifyDatafile() throws IcatException {
 		// Build entities
@@ -1200,9 +1258,10 @@ public class TestSearchApi {
 		JsonObject pngQuery = buildQuery("Datafile", null, "datafileFormat.name:png", null, null, null, null);
 		JsonObject lowRange = buildFacetRangeObject("low", 0L, 2L);
 		JsonObject highRange = buildFacetRangeObject("high", 2L, 4L);
-		JsonObject rangeFacetRequest = buildFacetRangeRequest(buildFacetIdQuery("42"), "date", lowRange, highRange);
-		JsonObject stringFacetRequest = buildFacetStringRequest("42", "datafileFormat.name");
-		JsonObject sparseFacetRequest = Json.createObjectBuilder().add("query", buildFacetIdQuery("42")).build();
+		JsonObject facetIdQuery = buildFacetIdQuery("id", "42");
+		JsonObject rangeFacetRequest = buildFacetRangeRequest(facetIdQuery, "date", lowRange,highRange);
+		JsonObject stringFacetRequest = buildFacetStringRequest("id", "42", "datafileFormat.name");
+		JsonObject sparseFacetRequest = Json.createObjectBuilder().add("query", facetIdQuery).build();
 		FacetDimension lowFacet = new FacetDimension("", "date", new FacetLabel("low", 1L), new FacetLabel("high", 0L));
 		FacetDimension highFacet = new FacetDimension("", "date", new FacetLabel("low", 0L),
 				new FacetLabel("high", 1L));
@@ -1340,14 +1399,16 @@ public class TestSearchApi {
 		JsonObjectBuilder filterBuilder = Json.createObjectBuilder();
 		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 		JsonObject value = Json.createObjectBuilder().add("field", "numericValue").add("exact", 273).build();
-		JsonObject numericName = Json.createObjectBuilder().add("field", "type.name").add("value", "numericParameter").build();
+		JsonObject numericName = Json.createObjectBuilder().add("field", "type.name").add("value", "numericParameter")
+				.build();
 		arrayBuilder.add(numericName).add(value);
 		filterBuilder.add("key", "key").add("label", "label").add("filter", arrayBuilder);
 		JsonObject numericFilter = filterBuilder.build();
 
 		filterBuilder = Json.createObjectBuilder();
 		arrayBuilder = Json.createArrayBuilder();
-		JsonObject rangeName = Json.createObjectBuilder().add("field", "type.name").add("value", "rangeParameter").build();
+		JsonObject rangeName = Json.createObjectBuilder().add("field", "type.name").add("value", "rangeParameter")
+				.build();
 		arrayBuilder.add(rangeName).add(value);
 		filterBuilder.add("key", "key").add("label", "label").add("filter", arrayBuilder);
 		JsonObject rangeFilter = filterBuilder.build();

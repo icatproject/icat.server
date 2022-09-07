@@ -199,4 +199,10 @@ public class Facility extends EntityBaseBean implements Serializable {
 		this.url = url;
 	}
 
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "facility.name", name);
+		SearchApi.encodeString(gen, "facility.id", id);
+	}
+
 }

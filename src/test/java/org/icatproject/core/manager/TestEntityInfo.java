@@ -47,9 +47,10 @@ public class TestEntityInfo {
 	@Test
 	public void testHasSearchDoc() throws Exception {
 		Set<String> docdbeans = new HashSet<>(Arrays.asList("Datafile", "DatafileFormat", "DatafileParameter",
-				"Dataset", "DatasetParameter", "DatasetType", "Facility", "Instrument", "InstrumentScientist",
-				"Investigation", "InvestigationInstrument", "InvestigationParameter", "InvestigationType",
-				"InvestigationUser", "ParameterType", "Sample", "SampleType", "SampleParameter", "User"));
+				"Dataset", "DatasetParameter", "DatasetTechnique", "DatasetType", "Facility", "Instrument",
+				"InstrumentScientist", "Investigation", "InvestigationInstrument", "InvestigationParameter",
+				"InvestigationType", "InvestigationUser", "ParameterType", "Sample", "SampleType", "SampleParameter",
+				"Technique", "User"));
 		for (String beanName : EntityInfoHandler.getEntityNamesList()) {
 			@SuppressWarnings("unchecked")
 			Class<? extends EntityBaseBean> bean = (Class<? extends EntityBaseBean>) Class
@@ -180,8 +181,10 @@ public class TestEntityInfo {
 						+ "startDate,studyInvestigations,summary,title,type,visitId",
 				Investigation.class);
 		testField("complete,dataCollectionDatasets,datafiles,datasetInstruments,datasetTechniques,description,"
-				+ "doi,endDate,fileCount,fileSize,investigation,location,name,parameters,sample,startDate,type", Dataset.class);
-		testField("dataCollectionDatafiles,dataCollectionDatasets,dataCollectionInvestigations,dataPublications,doi,jobsAsInput,jobsAsOutput,parameters",
+				+ "doi,endDate,fileCount,fileSize,investigation,location,name,parameters,sample,startDate,type",
+				Dataset.class);
+		testField(
+				"dataCollectionDatafiles,dataCollectionDatasets,dataCollectionInvestigations,dataPublications,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
 		testField("description,endDate,name,pid,startDate,status,studyInvestigations,user", Study.class);

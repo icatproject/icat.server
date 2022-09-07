@@ -1626,6 +1626,8 @@ public class EntityBeanManager {
 				return SearchManager.buildFacetQuery(filterObject, jsonFacet);
 			} else if (target.contains("Parameter")) {
 				relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
+			} else if (target.contains("DatasetTechnique")) {
+				relationship = eiHandler.getRelationshipsByName(klass).get("datasetTechniques");
 			} else {
 				relationship = eiHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
 			}

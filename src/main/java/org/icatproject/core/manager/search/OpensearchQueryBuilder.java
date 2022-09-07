@@ -139,7 +139,7 @@ public class OpensearchQueryBuilder {
 
     /**
      * @param field Field containing on of the terms.
-     * @param values JsonArrat of possible terms.
+     * @param values JsonArray of possible terms.
      * @return <code>{"terms": {`field`: `values`}}</code>
      */
     public static JsonObject buildTermsQuery(String field, JsonArray values) {
