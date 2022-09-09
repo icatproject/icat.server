@@ -23,6 +23,7 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
 import org.icatproject.core.IcatException;
+import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.DatafileFormat;
 import org.icatproject.core.entity.DatafileParameter;
@@ -106,15 +107,20 @@ public class TestSearchApi {
 
 	@Parameterized.Parameters
 	public static Iterable<SearchApi> data() throws URISyntaxException, IcatException {
-		String luceneUrl = System.getProperty("luceneUrl");
-		logger.info("Using Lucene service at {}", luceneUrl);
-		URI luceneUri = new URI(luceneUrl);
-
-		String opensearchUrl = System.getProperty("opensearchUrl");
-		logger.info("Using Opensearch/Elasticsearch service at {}", opensearchUrl);
-		URI opensearchUri = new URI(opensearchUrl);
-
-		return Arrays.asList(new LuceneApi(luceneUri), new OpensearchApi(opensearchUri, "\u2103: celsius", false));
+		String searchEngine = System.getProperty("searchEngine");
+		String searchUrls = System.getProperty("searchUrls");
+		URI searchUri = new URI(searchUrls);
+		logger.info("Using {} service at {}", searchEngine, searchUrls);
+		switch (searchEngine) {
+			case "LUCENE":
+				return Arrays.asList(new LuceneApi(searchUri));
+			case "OPENSEARCH":
+			case "ELASTICSEARCH":
+				return Arrays.asList(new OpensearchApi(searchUri, "\u2103: celsius", false));
+			default:
+				String msg = "Search engine must be one of LUCENE, OPENSEARCH or ELASTICSEARCH but was " + searchEngine;
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER, msg);
+		}
 	}
 
 	@Parameterized.Parameter

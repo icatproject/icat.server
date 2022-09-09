@@ -43,6 +43,7 @@ notification.Datafile = CU
 log.list = SESSION WRITE READ INFO
 
 # Search Engine
+# LUCENE, OPENSEARCH and ELASTICSEARCH engines are supported, however the latter two are considered experimental
 search.engine = LUCENE
 search.urls = https://localhost:8181
 search.populateBlockSize = 10000

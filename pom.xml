@@ -3,7 +3,7 @@
 
 	<groupId>org.icatproject</groupId>
 	<artifactId>icat.server</artifactId>
-	<version>5.0.1-SNAPSHOT</version>
+	<version>5.1.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>ICAT Server</name>
 	<description>A metadata catalogue to support Large Facility experimental data, 
@@ -113,13 +113,13 @@
 		<dependency>
 			<groupId>org.icatproject</groupId>
 			<artifactId>icat.utils</artifactId>
-			<version>4.16.2-SNAPSHOT</version>
+			<version>4.17.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.icatproject</groupId>
 			<artifactId>icat.client</artifactId>
-			<version>5.0.1-SNAPSHOT</version>
+			<version>5.1.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -226,8 +226,8 @@
 					</excludes>
 					<systemPropertyVariables>
 						<javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
-						<luceneUrl>${luceneUrl}</luceneUrl>
-						<opensearchUrl>${opensearchUrl}</opensearchUrl>
+						<searchEngine>${searchEngine}</searchEngine>
+						<searchUrls>${searchUrls}</searchUrls>
 					</systemPropertyVariables>
 					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>
@@ -246,8 +246,7 @@
 						<javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
 						<serverUrl>${serverUrl}</serverUrl>
 						<searchEngine>${searchEngine}</searchEngine>
-						<luceneUrl>${luceneUrl}</luceneUrl>
-						<opensearchUrl>${opensearchUrl}</opensearchUrl>
+						<searchUrls>${searchUrls}</searchUrls>
 					</systemPropertyVariables>
 				</configuration>
 				<executions>
@@ -328,8 +327,7 @@
 								<argument>${containerHome}</argument>
 								<argument>${serverUrl}</argument>
 								<argument>${searchEngine}</argument>
-								<argument>${luceneUrl}</argument>
-								<argument>${opensearchUrl}</argument>
+								<argument>${searchUrls}</argument>
 							</arguments>
 						</configuration>
 						<goals>

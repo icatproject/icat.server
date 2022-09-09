@@ -92,13 +92,11 @@ public class TestRS {
 			throws URISyntaxException, MalformedURLException, org.icatproject.core.IcatException {
 		if (searchApi == null) {
 			String searchEngine = System.getProperty("searchEngine");
+			String urlString = System.getProperty("searchUrls");
+			URI uribase = new URI(urlString);
 			if (searchEngine.equals("LUCENE")) {
-				String urlString = System.getProperty("luceneUrl");
-				URI uribase = new URI(urlString);
 				searchApi = new LuceneApi(uribase);
 			} else if (searchEngine.equals("OPENSEARCH") || searchEngine.equals("ELASTICSEARCH")) {
-				String urlString = System.getProperty("opensearchUrl");
-				URI uribase = new URI(urlString);
 				searchApi = new OpensearchApi(uribase);
 			} else {
 				throw new RuntimeException(

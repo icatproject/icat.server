@@ -8,20 +8,15 @@ import shutil
 from zipfile import ZipFile
 import subprocess
 
-if len(sys.argv) != 6:
+if len(sys.argv) != 5:
     raise RuntimeError("Wrong number of arguments")
 
 containerHome = sys.argv[1]
 icat_url = sys.argv[2]
 search_engine = sys.argv[3]
-lucene_url = sys.argv[4]
-opensearch_url = sys.argv[5]
+search_urls = sys.argv[4]
 
-if search_engine == "LUCENE":
-    search_urls = lucene_url
-elif search_engine == "OPENSEARCH" or search_engine == "ELASTICSEARCH":
-    search_urls = opensearch_url
-else:
+if search_engine not in ["LUCENE", "OPENSEARCH", "ELASTICSEARCH"]:
     raise RuntimeError("Search engine %s unrecognised, " % search_engine
                        + "should be one of LUCENE, ELASTICSEARCH, OPENSEARCH")
 

@@ -934,6 +934,10 @@ public class ICATRest {
 	 * 
 	 * @summary Free text id search.
 	 * 
+	 * @deprecated in favour of {@link #searchDocuments}, which offers more
+	 *             functionality and returns full documents rather than just ICAT
+	 *             ids.
+	 * 
 	 * @param sessionId
 	 *                  a sessionId of a user which takes the form
 	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
@@ -1028,14 +1032,6 @@ public class ICATRest {
 	 *                  >lucene parser</a> but avoid trying to use fields. This is
 	 *                  only respected in the case of an investigation search.</dd>
 	 *                  </dl>
-	 * @param sort
-	 *                  JSON encoded sort object. Each key should be a field on the
-	 *                  targeted Document, with a value of "asc" or "desc" to
-	 *                  specify the order of the results. Multiple pairs can be
-	 *                  provided, in which case each subsequent sort is used as a
-	 *                  tiebreaker for the previous one. If no sort is specified,
-	 *                  then results will be returned in order of relevance to the
-	 *                  search query, with their search engine id as a tiebreaker.
 	 * 
 	 * @param maxCount
 	 *                  maximum number of entities to return
@@ -1048,8 +1044,9 @@ public class ICATRest {
 	@GET
 	@Path("lucene/data")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String search(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
-			@QueryParam("query") String query, @QueryParam("maxCount") int maxCount, @QueryParam("sort") String sort)
+	@Deprecated
+	public String lucene(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
+			@QueryParam("query") String query, @QueryParam("maxCount") int maxCount)
 			throws IcatException {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
@@ -1094,7 +1091,7 @@ public class ICATRest {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
 			}
 			logger.debug("Free text search with query: {}", jo.toString());
-			objects = beanManager.freeTextSearch(userName, jo, maxCount, sort, manager, request.getRemoteAddr(), klass);
+			objects = beanManager.freeTextSearch(userName, jo, maxCount, null, manager, request.getRemoteAddr(), klass);
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartArray();
 			for (ScoredEntityBaseBean sb : objects) {
@@ -1264,7 +1261,7 @@ public class ICATRest {
 	@GET
 	@Path("search/documents")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String search(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
+	public String searchDocuments(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
 			@QueryParam("query") String query, @QueryParam("search_after") String searchAfter,
 			@QueryParam("minCount") int minCount, @QueryParam("maxCount") int maxCount, @QueryParam("sort") String sort,
 			@QueryParam("restrict") boolean restrict) throws IcatException {
@@ -1399,7 +1396,7 @@ public class ICATRest {
 	@GET
 	@Path("facet/documents")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String facet(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
+	public String facetDocuments(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
 			@QueryParam("query") String query) throws IcatException {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
@@ -1576,6 +1573,35 @@ public class ICATRest {
 		} catch (InterruptedException e) {
 			// Ignore
 		}
+	}
+
+	/**
+	 * Clear and repopulate lucene documents for the specified entityName
+	 * 
+	 * @deprecated in favour of {@link #searchPopulate}, which allows an upper limit
+	 *             on population to be set and makes deletion of existing documents
+	 *             optional.
+	 * 
+	 * @summary Lucene Populate
+	 * 
+	 * @param sessionId
+	 *                   a sessionId of a user listed in rootUserNames
+	 * @param entityName
+	 *                   the name of the entity
+	 * @param minid
+	 *                   only process entities with id values greater than this
+	 *                   value
+	 * 
+	 * @throws IcatException
+	 *                       when something is wrong
+	 */
+	@POST
+	@Path("lucene/db/{entityName}/{minid}")
+	@Deprecated
+	public void lucenePopulate(@FormParam("sessionId") String sessionId, @PathParam("entityName") String entityName,
+			@PathParam("minid") long minid) throws IcatException {
+		checkRoot(sessionId);
+		beanManager.searchPopulate(entityName, minid, null, true, manager);
 	}
 
 	/**
