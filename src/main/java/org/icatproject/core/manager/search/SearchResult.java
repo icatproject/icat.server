@@ -19,6 +19,10 @@ public class SearchResult {
 	public SearchResult() {
 	}
 
+	public SearchResult(List<FacetDimension> dimensions) {
+		this.dimensions = dimensions;
+	}
+
 	public SearchResult(JsonValue searchAfter, List<ScoredEntityBaseBean> results, List<FacetDimension> dimensions) {
 		this.searchAfter = searchAfter;
 		this.results = results;

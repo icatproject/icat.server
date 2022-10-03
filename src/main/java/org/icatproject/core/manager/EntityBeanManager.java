@@ -1128,9 +1128,6 @@ public class EntityBeanManager {
 			Session session = getSession(sessionId, manager);
 			String userName = session.getUserName();
 			logger.debug("user: " + userName + " is associated with: " + sessionId);
-			// TODO RM
-			// logger.trace("userName: {}", userName);
-			// userName = userName.equals("db/notroot") ? "notroot" : userName;
 			return userName;
 		} catch (IcatException e) {
 			logger.debug("sessionId " + sessionId + " is not associated with valid session " + e.getMessage());
@@ -1408,7 +1405,7 @@ public class EntityBeanManager {
 	 * 
 	 * @param userName User performing the search, used for authorisation.
 	 * @param jo       JsonObject containing the details of the query to be used.
-	 * @param limit    The maximum number of results to collect before returning. If
+	 * @param maxCount The maximum number of results to collect before returning. If
 	 *                 a batch from the search engine has more than this many
 	 *                 authorised results, then the excess results will be
 	 *                 discarded.
@@ -1418,56 +1415,15 @@ public class EntityBeanManager {
 	 * @return SearchResult for the query.
 	 * @throws IcatException
 	 */
-	public List<ScoredEntityBaseBean> freeTextSearch(String userName, JsonObject jo, int limit, String sort,
+	public List<ScoredEntityBaseBean> freeTextSearch(String userName, JsonObject jo, int maxCount,
 			EntityManager manager, String ip, Class<? extends EntityBaseBean> klass) throws IcatException {
 		long startMillis = System.currentTimeMillis();
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
-		JsonValue searchAfter = null;
-		JsonValue lastSearchAfter = null;
 		if (searchActive) {
-			SearchResult lastSearchResult = null;
-			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
-			/*
-			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to search engine
-			 */
-			int blockSize = Math.max(1000, limit);
-
-			do {
-				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, Arrays.asList("id"));
-				allResults = lastSearchResult.getResults();
-				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, limit, userName, manager, klass);
-				if (lastBean == null) {
-					// Haven't stopped early, so use the Lucene provided searchAfter document
-					lastSearchAfter = lastSearchResult.getSearchAfter();
-					if (lastSearchAfter == null) {
-						break; // If searchAfter is null, we ran out of results so stop here
-					}
-					searchAfter = lastSearchAfter;
-				} else {
-					// Have stopped early by reaching the limit, so build a searchAfter document
-					lastSearchAfter = searchManager.buildSearchAfter(lastBean, sort);
-					break;
-				}
-				if (System.currentTimeMillis() - startMillis > searchMaxSearchTimeMillis) {
-					String msg = "Search cancelled for exceeding " + searchMaxSearchTimeMillis / 1000 + " seconds";
-					throw new IcatException(IcatExceptionType.INTERNAL, msg);
-				}
-			} while (results.size() < limit);
+			searchDocuments(userName, jo, null, maxCount, maxCount, null, manager, klass,
+					startMillis, results, Arrays.asList("id"));
 		}
-
-		if (logRequests.contains("R")) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-				gen.write("userName", userName);
-				if (results.size() > 0) {
-					gen.write("entityId", results.get(0).getEntityBaseBeanId());
-				}
-				gen.writeEnd();
-			}
-			transmitter.processMessage("freeTextSearch", ip, baos.toString(), startMillis);
-		}
-		logger.debug("Returning {} results", results.size());
+		logSearch(userName, ip, startMillis, results, "freeTextSearch");
 		return results;
 	}
 
@@ -1494,44 +1450,16 @@ public class EntityBeanManager {
 	 * @throws IcatException
 	 */
 	public SearchResult freeTextSearchDocs(String userName, JsonObject jo, JsonValue searchAfter, int minCount,
-			int maxCount, String sort, EntityManager manager, String ip,
-			Class<? extends EntityBaseBean> klass) throws IcatException {
+			int maxCount, String sort, EntityManager manager, String ip, Class<? extends EntityBaseBean> klass)
+			throws IcatException {
 		long startMillis = System.currentTimeMillis();
-		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		JsonValue lastSearchAfter = null;
+		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		List<FacetDimension> dimensions = new ArrayList<>();
 		if (searchActive) {
-			SearchResult lastSearchResult = null;
-			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
 			List<String> fields = SearchManager.getPublicSearchFields(gateKeeper, klass.getSimpleName());
-			/*
-			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to search engine
-			 */
-			int blockSize = Math.max(1000, maxCount);
-
-			do {
-				lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
-				allResults = lastSearchResult.getResults();
-				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, maxCount, userName, manager,
-						klass);
-				if (lastBean == null) {
-					// Haven't stopped early, so use the Lucene provided searchAfter document
-					lastSearchAfter = lastSearchResult.getSearchAfter();
-					if (lastSearchAfter == null) {
-						break; // If searchAfter is null, we ran out of results so stop here
-					}
-					searchAfter = lastSearchAfter;
-				} else {
-					// Have stopped early by reaching the limit, so build a searchAfter document
-					lastSearchAfter = searchManager.buildSearchAfter(lastBean, sort);
-					break;
-				}
-				if (System.currentTimeMillis() - startMillis > searchMaxSearchTimeMillis) {
-					String msg = "Search cancelled for exceeding " + searchMaxSearchTimeMillis / 1000 + " seconds";
-					throw new IcatException(IcatExceptionType.INTERNAL, msg);
-				}
-			} while (results.size() < minCount);
+			lastSearchAfter = searchDocuments(userName, jo, searchAfter, maxCount, minCount, sort, manager, klass,
+					startMillis, results, fields);
 
 			if (jo.containsKey("facets")) {
 				List<JsonObject> jsonFacets = jo.getJsonArray("facets").getValuesAs(JsonObject.class);
@@ -1544,6 +1472,21 @@ public class EntityBeanManager {
 				}
 			}
 		}
+		logSearch(userName, ip, startMillis, results, "freeTextSearchDocs");
+		return new SearchResult(lastSearchAfter, results, dimensions);
+	}
+
+	/**
+	 * Performs logging dependent on the value of logRequests.
+	 * 
+	 * @param userName    User performing the search
+	 * @param ip          Used for logging only
+	 * @param startMillis The start time of the search in milliseconds
+	 * @param results     List of authorised search results
+	 * @param operation   Name of the calling function
+	 */
+	private void logSearch(String userName, String ip, long startMillis, List<ScoredEntityBaseBean> results,
+			String operation) {
 		if (logRequests.contains("R")) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
@@ -1553,10 +1496,69 @@ public class EntityBeanManager {
 				}
 				gen.writeEnd();
 			}
-			transmitter.processMessage("freeTextSearchDocs", ip, baos.toString(), startMillis);
+			transmitter.processMessage(operation, ip, baos.toString(), startMillis);
 		}
 		logger.debug("Returning {} results", results.size());
-		return new SearchResult(lastSearchAfter, results, dimensions);
+	}
+
+	/**
+	 * Performs batches of searches, the results of which are authorised. Results
+	 * are collected until they run out, minCount is reached, or too much time
+	 * elapses.
+	 * 
+	 * @param userName    User performing the search, used for authorisation.
+	 * @param jo          JsonObject containing the details of the query to be used.
+	 * @param searchAfter JsonValue representation of the final result from a
+	 *                    previous search.
+	 * @param minCount    The minimum number of results to collect before returning.
+	 *                    If a batch from the search engine has at least this many
+	 *                    authorised results, no further batches will be requested.
+	 * @param maxCount    The maximum number of results to collect before returning.
+	 *                    If a batch from the search engine has more than this many
+	 *                    authorised results, then the excess results will be
+	 *                    discarded.
+	 * @param sort        String of Json representing sort criteria.
+	 * @param manager     EntityManager for finding entities from their Id.
+	 * @param klass       Class of the entity to search.
+	 * @param startMillis The start time of the search in milliseconds
+	 * @param results     List of results from the search. Authorised results will
+	 *                    be appended to this List.
+	 * @param fields      Fields to include in the returned Documents.
+	 * @return JsonValue representing the last result of the search, formatted to
+	 *         allow future searches to "search after" this result. May be null.
+	 * @throws IcatException If the search exceeds the maximum allowed time.
+	 */
+	private JsonValue searchDocuments(String userName, JsonObject jo, JsonValue searchAfter, int maxCount, int minCount,
+			String sort, EntityManager manager, Class<? extends EntityBaseBean> klass, long startMillis,
+			List<ScoredEntityBaseBean> results, List<String> fields) throws IcatException {
+		/*
+		 * As results may be rejected and maxCount may be 1 ensure that we
+		 * don't make a huge number of calls to search engine
+		 */
+		int blockSize = Math.max(1000, maxCount);
+		JsonValue lastSearchAfter;
+		do {
+			SearchResult lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
+			List<ScoredEntityBaseBean> allResults = lastSearchResult.getResults();
+			ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, maxCount, userName, manager,
+					klass);
+			if (lastBean == null) {
+				// Haven't stopped early, so use the Lucene provided searchAfter document
+				lastSearchAfter = lastSearchResult.getSearchAfter();
+				if (lastSearchAfter == null) {
+					return null; // If searchAfter is null, we ran out of results so stop here
+				}
+				searchAfter = lastSearchAfter;
+			} else {
+				// Have stopped early by reaching the limit, so build a searchAfter document
+				return searchManager.buildSearchAfter(lastBean, sort);
+			}
+			if (System.currentTimeMillis() - startMillis > searchMaxSearchTimeMillis) {
+				String msg = "Search cancelled for exceeding " + searchMaxSearchTimeMillis / 1000 + " seconds";
+				throw new IcatException(IcatExceptionType.INTERNAL, msg);
+			}
+		} while (results.size() < minCount);
+		return lastSearchAfter;
 	}
 
 	/**
@@ -1569,7 +1571,6 @@ public class EntityBeanManager {
 	 * @throws IcatException
 	 */
 	public SearchResult facetDocs(JsonObject jo, Class<? extends EntityBaseBean> klass) throws IcatException {
-		JsonValue lastSearchAfter = null;
 		List<FacetDimension> dimensions = new ArrayList<>();
 		if (searchActive && jo.containsKey("facets")) {
 			List<JsonObject> jsonFacets = jo.getJsonArray("facets").getValuesAs(JsonObject.class);
@@ -1582,7 +1583,7 @@ public class EntityBeanManager {
 				}
 			}
 		}
-		return new SearchResult(lastSearchAfter, new ArrayList<>(), dimensions);
+		return new SearchResult(dimensions);
 	}
 
 	/**

@@ -1091,7 +1091,7 @@ public class ICATRest {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
 			}
 			logger.debug("Free text search with query: {}", jo.toString());
-			objects = beanManager.freeTextSearch(userName, jo, maxCount, null, manager, request.getRemoteAddr(), klass);
+			objects = beanManager.freeTextSearch(userName, jo, maxCount, manager, request.getRemoteAddr(), klass);
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartArray();
 			for (ScoredEntityBaseBean sb : objects) {

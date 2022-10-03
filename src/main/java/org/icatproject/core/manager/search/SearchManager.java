@@ -538,11 +538,7 @@ public class SearchManager {
 		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 		results.forEach(r -> arrayBuilder.add(Long.toString(r.getEntityBaseBeanId())));
 		JsonObject terms = Json.createObjectBuilder().add(idField, arrayBuilder.build()).build();
-		JsonObjectBuilder objectBuilder = Json.createObjectBuilder().add("query", terms);
-		if (facetJson.containsKey("dimensions")) {
-			objectBuilder.add("dimensions", facetJson.getJsonArray("dimensions"));
-		}
-		return objectBuilder.build();
+		return buildFacetQuery(terms, facetJson);
 	}
 
 	/**
@@ -570,11 +566,7 @@ public class SearchManager {
 			}
 		});
 		JsonObject terms = Json.createObjectBuilder().add("sample.id", arrayBuilder.build()).build();
-		JsonObjectBuilder objectBuilder = Json.createObjectBuilder().add("query", terms);
-		if (facetJson.containsKey("dimensions")) {
-			objectBuilder.add("dimensions", facetJson.getJsonArray("dimensions"));
-		}
-		return objectBuilder.build();
+		return buildFacetQuery(terms, facetJson);
 	}
 
 	/**
@@ -605,7 +597,7 @@ public class SearchManager {
 	private static List<String> buildPublicSearchFields(GateKeeper gateKeeper, Map<String, Relationship[]> map) {
 		List<String> fields = new ArrayList<>();
 		for (Entry<String, Relationship[]> entry : map.entrySet()) {
-			Boolean includeField = true;
+			boolean includeField = true;
 			if (entry.getValue() != null) {
 				for (Relationship relationship : entry.getValue()) {
 					if (!gateKeeper.allowed(relationship)) {

@@ -21,14 +21,7 @@ public class FacetLabel {
 	}
 
 	public FacetLabel(JsonObject jsonObject) {
-		label = jsonObject.getString("key");
-		value = jsonObject.getJsonNumber("doc_count").longValueExact();
-		if (jsonObject.containsKey("from")) {
-			from = jsonObject.getJsonNumber("from");
-		}
-		if (jsonObject.containsKey("to")) {
-			to = jsonObject.getJsonNumber("to");
-		}
+		this(jsonObject.getString("key"), jsonObject);
 	}
 
 	public FacetLabel(String label, JsonObject jsonObject) {
