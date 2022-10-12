@@ -48,7 +48,7 @@ public class LuceneApi extends SearchApi {
 	private static String getTargetPath(JsonObject query) throws IcatException {
 		if (!query.containsKey("target")) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-					"'target' must be present in query for LuceneApi, but it was " + query.toString());
+					"'target' must be present in query for LuceneApi, but it was " + query);
 		}
 		String path = query.getString("target").toLowerCase();
 		if (!indices.contains(path)) {
@@ -179,8 +179,8 @@ public class LuceneApi extends SearchApi {
 		for (JsonObject resultObject : resultsArray) {
 			int luceneDocId = resultObject.getInt("_id");
 			int shardIndex = resultObject.getInt("_shardIndex");
-			Float score = Float.NaN;
-			if (resultObject.keySet().contains("_score")) {
+			float score = Float.NaN;
+			if (resultObject.containsKey("_score")) {
 				score = resultObject.getJsonNumber("_score").bigDecimalValue().floatValue();
 			}
 			JsonObject source = resultObject.getJsonObject("_source");

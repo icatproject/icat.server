@@ -168,43 +168,39 @@ public class OpensearchScriptBuilder {
      *               nested entity will be removed from the array.
      * @return
      */
-    public static String buildParameterTypeScript(Set<String> docFields, boolean update) {
-        String source = findNestedChild("investigationparameter", true);
-        String ctxSource = "ctx._source.investigationparameter.get(childIndex)";
-        if (docFields != null) {
-            source += "if (childIndex != -1) { ";
-            for (String field : docFields) {
-                source += updateField(field, ctxSource, update);
-            }
-            source += " } ";
-        }
-        source += findNestedChild("datasetparameter", false);
-        ctxSource = "ctx._source.datasetparameter.get(childIndex)";
-        if (docFields != null) {
-            source += "if (childIndex != -1) { ";
-            for (String field : docFields) {
-                source += updateField(field, ctxSource, update);
-            }
-            source += " } ";
-        }
-        source += findNestedChild("datafileparameter", false);
-        ctxSource = "ctx._source.datafileparameter.get(childIndex)";
-        if (docFields != null) {
-            source += "if (childIndex != -1) { ";
-            for (String field : docFields) {
-                source += updateField(field, ctxSource, update);
-            }
-            source += " } ";
-        }
-        source += findNestedChild("sampleparameter", false);
-        ctxSource = "ctx._source.sampleparameter.get(childIndex)";
-        if (docFields != null) {
-            source += "if (childIndex != -1) { ";
-            for (String field : docFields) {
-                source += updateField(field, ctxSource, update);
-            }
-            source += " } ";
-        }
+    public static String buildParameterTypesScript(Set<String> docFields, boolean update) {
+        String source = buildParameterTypeScript(docFields, update, "investigationparameter", true);
+        source += buildParameterTypeScript(docFields, update, "datasetparameter", false);
+        source += buildParameterTypeScript(docFields, update, "datafileparameter", false);
+        source += buildParameterTypeScript(docFields, update, "sampleparameter", false);
         return buildScript(source);
+    }
+
+    /**
+     * Modifies a single type of Parameter (Investigation, Dataset, Datafile,
+     * Sample) with changes to a ParameterType.
+     * 
+     * @param update          If true the script will replace a nested entity, else
+     *                        the nested entity will be removed from the array
+     * @param nestedChildName Name of the Parameter entity to modify
+     * @param declareChildId  Whether the childId needs to be declared. This should
+     *                        only be true for the first parameter in the script.
+     * @param fields          The fields belonging to the ParameterType to be
+     *                        modified
+     * 
+     * @return The script to modify the Parameter as a String
+     */
+    private static String buildParameterTypeScript(Set<String> docFields, boolean update, String nestedChildName,
+            boolean declareChildId) {
+        String ctxSource = "ctx._source." + nestedChildName + ".get(childIndex)";
+        String source = findNestedChild(nestedChildName, declareChildId);
+        if (docFields != null) {
+            source += "if (childIndex != -1) { ";
+            for (String field : docFields) {
+                source += updateField(field, ctxSource, update);
+            }
+            source += " } ";
+        }
+        return source;
     }
 }

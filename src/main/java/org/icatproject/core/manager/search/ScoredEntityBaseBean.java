@@ -36,10 +36,10 @@ public class ScoredEntityBaseBean {
 	 *                       a key-value pair in the source JsonObject.
 	 */
 	public ScoredEntityBaseBean(int engineDocId, int shardIndex, float score, JsonObject source) throws IcatException {
-		if (!source.keySet().contains("id")) {
+		if (!source.containsKey("id")) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 					"Document source must have 'id' and the entityBaseBeanId as a key-value pair, but it was "
-							+ source.toString());
+							+ source);
 		}
 		this.engineDocId = engineDocId;
 		this.shardIndex = shardIndex;

@@ -26,6 +26,7 @@ import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
 import javax.persistence.EntityManager;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -139,7 +140,7 @@ public abstract class SearchApi {
 	public static String encodeOperation(String operation, EntityBaseBean bean) throws IcatException {
 		Long icatId = bean.getId();
 		if (icatId == null) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, bean.toString() + " had null id");
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, bean + " had null id");
 		}
 		String entityName = bean.getClass().getSimpleName();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -433,16 +434,7 @@ public abstract class SearchApi {
 	 * @throws IcatException
 	 */
 	protected void post(String path) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(path).build();
-			HttpPost httpPost = new HttpPost(uri);
-			logger.trace("Making call {}", uri);
-			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-			}
-		} catch (URISyntaxException | IOException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
+		postResponse(path, null, null);
 	}
 
 	/**
@@ -453,17 +445,7 @@ public abstract class SearchApi {
 	 * @throws IcatException
 	 */
 	protected void post(String path, String body) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(path).build();
-			HttpPost httpPost = new HttpPost(uri);
-			httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-			logger.trace("Making call {} with body {}", uri, body);
-			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-			}
-		} catch (URISyntaxException | IOException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
+		postResponse(path, body, null);
 	}
 
 	/**
@@ -475,19 +457,7 @@ public abstract class SearchApi {
 	 * @throws IcatException
 	 */
 	protected JsonObject postResponse(String path, String body) throws IcatException {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			URI uri = new URIBuilder(server).setPath(path).build();
-			HttpPost httpPost = new HttpPost(uri);
-			httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-			logger.trace("Making call {} with body {}", uri, body);
-			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-				JsonReader jsonReader = Json.createReader(response.getEntity().getContent());
-				return jsonReader.readObject();
-			}
-		} catch (URISyntaxException | IOException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
+		return postResponse(path, body, null);
 	}
 
 
@@ -503,18 +473,26 @@ public abstract class SearchApi {
 	protected JsonObject postResponse(String path, String body, Map<String, String> parameterMap) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			URIBuilder builder = new URIBuilder(server).setPath(path);
-			for (Entry<String, String> entry : parameterMap.entrySet()) {
-				builder.addParameter(entry.getKey(), entry.getValue());
+			if (parameterMap != null) {
+				for (Entry<String, String> entry : parameterMap.entrySet()) {
+					builder.addParameter(entry.getKey(), entry.getValue());
+				}
 			}
 			URI uri = builder.build();
 			HttpPost httpPost = new HttpPost(uri);
-			httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
+			if (body != null) {
+				httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
+			}
 			logger.trace("Making call {} with body {}", uri, body);
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
 				int code = response.getStatusLine().getStatusCode();
 				Rest.checkStatus(response, code == 400 ? IcatExceptionType.BAD_PARAMETER : IcatExceptionType.INTERNAL);
-				JsonReader jsonReader = Json.createReader(response.getEntity().getContent());
-				return jsonReader.readObject();
+				HttpEntity entity = response.getEntity();
+				if (entity != null) {
+					JsonReader jsonReader = Json.createReader(entity.getContent());
+					return jsonReader.readObject();
+				}
+				return null;
 			}
 		} catch (URISyntaxException | IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());

@@ -18,13 +18,10 @@ import java.util.Set;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
-import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
-import javax.json.JsonString;
 import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
 import javax.persistence.EntityManager;
 
@@ -87,7 +84,7 @@ public class OpensearchApi extends SearchApi {
 	}
 
 	private boolean aggregateFiles = false;
-	private IcatUnits icatUnits;
+	public IcatUnits icatUnits;
 	protected static final Logger logger = LoggerFactory.getLogger(OpensearchApi.class);
 	private static JsonObject indexSettings = Json.createObjectBuilder().add("analysis", Json.createObjectBuilder()
 			.add("analyzer", Json.createObjectBuilder()
@@ -130,7 +127,11 @@ public class OpensearchApi extends SearchApi {
 				new ParentRelation(RelationType.CHILD, "datafile", "dataset",
 						new HashSet<>(Arrays.asList("dataset.name", "dataset.id", "sample.id")))));
 		relations.put("user", Arrays.asList(
-				new ParentRelation(RelationType.CHILD, "instrumentscientist", "user", User.docFields)));
+				new ParentRelation(RelationType.CHILD, "instrumentscientist", "user", User.docFields),
+				new ParentRelation(RelationType.NESTED_GRANDCHILD, "investigation", "investigationuser",
+						User.docFields),
+				new ParentRelation(RelationType.NESTED_GRANDCHILD, "dataset", "investigationuser", User.docFields),
+				new ParentRelation(RelationType.NESTED_GRANDCHILD, "datafile", "investigationuser", User.docFields)));
 		relations.put("sample", Arrays.asList(
 				new ParentRelation(RelationType.CHILD, "dataset", "sample", Sample.docFields),
 				new ParentRelation(RelationType.CHILD, "datafile", "sample", Sample.docFields),
@@ -138,8 +139,7 @@ public class OpensearchApi extends SearchApi {
 		relations.put("sampletype", Arrays.asList(
 				new ParentRelation(RelationType.CHILD, "dataset", "sample.type", SampleType.docFields),
 				new ParentRelation(RelationType.CHILD, "datafile", "sample.type", SampleType.docFields),
-				new ParentRelation(RelationType.NESTED_GRANDCHILD, "investigation", "investigation",
-						SampleType.docFields)));
+				new ParentRelation(RelationType.NESTED_GRANDCHILD, "investigation", "sample", SampleType.docFields)));
 
 		// Nested children are indexed as an array of objects on their parent entity,
 		// and know their parent's id (N.B. InvestigationUsers are also mapped to
@@ -185,11 +185,6 @@ public class OpensearchApi extends SearchApi {
 		relations.put("technique", Arrays.asList(
 				new ParentRelation(RelationType.NESTED_GRANDCHILD, "dataset", "datasettechnique",
 						Technique.docFields)));
-		relations.put("user", Arrays.asList(
-				new ParentRelation(RelationType.NESTED_GRANDCHILD, "investigation", "investigationuser",
-						User.docFields),
-				new ParentRelation(RelationType.NESTED_GRANDCHILD, "dataset", "investigationuser", User.docFields),
-				new ParentRelation(RelationType.NESTED_GRANDCHILD, "datafile", "investigationuser", User.docFields)));
 		relations.put("instrument", Arrays.asList(
 				new ParentRelation(RelationType.NESTED_GRANDCHILD, "investigation", "investigationinstrument",
 						User.docFields),
@@ -237,49 +232,57 @@ public class OpensearchApi extends SearchApi {
 	 */
 	private static JsonObject buildMappings(String index) {
 		JsonObject typeLong = Json.createObjectBuilder().add("type", "long").build();
-		JsonObjectBuilder propertiesBuilder = Json.createObjectBuilder()
-				.add("id", typeLong);
-		if (index.equals("investigation")) {
-			propertiesBuilder
-					.add("type.id", typeLong)
-					.add("facility.id", typeLong)
-					.add("fileSize", typeLong)
-					.add("fileCount", typeLong)
-					.add("sample", buildNestedMapping("investigation.id", "type.id"))
-					.add("sampleparameter", buildNestedMapping("sample.id", "type.id"))
-					.add("investigationparameter", buildNestedMapping("investigation.id", "type.id"))
-					.add("investigationuser", buildNestedMapping("investigation.id", "user.id"))
-					.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"));
-		} else if (index.equals("dataset")) {
-			propertiesBuilder
-					.add("investigation.id", typeLong)
-					.add("type.id", typeLong)
-					.add("sample.id", typeLong)
-					.add("sample.investigaion.id", typeLong)
-					.add("sample.type.id", typeLong)
-					.add("fileSize", typeLong)
-					.add("fileCount", typeLong)
-					.add("datasetparameter", buildNestedMapping("dataset.id", "type.id"))
-					.add("datasettechnique", buildNestedMapping("dataset.id", "technique.id"))
-					.add("investigationuser", buildNestedMapping("investigation.id", "user.id"))
-					.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"))
-					.add("sampleparameter", buildNestedMapping("sample.id", "type.id"));
-		} else if (index.equals("datafile")) {
-			propertiesBuilder
-					.add("investigation.id", typeLong)
-					.add("datafileFormat.id", typeLong)
-					.add("sample.investigaion.id", typeLong)
-					.add("sample.type.id", typeLong)
-					.add("fileSize", typeLong)
-					.add("fileCount", typeLong)
-					.add("datafileparameter", buildNestedMapping("datafile.id", "type.id"))
-					.add("investigationuser", buildNestedMapping("investigation.id", "user.id"))
-					.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"))
-					.add("sampleparameter", buildNestedMapping("sample.id", "type.id"));
-		} else if (index.equals("instrumentscientist")) {
-			propertiesBuilder
-					.add("instrument.id", typeLong)
-					.add("user.id", typeLong);
+		JsonObjectBuilder propertiesBuilder = Json.createObjectBuilder().add("id", typeLong);
+		switch (index) {
+			case "investigation":
+				propertiesBuilder
+						.add("type.id", typeLong)
+						.add("facility.id", typeLong)
+						.add("fileSize", typeLong)
+						.add("fileCount", typeLong)
+						.add("sample", buildNestedMapping("investigation.id", "type.id"))
+						.add("sampleparameter", buildNestedMapping("sample.id", "type.id"))
+						.add("investigationparameter", buildNestedMapping("investigation.id", "type.id"))
+						.add("investigationuser", buildNestedMapping("investigation.id", "user.id"))
+						.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"));
+				break;
+
+			case "dataset":
+				propertiesBuilder
+						.add("investigation.id", typeLong)
+						.add("type.id", typeLong)
+						.add("sample.id", typeLong)
+						.add("sample.investigaion.id", typeLong)
+						.add("sample.type.id", typeLong)
+						.add("fileSize", typeLong)
+						.add("fileCount", typeLong)
+						.add("datasetparameter", buildNestedMapping("dataset.id", "type.id"))
+						.add("datasettechnique", buildNestedMapping("dataset.id", "technique.id"))
+						.add("investigationuser", buildNestedMapping("investigation.id", "user.id"))
+						.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"))
+						.add("sampleparameter", buildNestedMapping("sample.id", "type.id"));
+				break;
+
+			case "datafile":
+				propertiesBuilder
+						.add("investigation.id", typeLong)
+						.add("datafileFormat.id", typeLong)
+						.add("sample.investigaion.id", typeLong)
+						.add("sample.type.id", typeLong)
+						.add("fileSize", typeLong)
+						.add("fileCount", typeLong)
+						.add("datafileparameter", buildNestedMapping("datafile.id", "type.id"))
+						.add("investigationuser", buildNestedMapping("investigation.id", "user.id"))
+						.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"))
+						.add("sampleparameter", buildNestedMapping("sample.id", "type.id"));
+				break;
+
+			case "instrumentscientist":
+				propertiesBuilder
+						.add("instrument.id", typeLong)
+						.add("user.id", typeLong);
+				break;
+
 		}
 		return Json.createObjectBuilder().add("properties", propertiesBuilder).build();
 	}
@@ -309,44 +312,6 @@ public class OpensearchApi extends SearchApi {
 		return propertiesBuilder;
 	}
 
-	/**
-	 * Extracts and parses a date value from jsonObject. If the value is a NUMBER
-	 * (ms since epoch), then it is taken as is. If it is a STRING, then it is
-	 * expected in the yyyyMMddHHmm format.
-	 * 
-	 * @param jsonObject   JsonObject to extract the date from.
-	 * @param key          Key of the date field to extract.
-	 * @param offset       In the event of the date being a string, we do not have
-	 *                     second or ms precision. To ensure ranges are successful,
-	 *                     it may be necessary to add 59999 ms to the parsed value
-	 *                     as an offset.
-	 * @param defaultValue The value to return if key is not present in jsonObject.
-	 * @return Time since epoch in ms.
-	 * @throws IcatException
-	 */
-	private static Long parseDate(JsonObject jsonObject, String key, int offset, Long defaultValue)
-			throws IcatException {
-		if (jsonObject.containsKey(key)) {
-			ValueType valueType = jsonObject.get(key).getValueType();
-			switch (valueType) {
-				case STRING:
-					String dateString = jsonObject.getString(key);
-					try {
-						return decodeTime(dateString) + offset;
-					} catch (Exception e) {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-								"Could not parse date " + dateString + " using expected format yyyyMMddHHmm");
-					}
-				case NUMBER:
-					return jsonObject.getJsonNumber(key).longValueExact();
-				default:
-					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-							"Dates should be represented by a NUMBER or STRING JsonValue, but got " + valueType);
-			}
-		}
-		return defaultValue;
-	}
-
 	@Override
 	public void addNow(String entityName, List<Long> ids, EntityManager manager,
 			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor)
@@ -356,7 +321,7 @@ public class OpensearchApi extends SearchApi {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 			gen.writeStartArray();
-			for (Long id : ids) {
+			for (long id : ids) {
 				EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
 				if (bean != null) {
 					gen.writeStartObject().writeStartObject("create");
@@ -374,7 +339,7 @@ public class OpensearchApi extends SearchApi {
 	@Override
 	public void clear() throws IcatException {
 		commit();
-		String body = OpensearchQueryBuilder.addQuery(OpensearchQueryBuilder.buildMatchAllQuery()).build().toString();
+		String body = OpensearchQuery.matchAllQuery.toString();
 		post("/_all/_delete_by_query", body);
 	}
 
@@ -397,16 +362,16 @@ public class OpensearchApi extends SearchApi {
 
 		JsonObject queryObject = facetQuery.getJsonObject("query");
 		List<String> defaultFields = defaultFieldsMap.get(index);
-		JsonObjectBuilder bodyBuilder = parseQuery(Json.createObjectBuilder(), queryObject, index, dimensionPrefix,
-				defaultFields);
+		OpensearchQuery opensearchQuery = new OpensearchQuery(this);
+		opensearchQuery.parseQuery(queryObject, index, dimensionPrefix, defaultFields);
 		if (facetQuery.containsKey("dimensions")) {
 			JsonArray dimensions = facetQuery.getJsonArray("dimensions");
-			bodyBuilder = parseFacets(bodyBuilder, dimensions, maxLabels, dimensionPrefix);
+			opensearchQuery.parseFacets(dimensions, maxLabels, dimensionPrefix);
 		} else {
 			List<String> dimensions = defaultFacetsMap.get(index);
-			bodyBuilder = parseFacets(bodyBuilder, dimensions, maxLabels, dimensionPrefix);
+			opensearchQuery.parseFacets(dimensions, maxLabels, dimensionPrefix);
 		}
-		String body = bodyBuilder.build().toString();
+		String body = opensearchQuery.body();
 
 		Map<String, String> parameterMap = new HashMap<>();
 		parameterMap.put("size", maxResults.toString());
@@ -423,101 +388,17 @@ public class OpensearchApi extends SearchApi {
 		return results;
 	}
 
-	/**
-	 * Parses incoming Json encoding the requested facets and uses bodyBuilder to
-	 * construct Json that can be understood by Opensearch.
-	 * 
-	 * @param bodyBuilder     JsonObjectBuilder being used to build the body of the
-	 *                        request.
-	 * @param dimensions      JsonArray of JsonObjects representing dimensions to be
-	 *                        faceted.
-	 * @param maxLabels       The maximum number of labels to collect for each
-	 *                        dimension.
-	 * @param dimensionPrefix Optional prefix to apply to the dimension names. This
-	 *                        is needed to distinguish between potentially ambiguous
-	 *                        dimensions, such as "(investigation.)type.name" and
-	 *                        "(investigationparameter.)type.name".
-	 * @return The bodyBuilder originally passed with facet information added to it.
-	 */
-	private JsonObjectBuilder parseFacets(JsonObjectBuilder bodyBuilder, JsonArray dimensions, int maxLabels,
-			String dimensionPrefix) {
-		JsonObjectBuilder aggsBuilder = Json.createObjectBuilder();
-		for (JsonObject dimensionObject : dimensions.getValuesAs(JsonObject.class)) {
-			String dimensionString = dimensionObject.getString("dimension");
-			String field = dimensionPrefix == null ? dimensionString : dimensionPrefix + "." + dimensionString;
-			if (dimensionObject.containsKey("ranges")) {
-				JsonArray ranges = dimensionObject.getJsonArray("ranges");
-				aggsBuilder.add(dimensionString, OpensearchQueryBuilder.buildRangeFacet(field, ranges));
-			} else {
-				aggsBuilder.add(dimensionString,
-						OpensearchQueryBuilder.buildStringFacet(field + ".keyword", maxLabels));
-			}
-		}
-		return buildFacetRequestJson(bodyBuilder, dimensionPrefix, aggsBuilder);
-	}
-
-	/**
-	 * Uses bodyBuilder to construct Json for faceting string fields.
-	 * 
-	 * @param bodyBuilder     JsonObjectBuilder being used to build the body of the
-	 *                        request.
-	 * @param dimensions      List of dimensions to perform string based faceting
-	 *                        on.
-	 * @param maxLabels       The maximum number of labels to collect for each
-	 *                        dimension.
-	 * @param dimensionPrefix Optional prefix to apply to the dimension names. This
-	 *                        is needed to distinguish between potentially ambiguous
-	 *                        dimensions, such as "(investigation.)type.name" and
-	 *                        "(investigationparameter.)type.name".
-	 * @return The bodyBuilder originally passed with facet information added to it.
-	 */
-	private JsonObjectBuilder parseFacets(JsonObjectBuilder bodyBuilder, List<String> dimensions, int maxLabels,
-			String dimensionPrefix) {
-		JsonObjectBuilder aggsBuilder = Json.createObjectBuilder();
-		for (String dimensionString : dimensions) {
-			String field = dimensionPrefix == null ? dimensionString : dimensionPrefix + "." + dimensionString;
-			aggsBuilder.add(dimensionString, OpensearchQueryBuilder.buildStringFacet(field + ".keyword", maxLabels));
-		}
-		return buildFacetRequestJson(bodyBuilder, dimensionPrefix, aggsBuilder);
-	}
-
-	/**
-	 * Finalises the construction of faceting Json by handling the possibility of
-	 * faceting a nested object.
-	 * 
-	 * @param bodyBuilder     JsonObjectBuilder being used to build the body of the
-	 *                        request.
-	 * @param dimensionPrefix Optional prefix to apply to the dimension names. This
-	 *                        is needed to distinguish between potentially ambiguous
-	 *                        dimensions, such as "(investigation.)type.name" and
-	 *                        "(investigationparameter.)type.name".
-	 * @param aggsBuilder     JsonObjectBuilder that has the faceting details.
-	 * @return The bodyBuilder originally passed with facet information added to it.
-	 */
-	private JsonObjectBuilder buildFacetRequestJson(JsonObjectBuilder bodyBuilder, String dimensionPrefix,
-			JsonObjectBuilder aggsBuilder) {
-		if (dimensionPrefix == null) {
-			bodyBuilder.add("aggs", aggsBuilder);
-		} else {
-			bodyBuilder.add("aggs", Json.createObjectBuilder()
-					.add(dimensionPrefix, Json.createObjectBuilder()
-							.add("nested", Json.createObjectBuilder().add("path", dimensionPrefix))
-							.add("aggs", aggsBuilder)));
-		}
-		return bodyBuilder;
-	}
-
 	@Override
 	public SearchResult getResults(JsonObject query, JsonValue searchAfter, Integer blockSize, String sort,
 			List<String> requestedFields) throws IcatException {
 		String index = query.containsKey("target") ? query.getString("target").toLowerCase() : "_all";
 		List<String> defaultFields = defaultFieldsMap.get(index);
 
-		JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
-		bodyBuilder = parseSort(bodyBuilder, sort);
-		bodyBuilder = parseSearchAfter(bodyBuilder, searchAfter);
-		bodyBuilder = parseQuery(bodyBuilder, query, index, null, defaultFields);
-		String body = bodyBuilder.build().toString();
+		OpensearchQuery opensearchQuery = new OpensearchQuery(this);
+		opensearchQuery.parseQuery(query, index, null, defaultFields);
+		opensearchQuery.parseSort(sort);
+		opensearchQuery.parseSearchAfter(searchAfter);
+		String body = opensearchQuery.body();
 
 		Map<String, String> parameterMap = new HashMap<>();
 		Map<String, Set<String>> joinedFields = new HashMap<>();
@@ -529,7 +410,7 @@ public class OpensearchApi extends SearchApi {
 		List<ScoredEntityBaseBean> entities = result.getResults();
 		JsonArray hits = postResponse.getJsonObject("hits").getJsonArray("hits");
 		for (JsonObject hit : hits.getValuesAs(JsonObject.class)) {
-			Float score = Float.NaN;
+			float score = Float.NaN;
 			if (!hit.isNull("_score")) {
 				score = hit.getJsonNumber("_score").bigDecimalValue().floatValue();
 			}
@@ -556,7 +437,7 @@ public class OpensearchApi extends SearchApi {
 					parentId = source.getString("id");
 				}
 				// Search for joined entities matching the id
-				JsonObject termQuery = OpensearchQueryBuilder.buildTermQuery(fld, parentId);
+				JsonObject termQuery = OpensearchQuery.buildTermQuery(fld, parentId);
 				String joinedBody = Json.createObjectBuilder().add("query", termQuery).build().toString();
 				buildParameterMap(blockSize, requestedJoinedFields, joinedParameterMap, null);
 				JsonObject joinedResponse = postResponse("/" + joinedIndex + "/_search", joinedBody,
@@ -616,8 +497,7 @@ public class OpensearchApi extends SearchApi {
 					if (joinedFields.containsKey(splitString[0])) {
 						joinedFields.get(splitString[0]).add(splitString[1]);
 					} else {
-						joinedFields.putIfAbsent(splitString[0],
-								new HashSet<String>(Arrays.asList(splitString[1])));
+						joinedFields.putIfAbsent(splitString[0], new HashSet<>(Arrays.asList(splitString[1])));
 					}
 				} else {
 					sb.append(splitString[0].toLowerCase() + ",");
@@ -632,438 +512,56 @@ public class OpensearchApi extends SearchApi {
 	}
 
 	/**
-	 * Parse sort criteria and add it to the request body.
-	 * 
-	 * @param builder JsonObjectBuilder being used to build the body of the request.
-	 * @param sort    String of JsonObject containing the sort criteria.
-	 * @return The bodyBuilder originally passed with facet criteria added to it.
-	 */
-	private JsonObjectBuilder parseSort(JsonObjectBuilder builder, String sort) {
-		if (sort == null || sort.equals("")) {
-			return builder.add("sort", Json.createArrayBuilder()
-					.add(Json.createObjectBuilder().add("_score", "desc"))
-					.add(Json.createObjectBuilder().add("id", "asc")).build());
-		} else {
-			JsonObject sortObject = Json.createReader(new StringReader(sort)).readObject();
-			JsonArrayBuilder sortArrayBuilder = Json.createArrayBuilder();
-			for (String key : sortObject.keySet()) {
-				if (key.toLowerCase().contains("date")) {
-					sortArrayBuilder.add(Json.createObjectBuilder().add(key, sortObject.getString(key)));
-				} else {
-					sortArrayBuilder.add(Json.createObjectBuilder()
-							.add(key + ".keyword", sortObject.getString(key)));
-				}
-			}
-			return builder.add("sort", sortArrayBuilder.add(Json.createObjectBuilder().add("id", "asc")).build());
-		}
-	}
-
-	/**
-	 * Add searchAfter to the request body.
-	 * 
-	 * @param builder     JsonObjectBuilder being used to build the body of the
-	 *                    request.
-	 * @param searchAfter Possibly null JsonValue representing the last document of
-	 *                    a previous search.
-	 * @return The bodyBuilder originally passed with searchAfter added to it.
-	 */
-	private JsonObjectBuilder parseSearchAfter(JsonObjectBuilder builder, JsonValue searchAfter) {
-		if (searchAfter == null) {
-			return builder;
-		} else {
-			return builder.add("search_after", searchAfter);
-		}
-	}
-
-	/**
-	 * Parses the search query from the incoming queryRequest into Json that the
-	 * search cluster can understand.
-	 * 
-	 * @param builder         The JsonObjectBuilder being used to create the body
-	 *                        for
-	 *                        the POST request to the cluster.
-	 * @param queryRequest    The Json object containing the information on the
-	 *                        requested query, NOT formatted for the search cluster.
-	 * @param index           The index to search.
-	 * @param dimensionPrefix Used to build nested queries for arbitrary fields.
-	 * @param defaultFields   Default fields to apply parsed string queries to.
-	 * @return The JsonObjectBuilder initially passed with the "query" added to it.
-	 * @throws IcatException If the query cannot be parsed.
-	 */
-	private JsonObjectBuilder parseQuery(JsonObjectBuilder builder, JsonObject queryRequest, String index,
-			String dimensionPrefix, List<String> defaultFields) throws IcatException {
-		// In general, we use a boolean query to compound queries on individual fields
-		JsonObjectBuilder queryBuilder = Json.createObjectBuilder();
-		JsonObjectBuilder boolBuilder = Json.createObjectBuilder();
-
-		// Non-scored elements are added to the "filter"
-		JsonArrayBuilder filterBuilder = Json.createArrayBuilder();
-
-		Long lowerTime = Long.MIN_VALUE;
-		Long upperTime = Long.MAX_VALUE;
-		for (String queryKey : queryRequest.keySet()) {
-			switch (queryKey) {
-				case "target":
-					break; // Avoid using the target index as a term in the search
-				case "lower":
-					lowerTime = parseDate(queryRequest, "lower", 0, Long.MIN_VALUE);
-					break;
-				case "upper":
-					upperTime = parseDate(queryRequest, "upper", 59999, Long.MAX_VALUE);
-					break;
-				case "filter":
-					JsonObject filterObject = queryRequest.getJsonObject("filter");
-					for (String fld : filterObject.keySet()) {
-						JsonValue value = filterObject.get(fld);
-						String field = fld.replace(index + ".", "");
-						switch (value.getValueType()) {
-							case ARRAY:
-								JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-								for (JsonValue arrayValue : ((JsonArray) value).getValuesAs(JsonString.class)) {
-									parseFilter(arrayBuilder, field, arrayValue);
-								}
-								// If the key was just a nested entity (no ".") then we should FILTER all of our
-								// queries on that entity.
-								String occur = fld.contains(".") ? "should" : "filter";
-								filterBuilder.add(Json.createObjectBuilder().add("bool",
-										Json.createObjectBuilder().add(occur, arrayBuilder)));
-								break;
-
-							default:
-								parseFilter(filterBuilder, field, value);
-						}
-					}
-					break;
-				case "text":
-					// The free text is the only element we perform scoring on, so "must" occur
-					JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-					String text = queryRequest.getString("text");
-					arrayBuilder
-							.add(OpensearchQueryBuilder.buildStringQuery(text, defaultFields.toArray(new String[0])));
-					if (index.equals("investigation")) {
-						JsonObject stringQuery = OpensearchQueryBuilder.buildStringQuery(text, "sample.name",
-								"sample.type.name");
-						arrayBuilder.add(OpensearchQueryBuilder.buildNestedQuery("sample", stringQuery));
-						JsonObjectBuilder textBoolBuilder = Json.createObjectBuilder().add("should", arrayBuilder);
-						JsonObjectBuilder textMustBuilder = Json.createObjectBuilder().add("bool", textBoolBuilder);
-						boolBuilder.add("must", Json.createArrayBuilder().add(textMustBuilder));
-					} else {
-						boolBuilder.add("must", arrayBuilder);
-					}
-					break;
-				case "user":
-					String user = queryRequest.getString("user");
-					// Because InstrumentScientist is on a separate index, we need to explicitly
-					// perform a search here
-					JsonObject termQuery = OpensearchQueryBuilder.buildTermQuery("user.name.keyword", user);
-					String body = Json.createObjectBuilder().add("query", termQuery).build().toString();
-					Map<String, String> parameterMap = new HashMap<>();
-					parameterMap.put("_source", "instrument.id");
-					JsonObject postResponse = postResponse("/instrumentscientist/_search", body, parameterMap);
-					JsonArray hits = postResponse.getJsonObject("hits").getJsonArray("hits");
-					JsonArrayBuilder instrumentIdsBuilder = Json.createArrayBuilder();
-					for (JsonObject hit : hits.getValuesAs(JsonObject.class)) {
-						String instrumentId = hit.getJsonObject("_source").getString("instrument.id");
-						instrumentIdsBuilder.add(instrumentId);
-					}
-					JsonObject instrumentQuery = OpensearchQueryBuilder.buildTermsQuery(
-							"investigationinstrument.instrument.id",
-							instrumentIdsBuilder.build());
-					JsonObject nestedInstrumentQuery = OpensearchQueryBuilder.buildNestedQuery(
-							"investigationinstrument",
-							instrumentQuery);
-					// InvestigationUser should be a nested field on the main Document
-					JsonObject investigationUserQuery = OpensearchQueryBuilder.buildMatchQuery(
-							"investigationuser.user.name",
-							user);
-					JsonObject nestedUserQuery = OpensearchQueryBuilder.buildNestedQuery("investigationuser",
-							investigationUserQuery);
-					// At least one of being an InstrumentScientist or an InvestigationUser is
-					// necessary
-					JsonArrayBuilder array = Json.createArrayBuilder().add(nestedInstrumentQuery).add(nestedUserQuery);
-					filterBuilder.add(
-							Json.createObjectBuilder().add("bool", Json.createObjectBuilder().add("should", array)));
-					break;
-				case "userFullName":
-					String fullName = queryRequest.getString("userFullName");
-					JsonObject fullNameQuery = OpensearchQueryBuilder.buildStringQuery(fullName,
-							"investigationuser.user.fullName");
-					filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery("investigationuser", fullNameQuery));
-					break;
-				case "samples":
-					JsonArray samples = queryRequest.getJsonArray("samples");
-					for (int i = 0; i < samples.size(); i++) {
-						String sample = samples.getString(i);
-						JsonObject stringQuery = OpensearchQueryBuilder.buildStringQuery(sample, "sample.name",
-								"sample.type.name");
-						filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery("sample", stringQuery));
-					}
-					break;
-				case "parameters":
-					for (JsonObject parameterObject : queryRequest.getJsonArray("parameters")
-							.getValuesAs(JsonObject.class)) {
-						String path = index + "parameter";
-						List<JsonObject> parameterQueries = new ArrayList<>();
-						if (parameterObject.containsKey("name")) {
-							String name = parameterObject.getString("name");
-							parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".type.name", name));
-						}
-						if (parameterObject.containsKey("units")) {
-							String units = parameterObject.getString("units");
-							parameterQueries.add(OpensearchQueryBuilder.buildMatchQuery(path + ".type.units", units));
-						}
-						if (parameterObject.containsKey("stringValue")) {
-							String stringValue = parameterObject.getString("stringValue");
-							parameterQueries
-									.add(OpensearchQueryBuilder.buildMatchQuery(path + ".stringValue", stringValue));
-						} else if (parameterObject.containsKey("lowerDateValue")
-								&& parameterObject.containsKey("upperDateValue")) {
-							Long lower = parseDate(parameterObject, "lowerDateValue", 0, Long.MIN_VALUE);
-							Long upper = parseDate(parameterObject, "upperDateValue", 59999, Long.MAX_VALUE);
-							parameterQueries
-									.add(OpensearchQueryBuilder.buildLongRangeQuery(path + ".dateTimeValue", lower,
-											upper));
-						} else if (parameterObject.containsKey("lowerNumericValue")
-								&& parameterObject.containsKey("upperNumericValue")) {
-							JsonNumber lower = parameterObject.getJsonNumber("lowerNumericValue");
-							JsonNumber upper = parameterObject.getJsonNumber("upperNumericValue");
-							parameterQueries
-									.add(OpensearchQueryBuilder.buildRangeQuery(path + ".numericValue", lower, upper));
-						}
-						filterBuilder.add(
-								OpensearchQueryBuilder.buildNestedQuery(path,
-										parameterQueries.toArray(new JsonObject[0])));
-					}
-					break;
-				default:
-					// If the term doesn't require special logic, handle according to type
-					JsonObject defaultTermQuery;
-					String field = queryKey;
-					if (dimensionPrefix != null) {
-						field = dimensionPrefix + "." + field;
-					}
-					ValueType valueType = queryRequest.get(queryKey).getValueType();
-					// if (queryKey.contains(".")) {
-					// int pathEnd = queryKey.indexOf(".");
-					// path = queryKey.substring(0, pathEnd);
-					// if (path.equals(index)) {
-					// // e.g. "dataset.id" should be interpretted as "id" iff we're searching
-					// Datasets
-					// field = queryKey.substring(pathEnd + 1);
-					// }
-					// }
-					switch (valueType) {
-						case STRING:
-							defaultTermQuery = OpensearchQueryBuilder.buildTermQuery(field + ".keyword",
-									queryRequest.getString(queryKey));
-							break;
-						case NUMBER:
-							defaultTermQuery = OpensearchQueryBuilder.buildTermQuery(field,
-									queryRequest.getJsonNumber(queryKey));
-							break;
-						case ARRAY:
-							// Only support array of String as list of ICAT ids is currently only use case
-							defaultTermQuery = OpensearchQueryBuilder.buildTermsQuery(field,
-									queryRequest.getJsonArray(queryKey));
-							break;
-						default:
-							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-									"Query values should be ARRAY, STRING or NUMBER, but had value of type "
-											+ valueType);
-					}
-					if (dimensionPrefix != null) {
-						// e.g. "sample.id" should use a nested query as sample is nested on other
-						// entities
-						filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery(dimensionPrefix, defaultTermQuery));
-					} else {
-						// Otherwise, we can associate the query directly with the searched entity
-						filterBuilder.add(defaultTermQuery);
-					}
-			}
-		}
-
-		if (lowerTime != Long.MIN_VALUE || upperTime != Long.MAX_VALUE) {
-			if (index.equals("datafile")) {
-				// datafile has only one date field
-				filterBuilder.add(OpensearchQueryBuilder.buildLongRangeQuery("date", lowerTime, upperTime));
-			} else {
-				filterBuilder.add(OpensearchQueryBuilder.buildLongRangeQuery("startDate", lowerTime, upperTime));
-				filterBuilder.add(OpensearchQueryBuilder.buildLongRangeQuery("endDate", lowerTime, upperTime));
-			}
-		}
-
-		JsonArray filterArray = filterBuilder.build();
-		if (filterArray.size() > 0) {
-			boolBuilder.add("filter", filterArray);
-		}
-		return builder.add("query", queryBuilder.add("bool", boolBuilder));
-	}
-
-	/**
-	 * Parses a filter object applied to a single field. Note that in the case that
-	 * this field is actually a nested object, more complex logic will be applied to
-	 * ensure that only object matching all nested filters are returned.
-	 * 
-	 * @param filterBuilder Builder for the array of queries to filter by.
-	 * @param field         Field to apply the filter to. In the case of nested
-	 *                      queries, this should only be the name of the top level
-	 *                      field. For example "investigationparameter".
-	 * @param value         JsonValue representing the filter query. This can be a
-	 *                      STRING for simple terms, or an OBJECT containing nested
-	 *                      "value", "exact" or "range" filters.
-	 * @throws IcatException
-	 */
-	private void parseFilter(JsonArrayBuilder filterBuilder, String field, JsonValue value) throws IcatException {
-		ValueType valueType = value.getValueType();
-		switch (valueType) {
-			case STRING:
-				filterBuilder.add(
-						OpensearchQueryBuilder.buildTermQuery(field + ".keyword", ((JsonString) value).getString()));
-				return;
-			case OBJECT:
-				JsonObject valueObject = (JsonObject) value;
-				if (valueObject.containsKey("filter")) {
-					List<JsonObject> queryObjectsList = new ArrayList<>();
-					for (JsonObject nestedFilter : valueObject.getJsonArray("filter").getValuesAs(JsonObject.class)) {
-						String nestedField = nestedFilter.getString("field");
-						if (nestedFilter.containsKey("value")) {
-							// String based term query
-							String stringValue = nestedFilter.getString("value");
-							queryObjectsList.add(
-									OpensearchQueryBuilder.buildTermQuery(field + "." + nestedField + ".keyword",
-											stringValue));
-						} else if (nestedFilter.containsKey("exact")) {
-							JsonNumber exact = nestedFilter.getJsonNumber("exact");
-							String units = nestedFilter.getString("units", null);
-							if (units != null) {
-								SystemValue exactValue = icatUnits.new SystemValue(exact.doubleValue(), units);
-								if (exactValue.value != null) {
-									// If we were able to parse the units, apply query to the SI value
-									JsonObject bottomQuery = OpensearchQueryBuilder
-											.buildDoubleRangeQuery(field + ".rangeBottomSI", null, exactValue.value);
-									JsonObject topQuery = OpensearchQueryBuilder
-											.buildDoubleRangeQuery(field + ".rangeTopSI", exactValue.value, null);
-									JsonObject inRangeQuery = OpensearchQueryBuilder
-											.buildBoolQuery(Arrays.asList(bottomQuery, topQuery), null);
-									JsonObject exactQuery = OpensearchQueryBuilder
-											.buildTermQuery(field + "." + nestedField + "SI", exactValue.value);
-									queryObjectsList.add(
-											OpensearchQueryBuilder.buildBoolQuery(null,
-													Arrays.asList(inRangeQuery, exactQuery)));
-								} else {
-									// If units could not be parsed, make them part of the query on the raw data
-									JsonObject bottomQuery = OpensearchQueryBuilder
-											.buildRangeQuery(field + ".rangeBottom", null, exact);
-									JsonObject topQuery = OpensearchQueryBuilder.buildRangeQuery(field + ".rangeTop",
-											exact, null);
-									JsonObject inRangeQuery = OpensearchQueryBuilder
-											.buildBoolQuery(Arrays.asList(bottomQuery, topQuery), null);
-									JsonObject exactQuery = OpensearchQueryBuilder
-											.buildTermQuery(field + "." + nestedField, exact);
-									queryObjectsList.add(
-											OpensearchQueryBuilder.buildBoolQuery(null,
-													Arrays.asList(inRangeQuery, exactQuery)));
-									queryObjectsList.add(
-											OpensearchQueryBuilder.buildTermQuery(field + ".type.units.keyword",
-													units));
-								}
-							} else {
-								// If units were not provided, just apply to the raw data
-								JsonObject bottomQuery = OpensearchQueryBuilder.buildRangeQuery(field + ".rangeBottom",
-										null, exact);
-								JsonObject topQuery = OpensearchQueryBuilder.buildRangeQuery(field + ".rangeTop", exact,
-										null);
-								JsonObject inRangeQuery = OpensearchQueryBuilder
-										.buildBoolQuery(Arrays.asList(bottomQuery, topQuery), null);
-								JsonObject exactQuery = OpensearchQueryBuilder.buildTermQuery(field + "." + nestedField,
-										exact);
-								queryObjectsList.add(
-										OpensearchQueryBuilder.buildBoolQuery(null,
-												Arrays.asList(inRangeQuery, exactQuery)));
-							}
-						} else {
-							JsonNumber from = nestedFilter.getJsonNumber("from");
-							JsonNumber to = nestedFilter.getJsonNumber("to");
-							String units = nestedFilter.getString("units", null);
-							if (units != null) {
-								SystemValue fromValue = icatUnits.new SystemValue(from.doubleValue(), units);
-								SystemValue toValue = icatUnits.new SystemValue(to.doubleValue(), units);
-								if (fromValue.value != null && toValue.value != null) {
-									// If we were able to parse the units, apply query to the SI value
-									queryObjectsList.add(OpensearchQueryBuilder.buildDoubleRangeQuery(
-											field + "." + nestedField + "SI", fromValue.value, toValue.value));
-								} else {
-									// If units could not be parsed, make them part of the query on the raw data
-									queryObjectsList.add(
-											OpensearchQueryBuilder.buildRangeQuery(field + "." + nestedField, from,
-													to));
-									queryObjectsList.add(
-											OpensearchQueryBuilder.buildTermQuery(field + ".type.units.keyword",
-													units));
-								}
-							} else {
-								// If units were not provided, just apply to the raw data
-								queryObjectsList.add(
-										OpensearchQueryBuilder.buildRangeQuery(field + "." + nestedField, from, to));
-							}
-						}
-					}
-					JsonObject[] queryObjects = queryObjectsList.toArray(new JsonObject[0]);
-					filterBuilder.add(OpensearchQueryBuilder.buildNestedQuery(field, queryObjects));
-				} else {
-					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-							"expected an ARRAY with the key 'filter', but received " + valueObject.toString());
-				}
-				return;
-
-			default:
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-						"filter values should be STRING, OBJECT or and ARRAY of the former, but were " + valueType);
-		}
-
-	}
-
-	/**
 	 * Create mappings for indices that do not already have them.
 	 * 
 	 * @throws IcatException
 	 */
 	public void initMappings() throws IcatException {
 		for (String index : indices) {
-			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-				URI uri = new URIBuilder(server).setPath("/" + index).build();
-				logger.debug("Making call {}", uri);
-				HttpHead httpHead = new HttpHead(uri);
-				try (CloseableHttpResponse response = httpclient.execute(httpHead)) {
-					int statusCode = response.getStatusLine().getStatusCode();
-					// If the index isn't present, we should get 404 and create the index
-					if (statusCode == 200) {
-						// If the index already exists (200), do not attempt to create it
-						logger.debug("{} index already exists, continue", index);
-						continue;
-					} else if (statusCode != 404) {
-						// If the code isn't 200 or 404, something has gone wrong
+			if (!indexExists(index)) {
+				try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+					URI uri = new URIBuilder(server).setPath("/" + index).build();
+					HttpPut httpPut = new HttpPut(uri);
+					JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
+					bodyBuilder.add("settings", indexSettings).add("mappings", buildMappings(index));
+					String body = bodyBuilder.build().toString();
+					logger.debug("Making call {} with body {}", uri, body);
+					httpPut.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
+					try (CloseableHttpResponse response = httpclient.execute(httpPut)) {
 						Rest.checkStatus(response, IcatExceptionType.INTERNAL);
 					}
+				} catch (URISyntaxException | IOException e) {
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 				}
-			} catch (URISyntaxException | IOException e) {
-				throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 			}
+		}
+	}
 
-			try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-				URI uri = new URIBuilder(server).setPath("/" + index).build();
-				HttpPut httpPut = new HttpPut(uri);
-				JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
-				bodyBuilder.add("settings", indexSettings).add("mappings", buildMappings(index));
-				String body = bodyBuilder.build().toString();
-				logger.debug("Making call {} with body {}", uri, body);
-				httpPut.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-				try (CloseableHttpResponse response = httpclient.execute(httpPut)) {
+	/**
+	 * @param index Name of an index (entity) to check the existence of
+	 * @return Whether index exists on the cluster or not
+	 * @throws IcatException
+	 */
+	private boolean indexExists(String index) throws IcatException {
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			URI uri = new URIBuilder(server).setPath("/" + index).build();
+			logger.debug("Making call {}", uri);
+			HttpHead httpHead = new HttpHead(uri);
+			try (CloseableHttpResponse response = httpclient.execute(httpHead)) {
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == 404) {
+					// If the index isn't present, we should get 404
+					logger.debug("{} index does not exist", index);
+					return false;
+				} else {
+					// checkStatus will throw unless the code is 200 (index exists)
 					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
+					logger.debug("{} index already exists", index);
+					return true;
 				}
-			} catch (URISyntaxException | IOException e) {
-				throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 			}
+		} catch (URISyntaxException | IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
 
@@ -1077,35 +575,39 @@ public class OpensearchApi extends SearchApi {
 			String key = entry.getKey();
 			ParentRelation relation = entry.getValue().get(0);
 			// Special cases
-			if (key.equals("parametertype")) {
-				// ParameterType can apply to 4 different nested objects
-				post("/_scripts/update_parametertype",
-						OpensearchScriptBuilder.buildParameterTypeScript(ParameterType.docFields, true));
-				post("/_scripts/delete_parametertype",
-						OpensearchScriptBuilder.buildParameterTypeScript(ParameterType.docFields, false));
-				continue;
-			} else if (key.equals("sample")) {
-				// Sample is a child of Datafile and Dataset...
-				post("/_scripts/update_sample", OpensearchScriptBuilder.buildChildScript(Sample.docFields, true));
-				post("/_scripts/delete_sample", OpensearchScriptBuilder.buildChildScript(Sample.docFields, false));
-				// ...but a nested child of Investigations
-				post("/_scripts/update_nestedsample", OpensearchScriptBuilder.buildNestedChildScript(key, true));
-				post("/_scripts/delete_nestedsample", OpensearchScriptBuilder.buildNestedChildScript(key, false));
-				String createScript = OpensearchScriptBuilder.buildCreateNestedChildScript(key);
-				post("/_scripts/create_" + key, createScript);
-				continue;
-			} else if (key.equals("sampletype")) {
-				// SampleType is a child of Datafile and Dataset...
-				post("/_scripts/update_sampletype",
-						OpensearchScriptBuilder.buildChildScript(SampleType.docFields, true));
-				post("/_scripts/delete_sampletype",
-						OpensearchScriptBuilder.buildChildScript(SampleType.docFields, false));
-				// ...but a nested grandchild of Investigations
-				post("/_scripts/update_nestedsampletype",
-						OpensearchScriptBuilder.buildGrandchildScript("sample", SampleType.docFields, true));
-				post("/_scripts/delete_nestedsampletype",
-						OpensearchScriptBuilder.buildGrandchildScript("sample", SampleType.docFields, false));
-				continue;
+			switch (key) {
+				case "parametertype":
+					// ParameterType can apply to 4 different nested objects
+					post("/_scripts/update_parametertype",
+							OpensearchScriptBuilder.buildParameterTypesScript(ParameterType.docFields, true));
+					post("/_scripts/delete_parametertype",
+							OpensearchScriptBuilder.buildParameterTypesScript(ParameterType.docFields, false));
+					continue;
+
+				case "sample":
+					// Sample is a child of Datafile and Dataset...
+					post("/_scripts/update_sample", OpensearchScriptBuilder.buildChildScript(Sample.docFields, true));
+					post("/_scripts/delete_sample", OpensearchScriptBuilder.buildChildScript(Sample.docFields, false));
+					// ...but a nested child of Investigations
+					post("/_scripts/update_nestedsample", OpensearchScriptBuilder.buildNestedChildScript(key, true));
+					post("/_scripts/delete_nestedsample", OpensearchScriptBuilder.buildNestedChildScript(key, false));
+					String createScript = OpensearchScriptBuilder.buildCreateNestedChildScript(key);
+					post("/_scripts/create_" + key, createScript);
+					continue;
+
+				case "sampletype":
+					// SampleType is a child of Datafile and Dataset...
+					post("/_scripts/update_sampletype",
+							OpensearchScriptBuilder.buildChildScript(SampleType.docFields, true));
+					post("/_scripts/delete_sampletype",
+							OpensearchScriptBuilder.buildChildScript(SampleType.docFields, false));
+					// ...but a nested grandchild of Investigations
+					post("/_scripts/update_nestedsampletype",
+							OpensearchScriptBuilder.buildGrandchildScript("sample", SampleType.docFields, true));
+					post("/_scripts/delete_nestedsampletype",
+							OpensearchScriptBuilder.buildGrandchildScript("sample", SampleType.docFields, false));
+					continue;
+
 			}
 			String updateScript = "";
 			String deleteScript = "";
@@ -1136,69 +638,29 @@ public class OpensearchApi extends SearchApi {
 
 	public void modify(String json) throws IcatException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			List<HttpPost> updatesByQuery = new ArrayList<>();
-			Set<String> investigationIds = new HashSet<>();
-			Map<String, Long[]> investigationAggregations = new HashMap<>();
-			Map<String, Long[]> datasetAggregations = new HashMap<>();
-			StringBuilder sb = new StringBuilder();
+			OpensearchBulk bulk = new OpensearchBulk();
 			JsonReader jsonReader = Json.createReader(new StringReader(json));
 			JsonArray outerArray = jsonReader.readArray();
 			for (JsonObject operation : outerArray.getValuesAs(JsonObject.class)) {
-				Set<String> operationKeys = operation.keySet();
-				if (operationKeys.size() != 1) {
-					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-							"Operation should only have one key, but it had " + operationKeys);
-				}
-				String operationKey = operationKeys.toArray(new String[1])[0];
-				ModificationType modificationType = ModificationType.valueOf(operationKey.toUpperCase());
-				JsonObject innerOperation = operation.getJsonObject(modificationType.toString().toLowerCase());
-				String index = innerOperation.getString("_index").toLowerCase();
-				String id = innerOperation.getString("_id");
-				JsonObject document = innerOperation.containsKey("doc") ? innerOperation.getJsonObject("doc") : null;
-				logger.trace("{} {} with id {}", operationKey, index, id);
-
-				if (relations.containsKey(index)) {
-					// Related entities (with or without an index) will have one or more other
-					// indices that need to
-					// be updated with their information
-					for (ParentRelation relation : relations.get(index)) {
-						modifyNestedEntity(sb, updatesByQuery, id, index, document, modificationType, relation);
-					}
-				}
-				if (indices.contains(index)) {
-					// Also modify any main, indexable entities
-					modifyEntity(httpclient, sb, investigationIds, investigationAggregations, datasetAggregations, id,
-							index, document, modificationType);
-				}
+				parseModification(httpclient, bulk, operation);
 			}
 
-			if (sb.toString().length() > 0) {
-				// Perform simple bulk modifications
-				URI uri = new URIBuilder(server).setPath("/_bulk").build();
-				HttpPost httpPost = new HttpPost(uri);
-				httpPost.setEntity(new StringEntity(sb.toString(), ContentType.APPLICATION_JSON));
-				logger.trace("Making call {} with body {}", uri, sb.toString());
-				try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-				}
-			}
+			postModify("/_bulk", bulk.bulkBody());
 
-			if (updatesByQuery.size() > 0) {
-				// Ensure bulk changes are committed before performing updatesByQuery
-				commit();
-				for (HttpPost updateByQuery : updatesByQuery) {
-					try (CloseableHttpResponse response = httpclient.execute(updateByQuery)) {
-						Rest.checkStatus(response, IcatExceptionType.INTERNAL);
+			if (bulk.updatesMap.size() > 0) {
+				for (String path : bulk.updatesMap.keySet()) {
+					for (String body : bulk.updatesMap.get(path)) {
+						postModify(path, body);
 					}
 				}
 			}
 
-			if (investigationIds.size() > 0) {
+			if (bulk.investigationIds.size() > 0) {
 				// Ensure bulk changes are committed before checking for InvestigationUsers
 				commit();
-				for (String investigationId : investigationIds) {
-					URI uriGet = new URIBuilder(server).setPath("/investigation/_source/" + investigationId)
-							.build();
+				for (String investigationId : bulk.investigationIds) {
+					String path = "/investigation/_source/" + investigationId;
+					URI uriGet = new URIBuilder(server).setPath(path).build();
 					HttpGet httpGet = new HttpGet(uriGet);
 					try (CloseableHttpResponse responseGet = httpclient.execute(httpGet)) {
 						if (responseGet.getStatusLine().getStatusCode() == 200) {
@@ -1208,21 +670,68 @@ public class OpensearchApi extends SearchApi {
 				}
 			}
 
-			StringBuilder fileSizeStringBuilder = new StringBuilder();
-			buildFileSizeUpdates("investigation", investigationAggregations, fileSizeStringBuilder);
-			buildFileSizeUpdates("dataset", datasetAggregations, fileSizeStringBuilder);
-			if (fileSizeStringBuilder.toString().length() > 0) {
-				// Perform simple bulk modifications
-				URI uri = new URIBuilder(server).setPath("/_bulk").build();
-				HttpPost httpPost = new HttpPost(uri);
-				httpPost.setEntity(new StringEntity(fileSizeStringBuilder.toString(), ContentType.APPLICATION_JSON));
-				logger.trace("Making call {} with body {}", uri, fileSizeStringBuilder.toString());
-				try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-				}
-			}
+			buildFileSizeUpdates("investigation", bulk.investigationAggregations, bulk.fileAggregationBuilder);
+			buildFileSizeUpdates("dataset", bulk.datasetAggregations, bulk.fileAggregationBuilder);
+			postModify("/_bulk", bulk.fileAggregationBody());
+
+			postModify("/_bulk", bulk.deletedBody());
 		} catch (IOException | URISyntaxException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Parses a modification from operation, and adds it to bulk.
+	 * 
+	 * @param httpclient The client being used to send HTTP
+	 * @param bulk       OpensearchBulk object recording the requests for updates
+	 * @param operation  JsonObject representing the operation to be performed as
+	 *                   part of the bulk modification
+	 * @throws IcatException
+	 * @throws URISyntaxException
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	private void parseModification(CloseableHttpClient httpclient, OpensearchBulk bulk, JsonObject operation)
+			throws IcatException, URISyntaxException, ClientProtocolException, IOException {
+		Set<String> operationKeys = operation.keySet();
+		if (operationKeys.size() != 1) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"Operation should only have one key, but it had " + operationKeys);
+		}
+		String operationKey = operationKeys.toArray(new String[1])[0];
+		ModificationType modificationType = ModificationType.valueOf(operationKey.toUpperCase());
+		JsonObject innerOperation = operation.getJsonObject(modificationType.toString().toLowerCase());
+		String index = innerOperation.getString("_index").toLowerCase();
+		String id = innerOperation.getString("_id");
+		JsonObject document = innerOperation.containsKey("doc") ? innerOperation.getJsonObject("doc") : null;
+		logger.trace("{} {} with id {}", operationKey, index, id);
+
+		if (relations.containsKey(index)) {
+			// Related entities (with or without an index) will have one or more other
+			// indices that need to be updated with their information
+			for (ParentRelation relation : relations.get(index)) {
+				modifyNestedEntity(bulk, id, index, document, modificationType, relation);
+			}
+		}
+		if (indices.contains(index)) {
+			// Also modify any main, indexable entities
+			modifyEntity(httpclient, bulk, id, index, document, modificationType);
+		}
+	}
+
+	/**
+	 * Commits to ensure index is up to date, then sends a POST request for
+	 * modification. This may be bulk, a single update, update by query etc.
+	 * 
+	 * @param path Path on the search engine to POST to
+	 * @param body String of Json to send as the request body
+	 * @throws IcatException
+	 */
+	private void postModify(String path, String body) throws IcatException {
+		if (body.length() > 0) {
+			commit();
+			post(path, body);
 		}
 	}
 
@@ -1235,15 +744,15 @@ public class OpensearchApi extends SearchApi {
 	 *                              entity ids as keys.
 	 * @param fileSizeStringBuilder StringBuilder for constructing the bulk updates.
 	 */
-	private void buildFileSizeUpdates(String entity, Map<String, Long[]> aggregations,
+	private void buildFileSizeUpdates(String entity, Map<String, long[]> aggregations,
 			StringBuilder fileSizeStringBuilder) {
 		if (aggregations.size() > 0) {
 			for (String id : aggregations.keySet()) {
 				JsonObject targetObject = Json.createObjectBuilder().add("_id", new Long(id)).add("_index", entity)
 						.build();
 				JsonObject update = Json.createObjectBuilder().add("update", targetObject).build();
-				Long deltaFileSize = aggregations.get(id)[0];
-				Long deltaFileCount = aggregations.get(id)[1];
+				long deltaFileSize = aggregations.get(id)[0];
+				long deltaFileCount = aggregations.get(id)[1];
 				JsonObjectBuilder paramsBuilder = Json.createObjectBuilder();
 				JsonObjectBuilder scriptBuilder = Json.createObjectBuilder();
 				paramsBuilder.add("deltaFileSize", deltaFileSize).add("deltaFileCount", deltaFileCount);
@@ -1282,9 +791,10 @@ public class OpensearchApi extends SearchApi {
 	 * For cases when Datasets and Datafiles are created after an Investigation,
 	 * some nested fields such as InvestigationUser and InvestigationInstrument may
 	 * have already been indexed on the Investigation but not the Dataset/file as
-	 * the latter did not yet exist. This method retrieves these arrays from the
-	 * Investigation index ensuring that all information is available on all indices
-	 * at the time of creation.
+	 * the latter did not yet exist.
+	 * 
+	 * This method retrieves these arrays from the Investigation index ensuring that
+	 * all information is available on all indices at the time of creation.
 	 * 
 	 * @param httpclient      The client being used to send HTTP
 	 * @param investigationId Id of an investigation which may contain relevant
@@ -1302,67 +812,96 @@ public class OpensearchApi extends SearchApi {
 			throws IOException, URISyntaxException, IcatException, ClientProtocolException {
 		JsonObject responseObject = Json.createReader(responseGet.getEntity().getContent()).readObject();
 		if (responseObject.containsKey("investigationuser")) {
-			JsonArray jsonArray = responseObject.getJsonArray("investigationuser");
-			for (String index : new String[] { "datafile", "dataset" }) {
-				URI uri = new URIBuilder(server).setPath("/" + index + "/_update_by_query").build();
-				HttpPost httpPost = new HttpPost(uri);
-				JsonObjectBuilder paramsBuilder = Json.createObjectBuilder().add("doc", jsonArray);
-				JsonObjectBuilder scriptBuilder = Json.createObjectBuilder();
-				scriptBuilder.add("id", "create_investigationuser").add("params", paramsBuilder);
-				JsonObject queryObject = OpensearchQueryBuilder.buildTermQuery("investigation.id", investigationId);
-				JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
-				String body = bodyBuilder.add("query", queryObject).add("script", scriptBuilder).build().toString();
-				httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-				logger.trace("Making call {} with body {}", uri, body);
-				try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-					commit();
-				}
-			}
+			extractEntity(httpclient, investigationId, responseObject, "investigationuser", false);
 		}
 		if (responseObject.containsKey("investigationinstrument")) {
-			JsonArray jsonArray = responseObject.getJsonArray("investigationinstrument");
-			for (String index : new String[] { "datafile", "dataset" }) {
-				URI uri = new URIBuilder(server).setPath("/" + index + "/_update_by_query").build();
-				HttpPost httpPost = new HttpPost(uri);
-				JsonObjectBuilder paramsBuilder = Json.createObjectBuilder().add("doc", jsonArray);
-				JsonObjectBuilder scriptBuilder = Json.createObjectBuilder();
-				scriptBuilder.add("id", "create_investigationinstrument").add("params", paramsBuilder);
-				JsonObject queryObject = OpensearchQueryBuilder.buildTermQuery("investigation.id", investigationId);
-				JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
-				String body = bodyBuilder.add("query", queryObject).add("script", scriptBuilder).build().toString();
-				logger.trace("Making call {} with body {}", uri, body);
-				httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-				try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-					Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-					commit();
-				}
-			}
+			extractEntity(httpclient, investigationId, responseObject, "investigationinstrument", false);
 		}
 		if (responseObject.containsKey("sample")) {
-			JsonArray jsonArray = responseObject.getJsonArray("sample");
-			for (String index : new String[] { "datafile", "dataset" }) {
-				URI uri = new URIBuilder(server).setPath("/" + index + "/_update_by_query").build();
-				HttpPost httpPost = new HttpPost(uri);
-				for (JsonObject sampleObject : jsonArray.getValuesAs(JsonObject.class)) {
+			extractEntity(httpclient, investigationId, responseObject, "sample", true);
+		}
+	}
+
+	/**
+	 * For cases when Datasets and Datafiles are created after an Investigation,
+	 * some nested fields such as InvestigationUser and InvestigationInstrument may
+	 * have already been indexed on the Investigation but not the Dataset/file as
+	 * the latter did not yet exist.
+	 * 
+	 * This method extracts a single entity and uses it to update the
+	 * dataset/datafile indices.
+	 *
+	 * @param httpclient      The client being used to send HTTP
+	 * @param investigationId Id of an investigation which may contain relevant
+	 *                        information.
+	 * @param responseObject  JsonObject to extract the entity from
+	 * @param entityName      Name of the entity being extracted
+	 * @param addFields       Whether to add individual fields (true) or the entire
+	 *                        entity as one "doc" (false)
+	 * @throws URISyntaxException
+	 * @throws IcatException
+	 * @throws IOException
+	 * @throws ClientProtocolException
+	 */
+	private void extractEntity(CloseableHttpClient httpclient, String investigationId, JsonObject responseObject,
+			String entityName, boolean addFields)
+			throws URISyntaxException, IcatException, IOException, ClientProtocolException {
+		JsonArray jsonArray = responseObject.getJsonArray(entityName);
+		for (String index : new String[] { "datafile", "dataset" }) {
+			URI uri = new URIBuilder(server).setPath("/" + index + "/_update_by_query").build();
+			HttpPost httpPost = new HttpPost(uri);
+			if (addFields) {
+				for (JsonObject document : jsonArray.getValuesAs(JsonObject.class)) {
+					String documentId = document.getString("id");
+					JsonObject queryObject = OpensearchQuery.buildTermQuery(entityName + ".id", documentId);
 					JsonObjectBuilder paramsBuilder = Json.createObjectBuilder();
 					JsonObjectBuilder scriptBuilder = Json.createObjectBuilder();
-					String sampleId = sampleObject.getString("id");
-					for (String field : sampleObject.keySet()) {
-						paramsBuilder.add("sample." + field, sampleObject.get(field));
+					for (String field : document.keySet()) {
+						paramsBuilder.add(entityName + "." + field, document.get(field));
 					}
-					scriptBuilder.add("id", "update_sample").add("params", paramsBuilder);
-					JsonObject queryObject = OpensearchQueryBuilder.buildTermQuery("sample.id", sampleId);
-					JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
-					String body = bodyBuilder.add("query", queryObject).add("script", scriptBuilder).build().toString();
-					logger.trace("Making call {} with body {}", uri, body);
-					httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-					try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-						Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-						commit();
-					}
+					scriptBuilder.add("id", "update_" + entityName).add("params", paramsBuilder);
+
+					updateWithExtractedEntity(httpclient, uri, httpPost, queryObject, scriptBuilder);
 				}
+			} else {
+				JsonObject queryObject = OpensearchQuery.buildTermQuery("investigation.id", investigationId);
+				JsonObjectBuilder paramsBuilder = Json.createObjectBuilder().add("doc", jsonArray);
+				JsonObjectBuilder scriptBuilder = Json.createObjectBuilder();
+				scriptBuilder.add("id", "create_" + entityName).add("params", paramsBuilder);
+
+				updateWithExtractedEntity(httpclient, uri, httpPost, queryObject, scriptBuilder);
 			}
+		}
+	}
+
+	/**
+	 * For cases when Datasets and Datafiles are created after an Investigation,
+	 * some nested fields such as InvestigationUser and InvestigationInstrument may
+	 * have already been indexed on the Investigation but not the Dataset/file as
+	 * the latter did not yet exist.
+	 * 
+	 * This updates an index with the result of the extraction.
+	 * 
+	 * @param httpclient    The client being used to send HTTP
+	 * @param uri           URI for the relevant _update_by_query path
+	 * @param httpPost      HttpPost to be sent
+	 * @param queryObject   JsonObject determining which entities should be updated
+	 * @param scriptBuilder JsonObjectBuilder for the script used to perform the
+	 *                      update
+	 * @throws IcatException
+	 * @throws IOException
+	 * @throws ClientProtocolException
+	 */
+	private void updateWithExtractedEntity(CloseableHttpClient httpclient, URI uri, HttpPost httpPost,
+			JsonObject queryObject, JsonObjectBuilder scriptBuilder)
+			throws IcatException, IOException, ClientProtocolException {
+		JsonObjectBuilder bodyBuilder = Json.createObjectBuilder();
+		String body = bodyBuilder.add("query", queryObject).add("script", scriptBuilder).build().toString();
+		httpPost.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
+		logger.trace("Making call {} with body {}", uri, body);
+		try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+			Rest.checkStatus(response, IcatExceptionType.INTERNAL);
+			commit();
 		}
 	}
 
@@ -1370,9 +909,8 @@ public class OpensearchApi extends SearchApi {
 	 * Performs more complex update of an entity nested to a parent, for example
 	 * parameters.
 	 * 
-	 * @param sb               StringBuilder used for bulk modifications.
-	 * @param updatesByQuery   List of HttpPost that cannot be bulked, and update
-	 *                         existing documents based on a query.
+	 * @param bulk             OpensearchBulk object recording the requests for
+	 *                         updates by query
 	 * @param id               Id of the entity.
 	 * @param index            Index of the entity.
 	 * @param document         JsonObject containing the key value pairs of the
@@ -1383,9 +921,8 @@ public class OpensearchApi extends SearchApi {
 	 * @throws URISyntaxException
 	 * @throws IcatException
 	 */
-	private void modifyNestedEntity(StringBuilder sb, List<HttpPost> updatesByQuery, String id, String index,
-			JsonObject document, ModificationType modificationType, ParentRelation relation)
-			throws URISyntaxException, IcatException {
+	private void modifyNestedEntity(OpensearchBulk bulk, String id, String index, JsonObject document,
+			ModificationType modificationType, ParentRelation relation) throws URISyntaxException, IcatException {
 
 		switch (modificationType) {
 			case CREATE:
@@ -1403,9 +940,9 @@ public class OpensearchApi extends SearchApi {
 						for (Entry<String, JsonValue> entry : document.entrySet()) {
 							documentBuilder.add(entry.getKey().replace("sample.", ""), entry.getValue());
 						}
-						createNestedEntity(sb, id, index, documentBuilder.build(), relation);
+						createNestedEntity(bulk, id, index, documentBuilder.build(), relation);
 					} else {
-						createNestedEntity(sb, id, index, document, relation);
+						createNestedEntity(bulk, id, index, document, relation);
 					}
 				} else if (index.equals("sampletype")) {
 					// Otherwise, in most cases we don't need to update, as User and ParameterType
@@ -1413,23 +950,21 @@ public class OpensearchApi extends SearchApi {
 					// when that parent is created so the information is captured. However, since
 					// SampleType can be null upon creation of a Sample, need to account for the
 					// creation of a SampleType at a later date.
-					updateNestedEntityByQuery(updatesByQuery, id, index, document, relation, true);
+					updateNestedEntityByQuery(bulk, id, index, document, relation, true);
 				} else if (index.equals("sampleparameter")) {
 					// SampleParameter requires specific logic, as the join is performed using the
 					// Sample id rather than the SampleParameter id or the parent id.
-					logger.debug("index: {}, parent: {}, joinField: {}, doc: {}", index, relation.parentName,
-							relation.joinField, document.toString());
 					if (document.containsKey("sample.id")) {
 						String sampleId = document.getString("sample.id");
-						updateNestedEntityByQuery(updatesByQuery, sampleId, index, document, relation, true);
+						updateNestedEntityByQuery(bulk, sampleId, index, document, relation, true);
 					}
 				}
 				break;
 			case UPDATE:
-				updateNestedEntityByQuery(updatesByQuery, id, index, document, relation, true);
+				updateNestedEntityByQuery(bulk, id, index, document, relation, true);
 				break;
 			case DELETE:
-				updateNestedEntityByQuery(updatesByQuery, id, index, document, relation, false);
+				updateNestedEntityByQuery(bulk, id, index, document, relation, false);
 				break;
 		}
 	}
@@ -1437,23 +972,27 @@ public class OpensearchApi extends SearchApi {
 	/**
 	 * Create a new nested entity in an array on its parent.
 	 * 
-	 * @param sb       StringBuilder used for bulk modifications.
+	 * @param bulk     OpensearchBulk object recording the requests for single
+	 *                 updates
 	 * @param id       Id of the entity.
 	 * @param index    Index of the entity.
 	 * @param document JsonObject containing the key value pairs of the document
 	 *                 fields.
 	 * @param relation The relation between the nested entity and its parent.
-	 * @throws IcatException If parentId is missing from document.
+	 * @throws IcatException      If parentId is missing from document.
+	 * @throws URISyntaxException
 	 */
-	private static void createNestedEntity(StringBuilder sb, String id, String index, JsonObject document,
-			ParentRelation relation) throws IcatException {
+	private void createNestedEntity(OpensearchBulk bulk, String id, String index, JsonObject document,
+			ParentRelation relation) throws IcatException, URISyntaxException {
+
 		if (!document.containsKey(relation.joinField + ".id")) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 					relation.joinField + ".id not found in " + document.toString());
 		}
+
 		String parentId = document.getString(relation.joinField + ".id");
-		JsonObjectBuilder innerBuilder = Json.createObjectBuilder()
-				.add("_id", parentId).add("_index", relation.parentName);
+		String path = "/" + relation.parentName + "/_update/" + parentId;
+
 		// For nested 0:* relationships, wrap single documents in an array
 		JsonArray docArray = Json.createArrayBuilder().add(document).build();
 		JsonObjectBuilder paramsBuilder = Json.createObjectBuilder().add("id", id).add("doc", docArray);
@@ -1463,34 +1002,33 @@ public class OpensearchApi extends SearchApi {
 		} else {
 			scriptId = "update_" + index;
 		}
+
 		JsonObjectBuilder scriptBuilder = Json.createObjectBuilder().add("id", scriptId).add("params", paramsBuilder);
 		JsonObjectBuilder upsertBuilder = Json.createObjectBuilder().add(index, docArray);
 		JsonObjectBuilder payloadBuilder = Json.createObjectBuilder()
 				.add("upsert", upsertBuilder).add("script", scriptBuilder);
-		sb.append(Json.createObjectBuilder().add("update", innerBuilder).build().toString()).append("\n");
-		sb.append(payloadBuilder.build().toString()).append("\n");
+		bulk.addUpdate(path, payloadBuilder.build().toString());
 	}
 
 	/**
 	 * For existing nested objects, painless scripting must be used to update or
 	 * delete them.
 	 * 
-	 * @param updatesByQuery List of HttpPost that cannot be bulked, and update
-	 *                       existing documents based on a query.
-	 * @param id             Id of the entity.
-	 * @param index          Index of the entity.
-	 * @param document       JsonObject containing the key value pairs of the
-	 *                       document fields.
-	 * @param relation       The relation between the nested entity and its parent.
-	 * @param update         Whether to update, or if false delete nested entity
-	 *                       with the specified id.
+	 * @param bulk     OpensearchBulk object recording the requests for updates by
+	 *                 query
+	 * @param id       Id of the entity.
+	 * @param index    Index of the entity.
+	 * @param document JsonObject containing the key value pairs of the
+	 *                 document fields.
+	 * @param relation The relation between the nested entity and its parent.
+	 * @param update   Whether to update, or if false delete nested entity
+	 *                 with the specified id.
 	 * @throws URISyntaxException
 	 */
-	private void updateNestedEntityByQuery(List<HttpPost> updatesByQuery, String id, String index, JsonObject document,
+	private void updateNestedEntityByQuery(OpensearchBulk bulk, String id, String index, JsonObject document,
 			ParentRelation relation, boolean update) throws URISyntaxException {
+
 		String path = "/" + relation.parentName + "/_update_by_query";
-		URI uri = new URIBuilder(server).setPath(path).build();
-		HttpPost httpPost = new HttpPost(uri);
 
 		// Determine the Id of the painless script to use
 		String scriptId = update ? "update_" : "delete_";
@@ -1509,25 +1047,20 @@ public class OpensearchApi extends SearchApi {
 				paramsBuilder.add("doc", Json.createArrayBuilder().add(document));
 			} else {
 				// Need to update individual nested fields
-				paramsBuilder = convertScriptUnits(paramsBuilder, document, relation.fields);
+				convertScriptUnits(paramsBuilder, document, relation.fields);
 			}
 		}
 		JsonObjectBuilder scriptBuilder = Json.createObjectBuilder().add("id", scriptId).add("params", paramsBuilder);
-		JsonObject queryObject;
 		String idField = relation.joinField.equals(relation.parentName) ? "id" : relation.joinField + ".id";
 		// sample.id is a nested field on investigations, so need a nested query to
 		// successfully add sampleparameter
+		JsonObject queryObject = OpensearchQuery.buildTermQuery(idField, id);
 		if (relation.relationType.equals(RelationType.NESTED_GRANDCHILD)
 				|| index.equals("sampleparameter") && relation.parentName.equals("investigation")) {
-			queryObject = OpensearchQueryBuilder.buildNestedQuery(relation.joinField,
-					OpensearchQueryBuilder.buildTermQuery(idField, id));
-		} else {
-			queryObject = OpensearchQueryBuilder.buildTermQuery(idField, id);
+			queryObject = OpensearchQuery.buildNestedQuery(relation.joinField, queryObject);
 		}
 		JsonObject bodyJson = Json.createObjectBuilder().add("query", queryObject).add("script", scriptBuilder).build();
-		logger.trace("Making call {} with body {}", path, bodyJson.toString());
-		httpPost.setEntity(new StringEntity(bodyJson.toString(), ContentType.APPLICATION_JSON));
-		updatesByQuery.add(httpPost);
+		bulk.addUpdate(path, bodyJson.toString());
 	}
 
 	/**
@@ -1591,9 +1124,8 @@ public class OpensearchApi extends SearchApi {
 	 * @param paramsBuilder JsonObjectBuilder for the painless script parameters.
 	 * @param document      JsonObject containing the field/values.
 	 * @param fields        List of fields to be included in the parameters.
-	 * @return paramsBuilder with fields added.
 	 */
-	private JsonObjectBuilder convertScriptUnits(JsonObjectBuilder paramsBuilder, JsonObject document,
+	private void convertScriptUnits(JsonObjectBuilder paramsBuilder, JsonObject document,
 			Set<String> fields) {
 		for (String field : fields) {
 			if (document.containsKey(field)) {
@@ -1606,36 +1138,28 @@ public class OpensearchApi extends SearchApi {
 				}
 			}
 		}
-		return paramsBuilder;
 	}
 
 	/**
-	 * Adds modification command to sb. If relevant, also adds to the list of
+	 * Adds modification command to bulk. If relevant, also adds to the list of
 	 * investigationIds which may contain relevant information (e.g. nested
 	 * InvestigationUsers).
 	 * 
-	 * @param httpclient                The client being used to send HTTP
-	 * @param sb                        StringBuilder used for bulk modifications.
-	 * @param investigationIds          List of investigationIds to check for
-	 *                                  relevant
-	 *                                  fields.
-	 * @param investigationAggregations Map of aggregated fileSize changes with the
-	 *                                  Investigation ids as keys.
-	 * @param datasetAggregations       Map of aggregated fileSize changes with the
-	 *                                  Dataset ids as keys.
-	 * @param id                        Id of the entity.
-	 * @param index                     Index of the entity.
-	 * @param document                  JsonObject containing the key value pairs of
-	 *                                  the
-	 *                                  document fields.
-	 * @param modificationType          The type of operation to be performed.
+	 * @param httpclient       The client being used to send HTTP
+	 * @param bulk             OpensearchBulk object recording the requests for
+	 *                         updates and aggregations
+	 * @param id               Id of the entity.
+	 * @param index            Index of the entity.
+	 * @param document         JsonObject containing the key value pairs of
+	 *                         the
+	 *                         document fields.
+	 * @param modificationType The type of operation to be performed.
 	 * @throws URISyntaxException
 	 * @throws IOException
 	 * @throws ClientProtocolException
 	 */
-	private void modifyEntity(CloseableHttpClient httpclient, StringBuilder sb, Set<String> investigationIds,
-			Map<String, Long[]> investigationAggregations, Map<String, Long[]> datasetAggregations, String id,
-			String index, JsonObject document, ModificationType modificationType)
+	private void modifyEntity(CloseableHttpClient httpclient, OpensearchBulk bulk, String id, String index,
+			JsonObject document, ModificationType modificationType)
 			throws ClientProtocolException, IOException, URISyntaxException {
 
 		JsonObject targetObject = Json.createObjectBuilder().add("_id", new Long(id)).add("_index", index).build();
@@ -1644,82 +1168,98 @@ public class OpensearchApi extends SearchApi {
 		switch (modificationType) {
 			case CREATE:
 				docAsUpsert = Json.createObjectBuilder().add("doc", document).add("doc_as_upsert", true).build();
-				sb.append(update.toString()).append("\n").append(docAsUpsert.toString()).append("\n");
+				bulk.bulkBuilder.append(update.toString()).append("\n").append(docAsUpsert.toString()).append("\n");
 				if (document.containsKey("investigation.id")) {
 					// In principle a Dataset/Datafile could be created after InvestigationUser
 					// entities are attached to an Investigation, so need to check for those
-					investigationIds.add(document.getString("investigation.id"));
-				}
-				if (aggregateFiles && index.equals("datafile") && document.containsKey("fileSize")) {
-					long newFileSize = document.getJsonNumber("fileSize").longValueExact();
-					if (document.containsKey("investigation.id")) {
-						String investigationId = document.getString("investigation.id");
-						Long[] runningFileSize = investigationAggregations.getOrDefault(investigationId,
-								new Long[] { 0L, 0L });
-						Long[] newValue = new Long[] { runningFileSize[0] + newFileSize, runningFileSize[1] + 1L };
-						investigationAggregations.put(investigationId, newValue);
-					}
-					if (document.containsKey("dataset.id")) {
-						String datasetId = document.getString("dataset.id");
-						Long[] runningFileSize = datasetAggregations.getOrDefault(datasetId, new Long[] { 0L, 0L });
-						Long[] newValue = new Long[] { runningFileSize[0] + newFileSize, runningFileSize[1] + 1L };
-						datasetAggregations.put(datasetId, newValue);
-					}
+					bulk.investigationIds.add(document.getString("investigation.id"));
 				}
 				break;
 			case UPDATE:
 				docAsUpsert = Json.createObjectBuilder().add("doc", document).add("doc_as_upsert", true).build();
-				sb.append(update.toString()).append("\n").append(docAsUpsert.toString()).append("\n");
-				if (aggregateFiles && index.equals("datafile") && document.containsKey("fileSize")) {
-					long newFileSize = document.getJsonNumber("fileSize").longValueExact();
-					long oldFileSize;
-					JsonObject source = extractSource(httpclient, id);
-					if (source != null && source.containsKey("fileSize")) {
-						oldFileSize = source.getJsonNumber("fileSize").longValueExact();
-					} else {
-						oldFileSize = 0;
-					}
-					if (newFileSize != oldFileSize) {
-						if (document.containsKey("investigation.id")) {
-							String investigationId = document.getString("investigation.id");
-							Long[] runningFileSize = investigationAggregations.getOrDefault(investigationId,
-									new Long[] { 0L, 0L });
-							Long[] newValue = new Long[] { runningFileSize[0] + newFileSize - oldFileSize,
-									runningFileSize[1] };
-							investigationAggregations.put(investigationId, newValue);
-						}
-						if (document.containsKey("dataset.id")) {
-							String datasetId = document.getString("dataset.id");
-							Long[] runningFileSize = datasetAggregations.getOrDefault(datasetId, new Long[] { 0L, 0L });
-							Long[] newValue = new Long[] { runningFileSize[0] + newFileSize - oldFileSize,
-									runningFileSize[1] };
-							datasetAggregations.put(datasetId, newValue);
-						}
-					}
-				}
+				bulk.bulkBuilder.append(update.toString()).append("\n").append(docAsUpsert.toString()).append("\n");
 				break;
 			case DELETE:
-				sb.append(Json.createObjectBuilder().add("delete", targetObject).build().toString()).append("\n");
-				if (aggregateFiles && index.equals("datafile")) {
-					JsonObject source = extractSource(httpclient, id);
-					if (source != null && source.containsKey("fileSize")) {
-						long oldFileSize = source.getJsonNumber("fileSize").longValueExact();
-						if (source.containsKey("investigation.id")) {
-							String investigationId = source.getString("investigation.id");
-							Long[] runningFileSize = investigationAggregations.getOrDefault(investigationId,
-									new Long[] { 0L, 0L });
-							Long[] newValue = new Long[] { runningFileSize[0] - oldFileSize, runningFileSize[1] - 1 };
-							investigationAggregations.put(investigationId, newValue);
-						}
-						if (source.containsKey("dataset.id")) {
-							String datasetId = source.getString("dataset.id");
-							Long[] runningFileSize = datasetAggregations.getOrDefault(datasetId, new Long[] { 0L, 0L });
-							Long[] newValue = new Long[] { runningFileSize[0] - oldFileSize, runningFileSize[1] - 1 };
-							datasetAggregations.put(datasetId, newValue);
-						}
-					}
-				}
+				bulk.deletionBuilder.append(Json.createObjectBuilder().add("delete", targetObject).build().toString())
+						.append("\n");
 				break;
 		}
+		if (aggregateFiles && index.equals("datafile") && document.containsKey("fileSize")) {
+			aggregateFiles(modificationType, bulk, index, document, httpclient, id);
+		}
+	}
+
+	/**
+	 * Aggregates any change to file size to relevant paret entities.
+	 * 
+	 * @param modificationType The type of operation to be performed
+	 * @param bulk             OpensearchBulk object recording the requests for
+	 *                         updates and aggregations
+	 * @param index            Index of the entity
+	 * @param document         Document containing the parent entity ids
+	 * @param httpclient       CloseableHttpClient to use
+	 * @param id               Datafile id
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
+	private void aggregateFiles(ModificationType modificationType, OpensearchBulk bulk, String index,
+			JsonObject document, CloseableHttpClient httpclient, String id)
+			throws ClientProtocolException, IOException, URISyntaxException {
+		long deltaFileSize = 0;
+		long deltaFileCount = 0;
+		switch (modificationType) {
+			case CREATE:
+				deltaFileSize = document.getJsonNumber("fileSize").longValueExact();
+				deltaFileCount = 1;
+				break;
+			case UPDATE:
+				deltaFileSize = document.getJsonNumber("fileSize").longValueExact() - extractFileSize(httpclient, id);
+				break;
+			case DELETE:
+				deltaFileSize = -extractFileSize(httpclient, id);
+				deltaFileCount = -1;
+				break;
+		}
+		incrementEntity(bulk.investigationAggregations, document, deltaFileSize, deltaFileCount, "investigation.id");
+		incrementEntity(bulk.datasetAggregations, document, deltaFileSize, deltaFileCount, "dataset.id");
+	}
+
+	/**
+	 * Increments the changes to a parent entity by the values of deltaFileSize and
+	 * deltaFileCount.
+	 * 
+	 * @param aggregations   Map of aggregated fileSize changes with the parent ids
+	 *                       as keys.
+	 * @param document       Document containing the parent entity id
+	 * @param deltaFileSize  Change in file size
+	 * @param deltaFileCount Change in file count
+	 * @param idField        The field of the id of parent entity to be incremented
+	 */
+	private void incrementEntity(Map<String, long[]> aggregations, JsonObject document, long deltaFileSize,
+			long deltaFileCount, String idField) {
+		if (document.containsKey(idField)) {
+			String id = document.getString(idField);
+			long[] runningFileSize = aggregations.getOrDefault(id, new long[] { 0, 0 });
+			long[] newValue = new long[] { runningFileSize[0] + deltaFileSize, runningFileSize[1] + deltaFileCount };
+			aggregations.put(id, newValue);
+		}
+	}
+
+	/**
+	 * @param httpclient CloseableHttpClient to use
+	 * @param id         Datafile id
+	 * @return Size of the Datafile in bytes
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws ClientProtocolException
+	 */
+	private long extractFileSize(CloseableHttpClient httpclient, String id)
+			throws IOException, URISyntaxException, ClientProtocolException {
+		JsonObject source = extractSource(httpclient, id);
+		if (source != null && source.containsKey("fileSize")) {
+			return source.getJsonNumber("fileSize").longValueExact();
+		}
+		return 0;
 	}
 }

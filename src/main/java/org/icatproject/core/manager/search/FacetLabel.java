@@ -11,11 +11,11 @@ import javax.json.JsonObject;
 public class FacetLabel {
 
 	private String label;
-	private Long value;
+	private long value;
 	private JsonNumber from;
 	private JsonNumber to;
 
-	public FacetLabel(String label, Long value) {
+	public FacetLabel(String label, long value) {
 		this.label = label;
 		this.value = value;
 	}
@@ -39,7 +39,7 @@ public class FacetLabel {
 		return label;
 	}
 
-	public Long getValue() {
+	public long getValue() {
 		return value;
 	}
 

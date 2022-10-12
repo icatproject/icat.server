@@ -50,6 +50,8 @@ search.populateBlockSize = 10000
 search.directory = ${HOME}/data/icat/search
 search.backlogHandlerIntervalSeconds = 60
 search.enqueuedRequestIntervalSeconds = 5
+search.aggregateFilesIntervalSeconds = 3600
+search.maxSearchTimeSeconds = 5
 # The entities to index with the search engine. For example, remove 'Datafile' and 'DatafileParameter' if the number of datafiles exceeds lucene's limit of 2^32 entries in an index
 !search.entitiesToIndex = Datafile Dataset Investigation InvestigationUser DatafileParameter DatasetParameter InvestigationParameter Sample
 

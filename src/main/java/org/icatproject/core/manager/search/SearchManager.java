@@ -466,6 +466,7 @@ public class SearchManager {
 	private void synchronizedWrite(String line, Long fileLock, File file) throws IcatException {
 		synchronized (fileLock) {
 			try {
+				logger.trace("Writing {} to {}", line, file.getAbsolutePath());
 				FileWriter output = new FileWriter(file, true);
 				output.write(line + "\n");
 				output.close();

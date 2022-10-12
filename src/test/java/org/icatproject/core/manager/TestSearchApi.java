@@ -285,8 +285,8 @@ public class TestSearchApi {
 				FacetLabel expectedLabel = expectedLabels.get(j);
 				FacetLabel actualLabel = actualLabels.get(j);
 				String label = expectedLabel.getLabel();
-				Long expectedValue = expectedLabel.getValue();
-				Long actualValue = actualLabel.getValue();
+				long expectedValue = expectedLabel.getValue();
+				long actualValue = actualLabel.getValue();
 				assertEquals(label, actualLabel.getLabel());
 				message = "Label <" + label + ">: ";
 				assertEquals(message, expectedValue, actualValue);
@@ -345,8 +345,8 @@ public class TestSearchApi {
 			checkResults(lsr, n);
 		}
 		for (int i = 0; i < n.length; i++) {
-			Long resultId = results.get(i).getEntityBaseBeanId();
-			Long expectedId = (Long) Array.get(n, i);
+			long resultId = results.get(i).getEntityBaseBeanId();
+			long expectedId = (long) Array.get(n, i);
 			if (resultId != expectedId) {
 				fail("Expected id " + expectedId + " in position " + i + " but got " + resultId);
 			}
@@ -521,12 +521,12 @@ public class TestSearchApi {
 	 */
 	private void populate() throws IcatException {
 		List<String> queue = new ArrayList<>();
-		Long investigationUserId = 0L;
+		long investigationUserId = 0;
 
-		Instrument instrumentZero = populateInstrument(queue, 0L);
-		Instrument instrumentOne = populateInstrument(queue, 1L);
-		Technique techniqueZero = populateTechnique(queue, 0L);
-		Technique techniqueOne = populateTechnique(queue, 1L);
+		Instrument instrumentZero = populateInstrument(queue, 0);
+		Instrument instrumentOne = populateInstrument(queue, 1);
+		Technique techniqueZero = populateTechnique(queue, 0);
+		Technique techniqueOne = populateTechnique(queue, 1);
 
 		for (int investigationId = 0; investigationId < NUMINV; investigationId++) {
 			String word = word(investigationId % 26, (investigationId + 7) % 26, (investigationId + 17) % 26);
@@ -668,14 +668,13 @@ public class TestSearchApi {
 	 * @return The DatasetTechnique entity created.
 	 * @throws IcatException
 	 */
-	private DatasetTechnique populateDatasetTechnique(List<String> queue, Technique technique, Dataset dataset)
+	private void populateDatasetTechnique(List<String> queue, Technique technique, Dataset dataset)
 			throws IcatException {
 		DatasetTechnique datasetTechnique = new DatasetTechnique();
 		datasetTechnique.setId(technique.getId() * 100 + dataset.getId());
 		datasetTechnique.setTechnique(technique);
 		datasetTechnique.setDataset(dataset);
 		queue.add(SearchApi.encodeOperation("create", datasetTechnique));
-		return datasetTechnique;
 	}
 
 	private String word(int j, int k, int l) {
