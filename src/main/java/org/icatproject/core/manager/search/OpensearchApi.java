@@ -987,7 +987,7 @@ public class OpensearchApi extends SearchApi {
 
 		if (!document.containsKey(relation.joinField + ".id")) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-					relation.joinField + ".id not found in " + document.toString());
+					relation.joinField + ".id not found in " + document);
 		}
 
 		String parentId = document.getString(relation.joinField + ".id");

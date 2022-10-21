@@ -229,8 +229,8 @@ public class OpensearchQuery {
 	}
 
 	/**
-	 * @param key   Arbitrary key
-	 * @param value Arbitrary JsonObjectBuilder
+	 * @param key     Arbitrary key
+	 * @param builder Arbitrary JsonObjectBuilder
 	 * @return <code>{`key`: `builder`}}</code>
 	 */
 	private static JsonObject build(String key, JsonObjectBuilder builder) {
@@ -288,8 +288,6 @@ public class OpensearchQuery {
 	 * Parses incoming Json encoding the requested facets and uses bodyBuilder to
 	 * construct Json that can be understood by Opensearch.
 	 * 
-	 * @param bodyBuilder     JsonObjectBuilder being used to build the body of the
-	 *                        request.
 	 * @param dimensions      JsonArray of JsonObjects representing dimensions to be
 	 *                        faceted.
 	 * @param maxLabels       The maximum number of labels to collect for each
@@ -298,10 +296,8 @@ public class OpensearchQuery {
 	 *                        is needed to distinguish between potentially ambiguous
 	 *                        dimensions, such as "(investigation.)type.name" and
 	 *                        "(investigationparameter.)type.name".
-	 * @return The bodyBuilder originally passed with facet information added to it.
 	 */
-	public void parseFacets(JsonArray dimensions, int maxLabels,
-			String dimensionPrefix) {
+	public void parseFacets(JsonArray dimensions, int maxLabels, String dimensionPrefix) {
 		JsonObjectBuilder aggsBuilder = Json.createObjectBuilder();
 		for (JsonObject dimensionObject : dimensions.getValuesAs(JsonObject.class)) {
 			String dimensionString = dimensionObject.getString("dimension");
@@ -320,8 +316,6 @@ public class OpensearchQuery {
 	/**
 	 * Uses bodyBuilder to construct Json for faceting string fields.
 	 * 
-	 * @param bodyBuilder     JsonObjectBuilder being used to build the body of the
-	 *                        request.
 	 * @param dimensions      List of dimensions to perform string based faceting
 	 *                        on.
 	 * @param maxLabels       The maximum number of labels to collect for each
@@ -330,10 +324,8 @@ public class OpensearchQuery {
 	 *                        is needed to distinguish between potentially ambiguous
 	 *                        dimensions, such as "(investigation.)type.name" and
 	 *                        "(investigationparameter.)type.name".
-	 * @return The bodyBuilder originally passed with facet information added to it.
 	 */
-	public void parseFacets(List<String> dimensions, int maxLabels,
-			String dimensionPrefix) {
+	public void parseFacets(List<String> dimensions, int maxLabels, String dimensionPrefix) {
 		JsonObjectBuilder aggsBuilder = Json.createObjectBuilder();
 		for (String dimensionString : dimensions) {
 			String field = dimensionPrefix == null ? dimensionString : dimensionPrefix + "." + dimensionString;
@@ -346,14 +338,11 @@ public class OpensearchQuery {
 	 * Finalises the construction of faceting Json by handling the possibility of
 	 * faceting a nested object.
 	 * 
-	 * @param bodyBuilder     JsonObjectBuilder being used to build the body of the
-	 *                        request.
 	 * @param dimensionPrefix Optional prefix to apply to the dimension names. This
 	 *                        is needed to distinguish between potentially ambiguous
 	 *                        dimensions, such as "(investigation.)type.name" and
 	 *                        "(investigationparameter.)type.name".
 	 * @param aggsBuilder     JsonObjectBuilder that has the faceting details.
-	 * @return The bodyBuilder originally passed with facet information added to it.
 	 */
 	private void buildFacetRequestJson(String dimensionPrefix, JsonObjectBuilder aggsBuilder) {
 		if (dimensionPrefix == null) {
