@@ -95,8 +95,7 @@ public class TestRS {
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "root");
 		credentials.put("password", "password");
-		Session session = icat.login("db", credentials);
-		return session;
+		return icat.login("db", credentials);
 	}
 
 	private Session piOneSession() throws URISyntaxException, IcatException {
@@ -104,8 +103,7 @@ public class TestRS {
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "piOne");
 		credentials.put("password", "piOne");
-		Session session = icat.login("db", credentials);
-		return session;
+		return icat.login("db", credentials);
 	}
 
 	@Ignore("Test fails because of bug in eclipselink")
