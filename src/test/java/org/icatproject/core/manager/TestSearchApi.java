@@ -33,9 +33,11 @@ import org.icatproject.core.entity.DatasetTechnique;
 import org.icatproject.core.entity.DatasetType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Facility;
+import org.icatproject.core.entity.FacilityCycle;
 import org.icatproject.core.entity.Instrument;
 import org.icatproject.core.entity.InstrumentScientist;
 import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.InvestigationFacilityCycle;
 import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.InvestigationParameter;
 import org.icatproject.core.entity.InvestigationType;
@@ -95,13 +97,26 @@ public class TestSearchApi {
 
 	private static final String SEARCH_AFTER_NOT_NULL = "Expected searchAfter to be set, but it was null";
 	private static final List<String> datafileFields = Arrays.asList("id", "name", "location", "date", "dataset.id",
-			"dataset.name", "investigation.id", "investigation.name", "InvestigationInstrument instrument.id");
+			"dataset.name", "investigation.id", "investigation.name", "InvestigationInstrument instrument.id",
+			"InvestigationFacilityCycle facilityCycle.id");
 	private static final List<String> datasetFields = Arrays.asList("id", "name", "startDate", "endDate",
 			"investigation.id", "investigation.name", "investigation.title", "investigation.startDate",
-			"InvestigationInstrument instrument.id");
+			"InvestigationInstrument instrument.id", "InvestigationFacilityCycle facilityCycle.id");
 	private static final List<String> investigationFields = Arrays.asList("id", "name", "title", "startDate", "endDate",
 			"InvestigationInstrument instrument.id", "InvestigationInstrument instrument.name",
-			"InvestigationInstrument instrument.fullName");
+			"InvestigationInstrument instrument.fullName", "InvestigationFacilityCycle facilityCycle.id");
+
+	private static Facility facility = new Facility();
+	private static FacilityCycle facilityCycle = new FacilityCycle();
+	private static InvestigationType investigationType = new InvestigationType();
+	static {
+		facility.setName("facility");
+		facility.setId(0L);
+		facilityCycle.setFacility(facility);
+		facilityCycle.setId(0L);
+		investigationType.setName("type");
+		investigationType.setId(0L);
+	}
 
 	final static Logger logger = LoggerFactory.getLogger(TestSearchApi.class);
 
@@ -237,7 +252,8 @@ public class TestSearchApi {
 		JsonObject source = datafile.getSource();
 		assertNotNull(source);
 		Set<String> expectedKeys = new HashSet<>(Arrays.asList("id", "name", "location", "date", "dataset.id",
-				"dataset.name", "investigation.id", "investigation.name", "investigationinstrument"));
+				"dataset.name", "investigation.id", "investigation.name", "investigationinstrument",
+				"investigationfacilitycycle"));
 		assertEquals(expectedKeys, source.keySet());
 		assertEquals("0", source.getString("id"));
 		assertEquals("DFaaa", source.getString("name"));
@@ -250,13 +266,17 @@ public class TestSearchApi {
 		JsonArray instruments = source.getJsonArray("investigationinstrument");
 		assertEquals(1, instruments.size());
 		assertEquals("0", instruments.getJsonObject(0).getString("instrument.id"));
+		JsonArray facilityCycles = source.getJsonArray("investigationfacilitycycle");
+		assertEquals(1, facilityCycles.size());
+		assertEquals("0", facilityCycles.getJsonObject(0).getString("facilityCycle.id"));
 	}
 
 	private void checkDataset(ScoredEntityBaseBean dataset) {
 		JsonObject source = dataset.getSource();
 		assertNotNull(source);
 		Set<String> expectedKeys = new HashSet<>(Arrays.asList("id", "name", "startDate", "endDate", "investigation.id",
-				"investigation.name", "investigation.title", "investigation.startDate", "investigationinstrument"));
+				"investigation.name", "investigation.title", "investigation.startDate", "investigationinstrument",
+				"investigationfacilitycycle"));
 		assertEquals(expectedKeys, source.keySet());
 		assertEquals("0", source.getString("id"));
 		assertEquals("DSaaa", source.getString("name"));
@@ -269,6 +289,9 @@ public class TestSearchApi {
 		JsonArray instruments = source.getJsonArray("investigationinstrument");
 		assertEquals(1, instruments.size());
 		assertEquals("0", instruments.getJsonObject(0).getString("instrument.id"));
+		JsonArray facilityCycles = source.getJsonArray("investigationfacilitycycle");
+		assertEquals(1, facilityCycles.size());
+		assertEquals("0", facilityCycles.getJsonObject(0).getString("facilityCycle.id"));
 	}
 
 	private void checkFacets(List<FacetDimension> facetDimensions, FacetDimension... dimensions) {
@@ -297,8 +320,9 @@ public class TestSearchApi {
 	private void checkInvestigation(ScoredEntityBaseBean investigation) {
 		JsonObject source = investigation.getSource();
 		assertNotNull(source);
-		Set<String> expectedKeys = new HashSet<>(
-				Arrays.asList("id", "name", "title", "startDate", "endDate", "investigationinstrument"));
+		Set<String> expectedKeys = new HashSet<>(Arrays.asList(
+				"id", "name", "title", "startDate", "endDate", "investigationinstrument",
+				"investigationfacilitycycle"));
 		assertEquals(expectedKeys, source.keySet());
 		assertEquals("0", source.getString("id"));
 		assertEquals("a h r", source.getString("name"));
@@ -309,6 +333,9 @@ public class TestSearchApi {
 		assertEquals("0", instruments.getJsonObject(0).getString("instrument.id"));
 		assertEquals("bl0", instruments.getJsonObject(0).getString("instrument.name"));
 		assertEquals("Beamline 0", instruments.getJsonObject(0).getString("instrument.fullName"));
+		JsonArray facilityCycles = source.getJsonArray("investigationfacilitycycle");
+		assertEquals(1, facilityCycles.size());
+		assertEquals("0", facilityCycles.getJsonObject(0).getString("facilityCycle.id"));
 	}
 
 	private void checkResults(SearchResult lsr, Long... n) {
@@ -385,12 +412,6 @@ public class TestSearchApi {
 	}
 
 	private Investigation investigation(long id, String name, Date startDate, Date endDate) {
-		InvestigationType type = new InvestigationType();
-		type.setName("type");
-		type.setId(0L);
-		Facility facility = new Facility();
-		facility.setName("facility");
-		facility.setId(0L);
 		Investigation investigation = new Investigation();
 		investigation.setId(id);
 		investigation.setName(name);
@@ -399,7 +420,7 @@ public class TestSearchApi {
 		investigation.setCreateTime(startDate);
 		investigation.setModTime(endDate);
 		investigation.setFacility(facility);
-		investigation.setType(type);
+		investigation.setType(investigationType);
 		return investigation;
 	}
 
@@ -534,6 +555,12 @@ public class TestSearchApi {
 			Date endDate = new Date(now + (investigationId + 1) * 60000);
 			Investigation investigation = investigation(investigationId, word, startDate, endDate);
 			queue.add(SearchApi.encodeOperation("create", investigation));
+
+			InvestigationFacilityCycle investigationFacilityCycle = new InvestigationFacilityCycle();
+			investigationFacilityCycle.setId(new Long(investigationId));
+			investigationFacilityCycle.setFacilityCycle(facilityCycle);
+			investigationFacilityCycle.setInvestigation(investigation);
+			queue.add(SearchApi.encodeOperation("create", investigationFacilityCycle));
 
 			InvestigationInstrument investigationInstrument = new InvestigationInstrument();
 			investigationInstrument.setId(new Long(investigationId));
@@ -1264,7 +1291,7 @@ public class TestSearchApi {
 		JsonObject lowRange = buildFacetRangeObject("low", 0L, 2L);
 		JsonObject highRange = buildFacetRangeObject("high", 2L, 4L);
 		JsonObject facetIdQuery = buildFacetIdQuery("id", "42");
-		JsonObject rangeFacetRequest = buildFacetRangeRequest(facetIdQuery, "date", lowRange,highRange);
+		JsonObject rangeFacetRequest = buildFacetRangeRequest(facetIdQuery, "date", lowRange, highRange);
 		JsonObject stringFacetRequest = buildFacetStringRequest("id", "42", "datafileFormat.name");
 		JsonObject sparseFacetRequest = Json.createObjectBuilder().add("query", facetIdQuery).build();
 		FacetDimension lowFacet = new FacetDimension("", "date", new FacetLabel("low", 1L), new FacetLabel("high", 0L));

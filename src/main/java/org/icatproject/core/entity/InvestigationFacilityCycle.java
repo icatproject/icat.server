@@ -2,11 +2,14 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
+import javax.json.stream.JsonGenerator;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Many to many relationship between investigation and facilityCycle. "
         + "Allows investigations to belong to multiple cycles at once.")
@@ -14,7 +17,6 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITYCYCLE_ID", "INVESTIGATION_ID" }) })
 public class InvestigationFacilityCycle extends EntityBaseBean implements Serializable {
-
 
     @JoinColumn(name = "FACILITYCYCLE_ID", nullable = false)
     @ManyToOne
@@ -42,6 +44,13 @@ public class InvestigationFacilityCycle extends EntityBaseBean implements Serial
 
     public void setInvestigation(Investigation investigation) {
         this.investigation = investigation;
+    }
+
+    @Override
+    public void getDoc(JsonGenerator gen) {
+        SearchApi.encodeString(gen, "facilityCycle.id", facilityCycle.id);
+        SearchApi.encodeString(gen, "investigation.id", investigation.id);
+        SearchApi.encodeString(gen, "id", id);
     }
 
 }

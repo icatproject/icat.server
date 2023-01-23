@@ -164,6 +164,10 @@ public class OpensearchApi extends SearchApi {
 				new ParentRelation(RelationType.NESTED_CHILD, "investigation", "investigation", null),
 				new ParentRelation(RelationType.NESTED_CHILD, "dataset", "investigation", null),
 				new ParentRelation(RelationType.NESTED_CHILD, "datafile", "investigation", null)));
+		relations.put("investigationfacilitycycle", Arrays.asList(
+				new ParentRelation(RelationType.NESTED_CHILD, "investigation", "investigation", null),
+				new ParentRelation(RelationType.NESTED_CHILD, "dataset", "investigation", null),
+				new ParentRelation(RelationType.NESTED_CHILD, "datafile", "investigation", null)));
 
 		// Grandchildren are entities that are related to one of the nested
 		// children, but do not have a direct reference to one of the indexed entities,
@@ -244,7 +248,8 @@ public class OpensearchApi extends SearchApi {
 						.add("sampleparameter", buildNestedMapping("sample.id", "type.id"))
 						.add("investigationparameter", buildNestedMapping("investigation.id", "type.id"))
 						.add("investigationuser", buildNestedMapping("investigation.id", "user.id"))
-						.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"));
+						.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"))
+						.add("investigationfacilitycycle", buildNestedMapping("investigation.id", "facilityCycle.id"));
 				break;
 
 			case "dataset":
@@ -260,6 +265,7 @@ public class OpensearchApi extends SearchApi {
 						.add("datasettechnique", buildNestedMapping("dataset.id", "technique.id"))
 						.add("investigationuser", buildNestedMapping("investigation.id", "user.id"))
 						.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"))
+						.add("investigationfacilitycycle", buildNestedMapping("investigation.id", "facilityCycle.id"))
 						.add("sampleparameter", buildNestedMapping("sample.id", "type.id"));
 				break;
 
@@ -274,6 +280,7 @@ public class OpensearchApi extends SearchApi {
 						.add("datafileparameter", buildNestedMapping("datafile.id", "type.id"))
 						.add("investigationuser", buildNestedMapping("investigation.id", "user.id"))
 						.add("investigationinstrument", buildNestedMapping("investigation.id", "instrument.id"))
+						.add("investigationfacilitycycle", buildNestedMapping("investigation.id", "facilityCycle.id"))
 						.add("sampleparameter", buildNestedMapping("sample.id", "type.id"));
 				break;
 
@@ -816,6 +823,9 @@ public class OpensearchApi extends SearchApi {
 		}
 		if (responseObject.containsKey("investigationinstrument")) {
 			extractEntity(httpclient, investigationId, responseObject, "investigationinstrument", false);
+		}
+		if (responseObject.containsKey("investigationfacilitycycle")) {
+			extractEntity(httpclient, investigationId, responseObject, "investigationfacilitycycle", false);
 		}
 		if (responseObject.containsKey("sample")) {
 			extractEntity(httpclient, investigationId, responseObject, "sample", true);

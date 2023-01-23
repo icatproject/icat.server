@@ -271,6 +271,10 @@ public class Datafile extends EntityBaseBean implements Serializable {
 			Relationship[] investigationRelationships = {
 					eiHandler.getRelationshipsByName(Datafile.class).get("dataset"),
 					eiHandler.getRelationshipsByName(Dataset.class).get("investigation") };
+			Relationship[] investigationFacilityCyclesRelationships = {
+					eiHandler.getRelationshipsByName(Datafile.class).get("dataset"),
+					eiHandler.getRelationshipsByName(Dataset.class).get("investigation"),
+					eiHandler.getRelationshipsByName(Investigation.class).get("investigationFacilityCycles") };
 			Relationship[] instrumentRelationships = {
 					eiHandler.getRelationshipsByName(Datafile.class).get("dataset"),
 					eiHandler.getRelationshipsByName(Dataset.class).get("investigation"),
@@ -304,6 +308,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 			documentFields.put("visitId", investigationRelationships);
 			documentFields.put("datafileFormat.id", null);
 			documentFields.put("datafileFormat.name", datafileFormatRelationships);
+			documentFields.put("InvestigationFacilityCycle facilityCycle.id", investigationFacilityCyclesRelationships);
 			documentFields.put("InvestigationInstrument instrument.id", instrumentRelationships);
 		}
 		return documentFields;
