@@ -114,7 +114,7 @@ def _process(relativeUrl, parameters, method, headers=None, body=None):
     conn.endheaders()
      
     if parameters and method == "POST":
-        conn.send(parameters)
+        conn.send(parameters.encode("ascii"))
     elif body:
         blocksize = 8192
         datablock = body.read(blocksize)
