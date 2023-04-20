@@ -719,6 +719,49 @@ public class TestRS {
 	}
 
 	@Test
+	public void testSearchLists() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "notroot");
+		credentials.put("password", "password");
+		Session notrootSession = icat.login("db", credentials);
+
+		credentials = new HashMap<>();
+		credentials.put("username", "piOne");
+		credentials.put("password", "piOne");
+		Session piOneSession = icat.login("db", credentials);
+
+		// Get known configuration
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		notrootSession.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+
+		String query = "SELECT f.investigations FROM Facility f";
+		search(notrootSession, query, 3); // notroot is in user group giving CRUD to all, so should see all 3
+		search(piOneSession, query, 0); // piOne should not pass authz for Facility
+
+		try {
+			wSession.addRule(null, "Facility", "R");
+			search(notrootSession, query, 3); // notroot is in user group giving CRUD to all, so should see all 3
+			search(piOneSession, query, 0); // piOne should pass for Facility, but not for any Investigation
+	
+			wSession.addRule(null, "SELECT i FROM Investigation i WHERE i.visitId = 'zero'", "R");
+			search(notrootSession, query, 3); // notroot is in user group giving CRUD to all, so should see all 3
+			JsonArray results = search(piOneSession, query, 1); // piOne should pass for Facility, one Investigation
+			JsonObject result = results.getJsonObject(0);
+			JsonObject investigation = result.getJsonObject("Investigation");
+			assertEquals("Wrong visitId in "+ investigation.toString(), "zero", investigation.getString("visitId", null));
+	
+			query = "SELECT f.investigationTypes FROM Facility f";
+			wSession.addRule(null, "InvestigationType", "R");
+			search(notrootSession, query, 2); // notroot is in user group giving CRUD to all, so should see both
+			search(piOneSession, query, 2); // piOne should pass for Facility, both types
+		} finally {
+			// Reset authz after tests
+			wSession.setAuthz();
+		}
+	}
+
+	@Test
 	public void authzForUpdateAttribute() throws Exception {
 		Session session = createAndPopulate();
 

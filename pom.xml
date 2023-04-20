@@ -3,7 +3,7 @@
 
 	<groupId>org.icatproject</groupId>
 	<artifactId>icat.server</artifactId>
-	<version>4.11.1</version>
+	<version>4.11.2-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>ICAT Server</name>
 	<description>A metadata catalogue to support Large Facility experimental data, 
@@ -36,7 +36,7 @@
 		<connection>scm:git:${gitUrl}.git</connection>
 		<developerConnection>scm:git:${gitUrl}.git</developerConnection>
 		<url>${gitUrl}</url>
-		<tag>v4.11.1</tag>
+		<tag>v4.11.2</tag>
 	</scm>
 
 	<issueManagement>
@@ -399,6 +399,3 @@
 	</reporting>
 
 </project>
-
-
-
