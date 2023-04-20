@@ -11,6 +11,8 @@ import java.util.Set;
 import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.DatafileFormat;
 import org.icatproject.core.entity.Dataset;
+import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.InvestigationType;
 import org.junit.Test;
 
 public class TestFrom {
@@ -37,6 +39,7 @@ public class TestFrom {
 		assertEquals(2, clause.getAuthzMap().size());
 		assertEquals(Datafile.class, clause.getAuthzMap().get("df.id"));
 		assertEquals(Dataset.class, clause.getAuthzMap().get("df.dataset.id"));
+		assertEquals(0, clause.getReplaceMap().size());
 		assertEquals(Token.Type.WHERE, input.peek(0).getType());
 	}
 
@@ -50,6 +53,7 @@ public class TestFrom {
 		assertEquals(2, clause.getAuthzMap().size());
 		assertEquals(Datafile.class, clause.getAuthzMap().get("df.id"));
 		assertEquals(Dataset.class, clause.getAuthzMap().get("ds.id"));
+		assertEquals(0, clause.getReplaceMap().size());
 		assertEquals(Token.Type.WHERE, input.peek(0).getType());
 	}
 
@@ -64,6 +68,38 @@ public class TestFrom {
 		assertEquals(2, clause.getAuthzMap().size());
 		assertEquals(Dataset.class, clause.getAuthzMap().get("ds.id"));
 		assertEquals(DatafileFormat.class, clause.getAuthzMap().get("dff.id"));
+		assertEquals(0, clause.getReplaceMap().size());
+		assertEquals(Token.Type.WHERE, input.peek(0).getType());
+	}
+
+	@Test
+	public void testList1() throws Exception {
+		List<Token> tokens = Tokenizer
+				.getTokens("FROM Facility f WHERE");
+		Input input = new Input(tokens);
+		Set<String> idPaths = new HashSet<>(Arrays.asList("f.investigations"));
+		FromClause clause = new FromClause(input, idPaths);
+		assertEquals(" Facility f JOIN f.investigations a0", clause.toString());
+		assertEquals(1, clause.getAuthzMap().size());
+		assertEquals(Investigation.class, clause.getAuthzMap().get("a0.id"));
+		assertEquals(1, clause.getReplaceMap().size());
+		assertEquals("a0", clause.getReplaceMap().get("f.investigations"));
+		assertEquals(Token.Type.WHERE, input.peek(0).getType());
+	}
+
+	@Test
+	public void testList2() throws Exception {
+		List<Token> tokens = Tokenizer
+				.getTokens("FROM Facility f JOIN f.investigationTypes a0 WHERE");
+		Input input = new Input(tokens);
+		Set<String> idPaths = new HashSet<>(Arrays.asList("f.investigations", "a0"));
+		FromClause clause = new FromClause(input, idPaths);
+		assertEquals(" Facility f JOIN f.investigationTypes a0 JOIN f.investigations a1", clause.toString());
+		assertEquals(2, clause.getAuthzMap().size());
+		assertEquals(InvestigationType.class, clause.getAuthzMap().get("a0.id"));
+		assertEquals(Investigation.class, clause.getAuthzMap().get("a1.id"));
+		assertEquals(1, clause.getReplaceMap().size());
+		assertEquals("a1", clause.getReplaceMap().get("f.investigations"));
 		assertEquals(Token.Type.WHERE, input.peek(0).getType());
 	}
 

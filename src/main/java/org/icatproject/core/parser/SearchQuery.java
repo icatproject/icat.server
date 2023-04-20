@@ -51,6 +51,9 @@ public class SearchQuery {
 		}
 
 		fromClause = new FromClause(input, selectClause.getIdPaths());
+		for (Entry<String, String> entry : fromClause.getReplaceMap().entrySet()) {
+			selectClause.replace(entry.getKey(), entry.getValue());
+		}
 		Token t = input.peek(0);
 		if (t != null && t.getType() == Token.Type.WHERE) {
 			whereClause = new WhereClause(input);
