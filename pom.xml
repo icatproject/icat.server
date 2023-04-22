@@ -3,7 +3,7 @@
 
 	<groupId>org.icatproject</groupId>
 	<artifactId>icat.server</artifactId>
-	<version>4.11.2-SNAPSHOT</version>
+	<version>4.11.2</version>
 	<packaging>war</packaging>
 	<name>ICAT Server</name>
 	<description>A metadata catalogue to support Large Facility experimental data, 
