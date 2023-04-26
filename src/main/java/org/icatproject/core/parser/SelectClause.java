@@ -33,6 +33,10 @@ public class SelectClause {
 		clause = sb.toString();
 	}
 
+	public void replace(CharSequence target, CharSequence replacement) {
+		clause = clause.replace(" " + target, " " + replacement);
+	}
+
 	/** Only interested to detect single count request */
 	public boolean isCount() {
 		return idPaths.size() == 1 && count;
