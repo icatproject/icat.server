@@ -1,17 +1,17 @@
 package org.icatproject.core.manager;
 
-public class ScoredEntityBaseBean {
+public class ScoredEntityBaseBean implements HasEntityId {
 
-	private long entityBaseBeanId;
+	private Long id;
 	private float score;
 
-	public ScoredEntityBaseBean(long id, float score) {
-		this.entityBaseBeanId = id;
+	public ScoredEntityBaseBean(Long id, float score) {
+		this.id = id;
 		this.score = score;
 	}
 
-	public long getEntityBaseBeanId() {
-		return entityBaseBeanId;
+	public Long getId() {
+		return id;
 	}
 
 	public float getScore() {

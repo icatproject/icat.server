@@ -148,6 +148,7 @@ public class EntityBeanManager {
 	private boolean luceneActive;
 
 	private int maxEntities;
+	private int luceneSearchBlockSize;
 
 	private long exportCacheSize;
 	private Set<String> rootUserNames;
@@ -781,27 +782,58 @@ public class EntityBeanManager {
 		}
 	}
 
-	private void filterReadAccess(List<ScoredEntityBaseBean> results, List<ScoredEntityBaseBean> allResults,
+	/**
+	 * Performs authorisation for READ access on the newResults. Instead of
+	 * returning the entries which can be READ, they are added to the end of
+	 * acceptedResults, ensuring it doesn't exceed maxCount or maxEntities.
+	 * 
+	 * @param acceptedResults List containing already authorised entities. Entries
+	 *                        in newResults that pass authorisation will be added to
+	 *                        acceptedResults.
+	 * @param newResults      List containing new results to check READ access to.
+	 *                        Entries in newResults that pass authorisation will be
+	 *                        added to acceptedResults.
+	 * @param maxCount        The maximum size of acceptedResults. Once reached, no
+	 *                        more entries from newResults will be added.
+	 * @param userId          The user attempting to read the newResults.
+	 * @param manager         The EntityManager to use.
+	 * @param klass           The Class of the EntityBaseBean that is being
+	 *                        filtered.
+	 * @throws IcatException If more entities than the configuration option
+	 *                       maxEntities would be added to acceptedResults, then an
+	 *                       IcatException is thrown instead.
+	 */
+	private void filterReadAccess(List<ScoredEntityBaseBean> acceptedResults, List<ScoredEntityBaseBean> newResults,
 			int maxCount, String userId, EntityManager manager, Class<? extends EntityBaseBean> klass)
 			throws IcatException {
 
-		logger.debug("Got " + allResults.size() + " results from Lucene");
-		for (ScoredEntityBaseBean sr : allResults) {
-			long entityId = sr.getEntityBaseBeanId();
-			EntityBaseBean beanManaged = manager.find(klass, entityId);
-			if (beanManaged != null) {
-				try {
-					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
-					results.add(new ScoredEntityBaseBean(entityId, sr.getScore()));
-					if (results.size() > maxEntities) {
+		logger.debug("Got " + newResults.size() + " results from Lucene");
+		Set<Long> allowedIds = gateKeeper.getReadableIds(userId, newResults, klass.getSimpleName(), manager);
+		if (allowedIds == null) {
+			// A null result means there are no restrictions on the readable ids, so add as
+			// many newResults as we need to reach maxCount
+			int needed = maxCount - acceptedResults.size();
+			if (newResults.size() > needed) {
+				acceptedResults.addAll(newResults.subList(0, needed));
+			} else {
+				acceptedResults.addAll(newResults);
+			}
+			if (acceptedResults.size() > maxEntities) {
+				throw new IcatException(IcatExceptionType.VALIDATION,
+						"attempt to return more than " + maxEntities + " entities");
+			}
+		} else {
+			// Otherwise, add results in order until we reach maxCount
+			for (ScoredEntityBaseBean newResult : newResults) {
+				if (allowedIds.contains(newResult.getId())) {
+					acceptedResults.add(newResult);
+					if (acceptedResults.size() > maxEntities) {
 						throw new IcatException(IcatExceptionType.VALIDATION,
 								"attempt to return more than " + maxEntities + " entities");
 					}
-					if (results.size() == maxCount) {
+					if (acceptedResults.size() == maxCount) {
 						break;
 					}
-				} catch (IcatException e) {
-					// Nothing to do
 				}
 			}
 		}
@@ -1154,6 +1186,7 @@ public class EntityBeanManager {
 		notificationRequests = propertyHandler.getNotificationRequests();
 		luceneActive = lucene.isActive();
 		maxEntities = propertyHandler.getMaxEntities();
+		luceneSearchBlockSize = propertyHandler.getLuceneSearchBlockSize();
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
 		key = propertyHandler.getKey();
@@ -1398,11 +1431,7 @@ public class EntityBeanManager {
 			LuceneSearchResult last = null;
 			Long uid = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
-			/*
-			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to Lucene
-			 */
-			int blockSize = Math.max(1000, maxCount);
+			int blockSize = luceneSearchBlockSize;
 
 			do {
 				if (last == null) {
@@ -1423,7 +1452,7 @@ public class EntityBeanManager {
 			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
 				gen.write("userName", userName);
 				if (results.size() > 0) {
-					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+					gen.write("entityId", results.get(0).getId());
 				}
 				gen.writeEnd();
 			}
@@ -1441,11 +1470,7 @@ public class EntityBeanManager {
 			LuceneSearchResult last = null;
 			Long uid = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
-			/*
-			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to Lucene
-			 */
-			int blockSize = Math.max(1000, maxCount);
+			int blockSize = luceneSearchBlockSize;
 
 			do {
 				if (last == null) {
@@ -1465,7 +1490,7 @@ public class EntityBeanManager {
 			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
 				gen.write("userName", userName);
 				if (results.size() > 0) {
-					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+					gen.write("entityId", results.get(0).getId());
 				}
 				gen.writeEnd();
 			}
@@ -1492,11 +1517,7 @@ public class EntityBeanManager {
 			LuceneSearchResult last = null;
 			Long uid = null;
 			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
-			/*
-			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to Lucene
-			 */
-			int blockSize = Math.max(1000, maxCount);
+			int blockSize = luceneSearchBlockSize;
 
 			do {
 				if (last == null) {
@@ -1516,7 +1537,7 @@ public class EntityBeanManager {
 			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
 				gen.write("userName", userName);
 				if (results.size() > 0) {
-					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+					gen.write("entityId", results.get(0).getId());
 				}
 				gen.writeEnd();
 			}

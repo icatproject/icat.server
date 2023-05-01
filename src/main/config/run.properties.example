@@ -45,6 +45,10 @@ log.list = SESSION WRITE READ INFO
 # Lucene
 lucene.url = https://localhost:8181
 lucene.populateBlockSize = 10000
+# Recommend setting lucene.searchBlockSize equal to maxIdsInQuery, so that all Lucene results can be authorised at once
+# If lucene.searchBlockSize > maxIdsInQuery, then multiple auth checks may be needed for a single search to Lucene
+# The optimal value depends on how likely a user's auth request fails: larger values are more efficient when rejection is more likely
+lucene.searchBlockSize = 1000
 lucene.directory = ${HOME}/data/icat/lucene
 lucene.backlogHandlerIntervalSeconds = 60
 lucene.enqueuedRequestIntervalSeconds = 5

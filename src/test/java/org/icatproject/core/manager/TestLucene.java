@@ -159,7 +159,7 @@ public class TestLucene {
 		Set<Long> got = new HashSet<>();
 
 		for (ScoredEntityBaseBean q : lsr.getResults()) {
-			got.add(q.getEntityBaseBeanId());
+			got.add(q.getId());
 		}
 
 		Set<Long> missing = new HashSet<>(wanted);

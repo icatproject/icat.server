@@ -1108,7 +1108,7 @@ public class ICATRest {
 			gen.writeStartArray();
 			for (ScoredEntityBaseBean sb : objects) {
 				gen.writeStartObject();
-				gen.write("id", sb.getEntityBaseBeanId());
+				gen.write("id", sb.getId());
 				gen.write("score", sb.getScore());
 				gen.writeEnd();
 			}
