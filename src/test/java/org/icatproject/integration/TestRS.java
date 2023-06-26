@@ -96,7 +96,7 @@ public class TestRS {
 		credentials.put("username", "root");
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		// See what happens to query with bad order by
@@ -470,7 +470,7 @@ public class TestRS {
 		System.out.println(props);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		rootSession.luceneCommit();
@@ -512,7 +512,7 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		long fid = search(session, "Facility.id", 1).getJsonNumber(0).longValueExact();
@@ -544,7 +544,7 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		JsonArray array;
@@ -602,7 +602,7 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		JsonArray array;
@@ -731,7 +731,7 @@ public class TestRS {
 		Session piOneSession = icat.login("db", credentials);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		notrootSession.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		String query = "SELECT f.investigations FROM Facility f";
@@ -1420,7 +1420,7 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		return session;
@@ -1544,7 +1544,7 @@ public class TestRS {
 	private void exportMetaDataDump(Map<String, String> credentials) throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 
 		Map<String, String> rootCredentials = new HashMap<>();
 		rootCredentials.put("username", "root");
@@ -1583,7 +1583,7 @@ public class TestRS {
 		credentials.put("username", "root");
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 
 		// Get known configuration
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
@@ -1618,7 +1618,7 @@ public class TestRS {
 		credentials.put("username", "piOne");
 		credentials.put("password", "piOne");
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		try {
 			session.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
 			fail();
@@ -1633,7 +1633,7 @@ public class TestRS {
 		credentials.put("username", "root");
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 
 		start = System.currentTimeMillis();
 		session.importMetaData(path, DuplicateAction.CHECK, attributes);
