@@ -85,3 +85,4 @@ if not os.path.exists(binDir):
 
 p = subprocess.Popen(["./setup", "install"], cwd="src/test/install")
 p.wait()
+sys.exit(p.returncode)
