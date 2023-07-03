@@ -212,11 +212,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		if (doi != null) {
 			SearchApi.encodeString(gen, "doi", doi);
 		}
-		if (fileSize != null) {
-			SearchApi.encodeLong(gen, "fileSize", fileSize);
-		} else {
-			SearchApi.encodeLong(gen, "fileSize", 0L);
-		}
+		SearchApi.encodeLong(gen, "fileSize", fileSize);
 		SearchApi.encodeLong(gen, "fileCount", 1L); // Always 1, but makes sorting on fields consistent
 		if (datafileFormat != null) {
 			datafileFormat.getDoc(gen);
