@@ -14,9 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - version: 8
-            experimental: false
           - version: 11
+            experimental: false
+          - version: 17
             experimental: true
 
     steps:
