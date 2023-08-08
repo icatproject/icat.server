@@ -8,16 +8,10 @@ on:
 
 jobs:
   build_and_tests:
-    runs-on: ubuntu-20.04
-    continue-on-error: ${{ matrix.experimental }}
+    runs-on: ubuntu-22.04
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - version: 11
-            experimental: false
-          - version: 17
-            experimental: true
+        java_version: [11, 17]
 
     steps:
       # Setup Java & Python
@@ -25,12 +19,10 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
-          java-version: ${{ matrix.version }}
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.9.7"
-          architecture: x64
+          java-version: ${{ matrix.java_version }}
+
+      - name: Run apt-get update
+        run: sudo apt-get update
 
       # ICAT Ansible clone and install dependencies
       - name: Checkout icat-ansible
@@ -63,10 +55,6 @@ jobs:
           sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
           sudo apt-get remove --purge "mysql*"
           sudo rm -rf /var/lib/mysql* /etc/mysql
-
-      # Needed for `maven_artifact` module on Ansible - lxml is in requirements.txt but doesn't seem to work on GitHub Actions
-      - name: Install lxml
-        run: sudo apt-get install python3-lxml
 
       # Create local instance of ICAT
       - name: Run ICAT Ansible Playbook
