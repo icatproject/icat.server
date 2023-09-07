@@ -46,6 +46,7 @@ with open("src/test/install/run.properties", "w") as f:
         "search.engine = %s" % search_engine,
         "search.urls = %s" % search_urls,
         "search.populateBlockSize = 10000",
+        "search.searchBlockSize = 1000",
         "search.directory = %s/data/search" % subst["HOME"],
         "search.backlogHandlerIntervalSeconds = 60",
         "search.enqueuedRequestIntervalSeconds = 3",

@@ -343,7 +343,7 @@ public class TestSearchApi {
 		Set<Long> got = new HashSet<>();
 
 		for (ScoredEntityBaseBean q : lsr.getResults()) {
-			got.add(q.getEntityBaseBeanId());
+			got.add(q.getId());
 		}
 
 		Set<Long> missing = new HashSet<>(wanted);
@@ -372,7 +372,7 @@ public class TestSearchApi {
 			checkResults(lsr, n);
 		}
 		for (int i = 0; i < n.length; i++) {
-			long resultId = results.get(i).getEntityBaseBeanId();
+			long resultId = results.get(i).getId();
 			long expectedId = (long) Array.get(n, i);
 			if (resultId != expectedId) {
 				fail("Expected id " + expectedId + " in position " + i + " but got " + resultId);

@@ -537,7 +537,7 @@ public class SearchManager {
 	 */
 	public static JsonObject buildFacetQuery(List<ScoredEntityBaseBean> results, String idField, JsonObject facetJson) {
 		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-		results.forEach(r -> arrayBuilder.add(Long.toString(r.getEntityBaseBeanId())));
+		results.forEach(r -> arrayBuilder.add(Long.toString(r.getId())));
 		JsonObject terms = Json.createObjectBuilder().add(idField, arrayBuilder.build()).build();
 		return buildFacetQuery(terms, facetJson);
 	}

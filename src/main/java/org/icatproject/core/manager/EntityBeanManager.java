@@ -153,6 +153,7 @@ public class EntityBeanManager {
 	private long searchMaxSearchTimeMillis;
 
 	private int maxEntities;
+	private int searchSearchBlockSize;
 
 	private long exportCacheSize;
 	private Set<String> rootUserNames;
@@ -786,29 +787,59 @@ public class EntityBeanManager {
 		}
 	}
 
-	private ScoredEntityBaseBean filterReadAccess(List<ScoredEntityBaseBean> results,
-			List<ScoredEntityBaseBean> allResults, int maxCount, String userId, EntityManager manager,
-			Class<? extends EntityBaseBean> klass) throws IcatException {
+	/**
+	 * Performs authorisation for READ access on the newResults. Instead of
+	 * returning the entries which can be READ, they are added to the end of
+	 * acceptedResults, ensuring it doesn't exceed maxCount or maxEntities.
+	 * 
+	 * @param acceptedResults List containing already authorised entities. Entries
+	 *                        in newResults that pass authorisation will be added to
+	 *                        acceptedResults.
+	 * @param newResults      List containing new results to check READ access to.
+	 *                        Entries in newResults that pass authorisation will be
+	 *                        added to acceptedResults.
+	 * @param maxCount        The maximum size of acceptedResults. Once reached, no
+	 *                        more entries from newResults will be added.
+	 * @param userId          The user attempting to read the newResults.
+	 * @param manager         The EntityManager to use.
+	 * @param klass           The Class of the EntityBaseBean that is being
+	 *                        filtered.
+	 * @throws IcatException If more entities than the configuration option
+	 *                       maxEntities would be added to acceptedResults, then an
+	 *                       IcatException is thrown instead.
+	 */
+	private ScoredEntityBaseBean filterReadAccess(List<ScoredEntityBaseBean> acceptedResults, List<ScoredEntityBaseBean> newResults,
+			int maxCount, String userId, EntityManager manager, Class<? extends EntityBaseBean> klass)
+			throws IcatException {
 
-		logger.debug("Got " + allResults.size() + " results from search engine");
-		for (ScoredEntityBaseBean sr : allResults) {
-			long entityId = sr.getEntityBaseBeanId();
-			EntityBaseBean beanManaged = manager.find(klass, entityId);
-			logger.trace("{} {} {}", klass, entityId, beanManaged);
-			if (beanManaged != null) {
-				try {
-					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
-					results.add(sr);
-					if (results.size() > maxEntities) {
+		logger.debug("Got " + newResults.size() + " results from search engine");
+		Set<Long> allowedIds = gateKeeper.getReadableIds(userId, newResults, klass.getSimpleName(), manager);
+		if (allowedIds == null) {
+			// A null result means there are no restrictions on the readable ids, so add as
+			// many newResults as we need to reach maxCount
+			int needed = maxCount - acceptedResults.size();
+			if (newResults.size() > needed) {
+				acceptedResults.addAll(newResults.subList(0, needed));
+			} else {
+				acceptedResults.addAll(newResults);
+			}
+			if (acceptedResults.size() > maxEntities) {
+				throw new IcatException(IcatExceptionType.VALIDATION,
+						"attempt to return more than " + maxEntities + " entities");
+			}
+		} else {
+			// Otherwise, add results in order until we reach maxCount
+			for (ScoredEntityBaseBean newResult : newResults) {
+				if (allowedIds.contains(newResult.getId())) {
+					acceptedResults.add(newResult);
+					if (acceptedResults.size() > maxEntities) {
 						throw new IcatException(IcatExceptionType.VALIDATION,
 								"attempt to return more than " + maxEntities + " entities");
 					}
-					if (results.size() == maxCount) {
+					if (acceptedResults.size() == maxCount) {
 						logger.debug("maxCount {} reached", maxCount);
-						return sr;
+						return newResult;
 					}
-				} catch (IcatException e) {
-					// Nothing to do
 				}
 			}
 		}
@@ -1163,6 +1194,7 @@ public class EntityBeanManager {
 		searchActive = searchManager.isActive();
 		searchMaxSearchTimeMillis = propertyHandler.getSearchMaxSearchTimeMillis();
 		maxEntities = propertyHandler.getMaxEntities();
+		searchSearchBlockSize = propertyHandler.getSearchSearchBlockSize();
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
 		key = propertyHandler.getKey();
@@ -1492,7 +1524,7 @@ public class EntityBeanManager {
 			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
 				gen.write("userName", userName);
 				if (results.size() > 0) {
-					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+					gen.write("entityId", results.get(0).getId());
 				}
 				gen.writeEnd();
 			}
@@ -1531,14 +1563,9 @@ public class EntityBeanManager {
 	private JsonValue searchDocuments(String userName, JsonObject jo, JsonValue searchAfter, int maxCount, int minCount,
 			String sort, EntityManager manager, Class<? extends EntityBaseBean> klass, long startMillis,
 			List<ScoredEntityBaseBean> results, List<String> fields) throws IcatException {
-		/*
-		 * As results may be rejected and maxCount may be 1 ensure that we
-		 * don't make a huge number of calls to search engine
-		 */
-		int blockSize = Math.max(1000, maxCount);
 		JsonValue lastSearchAfter;
 		do {
-			SearchResult lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, blockSize, sort, fields);
+			SearchResult lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, searchSearchBlockSize, sort, fields);
 			List<ScoredEntityBaseBean> allResults = lastSearchResult.getResults();
 			ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, maxCount, userName, manager,
 					klass);

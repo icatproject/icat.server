@@ -306,6 +306,7 @@ public class PropertyHandler {
 	private SearchEngine searchEngine;
 	private List<URL> searchUrls = new ArrayList<>();
 	private int searchPopulateBlockSize;
+	private int searchSearchBlockSize;
 	private Path searchDirectory;
 	private long searchBacklogHandlerIntervalMillis;
 	private long searchAggregateFilesIntervalMillis;
@@ -489,15 +490,15 @@ public class PropertyHandler {
 				if (searchUrls.size() != 1) {
 					String msg = "Exactly one value for search.urls must be provided when using " + searchEngine;
 					throw new IllegalStateException(msg);
-					// } else if (searchUrls.size() == 0) {
-					// String msg = "At least one value for search.urls must be provided";
-					// throw new IllegalStateException(msg);
 				}
 				formattedProps.add("search.urls" + " " + searchUrls.toString());
 				logger.info("Using {} as search engine with url(s) {}", searchEngine, searchUrls);
 
 				searchPopulateBlockSize = props.getPositiveInt("search.populateBlockSize");
 				formattedProps.add("search.populateBlockSize" + " " + searchPopulateBlockSize);
+
+				searchSearchBlockSize = props.getPositiveInt("search.searchBlockSize");
+				formattedProps.add("search.searchBlockSize" + " " + searchSearchBlockSize);
 
 				searchDirectory = props.getPath("search.directory");
 				if (!searchDirectory.toFile().isDirectory()) {
@@ -661,6 +662,10 @@ public class PropertyHandler {
 
 	public int getSearchPopulateBlockSize() {
 		return searchPopulateBlockSize;
+	}
+
+	public int getSearchSearchBlockSize() {
+		return searchSearchBlockSize;
 	}
 
 	public long getSearchBacklogHandlerIntervalMillis() {

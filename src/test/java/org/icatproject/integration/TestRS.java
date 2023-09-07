@@ -127,14 +127,26 @@ public class TestRS {
 		wSession.clearAuthz();
 	}
 
-	@Ignore("Test fails because of bug in eclipselink")
-	@Test
-	public void testDistinctBehaviour() throws Exception {
+	private Session rootSession() throws URISyntaxException, IcatException {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "root");
 		credentials.put("password", "password");
-		Session session = icat.login("db", credentials);
+		return icat.login("db", credentials);
+	}
+
+	private Session piOneSession() throws URISyntaxException, IcatException {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "piOne");
+		credentials.put("password", "piOne");
+		return icat.login("db", credentials);
+	}
+
+	@Ignore("Test fails because of bug in eclipselink")
+	@Test
+	public void testDistinctBehaviour() throws Exception {
+		Session session = rootSession();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
@@ -518,6 +530,10 @@ public class TestRS {
 		// Set text and parameters
 		array = searchDatafiles(session, null, "df2", null, null, parameters, 20, 1);
 		checkResultFromLuceneSearch(session, "df2", array, "Datafile", "name");
+
+		// Search with a user who should not see any results
+		Session piOneSession = piOneSession();
+		searchDatafiles(piOneSession, null, null, null, null, null, 20, 0);
 	}
 
 	/**
@@ -562,6 +578,10 @@ public class TestRS {
 		Date upper = dft.parse("2014-05-16T05:15:26+0000");
 		array = searchDatasets(session, null, "gamma AND ds3", lower, upper, parameters, 20, 1);
 		checkResultFromLuceneSearch(session, "gamma", array, "Dataset", "description");
+
+		// Search with a user who should not see any results
+		Session piOneSession = piOneSession();
+		searchDatasets(piOneSession, null, null, null, null, null, 20, 0);
 	}
 
 	/**
@@ -626,6 +646,10 @@ public class TestRS {
 		} catch (IcatException e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
 		}
+
+		// Search with a user who should not see any results
+		Session piOneSession = piOneSession();
+		searchInvestigations(piOneSession, null, null, null, null, null, null, null, 20, 0);
 	}
 
 	/**
@@ -1241,9 +1265,10 @@ public class TestRS {
 
 		long fid = search(session, "Facility.id", 1).getJsonNumber(0).longValueExact();
 
+		String query = "Facility INCLUDE InvestigationType";
 		JsonObject fac = Json
 				.createReader(
-						new ByteArrayInputStream(session.get("Facility INCLUDE InvestigationType", fid).getBytes()))
+						new ByteArrayInputStream(session.get(query, fid).getBytes()))
 				.readObject().getJsonObject("Facility");
 
 		assertEquals("Test port facility", fac.getString("name"));
@@ -1257,6 +1282,13 @@ public class TestRS {
 		}
 		Collections.sort(names);
 		assertEquals(Arrays.asList("atype", "btype"), names);
+
+		// Search with a user who should not see any results
+		Session piOneSession = piOneSession();
+		wSession.addRule(null, "Facility", "R");
+		fac = Json.createReader(new StringReader(piOneSession.get(query, fid))).readObject().getJsonObject("Facility");
+		its = fac.getJsonArray("investigationTypes");
+		assertEquals(0, its.size());
 	}
 
 	@Test
@@ -1307,11 +1339,7 @@ public class TestRS {
 
 	@Test
 	public void testWait() throws Exception {
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "root");
-		credentials.put("password", "password");
-		Session rootSession = icat.login("db", credentials);
+		Session rootSession = rootSession();
 		long t = System.currentTimeMillis();
 		rootSession.waitMillis(1000L);
 		System.out.println(System.currentTimeMillis() - t);
@@ -1440,6 +1468,14 @@ public class TestRS {
 			Collections.sort(names);
 			assertEquals(Arrays.asList("atype", "btype"), names);
 		}
+
+		// Search with a user who should not see any results
+		Session piOneSession = piOneSession();
+		wSession.addRule(null, "Facility", "R");
+		JsonObject searchResult = search(piOneSession, "Facility INCLUDE InvestigationType", 1).getJsonObject(0);
+		JsonArray investigationTypes = searchResult.getJsonObject("Facility").getJsonArray("investigationTypes");
+		System.out.println(investigationTypes);
+		assertEquals(0, investigationTypes.size());
 	}
 
 	@Test
@@ -2246,14 +2282,65 @@ public class TestRS {
 		Files.delete(dump2);
 	}
 
+	@Test
+	public void exportMetaDataQueryUser() throws Exception {
+		Session rootSession = rootSession();
+		Session piOneSession = piOneSession();
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+
+		// Get known configuration
+		rootSession.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
+		String query = "Investigation INCLUDE Facility, Dataset";
+		Path dump1 = Files.createTempFile("dump1", ".tmp");
+		Path dump2 = Files.createTempFile("dump2", ".tmp");
+
+		// piOne should only be able to dump the Investigation, but not have R access to
+		// Dataset, Facility
+		wSession.addRule(null, "Investigation", "R");
+		try (InputStream stream = piOneSession.exportMetaData(query, Attributes.USER)) {
+			Files.copy(stream, dump1, StandardCopyOption.REPLACE_EXISTING);
+		}
+		// piOne should now be able to dump all due to rules giving R access
+		wSession.addRule(null, "Facility", "R");
+		wSession.addRule(null, "Dataset", "R");
+		try (InputStream stream = piOneSession.exportMetaData(query, Attributes.USER)) {
+			Files.copy(stream, dump2, StandardCopyOption.REPLACE_EXISTING);
+		}
+		List<String> restrictedLines = Files.readAllLines(dump1);
+		List<String> permissiveLines = Files.readAllLines(dump2);
+		String restrictiveMessage = " appeared in export, but piOne use should not have access";
+		String permissiveMessage = " did not appear in export, but piOne should have access";
+
+		boolean containsInvestigations = false;
+		for (String line : restrictedLines) {
+			System.out.println(line);
+			containsInvestigations = containsInvestigations || line.startsWith("Investigation");
+			assertFalse("Dataset" + restrictiveMessage, line.startsWith("Dataset"));
+			assertFalse("Facility" + restrictiveMessage, line.startsWith("Facility"));
+		}
+		assertTrue("Investigation" + permissiveMessage, containsInvestigations);
+
+		containsInvestigations = false;
+		boolean containsDatasets = false;
+		boolean containsFacilities = false;
+		for (String line : permissiveLines) {
+			System.out.println(line);
+			containsInvestigations = containsInvestigations || line.startsWith("Investigation");
+			containsDatasets = containsDatasets || line.startsWith("Dataset");
+			containsFacilities = containsFacilities || line.startsWith("Facility");
+		}
+		assertTrue("Investigation" + permissiveMessage, containsInvestigations);
+		assertTrue("Dataset" + permissiveMessage, containsDatasets);
+		assertTrue("Facility" + permissiveMessage, containsFacilities);
+
+		Files.delete(dump1);
+		Files.delete(dump2);
+	}
+
 	@Ignore("Test fails - appears brittle to differences in timezone")
 	@Test
 	public void exportMetaDataQuery() throws Exception {
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "root");
-		credentials.put("password", "password");
-		Session session = icat.login("db", credentials);
+		Session session = rootSession();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 
 		// Get known configuration
@@ -2284,11 +2371,7 @@ public class TestRS {
 
 	@Test
 	public void importMetaDataAllNotRoot() throws Exception {
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "piOne");
-		credentials.put("password", "piOne");
-		Session session = icat.login("db", credentials);
+		Session session = piOneSession();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		try {
 			session.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
@@ -2299,11 +2382,7 @@ public class TestRS {
 	}
 
 	private void importMetaData(Attributes attributes, String userName) throws Exception {
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "root");
-		credentials.put("password", "password");
-		Session session = icat.login("db", credentials);
+		Session session = rootSession();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 
 		start = System.currentTimeMillis();

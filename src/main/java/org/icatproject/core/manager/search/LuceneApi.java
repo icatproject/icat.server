@@ -75,7 +75,7 @@ public class LuceneApi extends SearchApi {
 		} else {
 			arrayBuilder = searchAfterArrayBuilder(lastBean, sort);
 		}
-		builder.add("fields", arrayBuilder.add(lastBean.getEntityBaseBeanId()));
+		builder.add("fields", arrayBuilder.add(lastBean.getId()));
 		return builder.build();
 	}
 
@@ -186,7 +186,7 @@ public class LuceneApi extends SearchApi {
 			JsonObject source = resultObject.getJsonObject("_source");
 			ScoredEntityBaseBean result = new ScoredEntityBaseBean(luceneDocId, shardIndex, score, source);
 			results.add(result);
-			logger.trace("Result id {} with score {}", result.getEntityBaseBeanId(), score);
+			logger.trace("Result id {} with score {}", result.getId(), score);
 		}
 		if (postResponse.containsKey("search_after")) {
 			lsr.setSearchAfter(postResponse.getJsonObject("search_after"));

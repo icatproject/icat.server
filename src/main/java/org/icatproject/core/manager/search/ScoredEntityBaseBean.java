@@ -4,10 +4,11 @@ import javax.json.JsonObject;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
+import org.icatproject.core.manager.HasEntityId;
 
-public class ScoredEntityBaseBean {
+public class ScoredEntityBaseBean implements HasEntityId {
 
-	private long entityBaseBeanId;
+	private long id;
 	private int shardIndex;
 	private int engineDocId;
 	private float score;
@@ -45,11 +46,11 @@ public class ScoredEntityBaseBean {
 		this.shardIndex = shardIndex;
 		this.score = score;
 		this.source = source;
-		this.entityBaseBeanId = new Long(source.getString("id"));
+		this.id = new Long(source.getString("id"));
 	}
 
-	public long getEntityBaseBeanId() {
-		return entityBaseBeanId;
+	public Long getId() {
+		return id;
 	}
 
 	public int getEngineDocId() {

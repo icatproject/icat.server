@@ -214,7 +214,7 @@ public abstract class SearchApi {
 			}
 			arrayBuilder.add(lastBean.getScore());
 		}
-		arrayBuilder.add(lastBean.getEntityBaseBeanId());
+		arrayBuilder.add(lastBean.getId());
 		return arrayBuilder.build();
 	}
 

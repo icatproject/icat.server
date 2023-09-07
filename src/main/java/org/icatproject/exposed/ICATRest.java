@@ -1096,7 +1096,7 @@ public class ICATRest {
 			gen.writeStartArray();
 			for (ScoredEntityBaseBean sb : objects) {
 				gen.writeStartObject();
-				gen.write("id", sb.getEntityBaseBeanId());
+				gen.write("id", sb.getId());
 				if (!Float.isNaN(sb.getScore())) {
 					gen.write("score", sb.getScore());
 				}
@@ -1354,7 +1354,7 @@ public class ICATRest {
 			gen.writeStartArray("results");
 			for (ScoredEntityBaseBean sb : result.getResults()) {
 				gen.writeStartObject();
-				gen.write("id", sb.getEntityBaseBeanId());
+				gen.write("id", sb.getId());
 				if (!Float.isNaN(sb.getScore())) {
 					gen.write("score", sb.getScore());
 				}

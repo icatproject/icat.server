@@ -471,7 +471,7 @@ public class OpensearchApi extends SearchApi {
 				result.setSearchAfter(lastHit.getJsonArray("sort"));
 			} else {
 				ScoredEntityBaseBean lastEntity = entities.get(blockSize - 1);
-				long id = lastEntity.getEntityBaseBeanId();
+				long id = lastEntity.getId();
 				float score = lastEntity.getScore();
 				result.setSearchAfter(Json.createArrayBuilder().add(score).add(id).build());
 			}
