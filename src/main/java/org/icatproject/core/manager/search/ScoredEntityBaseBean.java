@@ -1,6 +1,6 @@
 package org.icatproject.core.manager.search;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;

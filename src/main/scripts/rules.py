@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from __future__ import print_function
 
 import json
@@ -44,12 +44,12 @@ def getConn(relativeUrl, method, parameters=None):
 def getResponse(conn):
     response = conn.getresponse()
     rc = response.status
-    if (rc / 100 != 2):
+    if (rc // 100 != 2):
         try:
             responseContent = response.read()
             om = json.loads(responseContent)
         except Exception:
-            fatal("InternalException " + responseContent)
+            fatal("InternalException " + responseContent.decode())
         code = om["code"]
         message = om["message"]
         fatal(code + " " + message)
@@ -90,7 +90,7 @@ conn = getConn("session", "POST")
 conn.putheader('Content-Type', 'application/x-www-form-urlencoded') 
 conn.putheader('Content-Length', str(len(parameters)))
 conn.endheaders()
-conn.send(parameters)
+conn.send(parameters.encode("ascii"))
 result = json.loads(getResponse(conn).read())       
 sessionId = result["sessionId"]
 
@@ -102,7 +102,7 @@ if action == "dump":
     parameters = urlencode({"json": json.dumps(jsonDump)})
     conn = getConn("port", "GET", parameters)
     conn.endheaders()
-    print(getResponse(conn).read())
+    print(getResponse(conn).read().decode())
  
 elif action == "load":
     jsonDump = {}

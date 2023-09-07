@@ -1,9 +1,9 @@
 package org.icatproject.core.manager;
 
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Schedule;
+import jakarta.ejb.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.icatproject.core.entity.Session;
 import org.slf4j.Logger;

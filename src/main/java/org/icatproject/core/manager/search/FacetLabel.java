@@ -1,7 +1,7 @@
 package org.icatproject.core.manager.search;
 
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
 
 /**
  * Holds information for a single label value pair.

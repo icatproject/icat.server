@@ -3,7 +3,7 @@ package org.icatproject.core.manager.search;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.json.JsonValue;
+import jakarta.json.JsonValue;
 
 /**
  * Represents the results from a single search performed against the engine.

@@ -4,6 +4,6 @@
 
 General installation instructions are at https://icatproject.org/installation/component
 
-Specific installation instructions are at https://repo.icatproject.org/site/icat/server/5.0.0/installation.html
+Specific installation instructions are at https://repo.icatproject.org/site/icat/server/6.0.0/installation.html
 
-All documentation on the icat.server may be found at https://repo.icatproject.org/site/icat/server/5.0.0
+All documentation on the icat.server may be found at https://repo.icatproject.org/site/icat/server/6.0.0

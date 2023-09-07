@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from __future__ import print_function
 
 import os
@@ -114,7 +114,7 @@ def _process(relativeUrl, parameters, method, headers=None, body=None):
     conn.endheaders()
      
     if parameters and method == "POST":
-        conn.send(parameters)
+        conn.send(parameters.encode("ascii"))
     elif body:
         blocksize = 8192
         datablock = body.read(blocksize)
@@ -128,12 +128,12 @@ def _process(relativeUrl, parameters, method, headers=None, body=None):
     
     response = conn.getresponse()
     rc = response.status
-    if (rc / 100 != 2):
+    if (rc // 100 != 2):
         try:
             responseContent = response.read()
             om = json.loads(responseContent)
         except Exception:
-            fatal("InternalException " + responseContent)
+            fatal("InternalException " + responseContent.decode())
         code = om["code"]
         message = om["message"]
         fatal(code + " " + message)
@@ -152,7 +152,7 @@ def getPopulating(args):
     try:
         sessionId = getService()
         parameters = {"sessionId": sessionId}
-        print(_process("lucene/db", parameters, "GET").read())
+        print(_process("lucene/db", parameters, "GET").read().decode())
     except Exception as e:
         fatal(e)
 

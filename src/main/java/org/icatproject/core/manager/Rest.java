@@ -3,10 +3,10 @@ package org.icatproject.core.manager;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import javax.json.Json;
-import javax.json.stream.JsonParser;
-import javax.json.stream.JsonParsingException;
-import javax.json.stream.JsonParser.Event;
+import jakarta.json.Json;
+import jakarta.json.stream.JsonParser;
+import jakarta.json.stream.JsonParsingException;
+import jakarta.json.stream.JsonParser.Event;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;

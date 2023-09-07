@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from setup_utils import *
 import os
 import socket
@@ -41,8 +41,8 @@ if arg == "INSTALL":
     try:           
         uninstall()
         actions.registerDB("icat", props["db.driver"], props["db.url"], props["db.username"], props["db.password"])
-        actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Topic")
-        actions.createJMSResource("javax.jms.Topic", "jms/ICAT/log")
+        actions.createJMSResource("jakarta.jms.Topic", "jms/ICAT/Topic")
+        actions.createJMSResource("jakarta.jms.Topic", "jms/ICAT/log")
             
         ovfiles = [[prop_name, "WEB-INF/classes"]]
         if os.path.exists("logback.xml"): ovfiles.append(["logback.xml", "WEB-INF/classes"])

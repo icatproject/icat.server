@@ -8,16 +8,10 @@ on:
 
 jobs:
   build_and_tests:
-    runs-on: ubuntu-20.04
-    continue-on-error: ${{ matrix.experimental }}
+    runs-on: ubuntu-22.04
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - version: 8
-            experimental: false
-          - version: 11
-            experimental: true
+        java_version: [11, 17]
 
     steps:
       # Setup Java & Python
@@ -25,12 +19,10 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
-          java-version: ${{ matrix.version }}
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.9.7"
-          architecture: x64
+          java-version: ${{ matrix.java_version }}
+
+      - name: Run apt-get update
+        run: sudo apt-get update
 
       # ICAT Ansible clone and install dependencies
       - name: Checkout icat-ansible
@@ -38,7 +30,7 @@ jobs:
         with:
           repository: icatproject-contrib/icat-ansible
           path: icat-ansible
-          ref: master
+          ref: payara6
       - name: Install Ansible
         run: pip install -r icat-ansible/requirements.txt
 

@@ -2,8 +2,8 @@ package org.icatproject.core.manager.search;
 
 import java.util.Set;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
 public class OpensearchScriptBuilder {
 

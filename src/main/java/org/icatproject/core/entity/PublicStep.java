@@ -3,14 +3,14 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.NamedQuery;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostRemove;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityInfoHandler;

@@ -1,7 +1,10 @@
 package org.icatproject.core.parser;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,12 +22,18 @@ public class FromClause {
 	private String clause;
 
 	private Map<String, Class<? extends EntityBaseBean>> authzMap = new HashMap<>();
+	private Map<String, String> replaceMap = new HashMap<>();
+	private Set<String> aliases = new HashSet<>();
+	private int aliasNumber = 0;
 
 	private static Logger logger = LoggerFactory.getLogger(FromClause.class);
 
 	@SuppressWarnings("unchecked")
 	public FromClause(Input input, Set<String> idPaths) throws ParserException, IcatException {
 		logger.trace("Creating FromClause for idPaths {}", idPaths);
+		for (String idPath : idPaths) {
+			aliases.add(idPath.split("\\.")[0]);
+		}
 
 		StringBuilder sb = new StringBuilder();
 		Class<? extends EntityBaseBean> currentEntity = null;
@@ -102,14 +111,32 @@ public class FromClause {
 				if (f == null) {
 					throw new ParserException(bean.getSimpleName() + " has no field " + relPath);
 				}
-				Class<?> ftype = f.getType();
+				Class<?> fieldClass = f.getType();
 
-				if (EntityBaseBean.class.isAssignableFrom(ftype)) {
-					bean = (Class<? extends EntityBaseBean>) ftype;
+				if (EntityBaseBean.class.isAssignableFrom(fieldClass)) {
+					logger.trace("{} assignable to {}", relPath, fieldClass);
+					bean = (Class<? extends EntityBaseBean>) fieldClass;
 					if (dotn >= 0) {
 						authzPath = idPath.substring(0, dotn) + ".id";
 					}
+				} else if (List.class.isAssignableFrom(fieldClass)) {
+					ParameterizedType fieldType = (ParameterizedType) f.getGenericType();
+					Class<?> actualType = (Class<?>) fieldType.getActualTypeArguments()[0];
+					if (EntityBaseBean.class.isAssignableFrom(actualType)) {
+						logger.trace("{} assignable to List of {}", relPath, actualType);
+						bean = (Class<? extends EntityBaseBean>) actualType;
+						// Cannot perform authz on a list, so need to add a JOIN to the FROM clause
+						// Also need to replace the name in the SELECT with the alias of the JOIN
+						String replacement = generateAlias();
+						sb.append(" JOIN " + idPath + " " + replacement);
+						authzPath = replacement + ".id";
+						replaceMap.put(idPath, replacement);
+					} else {
+						logger.trace("{} of type List of {} not assignable", relPath, actualType);
+						authzPath = idPath.substring(0, dot) + ".id";
+					}
 				} else {
+					logger.trace("{} of type {} not assignable", relPath, fieldClass);
 					authzPath = idPath.substring(0, dot) + ".id";
 				}
 				dot = dotn;
@@ -121,6 +148,16 @@ public class FromClause {
 		clause = sb.toString();
 	}
 
+	private String generateAlias() {
+		String alias = "a" + aliasNumber;
+		aliasNumber++;
+		if (aliases.contains(alias)) {
+			return generateAlias();
+		} else {
+			return alias;
+		}
+	}
+
 	@Override
 	public String toString() {
 		return clause;
@@ -128,6 +165,10 @@ public class FromClause {
 
 	public Map<String, Class<? extends EntityBaseBean>> getAuthzMap() {
 		return authzMap;
+	}
+
+	public Map<String, String> getReplaceMap() {
+		return replaceMap;
 	}
 
 }

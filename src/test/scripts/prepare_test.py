@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from __future__ import print_function
 import sys
 import os
@@ -94,3 +94,4 @@ if not os.path.exists(binDir):
 
 p = subprocess.Popen(["./setup", "install"], cwd="src/test/install")
 p.wait()
+sys.exit(p.returncode)
