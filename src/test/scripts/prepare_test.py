@@ -56,7 +56,7 @@ if not os.path.exists("src/test/install/setup.properties"):
             "home           = %s" % containerHome,
             "port           = 4848",
             "# MySQL",
-            "db.driver      = com.mysql.jdbc.jdbc2.optional.MysqlDataSource",
+            "db.driver      = com.mysql.cj.jdbc.MysqlDataSource",
             "db.url         = jdbc:mysql://localhost:3306/icatdb",
             "db.username    = icatdbuser",
             "db.password    = icatdbuserpw"
