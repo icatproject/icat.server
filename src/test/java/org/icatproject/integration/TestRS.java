@@ -39,12 +39,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-import javax.json.stream.JsonGenerator;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import jakarta.json.stream.JsonGenerator;
 
 import org.icatproject.core.manager.LuceneApi;
 import org.icatproject.icat.client.ICAT;
@@ -96,7 +96,7 @@ public class TestRS {
 		credentials.put("username", "root");
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		// See what happens to query with bad order by
@@ -470,7 +470,7 @@ public class TestRS {
 		System.out.println(props);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		rootSession.luceneCommit();
@@ -500,7 +500,7 @@ public class TestRS {
 	@Test
 	public void testVersion() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		assertTrue(icat.getVersion().startsWith("5."));
+		assertTrue(icat.getVersion().startsWith("6."));
 	}
 
 	@Test
@@ -512,7 +512,7 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		long fid = search(session, "Facility.id", 1).getJsonNumber(0).longValueExact();
@@ -544,7 +544,7 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		JsonArray array;
@@ -602,7 +602,7 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		JsonArray array;
@@ -714,6 +714,49 @@ public class TestRS {
 			}
 			Collections.sort(names);
 			assertEquals(Arrays.asList("atype", "btype"), names);
+		}
+	}
+
+	@Test
+	public void testSearchLists() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "notroot");
+		credentials.put("password", "password");
+		Session notrootSession = icat.login("db", credentials);
+
+		credentials = new HashMap<>();
+		credentials.put("username", "piOne");
+		credentials.put("password", "piOne");
+		Session piOneSession = icat.login("db", credentials);
+
+		// Get known configuration
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
+		notrootSession.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+
+		String query = "SELECT f.investigations FROM Facility f";
+		search(notrootSession, query, 3); // notroot is in user group giving CRUD to all, so should see all 3
+		search(piOneSession, query, 0); // piOne should not pass authz for Facility
+
+		try {
+			wSession.addRule(null, "Facility", "R");
+			search(notrootSession, query, 3); // notroot is in user group giving CRUD to all, so should see all 3
+			search(piOneSession, query, 0); // piOne should pass for Facility, but not for any Investigation
+	
+			wSession.addRule(null, "SELECT i FROM Investigation i WHERE i.visitId = 'zero'", "R");
+			search(notrootSession, query, 3); // notroot is in user group giving CRUD to all, so should see all 3
+			JsonArray results = search(piOneSession, query, 1); // piOne should pass for Facility, one Investigation
+			JsonObject result = results.getJsonObject(0);
+			JsonObject investigation = result.getJsonObject("Investigation");
+			assertEquals("Wrong visitId in "+ investigation.toString(), "zero", investigation.getString("visitId", null));
+	
+			query = "SELECT f.investigationTypes FROM Facility f";
+			wSession.addRule(null, "InvestigationType", "R");
+			search(notrootSession, query, 2); // notroot is in user group giving CRUD to all, so should see both
+			search(piOneSession, query, 2); // piOne should pass for Facility, both types
+		} finally {
+			// Reset authz after tests
+			wSession.setAuthz();
 		}
 	}
 
@@ -1377,7 +1420,7 @@ public class TestRS {
 		Session session = icat.login("db", credentials);
 
 		// Get known configuration
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
 
 		return session;
@@ -1501,7 +1544,7 @@ public class TestRS {
 	private void exportMetaDataDump(Map<String, String> credentials) throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 
 		Map<String, String> rootCredentials = new HashMap<>();
 		rootCredentials.put("username", "root");
@@ -1540,7 +1583,7 @@ public class TestRS {
 		credentials.put("username", "root");
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 
 		// Get known configuration
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
@@ -1575,7 +1618,7 @@ public class TestRS {
 		credentials.put("username", "piOne");
 		credentials.put("password", "piOne");
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 		try {
 			session.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
 			fail();
@@ -1590,7 +1633,7 @@ public class TestRS {
 		credentials.put("username", "root");
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 
 		start = System.currentTimeMillis();
 		session.importMetaData(path, DuplicateAction.CHECK, attributes);

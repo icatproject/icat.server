@@ -19,21 +19,16 @@
 		<li>The icat distribution: <a
 			href="${repoUrl}/org/icatproject/icat.server/${project.version}/icat.server-${project.version}-distro.zip">icat.server-${project.version}-distro.zip</a>
 		</li>
-		<li>Java 8</li>
-		<li>A suitable deployed container. The installation scripts
-			support Glassfish/Payara and to a lesser extent WildFly. Testing has
-			been carried out with Payara 5.<a
-			href="https://icatproject.org/installation/glassfish/">Glassfish/Payara
-				installation instructions</a> are available.
-		</li>
+		<li>Java 11+</li>
+		<li>A suitable deployed application server that supports JakartaEE 10+. Testing has been carried out with Payara Server Community 6. Other applications servers such as GlassFish and WildFly may work but have not been tested.
+			<a href="https://icatproject.org/installation/glassfish/">Glassfish/Payara installation instructions</a> are available.</li>
 		<li>A database as described in <a
 			href="https://icatproject.org/installation/database/">Database
 				installation instructions</a> installed on the server
 		</li>
 		<li>Deployed ICAT authenticators.</li>
-		<li>A deployed icat.lucene server it you plan to use TopCAT</li>
-		<li>Python (version 2.4 to 2.7) and the python-suds package
-			installed on the server.</li>
+		<li>A deployed icat.lucene server it you plan to use free-text search.</li>
+		<li>Python 3.6+ and the suds-community package installed on the server.</li>
 	</ul>
 
 	<h2>Summary of steps</h2>

@@ -15,8 +15,8 @@ import java.text.SimpleDateFormat;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import javax.json.Json;
-import javax.json.stream.JsonGenerator;
+import jakarta.json.Json;
+import jakarta.json.stream.JsonGenerator;
 
 import org.icatproject.exposed.ICATRest;
 import org.icatproject.core.entity.ParameterValueType;

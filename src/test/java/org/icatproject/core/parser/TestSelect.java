@@ -60,10 +60,11 @@ public class TestSelect {
 		assertTrue(clause.getIdPaths().contains("e"));
 		assertEquals(Token.Type.FROM, input.peek(0).getType());
 	}
-	
+
 	@Test
 	public void testGood4() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("SELECT e, a FROM Employee e, MailingAddress a WHERE e.address = a.address");
+		List<Token> tokens = Tokenizer
+				.getTokens("SELECT e, a FROM Employee e, MailingAddress a WHERE e.address = a.address");
 		Input input = new Input(tokens);
 		SelectClause clause = new SelectClause(input);
 		assertEquals(" e , a", clause.toString());
@@ -73,7 +74,7 @@ public class TestSelect {
 		assertTrue(clause.getIdPaths().contains("a"));
 		assertEquals(Token.Type.FROM, input.peek(0).getType());
 	}
-	
+
 	@Test
 	public void testGood5() throws Exception {
 		List<Token> tokens = Tokenizer.getTokens("SELECT COUNT(df), max(df.id), min(df.id) FROM Datafile df");
@@ -85,6 +86,40 @@ public class TestSelect {
 		assertTrue(clause.getIdPaths().contains("df"));
 		assertTrue(clause.getIdPaths().contains("df.id"));
 		assertEquals(Token.Type.FROM, input.peek(0).getType());
+	}
+
+	@Test
+	public void testList1() throws Exception {
+		List<Token> tokens = Tokenizer.getTokens("SELECT f.investigations FROM Facility f");
+		Input input = new Input(tokens);
+		SelectClause clause = new SelectClause(input);
+		assertEquals(" f.investigations", clause.toString());
+		assertFalse(clause.isCount());
+		assertEquals(1, clause.getIdPaths().size());
+		assertTrue(clause.getIdPaths().contains("f.investigations"));
+		assertEquals(Token.Type.FROM, input.peek(0).getType());
+
+		clause.replace("f.investigations", "a0");
+		assertEquals(" a0", clause.toString());
+	}
+
+	@Test
+	public void testList2() throws Exception {
+		String query = "SELECT f.investigations, a0, ff.investigations FROM Facility f "
+				+ "JOIN f.investigationTypes a0 JOIN f.facilityCycles ff";
+		List<Token> tokens = Tokenizer.getTokens(query);
+		Input input = new Input(tokens);
+		SelectClause clause = new SelectClause(input);
+		assertEquals(" f.investigations , a0 , ff.investigations", clause.toString());
+		assertFalse(clause.isCount());
+		assertEquals(3, clause.getIdPaths().size());
+		assertTrue(clause.getIdPaths().contains("f.investigations"));
+		assertTrue(clause.getIdPaths().contains("a0"));
+		assertTrue(clause.getIdPaths().contains("ff.investigations"));
+		assertEquals(Token.Type.FROM, input.peek(0).getType());
+
+		clause.replace("f.investigations", "a1");
+		assertEquals(" a1 , a0 , ff.investigations", clause.toString());
 	}
 
 }
