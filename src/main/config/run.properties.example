@@ -47,8 +47,8 @@ log.list = SESSION WRITE READ INFO
 search.engine = LUCENE
 search.urls = https://localhost:8181
 search.populateBlockSize = 10000
-# Recommend setting lucene.searchBlockSize equal to maxIdsInQuery, so that all Lucene results can be authorised at once
-# If lucene.searchBlockSize > maxIdsInQuery, then multiple auth checks may be needed for a single search to Lucene
+# Recommend setting search.searchBlockSize equal to maxIdsInQuery, so that all results can be authorised at once
+# If search.searchBlockSize > maxIdsInQuery, then multiple auth checks may be needed for a single search
 # The optimal value depends on how likely a user's auth request fails: larger values are more efficient when rejection is more likely
 search.searchBlockSize = 1000
 search.directory = ${HOME}/data/icat/search
@@ -56,7 +56,7 @@ search.backlogHandlerIntervalSeconds = 60
 search.enqueuedRequestIntervalSeconds = 5
 search.aggregateFilesIntervalSeconds = 3600
 search.maxSearchTimeSeconds = 5
-# The entities to index with the search engine. For example, remove 'Datafile' and 'DatafileParameter' if the number of datafiles exceeds lucene's limit of 2^32 entries in an index
+# The entities to index with the search engine.
 !search.entitiesToIndex = Datafile Dataset Investigation InvestigationUser DatafileParameter DatasetParameter InvestigationParameter Sample
 
 # List members of cluster

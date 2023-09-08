@@ -159,37 +159,68 @@ def getPopulating(args):
 def populate(args):
     parser.set_usage(usagebase + "populate [<name>]")
     parser.set_description("Populate lucene (for that entry name)")
+    parser.add_option(
+        "-e",
+        "--entity-name",
+        action="append",
+        dest="entityName",
+        help="Name of entity to populate.",
+    )
+    parser.add_option(
+        "--min-id",
+        dest="minId",
+        help="Minimum (exclusive) ICAT entity id to populate",
+        type="int",
+    )
+    parser.add_option(
+        "--max-id",
+        dest="maxId",
+        help="Maximum (inclusive) ICAT entity id to populate",
+        type="int",
+    )
+    parser.add_option(
+        "-d",
+        "--delete",
+        dest="delete",
+        action="store_true",
+        help="Whether to delete all existing documents for this index",
+    )
     options, args = parser.parse_args(args)
-    
-    if len(args) == 0: 
-        try:
-            sessionId = getService() 
-            parameters = {"sessionId": sessionId}
-            for entity in "Datafile", "DatafileParameter", "Dataset", "DatasetParameter", "Investigation", "InvestigationParameter", "InvestigationUser", "Sample":
-                print(entity)
-                _process("lucene/db/" + entity + "/-1", parameters, "POST")
-        except Exception as e:
-            fatal(e)
-        return    
-        
-    if len(args) == 1:
-        try:
-            sessionId = getService()
-            parameters = {"sessionId": sessionId}
-            entity = args[0]
-            _process("lucene/db/" + entity + "/-1", parameters, "POST")
-        except Exception as e:
-            fatal(e)
-        return
-        
-    if len(args) > 2:
-        fatal("Must have zero arguments after the operation 'populate' or one - the name of the entity or two with the name of the entity and minid")
- 
+    entities = options.entityName or []
+    entities += args
+    if not entities:
+        # This does not need to include "nested" entities such as ParameterType, as this
+        # will be included in the READ operation on the DB implicitly
+        entities = [
+            "Datafile",
+            "Dataset",
+            "Investigation",
+            "DatafileParameter",
+			"DatasetParameter",
+            "DatasetTechnique",
+            "InstrumentScientist",
+            "InvestigationFacilityCycle",
+			"InvestigationInstrument",
+            "InvestigationParameter",
+            "InvestigationUser",
+            "Sample",
+            "SampleParameter",
+        ]
+
     try:
         sessionId = getService()
         parameters = {"sessionId": sessionId}
-        entity = args[0]
-        _process("lucene/db/" + entity + "/" + args[1], parameters, "POST")
+        if options.minId:
+            parameters["minId"] = options.minId
+        if options.maxId:
+            parameters["maxId"] = options.maxId
+        if options.delete:
+            parameters["delete"] = True
+        else:
+            parameters["delete"] = False
+            
+        for entity in entities:
+            _process("lucene/db/" + entity, parameters, "POST")
     except Exception as e:
         fatal(e)
 
