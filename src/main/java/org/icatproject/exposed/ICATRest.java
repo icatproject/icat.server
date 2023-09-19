@@ -153,7 +153,7 @@ public class ICATRest {
 	/**
 	 * Create one or more entities
 	 * 
-	 * @summary Write
+	 * @title Write
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -209,7 +209,7 @@ public class ICATRest {
 	/**
 	 * Clone an entity
 	 * 
-	 * @summary Clone
+	 * @title Clone
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -253,7 +253,7 @@ public class ICATRest {
 	/**
 	 * Delete entities as a json string.
 	 * 
-	 * @summary delete
+	 * @title delete
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -333,7 +333,7 @@ public class ICATRest {
 	/**
 	 * Export data from ICAT
 	 * 
-	 * @summary Export Metadata
+	 * @title Export Metadata
 	 * 
 	 * @param jsonString
 	 *            what to export which takes the form
@@ -372,7 +372,7 @@ public class ICATRest {
 	 * This call is primarily for testing. Authorization is not done so you must
 	 * be listed in rootUserNames to use this call.
 	 * 
-	 * @summary Execute line of jpql
+	 * @title Execute line of jpql
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -438,7 +438,7 @@ public class ICATRest {
 	/**
 	 * Return all that can be returned when not authenticated
 	 * 
-	 * @summary Properties
+	 * @title Properties
 	 * 
 	 * @return a json string
 	 * 
@@ -484,7 +484,7 @@ public class ICATRest {
 	/**
 	 * Return information about a session
 	 * 
-	 * @summary Session
+	 * @title Session
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -517,7 +517,7 @@ public class ICATRest {
 	 * unexpired session. This call should be used for a user logged in using an
 	 * authentication plugin configured to not return the mnemonic.
 	 * 
-	 * @summary LoggedIn
+	 * @title LoggedIn
 	 * 
 	 * @param userName
 	 *            the name of the user (without mnemonic)
@@ -539,7 +539,7 @@ public class ICATRest {
 	 * Returns after specified number of seconds - returning elapsed time in
 	 * milliseconds
 	 * 
-	 * @summary Sleep
+	 * @title Sleep
 	 * 
 	 * @param seconds
 	 *            how many seconds to wait before returning
@@ -569,7 +569,7 @@ public class ICATRest {
 	 * unexpired session. This call should be used for a user logged in using an
 	 * authentication plugin configured to return the mnemonic.
 	 * 
-	 * @summary LoggedIn
+	 * @title LoggedIn
 	 * 
 	 * @param mnemonic
 	 *            the mnemomnic used to identify the authentication plugin
@@ -593,7 +593,7 @@ public class ICATRest {
 	/**
 	 * return the version of the icat server
 	 * 
-	 * @summary Version
+	 * @title Version
 	 * 
 	 * @return json string of the form: <samp>{"version":"4.4.0"}</samp>
 	 */
@@ -653,7 +653,7 @@ public class ICATRest {
 	 * file.</dd>
 	 * </dl>
 	 * 
-	 * @summary import metadata
+	 * @title import metadata
 	 *
 	 * @throws IcatException
 	 *             when something is wrong
@@ -841,7 +841,7 @@ public class ICATRest {
 	/**
 	 * Login to create a session
 	 * 
-	 * @summary Login
+	 * @title Login
 	 * 
 	 * @param request
 	 * @param jsonString
@@ -913,7 +913,7 @@ public class ICATRest {
 	/**
 	 * Logout from a session
 	 * 
-	 * @summary Logout
+	 * @title Logout
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -932,7 +932,7 @@ public class ICATRest {
 	/**
 	 * perform a lucene search
 	 * 
-	 * @summary lucene search
+	 * @title lucene search
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -1120,7 +1120,7 @@ public class ICATRest {
 	 * This is an internal call made by one icat instance to another in the same
 	 * cluster
 	 * 
-	 * @summary markPublicTablesStale
+	 * @title markPublicTablesStale
 	 */
 	@POST
 	@Path("gatekeeper/markPublicTablesStale")
@@ -1138,7 +1138,7 @@ public class ICATRest {
 	 * This is an internal call made by one icat instance to another in the same
 	 * cluster
 	 * 
-	 * @summary markPublicTablesStale
+	 * @title markPublicTablesStale
 	 */
 	@POST
 	@Path("gatekeeper/markPublicStepsStale")
@@ -1153,7 +1153,7 @@ public class ICATRest {
 	/**
 	 * Stop population of the lucene database if it is running.
 	 * 
-	 * @summary Lucene Clear
+	 * @title Lucene Clear
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1171,7 +1171,7 @@ public class ICATRest {
 	/**
 	 * Forces a commit of the lucene database
 	 * 
-	 * @summary Lucene Commit
+	 * @title Lucene Commit
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1189,7 +1189,7 @@ public class ICATRest {
 	/**
 	 * Return a list of class names for which population is going on
 	 * 
-	 * @summary lucene GetPopulating
+	 * @title lucene GetPopulating
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1217,7 +1217,7 @@ public class ICATRest {
 	 * Call for testing only. The call will take the time specified and then
 	 * returns.
 	 * 
-	 * @summary wait
+	 * @title wait
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1240,7 +1240,7 @@ public class ICATRest {
 	/**
 	 * Clear and repopulate lucene documents for the specified entityName
 	 * 
-	 * @summary Lucene Populate
+	 * @title Lucene Populate
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1263,7 +1263,7 @@ public class ICATRest {
 	/**
 	 * Refresh session
 	 * 
-	 * @summary Refresh
+	 * @title Refresh
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -1284,7 +1284,7 @@ public class ICATRest {
 	 * This includes the functionality of both search and get calls in the SOAP
 	 * web service.
 	 * 
-	 * @summary search/get
+	 * @title search/get
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
