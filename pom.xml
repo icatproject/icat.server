@@ -74,7 +74,8 @@
 			<groupId>jakarta.platform</groupId>
 			<artifactId>jakarta.jakartaee-api</artifactId>
 			<version>10.0.0</version>
-			<scope>provided</scope>
+			<!-- miredot-plugin needs this on the runtime classpath -->
+			<!-- <scope>provided</scope> -->
 		</dependency>
 
 		<dependency>
@@ -159,7 +160,7 @@
 			<plugin>
 				<groupId>com.qmino</groupId>
 				<artifactId>miredot-plugin</artifactId>
-				<version>2.4.1-Java11</version>
+				<version>2.4.3-Java11</version>
 				<executions>
 					<execution>
 						<id>miredot</id>
@@ -192,6 +193,11 @@
 							<PARTIAL_RESOURCE_OVERLAP>failbuild</PARTIAL_RESOURCE_OVERLAP>
 						</checks>
 					</analysis>
+					<restModel>
+						<restFramework>
+							<name>jakarta</name>
+						</restFramework>
+					</restModel>
 				</configuration>
 			</plugin>
 
