@@ -48,9 +48,9 @@ public class InvestigationFacilityCycle extends EntityBaseBean implements Serial
 
     @Override
     public void getDoc(JsonGenerator gen) {
-        SearchApi.encodeString(gen, "facilityCycle.id", facilityCycle.id);
-        SearchApi.encodeString(gen, "investigation.id", investigation.id);
-        SearchApi.encodeString(gen, "id", id);
+        SearchApi.encodeLong(gen, "facilityCycle.id", facilityCycle.id);
+        SearchApi.encodeLong(gen, "investigation.id", investigation.id);
+        SearchApi.encodeLong(gen, "id", id);
     }
 
 }

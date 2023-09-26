@@ -56,6 +56,6 @@ public class DatasetParameter extends Parameter implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		super.getDoc(gen);
-		SearchApi.encodeString(gen, "dataset.id", dataset.id);
+		SearchApi.encodeLong(gen, "dataset.id", dataset.id);
 	}
 }

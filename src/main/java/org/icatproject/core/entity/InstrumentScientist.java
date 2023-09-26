@@ -49,8 +49,8 @@ public class InstrumentScientist extends EntityBaseBean implements Serializable 
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		user.getDoc(gen);
-		SearchApi.encodeString(gen, "instrument.id", instrument.id);
-		SearchApi.encodeString(gen, "id", id);
+		SearchApi.encodeLong(gen, "instrument.id", instrument.id);
+		SearchApi.encodeLong(gen, "id", id);
 	}
 
 }

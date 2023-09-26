@@ -158,7 +158,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
 			SearchApi.encodeText(gen, "instrument.fullName", fullName);
 		}
 		SearchApi.encodeString(gen, "instrument.name", name);
-		SearchApi.encodeString(gen, "instrument.id", id);
+		SearchApi.encodeLong(gen, "instrument.id", id);
 	}
 
 }

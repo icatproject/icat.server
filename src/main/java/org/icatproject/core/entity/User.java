@@ -172,7 +172,7 @@ public class User extends EntityBaseBean implements Serializable {
 			SearchApi.encodeText(gen, "user.fullName", fullName);
 		}
 		SearchApi.encodeString(gen, "user.name", name);
-		SearchApi.encodeString(gen, "user.id", id);
+		SearchApi.encodeLong(gen, "user.id", id);
 	}
 
 }

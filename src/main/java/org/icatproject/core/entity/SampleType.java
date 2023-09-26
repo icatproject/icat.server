@@ -95,7 +95,7 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		SearchApi.encodeString(gen, "sample.type.name", name);
-		SearchApi.encodeString(gen, "sample.type.id", id);
+		SearchApi.encodeLong(gen, "sample.type.id", id);
 	}
 
 }

@@ -46,7 +46,7 @@ public class ScoredEntityBaseBean implements HasEntityId {
 		this.shardIndex = shardIndex;
 		this.score = score;
 		this.source = source;
-		this.id = new Long(source.getString("id"));
+		this.id = source.getJsonNumber("id").longValueExact();
 	}
 
 	public Long getId() {

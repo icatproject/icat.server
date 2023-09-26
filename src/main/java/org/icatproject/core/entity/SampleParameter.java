@@ -56,7 +56,7 @@ public class SampleParameter extends Parameter implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		super.getDoc(gen);
-		SearchApi.encodeString(gen, "sample.id", sample.id);
+		SearchApi.encodeLong(gen, "sample.id", sample.id);
 	}
 
 }

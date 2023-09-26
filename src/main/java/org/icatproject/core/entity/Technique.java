@@ -73,7 +73,7 @@ public class Technique extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void getDoc(JsonGenerator gen) {
-		SearchApi.encodeString(gen, "technique.id", id);
+		SearchApi.encodeLong(gen, "technique.id", id);
 		SearchApi.encodeString(gen, "technique.name", name);
 		SearchApi.encodeString(gen, "technique.description", description);
 		SearchApi.encodeString(gen, "technique.pid", pid);

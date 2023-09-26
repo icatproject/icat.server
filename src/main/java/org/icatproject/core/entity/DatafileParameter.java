@@ -56,7 +56,7 @@ public class DatafileParameter extends Parameter implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		super.getDoc(gen);
-		SearchApi.encodeString(gen, "datafile.id", datafile.id);
+		SearchApi.encodeLong(gen, "datafile.id", datafile.id);
 	}
 
 }

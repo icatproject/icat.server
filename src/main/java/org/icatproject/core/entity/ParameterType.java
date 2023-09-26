@@ -97,7 +97,8 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	@Comment("If ordinary users are allowed to create their own parameter types this indicates that this one has been approved")
 	private boolean verified;
 
-	public static Set<String> docFields = new HashSet<>(Arrays.asList("type.name", "type.units", "type.unitsSI", "numericValueSI", "type.id"));
+	public static Set<String> docFields = new HashSet<>(
+			Arrays.asList("type.name", "type.units", "type.unitsSI", "numericValueSI", "type.id"));
 
 	/* Needed for JPA */
 	public ParameterType() {
@@ -283,7 +284,7 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	public void getDoc(JsonGenerator gen) {
 		SearchApi.encodeString(gen, "type.name", name);
 		SearchApi.encodeString(gen, "type.units", units);
-		SearchApi.encodeString(gen, "type.id", id);
+		SearchApi.encodeLong(gen, "type.id", id);
 	}
 
 }

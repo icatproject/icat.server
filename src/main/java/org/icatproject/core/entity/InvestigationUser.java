@@ -40,8 +40,8 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		user.getDoc(gen);
-		SearchApi.encodeString(gen, "investigation.id", investigation.id);
-		SearchApi.encodeString(gen, "id", id);
+		SearchApi.encodeLong(gen, "investigation.id", investigation.id);
+		SearchApi.encodeLong(gen, "id", id);
 	}
 
 	public String getRole() {

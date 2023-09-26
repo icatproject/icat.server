@@ -88,7 +88,7 @@ public abstract class SearchApi {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 			gen.writeStartObject().writeStartObject("delete");
-			gen.write("_index", entityName).write("_id", bean.getId().toString());
+			gen.write("_index", entityName).write("_id", bean.getId());
 			gen.writeEnd().writeEnd();
 		}
 		return baos.toString();
@@ -146,23 +146,12 @@ public abstract class SearchApi {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 			gen.writeStartObject().writeStartObject(operation);
-			gen.write("_index", entityName).write("_id", icatId.toString());
+			gen.write("_index", entityName).write("_id", icatId);
 			gen.writeStartObject("doc");
 			bean.getDoc(gen);
 			gen.writeEnd().writeEnd().writeEnd();
 		}
 		return baos.toString();
-	}
-
-	/**
-	 * Writes a key value pair to the JsonGenerator being used to encode an entity.
-	 * 
-	 * @param gen   JsonGenerator being used to encode.
-	 * @param name  Name of the field.
-	 * @param value Long value to encode as a string.
-	 */
-	public static void encodeString(JsonGenerator gen, String name, Long value) {
-		gen.write(name, Long.toString(value));
 	}
 
 	/**
@@ -451,15 +440,14 @@ public abstract class SearchApi {
 	/**
 	 * POST to path with a body and response handling.
 	 * 
-	 * @param path         Path on the search engine to POST to.
-	 * @param body         String of Json to send as the request body.
+	 * @param path Path on the search engine to POST to.
+	 * @param body String of Json to send as the request body.
 	 * @return JsonObject returned by the search engine.
 	 * @throws IcatException
 	 */
 	protected JsonObject postResponse(String path, String body) throws IcatException {
 		return postResponse(path, body, null);
 	}
-
 
 	/**
 	 * POST to path with a body and response handling.

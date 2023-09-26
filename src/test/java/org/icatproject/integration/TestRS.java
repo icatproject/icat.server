@@ -1055,7 +1055,7 @@ public class TestRS {
 
 		badParameters = Arrays.asList(new ParameterForLucene("color", null, null));
 		try {
-			searchInvestigations(session, null, null, null, null, badParameters, null, null,10, null, null, 0);
+			searchInvestigations(session, null, null, null, null, badParameters, null, null, 10, null, null, 0);
 			fail("BAD_PARAMETER exception not caught");
 		} catch (IcatException e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
@@ -1082,13 +1082,15 @@ public class TestRS {
 
 	private void checkFacets(JsonObject responseObject, String dimension, List<String> expectedLabels,
 			List<Long> expectedCounts) {
-		String dimensionsMessage = "Expected responseObject to contain 'dimensions', but it had keys "
-				+ responseObject.keySet();
+		Set<String> responseKeys = responseObject.keySet();
+		String dimensionsMessage = "Expected responseObject to contain 'dimensions', but it had keys " + responseKeys;
 		assertTrue(dimensionsMessage, responseObject.containsKey("dimensions"));
+
 		JsonObject dimensions = responseObject.getJsonObject("dimensions");
-		String dimensionMessage = "Expected 'dimensions' to contain " + dimension + " but keys were "
-				+ dimensions.keySet();
+		Set<String> dimensionKeys = dimensions.keySet();
+		String dimensionMessage = "Expected 'dimensions' to contain " + dimension + " but keys were " + dimensionKeys;
 		assertTrue(dimensionMessage, dimensions.containsKey(dimension));
+
 		JsonObject labelsObject = dimensions.getJsonObject(dimension);
 		assertEquals(expectedLabels.size(), labelsObject.size());
 		for (int i = 0; i < expectedLabels.size(); i++) {
@@ -1503,14 +1505,15 @@ public class TestRS {
 			wSession.addRule(null, "Facility", "R");
 			search(notrootSession, query, 3); // notroot is in user group giving CRUD to all, so should see all 3
 			search(piOneSession, query, 0); // piOne should pass for Facility, but not for any Investigation
-	
+
 			wSession.addRule(null, "SELECT i FROM Investigation i WHERE i.visitId = 'zero'", "R");
 			search(notrootSession, query, 3); // notroot is in user group giving CRUD to all, so should see all 3
 			JsonArray results = search(piOneSession, query, 1); // piOne should pass for Facility, one Investigation
 			JsonObject result = results.getJsonObject(0);
 			JsonObject investigation = result.getJsonObject("Investigation");
-			assertEquals("Wrong visitId in "+ investigation.toString(), "zero", investigation.getString("visitId", null));
-	
+			String visitId = investigation.getString("visitId", null);
+			assertEquals("Wrong visitId in " + investigation.toString(), "zero", visitId);
+
 			query = "SELECT f.investigationTypes FROM Facility f";
 			wSession.addRule(null, "InvestigationType", "R");
 			search(notrootSession, query, 2); // notroot is in user group giving CRUD to all, so should see both

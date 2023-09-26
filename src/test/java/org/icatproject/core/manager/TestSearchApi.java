@@ -96,9 +96,9 @@ public class TestSearchApi {
 	}
 
 	private static final String SEARCH_AFTER_NOT_NULL = "Expected searchAfter to be set, but it was null";
-	private static final List<String> datafileFields = Arrays.asList("id", "name", "location", "date", "dataset.id",
-			"dataset.name", "investigation.id", "investigation.name", "InvestigationInstrument instrument.id",
-			"InvestigationFacilityCycle facilityCycle.id");
+	private static final List<String> datafileFields = Arrays.asList("id", "name", "location", "datafileFormat.name",
+			"date", "dataset.id", "dataset.name", "investigation.id", "investigation.name",
+			"InvestigationInstrument instrument.id", "InvestigationFacilityCycle facilityCycle.id");
 	private static final List<String> datasetFields = Arrays.asList("id", "name", "startDate", "endDate",
 			"investigation.id", "investigation.name", "investigation.title", "investigation.startDate",
 			"InvestigationInstrument instrument.id", "InvestigationFacilityCycle facilityCycle.id");
@@ -217,7 +217,7 @@ public class TestSearchApi {
 		return builder.build();
 	}
 
-	private static JsonObject buildFacetIdQuery(String idField, String idValue) {
+	private static JsonObject buildFacetIdQuery(String idField, long idValue) {
 		return Json.createObjectBuilder().add(idField, Json.createArrayBuilder().add(idValue)).build();
 	}
 
@@ -241,7 +241,7 @@ public class TestSearchApi {
 		return Json.createObjectBuilder().add("query", queryObject).add("dimensions", rangedDimensionsBuilder).build();
 	}
 
-	private static JsonObject buildFacetStringRequest(String idField, String idValue, String dimension) {
+	private static JsonObject buildFacetStringRequest(String idField, long idValue, String dimension) {
 		JsonObject idQuery = buildFacetIdQuery(idField, idValue);
 		JsonObjectBuilder stringDimensionBuilder = Json.createObjectBuilder().add("dimension", dimension);
 		JsonArrayBuilder stringDimensionsBuilder = Json.createArrayBuilder().add(stringDimensionBuilder);
@@ -255,20 +255,20 @@ public class TestSearchApi {
 				"dataset.name", "investigation.id", "investigation.name", "investigationinstrument",
 				"investigationfacilitycycle"));
 		assertEquals(expectedKeys, source.keySet());
-		assertEquals("0", source.getString("id"));
+		assertEquals(0, source.getJsonNumber("id").longValueExact());
 		assertEquals("DFaaa", source.getString("name"));
 		assertEquals("/dir/DFaaa", source.getString("location"));
 		assertNotNull(source.getJsonNumber("date"));
-		assertEquals("0", source.getString("dataset.id"));
+		assertEquals(0, source.getJsonNumber("dataset.id").longValueExact());
 		assertEquals("DSaaa", source.getString("dataset.name"));
-		assertEquals("0", source.getString("investigation.id"));
+		assertEquals(0, source.getJsonNumber("investigation.id").longValueExact());
 		assertEquals("a h r", source.getString("investigation.name"));
 		JsonArray instruments = source.getJsonArray("investigationinstrument");
 		assertEquals(1, instruments.size());
-		assertEquals("0", instruments.getJsonObject(0).getString("instrument.id"));
+		assertEquals(0, instruments.getJsonObject(0).getJsonNumber("instrument.id").longValueExact());
 		JsonArray facilityCycles = source.getJsonArray("investigationfacilitycycle");
 		assertEquals(1, facilityCycles.size());
-		assertEquals("0", facilityCycles.getJsonObject(0).getString("facilityCycle.id"));
+		assertEquals(0, facilityCycles.getJsonObject(0).getJsonNumber("facilityCycle.id").longValueExact());
 	}
 
 	private void checkDataset(ScoredEntityBaseBean dataset) {
@@ -278,20 +278,20 @@ public class TestSearchApi {
 				"investigation.name", "investigation.title", "investigation.startDate", "investigationinstrument",
 				"investigationfacilitycycle"));
 		assertEquals(expectedKeys, source.keySet());
-		assertEquals("0", source.getString("id"));
+		assertEquals(0, source.getJsonNumber("id").longValueExact());
 		assertEquals("DSaaa", source.getString("name"));
 		assertNotNull(source.getJsonNumber("startDate"));
 		assertNotNull(source.getJsonNumber("endDate"));
-		assertEquals("0", source.getString("investigation.id"));
+		assertEquals(0, source.getJsonNumber("investigation.id").longValueExact());
 		assertEquals("a h r", source.getString("investigation.name"));
 		assertEquals("title", source.getString("investigation.title"));
 		assertNotNull(source.getJsonNumber("investigation.startDate"));
 		JsonArray instruments = source.getJsonArray("investigationinstrument");
 		assertEquals(1, instruments.size());
-		assertEquals("0", instruments.getJsonObject(0).getString("instrument.id"));
+		assertEquals(0, instruments.getJsonObject(0).getJsonNumber("instrument.id").longValueExact());
 		JsonArray facilityCycles = source.getJsonArray("investigationfacilitycycle");
 		assertEquals(1, facilityCycles.size());
-		assertEquals("0", facilityCycles.getJsonObject(0).getString("facilityCycle.id"));
+		assertEquals(0, facilityCycles.getJsonObject(0).getJsonNumber("facilityCycle.id").longValueExact());
 	}
 
 	private void checkFacets(List<FacetDimension> facetDimensions, FacetDimension... dimensions) {
@@ -324,18 +324,18 @@ public class TestSearchApi {
 				"id", "name", "title", "startDate", "endDate", "investigationinstrument",
 				"investigationfacilitycycle"));
 		assertEquals(expectedKeys, source.keySet());
-		assertEquals("0", source.getString("id"));
+		assertEquals(0, source.getJsonNumber("id").longValueExact());
 		assertEquals("a h r", source.getString("name"));
 		assertNotNull(source.getJsonNumber("startDate"));
 		assertNotNull(source.getJsonNumber("endDate"));
 		JsonArray instruments = source.getJsonArray("investigationinstrument");
 		assertEquals(1, instruments.size());
-		assertEquals("0", instruments.getJsonObject(0).getString("instrument.id"));
+		assertEquals(0, instruments.getJsonObject(0).getJsonNumber("instrument.id").longValueExact());
 		assertEquals("bl0", instruments.getJsonObject(0).getString("instrument.name"));
 		assertEquals("Beamline 0", instruments.getJsonObject(0).getString("instrument.fullName"));
 		JsonArray facilityCycles = source.getJsonArray("investigationfacilitycycle");
 		assertEquals(1, facilityCycles.size());
-		assertEquals("0", facilityCycles.getJsonObject(0).getString("facilityCycle.id"));
+		assertEquals(0, facilityCycles.getJsonObject(0).getJsonNumber("facilityCycle.id").longValueExact());
 	}
 
 	private void checkResults(SearchResult lsr, Long... n) {
@@ -996,8 +996,8 @@ public class TestSearchApi {
 		checkResults(lsr);
 
 		// Test DatasetTechnique Facets
-		JsonObject stringFacetRequestZero = buildFacetStringRequest("dataset.id", "0", "technique.name");
-		JsonObject stringFacetRequestOne = buildFacetStringRequest("dataset.id", "1", "technique.name");
+		JsonObject stringFacetRequestZero = buildFacetStringRequest("dataset.id", 0, "technique.name");
+		JsonObject stringFacetRequestOne = buildFacetStringRequest("dataset.id", 1, "technique.name");
 		FacetDimension facetZero = new FacetDimension("", "technique.name", new FacetLabel("technique0", 1L));
 		FacetDimension facetOne = new FacetDimension("", "technique.name", new FacetLabel("technique1", 1L));
 		checkFacets(searchApi.facetSearch("DatasetTechnique", stringFacetRequestZero, 5, 5), facetZero);
@@ -1290,9 +1290,9 @@ public class TestSearchApi {
 		JsonObject pngQuery = buildQuery("Datafile", null, "datafileFormat.name:png", null, null, null, null);
 		JsonObject lowRange = buildFacetRangeObject("low", 0L, 2L);
 		JsonObject highRange = buildFacetRangeObject("high", 2L, 4L);
-		JsonObject facetIdQuery = buildFacetIdQuery("id", "42");
+		JsonObject facetIdQuery = buildFacetIdQuery("id", 42);
 		JsonObject rangeFacetRequest = buildFacetRangeRequest(facetIdQuery, "date", lowRange, highRange);
-		JsonObject stringFacetRequest = buildFacetStringRequest("id", "42", "datafileFormat.name");
+		JsonObject stringFacetRequest = buildFacetStringRequest("id", 42, "datafileFormat.name");
 		JsonObject sparseFacetRequest = Json.createObjectBuilder().add("query", facetIdQuery).build();
 		FacetDimension lowFacet = new FacetDimension("", "date", new FacetLabel("low", 1L), new FacetLabel("high", 0L));
 		FacetDimension highFacet = new FacetDimension("", "date", new FacetLabel("low", 0L),
@@ -1302,40 +1302,40 @@ public class TestSearchApi {
 
 		// Original
 		modify(SearchApi.encodeOperation("create", elephantDatafile));
-		checkResults(searchApi.getResults(elephantQuery, 5), 42L);
-		checkResults(searchApi.getResults(rhinoQuery, 5));
-		checkResults(searchApi.getResults(pdfQuery, 5));
-		checkResults(searchApi.getResults(pngQuery, 5));
+		checkResults(searchApi.getResults(elephantQuery, null, 5, null, datafileFields), 42L);
+		checkResults(searchApi.getResults(rhinoQuery, null, 5, null, datafileFields));
+		checkResults(searchApi.getResults(pdfQuery, null, 5, null, datafileFields));
+		checkResults(searchApi.getResults(pngQuery, null, 5, null, datafileFields));
 		checkFacets(searchApi.facetSearch("Datafile", stringFacetRequest, 5, 5));
 		checkFacets(searchApi.facetSearch("Datafile", sparseFacetRequest, 5, 5));
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), lowFacet);
 
 		// Change name and add a format
 		modify(SearchApi.encodeOperation("update", rhinoDatafile));
-		checkResults(searchApi.getResults(elephantQuery, 5));
-		checkResults(searchApi.getResults(rhinoQuery, 5), 42L);
-		checkResults(searchApi.getResults(pdfQuery, 5), 42L);
-		checkResults(searchApi.getResults(pngQuery, 5));
+		checkResults(searchApi.getResults(elephantQuery, null, 5, null, datafileFields));
+		checkResults(searchApi.getResults(rhinoQuery, null, 5, null, datafileFields), 42L);
+		checkResults(searchApi.getResults(pdfQuery, null, 5, null, datafileFields), 42L);
+		checkResults(searchApi.getResults(pngQuery, null, 5, null, datafileFields));
 		checkFacets(searchApi.facetSearch("Datafile", stringFacetRequest, 5, 5), pdfFacet);
 		checkFacets(searchApi.facetSearch("Datafile", sparseFacetRequest, 5, 5), pdfFacet);
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), highFacet);
 
 		// Change just the format
 		modify(SearchApi.encodeOperation("update", pngFormat));
-		checkResults(searchApi.getResults(elephantQuery, 5));
-		checkResults(searchApi.getResults(rhinoQuery, 5), 42L);
-		checkResults(searchApi.getResults(pdfQuery, 5));
-		checkResults(searchApi.getResults(pngQuery, 5), 42L);
+		checkResults(searchApi.getResults(elephantQuery, null, 5, null, datafileFields));
+		checkResults(searchApi.getResults(rhinoQuery, null, 5, null, datafileFields), 42L);
+		checkResults(searchApi.getResults(pdfQuery, null, 5, null, datafileFields));
+		checkResults(searchApi.getResults(pngQuery, null, 5, null, datafileFields), 42L);
 		checkFacets(searchApi.facetSearch("Datafile", stringFacetRequest, 5, 5), pngFacet);
 		checkFacets(searchApi.facetSearch("Datafile", sparseFacetRequest, 5, 5), pngFacet);
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), highFacet);
 
 		// Remove the format
 		modify(SearchApi.encodeOperation("delete", pngFormat));
-		checkResults(searchApi.getResults(elephantQuery, 5));
-		checkResults(searchApi.getResults(rhinoQuery, 5), 42L);
-		checkResults(searchApi.getResults(pdfQuery, 5));
-		checkResults(searchApi.getResults(pngQuery, 5));
+		checkResults(searchApi.getResults(elephantQuery, null, 5, null, datafileFields));
+		checkResults(searchApi.getResults(rhinoQuery, null, 5, null, datafileFields), 42L);
+		checkResults(searchApi.getResults(pdfQuery, null, 5, null, datafileFields));
+		checkResults(searchApi.getResults(pngQuery, null, 5, null, datafileFields));
 		checkFacets(searchApi.facetSearch("Datafile", stringFacetRequest, 5, 5));
 		checkFacets(searchApi.facetSearch("Datafile", sparseFacetRequest, 5, 5));
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), highFacet);
@@ -1474,7 +1474,7 @@ public class TestSearchApi {
 		dataset.setSample(sample);
 
 		// Queries and expected responses
-		JsonObjectBuilder query = Json.createObjectBuilder().add("sample.id", Json.createArrayBuilder().add("3"));
+		JsonObjectBuilder query = Json.createObjectBuilder().add("sample.id", Json.createArrayBuilder().add(3));
 		JsonObjectBuilder dimension = Json.createObjectBuilder().add("dimension", "type.name");
 		JsonArrayBuilder dimensions = Json.createArrayBuilder().add(dimension);
 		JsonObject facet = Json.createObjectBuilder().add("query", query).add("dimensions", dimensions).build();

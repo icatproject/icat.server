@@ -45,8 +45,8 @@ public class InvestigationInstrument extends EntityBaseBean implements Serializa
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		instrument.getDoc(gen);
-		SearchApi.encodeString(gen, "investigation.id", investigation.id);
-		SearchApi.encodeString(gen, "id", id);
+		SearchApi.encodeLong(gen, "investigation.id", investigation.id);
+		SearchApi.encodeLong(gen, "id", id);
 	}
 
 }

@@ -347,7 +347,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		SearchApi.encodeLong(gen, "fileSize", fileSize);
 		SearchApi.encodeLong(gen, "fileCount", fileCount);
 
-		SearchApi.encodeString(gen, "id", id);
+		SearchApi.encodeLong(gen, "id", id);
 		facility.getDoc(gen);
 		type.getDoc(gen);
 	}

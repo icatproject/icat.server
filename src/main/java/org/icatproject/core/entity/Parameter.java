@@ -177,7 +177,7 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 			SearchApi.encodeDouble(gen, "rangeBottom", rangeBottom);
 		}
 		type.getDoc(gen);
-		SearchApi.encodeString(gen, "id", id);
+		SearchApi.encodeLong(gen, "id", id);
 	}
 
 }

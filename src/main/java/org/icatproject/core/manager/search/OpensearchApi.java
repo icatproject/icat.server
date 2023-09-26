@@ -332,7 +332,7 @@ public class OpensearchApi extends SearchApi {
 				EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
 				if (bean != null) {
 					gen.writeStartObject().writeStartObject("create");
-					gen.write("_index", entityName).write("_id", bean.getId().toString());
+					gen.write("_index", entityName).write("_id", bean.getId());
 					gen.writeStartObject("doc");
 					bean.getDoc(gen);
 					gen.writeEnd().writeEnd().writeEnd();
@@ -710,7 +710,7 @@ public class OpensearchApi extends SearchApi {
 		ModificationType modificationType = ModificationType.valueOf(operationKey.toUpperCase());
 		JsonObject innerOperation = operation.getJsonObject(modificationType.toString().toLowerCase());
 		String index = innerOperation.getString("_index").toLowerCase();
-		String id = innerOperation.getString("_id");
+		long id = innerOperation.getJsonNumber("_id").longValueExact();
 		JsonObject document = innerOperation.containsKey("doc") ? innerOperation.getJsonObject("doc") : null;
 		logger.trace("{} {} with id {}", operationKey, index, id);
 
@@ -755,7 +755,7 @@ public class OpensearchApi extends SearchApi {
 			StringBuilder fileSizeStringBuilder) {
 		if (aggregations.size() > 0) {
 			for (String id : aggregations.keySet()) {
-				JsonObject targetObject = Json.createObjectBuilder().add("_id", new Long(id)).add("_index", entity)
+				JsonObject targetObject = Json.createObjectBuilder().add("_id", Long.valueOf(id)).add("_index", entity)
 						.build();
 				JsonObject update = Json.createObjectBuilder().add("update", targetObject).build();
 				long deltaFileSize = aggregations.get(id)[0];
@@ -781,7 +781,7 @@ public class OpensearchApi extends SearchApi {
 	 * @throws URISyntaxException
 	 * @throws ClientProtocolException
 	 */
-	private JsonObject extractSource(CloseableHttpClient httpclient, String id)
+	private JsonObject extractSource(CloseableHttpClient httpclient, long id)
 			throws IOException, URISyntaxException, ClientProtocolException {
 		URI uriGet = new URIBuilder(server).setPath("/datafile/_source/" + id)
 				.build();
@@ -931,7 +931,7 @@ public class OpensearchApi extends SearchApi {
 	 * @throws URISyntaxException
 	 * @throws IcatException
 	 */
-	private void modifyNestedEntity(OpensearchBulk bulk, String id, String index, JsonObject document,
+	private void modifyNestedEntity(OpensearchBulk bulk, long id, String index, JsonObject document,
 			ModificationType modificationType, ParentRelation relation) throws URISyntaxException, IcatException {
 
 		switch (modificationType) {
@@ -965,7 +965,7 @@ public class OpensearchApi extends SearchApi {
 					// SampleParameter requires specific logic, as the join is performed using the
 					// Sample id rather than the SampleParameter id or the parent id.
 					if (document.containsKey("sample.id")) {
-						String sampleId = document.getString("sample.id");
+						long sampleId = document.getJsonNumber("sample.id").longValueExact();
 						updateNestedEntityByQuery(bulk, sampleId, index, document, relation, true);
 					}
 				}
@@ -992,7 +992,7 @@ public class OpensearchApi extends SearchApi {
 	 * @throws IcatException      If parentId is missing from document.
 	 * @throws URISyntaxException
 	 */
-	private void createNestedEntity(OpensearchBulk bulk, String id, String index, JsonObject document,
+	private void createNestedEntity(OpensearchBulk bulk, long id, String index, JsonObject document,
 			ParentRelation relation) throws IcatException, URISyntaxException {
 
 		if (!document.containsKey(relation.joinField + ".id")) {
@@ -1035,7 +1035,7 @@ public class OpensearchApi extends SearchApi {
 	 *                 with the specified id.
 	 * @throws URISyntaxException
 	 */
-	private void updateNestedEntityByQuery(OpensearchBulk bulk, String id, String index, JsonObject document,
+	private void updateNestedEntityByQuery(OpensearchBulk bulk, long id, String index, JsonObject document,
 			ParentRelation relation, boolean update) throws URISyntaxException {
 
 		String path = "/" + relation.parentName + "/_update_by_query";
@@ -1168,11 +1168,11 @@ public class OpensearchApi extends SearchApi {
 	 * @throws IOException
 	 * @throws ClientProtocolException
 	 */
-	private void modifyEntity(CloseableHttpClient httpclient, OpensearchBulk bulk, String id, String index,
+	private void modifyEntity(CloseableHttpClient httpclient, OpensearchBulk bulk, long id, String index,
 			JsonObject document, ModificationType modificationType)
 			throws ClientProtocolException, IOException, URISyntaxException {
 
-		JsonObject targetObject = Json.createObjectBuilder().add("_id", new Long(id)).add("_index", index).build();
+		JsonObject targetObject = Json.createObjectBuilder().add("_id", id).add("_index", index).build();
 		JsonObject update = Json.createObjectBuilder().add("update", targetObject).build();
 		JsonObject docAsUpsert;
 		switch (modificationType) {
@@ -1214,7 +1214,7 @@ public class OpensearchApi extends SearchApi {
 	 * @throws URISyntaxException
 	 */
 	private void aggregateFiles(ModificationType modificationType, OpensearchBulk bulk, String index,
-			JsonObject document, CloseableHttpClient httpclient, String id)
+			JsonObject document, CloseableHttpClient httpclient, long id)
 			throws ClientProtocolException, IOException, URISyntaxException {
 		long deltaFileSize = 0;
 		long deltaFileCount = 0;
@@ -1264,7 +1264,7 @@ public class OpensearchApi extends SearchApi {
 	 * @throws URISyntaxException
 	 * @throws ClientProtocolException
 	 */
-	private long extractFileSize(CloseableHttpClient httpclient, String id)
+	private long extractFileSize(CloseableHttpClient httpclient, long id)
 			throws IOException, URISyntaxException, ClientProtocolException {
 		JsonObject source = extractSource(httpclient, id);
 		if (source != null && source.containsKey("fileSize")) {

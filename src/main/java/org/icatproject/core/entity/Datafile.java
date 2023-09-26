@@ -224,9 +224,9 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		} else {
 			SearchApi.encodeLong(gen, "date", modTime);
 		}
-		SearchApi.encodeString(gen, "id", id);
+		SearchApi.encodeLong(gen, "id", id);
 		if (dataset != null) {
-			SearchApi.encodeString(gen, "dataset.id", dataset.id);
+			SearchApi.encodeLong(gen, "dataset.id", dataset.id);
 			SearchApi.encodeString(gen, "dataset.name", dataset.getName());
 			Sample sample = dataset.getSample();
 			if (sample != null) {
@@ -234,7 +234,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 			}
 			Investigation investigation = dataset.getInvestigation();
 			if (investigation != null) {
-				SearchApi.encodeString(gen, "investigation.id", investigation.id);
+				SearchApi.encodeLong(gen, "investigation.id", investigation.id);
 				SearchApi.encodeString(gen, "investigation.name", investigation.getName());
 				SearchApi.encodeString(gen, "visitId", investigation.getVisitId());
 				if (investigation.getStartDate() != null) {

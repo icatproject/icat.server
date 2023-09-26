@@ -441,7 +441,7 @@ public class SearchManager {
 			gateKeeper.markPublicSearchFieldsFresh();
 		}
 		List<String> requestedFields = publicSearchFields.get(simpleName);
-		logger.trace("{} has public fields {}", simpleName, requestedFields);
+		logger.debug("{} has public fields {}", simpleName, requestedFields);
 		return requestedFields;
 	}
 
@@ -537,7 +537,7 @@ public class SearchManager {
 	 */
 	public static JsonObject buildFacetQuery(List<ScoredEntityBaseBean> results, String idField, JsonObject facetJson) {
 		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-		results.forEach(r -> arrayBuilder.add(Long.toString(r.getId())));
+		results.forEach(r -> arrayBuilder.add(r.getId()));
 		JsonObject terms = Json.createObjectBuilder().add(idField, arrayBuilder.build()).build();
 		return buildFacetQuery(terms, facetJson);
 	}

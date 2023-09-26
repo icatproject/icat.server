@@ -106,7 +106,7 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		SearchApi.encodeString(gen, "datafileFormat.name", name);
-		SearchApi.encodeString(gen, "datafileFormat.id", id);
+		SearchApi.encodeLong(gen, "datafileFormat.id", id);
 	}
 
 }

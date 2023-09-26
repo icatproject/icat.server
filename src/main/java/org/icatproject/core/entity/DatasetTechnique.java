@@ -44,8 +44,8 @@ public class DatasetTechnique extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void getDoc(JsonGenerator gen) {
-		SearchApi.encodeString(gen, "id", id);
-		SearchApi.encodeString(gen, "dataset.id", dataset.id);
+		SearchApi.encodeLong(gen, "id", id);
+		SearchApi.encodeLong(gen, "dataset.id", dataset.id);
 		technique.getDoc(gen);
 	}
 }

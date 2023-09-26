@@ -82,7 +82,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		SearchApi.encodeString(gen, "type.name", name);
-		SearchApi.encodeString(gen, "type.id", id);
+		SearchApi.encodeLong(gen, "type.id", id);
 	}
 
 }

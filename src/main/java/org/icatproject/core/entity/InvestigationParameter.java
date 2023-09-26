@@ -57,6 +57,6 @@ public class InvestigationParameter extends Parameter implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		super.getDoc(gen);
-		SearchApi.encodeString(gen, "investigation.id", investigation.id);
+		SearchApi.encodeLong(gen, "investigation.id", investigation.id);
 	}
 }
