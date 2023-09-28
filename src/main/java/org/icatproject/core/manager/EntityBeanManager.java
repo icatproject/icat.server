@@ -63,6 +63,8 @@ import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.Session;
@@ -1687,18 +1689,21 @@ public class EntityBeanManager {
 	 */
 	private JsonObject buildFacetQuery(Class<? extends EntityBaseBean> klass, String target,
 			List<ScoredEntityBaseBean> results, JsonObject jsonFacet) throws IcatException {
-		if (target.equals(klass.getSimpleName())) {
+		String parentName = klass.getSimpleName();
+		if (target.equals(parentName)) {
 			return SearchManager.buildFacetQuery(results, "id", jsonFacet);
 		} else {
 			Relationship relationship;
 			if (target.equals("SampleParameter")) {
 				Relationship sampleRelationship;
-				if (klass.getSimpleName().equals("Investigation")) {
+				if (parentName.equals("Investigation")) {
 					sampleRelationship = eiHandler.getRelationshipsByName(klass).get("samples");
 				} else {
-					if (klass.getSimpleName().equals("Datafile")) {
+					if (parentName.equals("Datafile")) {
 						Relationship datasetRelationship = eiHandler.getRelationshipsByName(klass).get("dataset");
 						if (!gateKeeper.allowed(datasetRelationship)) {
+							logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed", target,
+								parentName);
 							return null;
 						}
 					}
@@ -1706,9 +1711,32 @@ public class EntityBeanManager {
 				}
 				Relationship parameterRelationship = eiHandler.getRelationshipsByName(Sample.class).get("parameters");
 				if (!gateKeeper.allowed(sampleRelationship) || !gateKeeper.allowed(parameterRelationship)) {
+					logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed", target,
+						parentName);
 					return null;
 				}
-				return SearchManager.buildSampleFacetQuery(results, jsonFacet);
+				return SearchManager.buildFacetQuery(results, "sample.id", "sample.id", jsonFacet);
+			} else if (target.equals("InvestigationInstrument")) {
+				List<Relationship> relationships = new ArrayList<>();
+				String resultIdField = "id";
+				if (parentName.equals("Datafile")) {
+					resultIdField = "investigation.id";
+					relationships.add(eiHandler.getRelationshipsByName(Datafile.class).get("dataset"));
+					relationships.add(eiHandler.getRelationshipsByName(Dataset.class).get("investigation"));
+				} else if (parentName.equals("Dataset")) {
+					resultIdField = "investigation.id";
+					relationships.add(eiHandler.getRelationshipsByName(Dataset.class).get("investigation"));
+				}
+				relationships.add(eiHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"));
+				relationships.add(eiHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument"));
+				for (Relationship r : relationships) {
+					if (!gateKeeper.allowed(r)) {
+						logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed", target,
+							parentName);
+						return null;
+					}
+				}
+				return SearchManager.buildFacetQuery(results, resultIdField, "investigation.id", jsonFacet);
 			} else if (target.contains("Parameter")) {
 				relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
 			} else {
@@ -1716,10 +1744,15 @@ public class EntityBeanManager {
 			}
 
 			if (gateKeeper.allowed(relationship)) {
-				return SearchManager.buildFacetQuery(results, klass.getSimpleName().toLowerCase() + ".id", jsonFacet);
+				if (target.equals("Sample") && parentName.equals("Investigation")) {
+					// As samples can be one to many on Investigations or one to one on Datasets, they do not follow
+					// usual naming conventions in the document mapping
+					return SearchManager.buildFacetQuery(results, "sample.investigation.id", jsonFacet);
+				}
+				return SearchManager.buildFacetQuery(results, parentName.toLowerCase() + ".id", jsonFacet);
 			} else {
 				logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed",
-						target, klass.getSimpleName());
+						target, parentName);
 				return null;
 			}
 		}

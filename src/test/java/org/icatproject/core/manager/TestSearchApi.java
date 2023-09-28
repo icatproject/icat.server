@@ -217,8 +217,12 @@ public class TestSearchApi {
 		return builder.build();
 	}
 
-	private static JsonObject buildFacetIdQuery(String idField, long idValue) {
-		return Json.createObjectBuilder().add(idField, Json.createArrayBuilder().add(idValue)).build();
+	private static JsonObject buildFacetIdQuery(String idField, long... idValues) {
+		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+		for (long id : idValues) {
+			arrayBuilder.add(id);
+		}
+		return Json.createObjectBuilder().add(idField, arrayBuilder).build();
 	}
 
 	private static JsonObject buildFacetRangeObject(String key, double from, double to) {
@@ -246,6 +250,10 @@ public class TestSearchApi {
 		JsonObjectBuilder stringDimensionBuilder = Json.createObjectBuilder().add("dimension", dimension);
 		JsonArrayBuilder stringDimensionsBuilder = Json.createArrayBuilder().add(stringDimensionBuilder);
 		return Json.createObjectBuilder().add("query", idQuery).add("dimensions", stringDimensionsBuilder).build();
+	}
+
+	private JsonObject buildFacetSparseRequest(JsonObject facetIdQuery) {
+		return Json.createObjectBuilder().add("query", facetIdQuery).build();
 	}
 
 	private void checkDatafile(ScoredEntityBaseBean datafile) {
@@ -503,6 +511,7 @@ public class TestSearchApi {
 		sample.setId(id);
 		sample.setName(name);
 		sample.setInvestigation(investigation);
+		sample.setType(sampleType);
 		return sample;
 	}
 
@@ -1002,6 +1011,14 @@ public class TestSearchApi {
 		FacetDimension facetOne = new FacetDimension("", "technique.name", new FacetLabel("technique1", 1L));
 		checkFacets(searchApi.facetSearch("DatasetTechnique", stringFacetRequestZero, 5, 5), facetZero);
 		checkFacets(searchApi.facetSearch("DatasetTechnique", stringFacetRequestOne, 5, 5), facetOne);
+
+		// Test instrument.name Facets
+		JsonObject instrumentFacetRequestZero = buildFacetStringRequest("investigation.id", 0, "instrument.name");
+		JsonObject instrumentFacetRequestOne = buildFacetStringRequest("investigation.id", 1, "instrument.name");
+		FacetDimension instrumentFacetZero = new FacetDimension("", "instrument.name", new FacetLabel("bl0", 1L));
+		FacetDimension instrumentFacetOne = new FacetDimension("", "instrument.name", new FacetLabel("bl1", 1L));
+		checkFacets(searchApi.facetSearch("InvestigationInstrument", instrumentFacetRequestZero, 5, 5), instrumentFacetZero);
+		checkFacets(searchApi.facetSearch("InvestigationInstrument", instrumentFacetRequestOne, 5, 5), instrumentFacetOne);
 	}
 
 	@Test
@@ -1293,7 +1310,7 @@ public class TestSearchApi {
 		JsonObject facetIdQuery = buildFacetIdQuery("id", 42);
 		JsonObject rangeFacetRequest = buildFacetRangeRequest(facetIdQuery, "date", lowRange, highRange);
 		JsonObject stringFacetRequest = buildFacetStringRequest("id", 42, "datafileFormat.name");
-		JsonObject sparseFacetRequest = Json.createObjectBuilder().add("query", facetIdQuery).build();
+		JsonObject sparseFacetRequest = buildFacetSparseRequest(facetIdQuery);
 		FacetDimension lowFacet = new FacetDimension("", "date", new FacetLabel("low", 1L), new FacetLabel("high", 0L));
 		FacetDimension highFacet = new FacetDimension("", "date", new FacetLabel("low", 0L),
 				new FacetLabel("high", 1L));
@@ -1474,10 +1491,18 @@ public class TestSearchApi {
 		dataset.setSample(sample);
 
 		// Queries and expected responses
-		JsonObjectBuilder query = Json.createObjectBuilder().add("sample.id", Json.createArrayBuilder().add(3));
+		JsonObjectBuilder sampleQuery = Json.createObjectBuilder().add("sample.id", Json.createArrayBuilder().add(3));
 		JsonObjectBuilder dimension = Json.createObjectBuilder().add("dimension", "type.name");
 		JsonArrayBuilder dimensions = Json.createArrayBuilder().add(dimension);
-		JsonObject facet = Json.createObjectBuilder().add("query", query).add("dimensions", dimensions).build();
+		JsonObject sampleParameterFacetQuery = Json.createObjectBuilder().add("query", sampleQuery).add("dimensions", dimensions).build();
+
+		JsonObjectBuilder sampleInvestigationQuery = Json.createObjectBuilder().add("sample.investigation.id", Json.createArrayBuilder().add(0));
+		JsonObjectBuilder sampleTypeDimension = Json.createObjectBuilder().add("dimension", "sample.type.name");
+		JsonArrayBuilder sampleTypeDimensions = Json.createArrayBuilder().add(sampleTypeDimension);
+		JsonObject sampleTypeFacetQuery = Json.createObjectBuilder().add("query", sampleInvestigationQuery).add("dimensions", sampleTypeDimensions).build();
+
+		JsonObject facetIdQuery = buildFacetIdQuery("id", 1, 2);
+		JsonObject sparseRequest = buildFacetSparseRequest(facetIdQuery);
 
 		JsonObjectBuilder filterBuilder = Json.createObjectBuilder();
 		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
@@ -1487,7 +1512,9 @@ public class TestSearchApi {
 		filterBuilder.add("key", "key").add("label", "label").add("filter", arrayBuilder);
 		JsonObject filter = filterBuilder.build();
 
-		FacetDimension expectedFacet = new FacetDimension("", "type.name", new FacetLabel("parameter", 1L));
+		FacetDimension sampleParemeterFacet = new FacetDimension("", "type.name", new FacetLabel("parameter", 1L));
+		FacetDimension sampleTypeFacet = new FacetDimension("", "sample.type.name", new FacetLabel("test", 1L));
+		FacetDimension datasetTypeFacet = new FacetDimension("", "type.name", new FacetLabel("type", 1L));
 		JsonObject investigationQuery = buildQuery("Investigation", null, null, null, null, null, null,
 				new Filter("sampleparameter", filter));
 		JsonObject datasetQuery = buildQuery("Dataset", null, null, null, null, null, null,
@@ -1504,7 +1531,10 @@ public class TestSearchApi {
 				SearchApi.encodeOperation("create", parameter));
 
 		// Test
-		checkFacets(searchApi.facetSearch("SampleParameter", facet, 5, 5), expectedFacet);
+		checkFacets(searchApi.facetSearch("SampleParameter", sampleParameterFacetQuery, 5, 5), sampleParemeterFacet);
+		checkFacets(searchApi.facetSearch("Sample", sampleTypeFacetQuery, 5, 5), sampleTypeFacet);
+		checkFacets(searchApi.facetSearch("Dataset", sparseRequest, 5, 5), datasetTypeFacet, sampleTypeFacet);
+		checkFacets(searchApi.facetSearch("Datafile", sparseRequest, 5, 5), sampleTypeFacet);
 
 		SearchResult lsr = searchApi.getResults(investigationQuery, null, 5, null, investigationFields);
 		checkResults(lsr, 0L);

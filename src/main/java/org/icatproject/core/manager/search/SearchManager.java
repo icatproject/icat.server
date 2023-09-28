@@ -34,9 +34,9 @@ import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
-import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import jakarta.json.JsonValue.ValueType;
 import jakarta.persistence.EntityManager;
@@ -529,44 +529,48 @@ public class SearchManager {
 	 * Builds a JsonObject for performing faceting against results from a previous
 	 * search.
 	 * 
-	 * @param results   List of results from a previous search, containing entity
-	 *                  ids.
-	 * @param idField   The field to perform id querying against.
-	 * @param facetJson JsonObject containing the dimensions to facet.
+	 * @param results      List of results from a previous search, containing entity
+	 *                     ids.
+	 * @param queryIdField The field to perform id querying against.
+	 * @param facetJson    JsonObject containing the dimensions to facet.
 	 * @return <code>{"query": {`idField`: [...]}, "dimensions": [...]}</code>
 	 */
-	public static JsonObject buildFacetQuery(List<ScoredEntityBaseBean> results, String idField, JsonObject facetJson) {
+	public static JsonObject buildFacetQuery(List<ScoredEntityBaseBean> results, String queryIdField,
+			JsonObject facetJson) {
 		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 		results.forEach(r -> arrayBuilder.add(r.getId()));
-		JsonObject terms = Json.createObjectBuilder().add(idField, arrayBuilder.build()).build();
+		JsonObject terms = Json.createObjectBuilder().add(queryIdField, arrayBuilder.build()).build();
 		return buildFacetQuery(terms, facetJson);
 	}
 
 	/**
 	 * Builds a JsonObject for performing faceting against results from a previous
-	 * search. Has specific logic for handling the nesting of Samples.
+	 * search.
 	 * 
-	 * @param results   List of results from a previous search, containing sample
-	 *                  ids.
-	 * @param facetJson JsonObject containing the dimensions to facet.
-	 * @return
+	 * @param results       List of results from a previous search, containing
+	 *                      entity ids.
+	 * @param resultIdField The id(s) to extract from the results.
+	 * @param queryIdField  The id field to target with the query.
+	 * @param facetJson     JsonObject containing the dimensions to facet.
+	 * @return <code>{"query": {`idField`: [...]}, "dimensions": [...]}</code>
 	 */
-	public static JsonObject buildSampleFacetQuery(List<ScoredEntityBaseBean> results, JsonObject facetJson) {
+	public static JsonObject buildFacetQuery(List<ScoredEntityBaseBean> results, String resultIdField,
+			String queryIdField, JsonObject facetJson) {
 		JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 		results.forEach(r -> {
 			JsonObject source = r.getSource();
-			if (source.containsKey("sample.id")) {
-				ValueType valueType = source.get("sample.id").getValueType();
-				if (valueType.equals(ValueType.STRING)) {
-					arrayBuilder.add(source.getString("sample.id"));
+			if (source.containsKey(resultIdField)) {
+				ValueType valueType = source.get(resultIdField).getValueType();
+				if (valueType.equals(ValueType.NUMBER)) {
+					arrayBuilder.add(source.getJsonNumber(resultIdField));
 				} else if (valueType.equals(ValueType.ARRAY)) {
-					source.getJsonArray("sample.id").getValuesAs(JsonString.class).forEach(sampleId -> {
-						arrayBuilder.add(sampleId);
+					source.getJsonArray(resultIdField).getValuesAs(JsonNumber.class).forEach(id -> {
+						arrayBuilder.add(id);
 					});
 				}
 			}
 		});
-		JsonObject terms = Json.createObjectBuilder().add("sample.id", arrayBuilder.build()).build();
+		JsonObject terms = Json.createObjectBuilder().add(queryIdField, arrayBuilder.build()).build();
 		return buildFacetQuery(terms, facetJson);
 	}
 

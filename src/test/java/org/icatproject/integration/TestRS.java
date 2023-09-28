@@ -1037,6 +1037,21 @@ public class TestRS {
 		assertFalse(responseObject.containsKey("search_after"));
 		checkFacets(responseObject, "InvestigationParameter.type.name", Arrays.asList("colour"),
 				Arrays.asList(1L));
+
+		// Test no facets match on Sample due to lack of READ access
+		facets = buildFacetRequest("Sample", "sample.type.name");
+		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
+				3);
+		assertFalse(responseObject.containsKey("search_after"));
+		assertFalse(NO_DIMENSIONS, responseObject.containsKey("dimensions"));
+
+		// Test facets match on Sample
+		wSession.addRule(null, "Sample", "R");
+		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
+				3);
+		assertFalse(responseObject.containsKey("search_after"));
+		checkFacets(responseObject, "Sample.sample.type.name", Arrays.asList("diamond", "rust"),
+				Arrays.asList(1L, 1L));
 	}
 
 	@Test
@@ -1073,9 +1088,13 @@ public class TestRS {
 	}
 
 	private JsonArray buildFacetRequest(String target) {
+		return buildFacetRequest(target, "type.name");
+	}
+
+	private JsonArray buildFacetRequest(String target, String dimension) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
-		JsonObjectBuilder dimension = Json.createObjectBuilder().add("dimension", "type.name");
-		JsonArrayBuilder dimensions = Json.createArrayBuilder().add(dimension);
+		JsonObjectBuilder dimensionBuilder = Json.createObjectBuilder().add("dimension", dimension);
+		JsonArrayBuilder dimensions = Json.createArrayBuilder().add(dimensionBuilder);
 		builder.add("target", target).add("dimensions", dimensions);
 		return Json.createArrayBuilder().add(builder).build();
 	}
