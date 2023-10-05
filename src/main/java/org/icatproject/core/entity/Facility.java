@@ -199,6 +199,14 @@ public class Facility extends EntityBaseBean implements Serializable {
 		this.url = url;
 	}
 
+	public void setDataPublications(List<DataPublication> dataPublications) {
+		this.dataPublications = dataPublications;
+	}
+
+	public void setDataPublicationTypes(List<DataPublicationType> dataPublicationTypes) {
+		this.dataPublicationTypes = dataPublicationTypes;
+	}
+
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		SearchApi.encodeString(gen, "facility.name", name);
