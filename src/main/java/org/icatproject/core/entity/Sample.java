@@ -105,7 +105,12 @@ public class Sample extends EntityBaseBean implements Serializable {
 	public void getDoc(JsonGenerator gen) {
 		SearchApi.encodeString(gen, "sample.name", name);
 		SearchApi.encodeLong(gen, "sample.id", id);
-		SearchApi.encodeLong(gen, "sample.investigation.id", investigation.id);
+		if (investigation != null) {
+			// Investigation is not nullable, but it is possible to pass Samples without their Investigation
+			// relationship populated when creating Datasets, where this field is not needed anyway - so guard against
+			// null pointers
+			SearchApi.encodeLong(gen, "sample.investigation.id", investigation.id);
+		}
 		if (type != null) {
 			type.getDoc(gen);
 		}
