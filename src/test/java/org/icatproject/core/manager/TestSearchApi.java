@@ -1209,6 +1209,16 @@ public class TestSearchApi {
 				pojos, "b");
 		lsr = searchApi.getResults(query, 100, null);
 		checkResults(lsr, 3L);
+
+		// Sample filtering
+		query = buildQuery("Investigation", null, null, null, null, null, null, new Filter("sample.sample.type.name", "test"));
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
+
+		query = buildQuery("Investigation", null, null, null, null, null, null, new Filter("sample.sample.type.name", "fail"));
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr);
+
 	}
 
 	@Test
