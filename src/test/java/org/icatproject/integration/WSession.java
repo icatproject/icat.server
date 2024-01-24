@@ -381,6 +381,7 @@ public class WSession {
 		this.addFastRule("InstrumentScientist", "CRUD");
 		this.addFastRule("SampleType", "CRUD");
 		this.addFastRule("Sample", "CRUD");
+		this.addFastRule("InvestigationSample", "CRUD");
 		this.addFastRule("PublicStep", "CRUD");
 		this.addFastRule("Study", "CRUD");
 		this.addFastRule("StudyInvestigation", "CRUD");
