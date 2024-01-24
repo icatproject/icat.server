@@ -5,17 +5,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
 
 @Comment("A curated data publication")
 @SuppressWarnings("serial")
@@ -42,7 +42,7 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 	private List<DataPublicationDate> dates = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "publication")
-	private List<RelatedIdentifier> relatedIdentifiers = new ArrayList<>();
+	private List<RelatedItem> relatedItems = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataPublication")
 	private List<DataPublicationFunding> fundingReferences = new ArrayList<>();
@@ -91,8 +91,8 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 		return dates;
 	}
 
-	public List<RelatedIdentifier> getRelatedIdentifiers() {
-		return relatedIdentifiers;
+	public List<RelatedItem> getRelatedItems() {
+		return relatedItems;
 	}
 
 	public List<DataPublicationFunding> getFundingReferences() {
@@ -139,8 +139,8 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 		this.dates = dates;
 	}
 
-	public void setRelatedIdentifiers(List<RelatedIdentifier> relatedIdentifiers) {
-		this.relatedIdentifiers = relatedIdentifiers;
+	public void setRelatedItems(List<RelatedItem> relatedItems) {
+		this.relatedItems = relatedItems;
 	}
 
 	public void setFundingReferences(List<DataPublicationFunding> fundingReferences) {

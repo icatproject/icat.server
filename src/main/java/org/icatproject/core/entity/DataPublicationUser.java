@@ -4,15 +4,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Comment("Author, e.g. creator of or contributor to a data publication")
 @SuppressWarnings("serial")
@@ -46,6 +46,9 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 
 	@Comment("The family name of the user")
 	private String familyName;
+
+	@Comment("The email address for the user that should be exposed in the publication, if any")
+	private String email;
 
 	/* Needed for JPA */
 	public DataPublicationUser() {
@@ -83,6 +86,10 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 		return familyName;
 	}
 
+	public String getEmail() {
+		return email;
+	}
+
 	public void setPublication(DataPublication publication) {
 		this.publication = publication;
 	}
@@ -113,5 +120,9 @@ public class DataPublicationUser extends EntityBaseBean implements Serializable 
 
 	public void setFamilyName(String familyName) {
 		this.familyName = familyName;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }

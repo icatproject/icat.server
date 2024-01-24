@@ -6,12 +6,18 @@
 
 	<h1>ICAT Server Release Notes</h1>
 
-	<h2>6.0.0</h2>
+	<h2>devel - not released</h2>
 	<p>Schema changes and additions</p>
 	<ul>
 		<li>Make the relationship between Sample and Investigation many-to-many
 		(Issue 231).</li>
 	</ul>
+
+	<h2>6.0.0</h2>
+	<p>Upgrade from JavaEE to JakartaEE 10. Requires Java 11+ and an application server that supports JakartaEE 10 such as Payara 6.</p>
+
+	<h2>5.0.1</h2>
+	<p>Fix authorization of lists of ICAT entities and use Python3 for scripts</p>
 
 	<h2>5.0.0</h2>
 	<p>Schema changes and additions</p>
@@ -20,7 +26,7 @@
 		<li>Add entity classes Technique and DatasetTechnique (Issue 230).</li>
 		<li>Add columns for investigation and dataset size (Issue 211) and fileCount (Issue 238).</li>
 		<li>Add tables DataPublication, DataPublicationDate, DataPublicationUser,
-			RelatedIdentifier, and FundingReference (Issue 200).</li>
+			RelatedItem, and FundingReference (Issue 200).</li>
 		<li>Add tables DataPublicationFunding and InvestigationFunding (Issue 249).</li>
 		<li>Add table Affiliation (Issue 248).</li>
 		<li>Add tables DataPublicationType and DataCollectionInvestigation (Issue 261).</li>

@@ -19,17 +19,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.json.stream.JsonGenerator;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.json.stream.JsonGenerator;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
@@ -77,7 +77,7 @@ import org.icatproject.core.entity.PermissibleStringValue;
 import org.icatproject.core.entity.PublicStep;
 import org.icatproject.core.entity.Publication;
 import org.icatproject.core.entity.RelatedDatafile;
-import org.icatproject.core.entity.RelatedIdentifier;
+import org.icatproject.core.entity.RelatedItem;
 import org.icatproject.core.entity.Rule;
 import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.SampleParameter;
@@ -216,7 +216,7 @@ public class EntityInfoHandler {
 			Job.class, Keyword.class, Technique.class, DatasetTechnique.class, PermissibleStringValue.class, 
 			Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class, Study.class, 
 			DataPublication.class, DataPublicationDate.class, DataPublicationUser.class, DataPublicationType.class, 
-			Affiliation.class, RelatedIdentifier.class,	FundingReference.class, DataPublicationFunding.class, 
+			Affiliation.class, RelatedItem.class, FundingReference.class, DataPublicationFunding.class,
 			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, InvestigationSample.class,
 			StudyInvestigation.class, InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class,
 			InvestigationFacilityCycle.class);
