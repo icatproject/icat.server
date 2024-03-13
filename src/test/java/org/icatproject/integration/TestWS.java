@@ -1052,7 +1052,7 @@ public class TestWS {
 		session.addUserGroupMember("root", "root");
 		session.addUserGroupMember("root", "useroffice");
 
-		for (String t : EntityInfoHandler.getAlphabeticEntityNames()) {
+		for (String t : EntityInfoHandler.getEntityNamesList()) {
 			session.addRule("root", "SELECT x FROM " + t + " x", "CRUD");
 			session.addRule("notroot", "SELECT x FROM " + t + " x", "CRUD");
 		}

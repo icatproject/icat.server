@@ -50,7 +50,7 @@ public class FromClause {
 			String val = t.getValue();
 			sb.append(" " + val);
 			if (t.getType() == Token.Type.NAME) {
-				if (EntityInfoHandler.getAlphabeticEntityNames().contains(val)) {
+				if (EntityInfoHandler.getEntityNamesList().contains(val)) {
 					currentEntity = EntityInfoHandler.getClass(val);
 				} else {
 					int dot = val.indexOf('.');

@@ -9,7 +9,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -208,8 +207,12 @@ public class EntityInfoHandler {
 
 	}
 
-	private static List<String> alphabeticEntityNames;
-	private static List<Class<? extends EntityBaseBean>> entities = Arrays.asList(User.class, Grouping.class,
+	private static final Logger logger = LoggerFactory.getLogger(EntityInfoHandler.class);
+
+	private static final String[] SYSTEM_ATTRIBUTES = { "createId", "createTime", "modId", "modTime" };
+
+	// All entities in export order
+	private static final List<Class<? extends EntityBaseBean>> ENTITIES = List.of(User.class, Grouping.class,
 			UserGroup.class, Rule.class, PublicStep.class, Facility.class, DatafileFormat.class, Application.class,
 			Instrument.class, InvestigationType.class, DatasetType.class, ParameterType.class, SampleType.class,
 			Investigation.class, Sample.class, Dataset.class, Datafile.class, FacilityCycle.class, DataCollection.class,
@@ -222,28 +225,20 @@ public class EntityInfoHandler {
 			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class, 
 			InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class,
 			InvestigationFacilityCycle.class);
-	private static Set<String> entityNames = new HashSet<>();
 
-	private static String[] systemAttributes = { "createId", "createTime", "modId", "modTime" };
+	// All entity names in export order
+	private static final List<String> EXPORT_ENTITY_NAMES =
+		ENTITIES.stream().map((entity) -> entity.getSimpleName()).collect(Collectors.toUnmodifiableList());
 
-	private static List<String> exportEntityNames = new ArrayList<>();
+	// All entity names in alphabetical order
+	private static final List<String> ENTITY_NAMES =
+		ENTITIES.stream().map((entity) -> entity.getSimpleName()).sorted().collect(Collectors.toUnmodifiableList());
 
-	public static EntityInfoHandler instance = new EntityInfoHandler();
+	// Map of entity class -> PrivateEntityInfo
+	private static final Map<Class<? extends EntityBaseBean>, PrivateEntityInfo> PRIVATE_ENTITY_INFO_MAP =
+		ENTITIES.stream().collect(Collectors.toUnmodifiableMap((entity) -> entity, (entity) -> buildEi(entity)));
 
-	protected final static Logger logger = LoggerFactory.getLogger(EntityInfoHandler.class);
-
-	static {
-		for (Class<? extends EntityBaseBean> entity : entities) {
-			entityNames.add(entity.getSimpleName());
-			exportEntityNames.add(entity.getSimpleName());
-		}
-		alphabeticEntityNames = new ArrayList<>(entityNames);
-		Collections.sort(alphabeticEntityNames);
-	}
-
-	public static Set<String> getAlphabeticEntityNames() {
-		return entityNames;
-	}
+	private static EntityInfoHandler instance = new EntityInfoHandler();
 
 	public static Class<EntityBaseBean> getClass(String tableName) throws IcatException {
 		try {
@@ -263,19 +258,16 @@ public class EntityInfoHandler {
 	}
 
 	public static List<String> getEntityNamesList() {
-		return alphabeticEntityNames;
+		return ENTITY_NAMES;
 	};
 
 	public static List<String> getExportEntityNames() {
-		return exportEntityNames;
+		return EXPORT_ENTITY_NAMES;
 	};
 
 	public static EntityInfoHandler getInstance() {
 		return instance;
 	}
-
-	private static final Map<Class<? extends EntityBaseBean>, PrivateEntityInfo> PRIVATE_ENTITY_INFO_MAP =
-		entities.stream().collect(Collectors.toUnmodifiableMap((entity) -> entity, (entity) -> buildEi(entity)));
 
 	private EntityInfoHandler() {
 	}
@@ -526,7 +518,7 @@ public class EntityInfoHandler {
 			nAll = 1;
 		}
 
-		for (String s : systemAttributes) {
+		for (String s : SYSTEM_ATTRIBUTES) {
 			exportHeaderAll.append(sepAll);
 			sepAll = ",";
 			exportHeaderAll.append(s + ":" + nAll++);
