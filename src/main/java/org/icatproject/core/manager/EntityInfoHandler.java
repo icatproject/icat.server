@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
@@ -276,16 +277,17 @@ public class EntityInfoHandler {
 		return exportEntityNames;
 	};
 
-	public static synchronized EntityInfoHandler getInstance() {
+	public static EntityInfoHandler getInstance() {
 		return instance;
 	}
 
-	private final HashMap<Class<? extends EntityBaseBean>, PrivateEntityInfo> map = new HashMap<Class<? extends EntityBaseBean>, PrivateEntityInfo>();
+	private static final Map<Class<? extends EntityBaseBean>, PrivateEntityInfo> PRIVATE_ENTITY_INFO_MAP =
+		entities.stream().collect(Collectors.toUnmodifiableMap((entity) -> entity, (entity) -> buildEi(entity)));
 
 	private EntityInfoHandler() {
 	}
 
-	private PrivateEntityInfo buildEi(Class<? extends EntityBaseBean> objectClass) throws IcatException {
+	private static PrivateEntityInfo buildEi(Class<? extends EntityBaseBean> objectClass) {
 		logger.debug("Building PrivateEntityInfo for " + objectClass);
 		List<Field> fields = new ArrayList<Field>();
 		Class<?> cobj = objectClass;
@@ -311,19 +313,14 @@ public class EntityInfoHandler {
 				if (oneToMany != null) {
 					all = Arrays.asList(oneToMany.cascade()).contains(CascadeType.ALL);
 					if (!all && oneToMany.cascade().length != 0) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								"Cascade must be all or nothing " + objectClass.getSimpleName() + "."
-										+ field.getName());
+						throw new IllegalStateException("Cascade must be all or nothing " + objectClass.getSimpleName() + "." + field.getName());
 					}
 					mappedBy = oneToMany.mappedBy();
 					if (mappedBy == null) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								"MappedBy must be set for " + objectClass.getSimpleName() + "." + field.getName());
+						throw new IllegalStateException("MappedBy must be set for " + objectClass.getSimpleName() + "." + field.getName());
 					}
 				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							"Looks like a one to many relationship but not marked as such "
-									+ objectClass.getSimpleName() + "." + field.getName());
+					throw new IllegalStateException("Looks like a one to many relationship but not marked as such " + objectClass.getSimpleName() + "." + field.getName());
 				}
 				final ParameterizedType pt = (ParameterizedType) field.getGenericType();
 				final Type[] args = pt.getActualTypeArguments();
@@ -334,24 +331,19 @@ public class EntityInfoHandler {
 						if (EntityBaseBean.class.isAssignableFrom(argc)) {
 							@SuppressWarnings("unchecked")
 							final Class<? extends EntityBaseBean> argc2 = (Class<? extends EntityBaseBean>) argc;
-							try {
-								String name = "set" + Character.toUpperCase(mappedBy.charAt(0)) + mappedBy.substring(1);
-								Method[] ms = argc2.getMethods();
-								boolean inv = false;
-								for (Method m : ms) {
-									if (m.getName().equals(name)) {
-										rels.add(new Relationship(objectClass, field, argc2, true, all, m));
-										inv = true;
-										break;
-									}
+
+							String name = "set" + Character.toUpperCase(mappedBy.charAt(0)) + mappedBy.substring(1);
+							Method[] ms = argc2.getMethods();
+							boolean inv = false;
+							for (Method m : ms) {
+								if (m.getName().equals(name)) {
+									rels.add(new Relationship(objectClass, field, argc2, true, all, m));
+									inv = true;
+									break;
 								}
-								if (!inv) {
-									throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-											"Inverse relationship not found " + objectClass.getSimpleName() + "."
-													+ field.getName());
-								}
-							} catch (SecurityException e) {
-								throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
+							}
+							if (!inv) {
+								throw new IllegalStateException("Inverse relationship not found " + objectClass.getSimpleName() + "." + field.getName());
 							}
 						}
 					}
@@ -362,14 +354,10 @@ public class EntityInfoHandler {
 				if (manyToOne != null) {
 					all = Arrays.asList(manyToOne.cascade()).contains(CascadeType.ALL);
 					if (!all && manyToOne.cascade().length != 0) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								"Cascade must be all or nothing " + objectClass.getSimpleName() + "."
-										+ field.getName());
+						throw new IllegalStateException("Cascade must be all or nothing " + objectClass.getSimpleName() + "." + field.getName());
 					}
 				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							"Looks like a many to one relationship but not marked as such "
-									+ objectClass.getSimpleName() + "." + field.getName());
+					throw new IllegalStateException("Looks like a many to one relationship but not marked as such " + objectClass.getSimpleName() + "." + field.getName());
 				}
 				@SuppressWarnings("unchecked")
 				final Class<? extends EntityBaseBean> argc2 = (Class<? extends EntityBaseBean>) field.getType();
@@ -410,11 +398,11 @@ public class EntityInfoHandler {
 			Method method;
 			try {
 				method = objc.getMethod("get" + prop);
-			} catch (final NoSuchMethodException e) {
+			} catch (NoSuchMethodException e1) {
 				try {
 					method = objc.getMethod("is" + prop);
-				} catch (final Exception e1) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
+				} catch (NoSuchMethodException e2) {
+					throw new IllegalStateException("No method get" + prop + "() or is" + prop+ "() found in class " + objc.getName());
 				}
 			}
 			getters.put(field, method);
@@ -479,15 +467,13 @@ public class EntityInfoHandler {
 					setters.put(field, m);
 					if (settable) {
 						if (updaters.put(field, m) != null) {
-							throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-									"set" + prop + " is ambiguous");
+							throw new IllegalStateException("set" + prop + " is ambiguous");
 						}
 					}
 				}
 			}
 			if (settable && updaters.get(field) == null) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-						"set" + prop + " not found for " + objc.getSimpleName());
+				throw new IllegalStateException("set" + prop + " not found for " + objc.getSimpleName());
 			}
 
 			if (getters.get(field).getReturnType().equals(String.class)) {
@@ -506,20 +492,17 @@ public class EntityInfoHandler {
 				for (String colNam : Arrays.asList(constraint.columnNames())) {
 					Field col = dbCols.get(colNam);
 					if (col == null) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								"Column " + colNam + " mentioned in UniqueConstraint of " + objectClass.getSimpleName()
+						throw new IllegalStateException("Column " + colNam + " mentioned in UniqueConstraint of " + objectClass.getSimpleName()
 										+ " table is not present in entity");
 					}
 					if (!nnf.contains(col)) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								"Column " + colNam + " mentioned in UniqueConstraint of " + objectClass.getSimpleName()
+						throw new IllegalStateException("Column " + colNam + " mentioned in UniqueConstraint of " + objectClass.getSimpleName()
 										+ " table must be annotated as 'nullable = false'");
 					}
 					constraintFields.add(col);
 				}
 			} else if (ncons > 1) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Problem with "
-						+ objectClass.getSimpleName() + ": at most one constraint may be defined for an ICAT entity");
+				throw new IllegalStateException("Problem with " + objectClass.getSimpleName() + ": at most one constraint may be defined for an ICAT entity");
 			}
 		}
 
@@ -529,8 +512,8 @@ public class EntityInfoHandler {
 		Constructor<? extends EntityBaseBean> constructor = null;
 		try {
 			constructor = objectClass.getConstructor();
-		} catch (Exception e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		} catch (NoSuchMethodException e) {
+			throw new IllegalStateException("Zero-argument constructor not found for class " + objectClass.getName(), e);
 		}
 
 		StringBuilder exportNull = new StringBuilder();
@@ -624,57 +607,35 @@ public class EntityInfoHandler {
 				relInKey, hasLuceneDoc);
 	}
 
+	private static PrivateEntityInfo getPrivateEntityInfo(Class<? extends EntityBaseBean> objectClass) {
+		PrivateEntityInfo ei = PRIVATE_ENTITY_INFO_MAP.get(objectClass);
+
+		if (ei == null) {
+			// Should never happen because the map contains all non-abstract classes that extend EntityBaseBean
+			throw new IllegalStateException("Class not found in PRIVATE_ENTITY_INFO_MAP: " + objectClass.getName());
+		}
+
+		return ei;
+	};
+
 	/**
 	 * Set of fields that are "simple attributes". This excludes relationships,
 	 * id, createId, CreateTime, modId and modTime
 	 */
-	public Set<Field> getAttributes(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.attributes;
-		}
+	public Set<Field> getAttributes(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).attributes;
 	}
 
-	public String getClassComment(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.classComment;
-		}
+	public String getClassComment(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).classComment;
 	}
 
-	public List<Field> getConstraintFields(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.constraintFields;
-		}
+	public List<Field> getConstraintFields(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).constraintFields;
 	}
 
-	public Constructor<? extends EntityBaseBean> getConstructor(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.constructor;
-		}
+	public Constructor<? extends EntityBaseBean> getConstructor(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).constructor;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -726,113 +687,49 @@ public class EntityInfoHandler {
 
 	}
 
-	public String getExportHeader(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.exportHeader;
-		}
+	public String getExportHeader(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).exportHeader;
 	}
 
-	public String getExportHeaderAll(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.exportHeaderAll;
-		}
+	public String getExportHeaderAll(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).exportHeaderAll;
 	}
 
-	public String getExportNull(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.exportNull;
-		}
+	public String getExportNull(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).exportNull;
 	}
 
-	public Map<Field, String> getFieldComments(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.fieldComments;
-		}
+	public Map<Field, String> getFieldComments(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).fieldComments;
 	}
 
 	/**
 	 * Returns all user settable fields (not id, createId, modId, createTime nor
 	 * modTime
 	 */
-	public List<Field> getFields(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.fields;
-		}
+	public List<Field> getFields(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).fields;
 	}
 
-	public Map<String, Field> getFieldsByName(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.fieldsByName;
-		}
+	public Map<String, Field> getFieldsByName(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).fieldsByName;
 	}
 
 	/**
 	 * Map from field to getter for all fields
 	 */
-	public Map<Field, Method> getGetters(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.getters;
-		}
+	public Map<Field, Method> getGetters(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).getters;
 	}
 
 	/**
 	 * Map from field name to getter for all fields
 	 */
-	public Map<String, Method> getGettersFromName(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.gettersFromName;
-		}
+	public Map<String, Method> getGettersFromName(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).gettersFromName;
 	}
 
-	private List<Field> getNormalFields(Class<?> cobj) {
+	private static List<Field> getNormalFields(Class<?> cobj) {
 		List<Field> fields = new ArrayList<Field>(Arrays.asList(cobj.getDeclaredFields()));
 		final Iterator<Field> iter = fields.iterator();
 		while (iter.hasNext()) {
@@ -851,40 +748,16 @@ public class EntityInfoHandler {
 		return fields;
 	}
 
-	public List<Field> getNotNullableFields(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.notNullableFields;
-		}
+	public List<Field> getNotNullableFields(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).notNullableFields;
 	}
 
-	public Set<Relationship> getOnes(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.ones;
-		}
+	public Set<Relationship> getOnes(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).ones;
 	}
 
-	public Set<Relationship> getRelatedEntities(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.relatedEntities;
-		}
+	public Set<Relationship> getRelatedEntities(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).relatedEntities;
 	}
 
 	/**
@@ -892,92 +765,43 @@ public class EntityInfoHandler {
 	 * 
 	 * @throws IcatException
 	 */
-	public Map<String, Relationship> getRelationshipsByName(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.relationshipsByName;
-		}
+	public Map<String, Relationship> getRelationshipsByName(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).relationshipsByName;
 	}
 
-	public Set<Field> getRelInKey(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.relInKey;
-		}
+	public Set<Field> getRelInKey(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).relInKey;
 	}
 
 	/**
 	 * Map from field to setter for all fields including id but not for
 	 * createId, modId, createTime nor modTime
 	 */
-	public Map<Field, Method> getSetters(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.setters;
-		}
+	public Map<Field, Method> getSetters(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).setters;
 	}
 
 	/**
 	 * Returns the setters for those fields that are not one to many
 	 * relationships and not id, createId, modId, createTime nor modTime
 	 */
-	public Map<Field, Method> getSettersForUpdate(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.updaters;
-		}
+	public Map<Field, Method> getSettersForUpdate(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).updaters;
 	}
 
 	/**
 	 * Returns all string fields except for createId and modId
 	 */
-	public Map<Field, Integer> getStringFields(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.stringFields;
-		}
+	public Map<Field, Integer> getStringFields(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).stringFields;
 	}
 
 	/** Return true if getDoc() method exists else false */
-	public boolean hasLuceneDoc(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.hasLuceneDoc;
-		}
+	public boolean hasLuceneDoc(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).hasLuceneDoc;
 	}
 
-	private int setRelHeader(int n, Field field, StringBuilder exportHeader, StringBuilder exportNull, boolean con) {
+	private static int setRelHeader(int n, Field field, StringBuilder exportHeader, StringBuilder exportNull, boolean con) {
 
 		Set<String> conColumns = new HashSet<>();
 		Table tableAnnot = field.getType().getAnnotation(Table.class);
