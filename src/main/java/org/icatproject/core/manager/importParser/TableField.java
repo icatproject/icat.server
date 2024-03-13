@@ -46,7 +46,7 @@ public class TableField {
 	}
 
 	@SuppressWarnings("unchecked")
-	public TableField(Input input, Class<EntityBaseBean> tableClass,
+	public TableField(Input input, Class<? extends EntityBaseBean> tableClass,
 			Map<String, Field> fieldsByName, Map<Field, Method> setters) throws ParserException,
 			IcatException {
 		Token next = input.consume(Token.Type.NAME, Token.Type.QMARK);

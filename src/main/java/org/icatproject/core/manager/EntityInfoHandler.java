@@ -234,27 +234,24 @@ public class EntityInfoHandler {
 	private static final List<String> ENTITY_NAMES =
 		ENTITIES.stream().map((entity) -> entity.getSimpleName()).sorted().collect(Collectors.toUnmodifiableList());
 
+	// Map of entity name -> entity class
+	private static final Map<String, Class<? extends EntityBaseBean>> ENTITY_NAME_MAP =
+		ENTITIES.stream().collect(Collectors.toUnmodifiableMap((entity) -> entity.getSimpleName(), (entity) -> entity));
+
 	// Map of entity class -> PrivateEntityInfo
 	private static final Map<Class<? extends EntityBaseBean>, PrivateEntityInfo> PRIVATE_ENTITY_INFO_MAP =
 		ENTITIES.stream().collect(Collectors.toUnmodifiableMap((entity) -> entity, (entity) -> buildEi(entity)));
 
 	private static EntityInfoHandler instance = new EntityInfoHandler();
 
-	public static Class<EntityBaseBean> getClass(String tableName) throws IcatException {
-		try {
-			final Class<?> klass = Class.forName(Constants.ENTITY_PREFIX + tableName);
-			if (EntityBaseBean.class.isAssignableFrom(klass)) {
-				@SuppressWarnings("unchecked")
-				final Class<EntityBaseBean> eklass = (Class<EntityBaseBean>) klass;
-				return eklass;
-			} else {
-				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
-						tableName + " is not an EntityBaseBean");
-			}
-		} catch (final ClassNotFoundException e) {
-			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
-					tableName + " is not an EntityBaseBean");
+	public static Class<? extends EntityBaseBean> getClass(String tableName) throws IcatException {
+		Class<? extends EntityBaseBean> entityClass = ENTITY_NAME_MAP.get(tableName);
+
+		if (entityClass == null) {
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, tableName + " is not an ICAT entity");
 		}
+
+		return entityClass;
 	}
 
 	public static List<String> getEntityNamesList() {

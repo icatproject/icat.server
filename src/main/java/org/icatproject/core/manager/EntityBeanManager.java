@@ -727,7 +727,7 @@ public class EntityBeanManager {
 			throws IcatException, IOException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException {
 		logger.debug("Export " + (ids == null ? "complete" : "partial") + " " + beanName);
-		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		Class<? extends EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
 		output.write((linesep).getBytes());
 		if (allAttributes) {
 			output.write(eiHandler.getExportHeaderAll(klass).getBytes());
@@ -2057,7 +2057,7 @@ public class EntityBeanManager {
 
 		Entry<String, JsonValue> entry = entity.entrySet().iterator().next();
 		String beanName = entry.getKey();
-		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		Class<? extends EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
 		JsonValue value = entry.getValue();
 		if (value.getValueType() != ValueType.OBJECT) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
@@ -2212,7 +2212,7 @@ public class EntityBeanManager {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		logger.info("{} cloning {}/{}", userId, beanName, id);
 
-		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		Class<? extends EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
 		EntityBaseBean bean = manager.find(klass, id);
 		if (bean == null) {
 			throw new IcatException(IcatExceptionType.NO_SUCH_OBJECT_FOUND, beanName + ":" + id);

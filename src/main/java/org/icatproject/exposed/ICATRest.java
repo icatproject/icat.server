@@ -303,7 +303,7 @@ public class ICATRest {
 		}
 		Entry<String, JsonValue> entry = entity.entrySet().iterator().next();
 		String beanName = entry.getKey();
-		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		Class<? extends EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
 		JsonObject contents = (JsonObject) entry.getValue();
 
 		EntityBaseBean bean = null;
