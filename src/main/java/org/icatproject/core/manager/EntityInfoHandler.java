@@ -241,13 +241,6 @@ public class EntityInfoHandler {
 		Collections.sort(alphabeticEntityNames);
 	}
 
-	private final static Comparator<? super Field> fieldComparator = new Comparator<Field>() {
-		@Override
-		public int compare(Field o1, Field o2) {
-			return o1.getName().compareTo(o2.getName());
-		}
-	};
-
 	public static Set<String> getAlphabeticEntityNames() {
 		return entityNames;
 	}
@@ -296,7 +289,7 @@ public class EntityInfoHandler {
 			cobj = cobj.getSuperclass();
 		}
 
-		Collections.sort(fields, fieldComparator);
+		fields.sort(Comparator.comparing(Field::getName));
 		Map<String, Field> fieldsByName = new HashMap<>();
 
 		Set<Field> attributes = new HashSet<Field>();
@@ -824,7 +817,7 @@ public class EntityInfoHandler {
 			fields.addAll(getNormalFields(cobj));
 			cobj = cobj.getSuperclass();
 		}
-		Collections.sort(fields, fieldComparator);
+		fields.sort(Comparator.comparing(Field::getName));
 
 		String sep = "";
 		for (Field f : fields) {
