@@ -55,7 +55,7 @@ public class DocGenerator {
 				out.println("<p>" + classComment + "</p>");
 			}
 
-			Set<Field> fields = eiHandler.getGetters(eklass).keySet();
+			Set<Field> fields = new HashSet<Field>(eiHandler.getGetters(eklass).keySet());
 			Map<Field, String> fieldComments = eiHandler.getFieldComments(eklass);
 			Set<Field> notnullables = new HashSet<Field>(eiHandler.getNotNullableFields(eklass));
 			Map<Field, Integer> stringFields = eiHandler.getStringFields(eklass);
