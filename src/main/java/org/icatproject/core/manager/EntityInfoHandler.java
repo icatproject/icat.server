@@ -95,29 +95,29 @@ import org.slf4j.LoggerFactory;
 // that the instance is created statically as we know it will be needed.
 public class EntityInfoHandler {
 
-	private class PrivateEntityInfo {
+	private static class PrivateEntityInfo {
 
-		private Set<Field> attributes;
-		private String classComment;
-		private List<Field> constraintFields;
-		private Constructor<? extends EntityBaseBean> constructor;
-		public String exportHeader;
-		public String exportHeaderAll;
-		public String exportNull;
-		private Map<Field, String> fieldComments;
-		private Map<String, Field> fieldsByName;
-		private final Map<Field, Method> getters;
-		private final List<Field> notNullableFields;
-		private Set<Relationship> ones;
-		private final Set<Relationship> relatedEntities;
-		private Map<Field, Method> setters;
-		private final Map<Field, Integer> stringFields;
-		private final Map<Field, Method> updaters;
-		private List<Field> fields;
-		public Map<String, Method> gettersFromName;
-		public Map<String, Relationship> relationshipsByName;
-		public Set<Field> relInKey;
-		private boolean hasLuceneDoc;
+		final Set<Field> attributes;
+		final String classComment;
+		final List<Field> constraintFields;
+		final Constructor<? extends EntityBaseBean> constructor;
+		final String exportHeader;
+		final String exportHeaderAll;
+		final String exportNull;
+		final Map<Field, String> fieldComments;
+		final Map<String, Field> fieldsByName;
+		final Map<Field, Method> getters;
+		final List<Field> notNullableFields;
+		final Set<Relationship> ones;
+		final Set<Relationship> relatedEntities;
+		final Map<Field, Method> setters;
+		final Map<Field, Integer> stringFields;
+		final Map<Field, Method> updaters;
+		final List<Field> fields;
+		final Map<String, Method> gettersFromName;
+		final Map<String, Relationship> relationshipsByName;
+		final Set<Field> relInKey;
+		final boolean hasLuceneDoc;
 
 		public PrivateEntityInfo(Set<Relationship> rels, List<Field> notNullableFields, Map<Field, Method> getters,
 				Map<String, Method> gettersFromName, Map<Field, Integer> stringFields, Map<Field, Method> setters,
@@ -126,31 +126,33 @@ public class EntityInfoHandler {
 				Constructor<? extends EntityBaseBean> constructor, Map<String, Field> fieldByName, String exportHeader,
 				String exportNull, List<Field> fields, String exportHeaderAll,
 				Map<String, Relationship> relationshipsByName, Set<Field> relInKey, boolean hasLuceneDoc) {
-			this.relatedEntities = rels;
-			this.notNullableFields = notNullableFields;
-			this.getters = getters;
-			this.gettersFromName = gettersFromName;
-			this.stringFields = stringFields;
-			this.setters = setters;
-			this.updaters = updaters;
-			this.constraintFields = constraintFields;
+
+			// Use copyOf to create unmodifiable collections
+			this.relatedEntities = Set.copyOf(rels);
+			this.notNullableFields = List.copyOf(notNullableFields);
+			this.getters = Map.copyOf(getters);
+			this.gettersFromName = Map.copyOf(gettersFromName);
+			this.stringFields = Map.copyOf(stringFields);
+			this.setters = Map.copyOf(setters);
+			this.updaters = Map.copyOf(updaters);
+			this.constraintFields = List.copyOf(constraintFields);
 			this.classComment = classComment;
-			this.fieldComments = fieldComments;
-			this.ones = ones;
-			this.attributes = attributes;
+			this.fieldComments = Map.copyOf(fieldComments);
+			this.ones = Set.copyOf(ones);
+			this.attributes = Set.copyOf(attributes);
 			this.constructor = constructor;
-			this.fieldsByName = fieldByName;
+			this.fieldsByName = Map.copyOf(fieldByName);
 			this.exportHeader = exportHeader;
 			this.exportNull = exportNull;
-			this.fields = fields;
+			this.fields = List.copyOf(fields);
 			this.exportHeaderAll = exportHeaderAll;
-			this.relationshipsByName = relationshipsByName;
-			this.relInKey = relInKey;
+			this.relationshipsByName = Map.copyOf(relationshipsByName);
+			this.relInKey = Set.copyOf(relInKey);
 			this.hasLuceneDoc = hasLuceneDoc;
 		}
 	}
 
-	public class Relationship {
+	public static class Relationship {
 
 		private final boolean collection;
 
@@ -158,9 +160,9 @@ public class EntityInfoHandler {
 
 		private final Field field;
 
-		private Method inverseSetter;
+		private final Method inverseSetter;
 
-		private Class<? extends EntityBaseBean> originBean;
+		private final Class<? extends EntityBaseBean> originBean;
 
 		public Relationship(Class<? extends EntityBaseBean> originBean, Field field,
 				Class<? extends EntityBaseBean> destinationBean, boolean collection, boolean cascaded,
