@@ -89,9 +89,7 @@ import org.icatproject.core.entity.UserGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Note that this does not use a Singleton Bean as there is no need for the
-// extra complexity and
-// that the instance is created statically as we know it will be needed.
+// This class only has static methods and cannot be instantiated
 public class EntityInfoHandler {
 
 	private static class PrivateEntityInfo {
@@ -241,8 +239,6 @@ public class EntityInfoHandler {
 	private static final Map<Class<? extends EntityBaseBean>, PrivateEntityInfo> PRIVATE_ENTITY_INFO_MAP =
 		ENTITIES.stream().collect(Collectors.toUnmodifiableMap((entity) -> entity, (entity) -> buildEi(entity)));
 
-	private static EntityInfoHandler instance = new EntityInfoHandler();
-
 	public static Class<? extends EntityBaseBean> getClass(String tableName) throws IcatException {
 		Class<? extends EntityBaseBean> entityClass = ENTITY_NAME_MAP.get(tableName);
 
@@ -260,10 +256,6 @@ public class EntityInfoHandler {
 	public static List<String> getExportEntityNames() {
 		return EXPORT_ENTITY_NAMES;
 	};
-
-	public static EntityInfoHandler getInstance() {
-		return instance;
-	}
 
 	private EntityInfoHandler() {
 	}
@@ -603,24 +595,24 @@ public class EntityInfoHandler {
 	 * Set of fields that are "simple attributes". This excludes relationships,
 	 * id, createId, CreateTime, modId and modTime
 	 */
-	public Set<Field> getAttributes(Class<? extends EntityBaseBean> objectClass) {
+	public static Set<Field> getAttributes(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).attributes;
 	}
 
-	public String getClassComment(Class<? extends EntityBaseBean> objectClass) {
+	public static String getClassComment(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).classComment;
 	}
 
-	public List<Field> getConstraintFields(Class<? extends EntityBaseBean> objectClass) {
+	public static List<Field> getConstraintFields(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).constraintFields;
 	}
 
-	public Constructor<? extends EntityBaseBean> getConstructor(Class<? extends EntityBaseBean> objectClass) {
+	public static Constructor<? extends EntityBaseBean> getConstructor(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).constructor;
 	}
 
 	@SuppressWarnings("unchecked")
-	public EntityInfo getEntityInfo(String beanName) throws IcatException {
+	public static EntityInfo getEntityInfo(String beanName) throws IcatException {
 		Class<? extends EntityBaseBean> beanClass = getClass(beanName);
 
 		EntityInfo entityInfo = new EntityInfo();
@@ -664,19 +656,19 @@ public class EntityInfoHandler {
 
 	}
 
-	public String getExportHeader(Class<? extends EntityBaseBean> objectClass) {
+	public static String getExportHeader(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).exportHeader;
 	}
 
-	public String getExportHeaderAll(Class<? extends EntityBaseBean> objectClass) {
+	public static String getExportHeaderAll(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).exportHeaderAll;
 	}
 
-	public String getExportNull(Class<? extends EntityBaseBean> objectClass) {
+	public static String getExportNull(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).exportNull;
 	}
 
-	public Map<Field, String> getFieldComments(Class<? extends EntityBaseBean> objectClass) {
+	public static Map<Field, String> getFieldComments(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).fieldComments;
 	}
 
@@ -684,25 +676,25 @@ public class EntityInfoHandler {
 	 * Returns all user settable fields (not id, createId, modId, createTime nor
 	 * modTime
 	 */
-	public List<Field> getFields(Class<? extends EntityBaseBean> objectClass) {
+	public static List<Field> getFields(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).fields;
 	}
 
-	public Map<String, Field> getFieldsByName(Class<? extends EntityBaseBean> objectClass) {
+	public static Map<String, Field> getFieldsByName(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).fieldsByName;
 	}
 
 	/**
 	 * Map from field to getter for all fields
 	 */
-	public Map<Field, Method> getGetters(Class<? extends EntityBaseBean> objectClass) {
+	public static Map<Field, Method> getGetters(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).getters;
 	}
 
 	/**
 	 * Map from field name to getter for all fields
 	 */
-	public Map<String, Method> getGettersFromName(Class<? extends EntityBaseBean> objectClass) {
+	public static Map<String, Method> getGettersFromName(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).gettersFromName;
 	}
 
@@ -725,15 +717,15 @@ public class EntityInfoHandler {
 		return fields;
 	}
 
-	public List<Field> getNotNullableFields(Class<? extends EntityBaseBean> objectClass) {
+	public static List<Field> getNotNullableFields(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).notNullableFields;
 	}
 
-	public Set<Relationship> getOnes(Class<? extends EntityBaseBean> objectClass) {
+	public static Set<Relationship> getOnes(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).ones;
 	}
 
-	public Set<Relationship> getRelatedEntities(Class<? extends EntityBaseBean> objectClass) {
+	public static Set<Relationship> getRelatedEntities(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).relatedEntities;
 	}
 
@@ -742,11 +734,11 @@ public class EntityInfoHandler {
 	 * 
 	 * @throws IcatException
 	 */
-	public Map<String, Relationship> getRelationshipsByName(Class<? extends EntityBaseBean> objectClass) {
+	public static Map<String, Relationship> getRelationshipsByName(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).relationshipsByName;
 	}
 
-	public Set<Field> getRelInKey(Class<? extends EntityBaseBean> objectClass) {
+	public static Set<Field> getRelInKey(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).relInKey;
 	}
 
@@ -754,7 +746,7 @@ public class EntityInfoHandler {
 	 * Map from field to setter for all fields including id but not for
 	 * createId, modId, createTime nor modTime
 	 */
-	public Map<Field, Method> getSetters(Class<? extends EntityBaseBean> objectClass) {
+	public static Map<Field, Method> getSetters(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).setters;
 	}
 
@@ -762,19 +754,19 @@ public class EntityInfoHandler {
 	 * Returns the setters for those fields that are not one to many
 	 * relationships and not id, createId, modId, createTime nor modTime
 	 */
-	public Map<Field, Method> getSettersForUpdate(Class<? extends EntityBaseBean> objectClass) {
+	public static Map<Field, Method> getSettersForUpdate(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).updaters;
 	}
 
 	/**
 	 * Returns all string fields except for createId and modId
 	 */
-	public Map<Field, Integer> getStringFields(Class<? extends EntityBaseBean> objectClass) {
+	public static Map<Field, Integer> getStringFields(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).stringFields;
 	}
 
 	/** Return true if getDoc() method exists else false */
-	public boolean hasLuceneDoc(Class<? extends EntityBaseBean> objectClass) {
+	public static boolean hasLuceneDoc(Class<? extends EntityBaseBean> objectClass) {
 		return getPrivateEntityInfo(objectClass).hasLuceneDoc;
 	}
 

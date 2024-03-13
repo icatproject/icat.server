@@ -32,8 +32,6 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	public static final String GET_ALL_QUERY = "AllowedStep.GetAllQuery";
 	private static final Logger logger = LoggerFactory.getLogger(PublicStep.class);
 
-	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	public String getOrigin() {
 		return origin;
 	}
@@ -64,7 +62,7 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 
 	private void fixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
 		Class<? extends EntityBaseBean> bean = EntityInfoHandler.getClass(origin);
-		Set<Relationship> rs = eiHandler.getRelatedEntities(bean);
+		Set<Relationship> rs = EntityInfoHandler.getRelatedEntities(bean);
 		boolean found = false;
 		for (Relationship r : rs) {
 			if (r.getField().getName().equals(field)) {

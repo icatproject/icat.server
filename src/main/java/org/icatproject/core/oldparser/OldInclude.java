@@ -22,8 +22,6 @@ public class OldInclude {
 		FIRST, LOWER
 	};
 
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	private Set<Class<? extends EntityBaseBean>> includes = new HashSet<Class<? extends EntityBaseBean>>();
 
 	static Logger logger = LoggerFactory.getLogger(OldInclude.class);
@@ -72,7 +70,7 @@ public class OldInclude {
 					throws IcatException {
 		boolean first = position == Position.FIRST;
 		String suffix = first ? "$" : "_$";
-		Set<Relationship> relationships = eiHandler.getRelatedEntities(entityClass);
+		Set<Relationship> relationships = EntityInfoHandler.getRelatedEntities(entityClass);
 		for (Relationship r : relationships) {
 			if (!r.isCollection() || followCascades == FollowCascades.TRUE) {
 				Class<? extends EntityBaseBean> bean = r.getDestinationBean();

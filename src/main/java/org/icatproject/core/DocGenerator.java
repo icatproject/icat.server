@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 
 public class DocGenerator {
 
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	private static Logger logger = LoggerFactory.getLogger(DocGenerator.class);
 
 	public static void main(String[] args) throws Exception {
@@ -46,17 +44,17 @@ public class DocGenerator {
 		for (String cname : cnames) {
 			out.print("<hr/><h2 id=\"" + cname + "\">" + cname + "</h2>");
 			Class<? extends EntityBaseBean> eklass = EntityInfoHandler.getClass(cname);
-			String classComment = eiHandler.getClassComment(eklass);
+			String classComment = EntityInfoHandler.getClassComment(eklass);
 			if (classComment == null) {
 				System.out.println(cname + " has no comment");
 			} else {
 				out.println("<p>" + classComment + "</p>");
 			}
 
-			Set<Field> fields = new HashSet<Field>(eiHandler.getGetters(eklass).keySet());
-			Map<Field, String> fieldComments = eiHandler.getFieldComments(eklass);
-			Set<Field> notnullables = new HashSet<Field>(eiHandler.getNotNullableFields(eklass));
-			Map<Field, Integer> stringFields = eiHandler.getStringFields(eklass);
+			Set<Field> fields = new HashSet<Field>(EntityInfoHandler.getGetters(eklass).keySet());
+			Map<Field, String> fieldComments = EntityInfoHandler.getFieldComments(eklass);
+			Set<Field> notnullables = new HashSet<Field>(EntityInfoHandler.getNotNullableFields(eklass));
+			Map<Field, Integer> stringFields = EntityInfoHandler.getStringFields(eklass);
 
 			Iterator<Field> iter = fields.iterator();
 			while (iter.hasNext()) {
@@ -67,7 +65,7 @@ public class DocGenerator {
 				}
 			}
 
-			List<Field> constraint = eiHandler.getConstraintFields(eklass);
+			List<Field> constraint = EntityInfoHandler.getConstraintFields(eklass);
 			if (!constraint.isEmpty()) {
 				out.print("<p><b>Uniqueness constraint</b> ");
 				first = true;
@@ -84,7 +82,7 @@ public class DocGenerator {
 
 			out.println(
 					"<h3>Relationships</h3><table><tr><th>Card</th><th>Class</th><th>Field</th><th>Cascaded</th><th>Description</th></tr>");
-			for (Relationship r : eiHandler.getRelatedEntities(eklass)) {
+			for (Relationship r : EntityInfoHandler.getRelatedEntities(eklass)) {
 				Field f = r.getField();
 				boolean notnullable = notnullables.contains(f);
 				boolean many = r.isCollection();

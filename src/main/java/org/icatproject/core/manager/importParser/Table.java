@@ -18,13 +18,12 @@ public class Table {
 	private String name;
 	private List<TableField> tableFields = new ArrayList<>();
 	private Class<? extends EntityBaseBean> tableClass;
-	private final static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
 	public Table(Input input) throws ParserException, IcatException {
 		name = input.consume(Token.Type.NAME).getValue();
 		tableClass = EntityInfoHandler.getClass(name);
-		Map<String, Field> fieldsByName = eiHandler.getFieldsByName(tableClass);
-		Map<Field, Method> setters = eiHandler.getSetters(tableClass);
+		Map<String, Field> fieldsByName = EntityInfoHandler.getFieldsByName(tableClass);
+		Map<Field, Method> setters = EntityInfoHandler.getSetters(tableClass);
 
 		input.consume(Token.Type.OPENPAREN);
 		while (true) {
