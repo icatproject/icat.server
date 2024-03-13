@@ -57,7 +57,6 @@ import jakarta.transaction.UserTransaction;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 
-import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.Datafile;
@@ -1528,11 +1527,9 @@ public class EntityBeanManager {
 
 	public void lucenePopulate(String entityName, long minid, EntityManager manager) throws IcatException {
 		if (luceneActive) {
-			try {
-				Class.forName(Constants.ENTITY_PREFIX + entityName);
-			} catch (ClassNotFoundException e) {
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
-			}
+			// Throws IcatException if entityName is not an ICAT entity
+			EntityInfoHandler.getClass(entityName);
+
 			lucene.populate(entityName, minid);
 		}
 	}

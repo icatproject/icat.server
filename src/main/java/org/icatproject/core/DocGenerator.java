@@ -45,9 +45,7 @@ public class DocGenerator {
 
 		for (String cname : cnames) {
 			out.print("<hr/><h2 id=\"" + cname + "\">" + cname + "</h2>");
-			Class<?> klass = Class.forName("org.icatproject.core.entity." + cname);
-			@SuppressWarnings("unchecked")
-			Class<? extends EntityBaseBean> eklass = (Class<? extends EntityBaseBean>) klass;
+			Class<? extends EntityBaseBean> eklass = EntityInfoHandler.getClass(cname);
 			String classComment = eiHandler.getClassComment(eklass);
 			if (classComment == null) {
 				System.out.println(cname + " has no comment");

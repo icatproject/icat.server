@@ -46,7 +46,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
@@ -118,7 +117,7 @@ public class LuceneManager {
 			try {
 				logger.debug("About to index {} {} records", ids.size(), entityName);
 				this.entityName = entityName;
-				klass = (Class<? extends EntityBaseBean>) Class.forName(Constants.ENTITY_PREFIX + entityName);
+				klass = EntityInfoHandler.getClass(entityName);
 				this.ids = ids;
 				manager = entityManagerFactory.createEntityManager();
 				this.start = start;

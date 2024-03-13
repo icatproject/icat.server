@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.DataCollection;
 import org.icatproject.core.entity.DataCollectionDatafile;
@@ -50,8 +49,7 @@ public class TestEntityInfo {
 				"InvestigationParameter", "DatasetParameter", "DatafileParameter", "InvestigationUser", "Sample"));
 		for (String beanName : EntityInfoHandler.getEntityNamesList()) {
 			@SuppressWarnings("unchecked")
-			Class<? extends EntityBaseBean> bean = (Class<? extends EntityBaseBean>) Class
-					.forName(Constants.ENTITY_PREFIX + beanName);
+			Class<? extends EntityBaseBean> bean = EntityInfoHandler.getClass(beanName);
 			if (docdbeans.contains(beanName)) {
 				assertTrue(eiHandler.hasLuceneDoc(bean));
 			} else {

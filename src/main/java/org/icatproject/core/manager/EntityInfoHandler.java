@@ -31,7 +31,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.xml.bind.annotation.XmlTransient;
 
-import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.Affiliation;
 import org.icatproject.core.entity.Application;
@@ -622,12 +621,8 @@ public class EntityInfoHandler {
 
 	@SuppressWarnings("unchecked")
 	public EntityInfo getEntityInfo(String beanName) throws IcatException {
-		Class<? extends EntityBaseBean> beanClass;
-		try {
-			beanClass = (Class<? extends EntityBaseBean>) Class.forName(Constants.ENTITY_PREFIX + beanName);
-		} catch (ClassNotFoundException e) {
-			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, beanName + " is not an ICAT entity");
-		}
+		Class<? extends EntityBaseBean> beanClass = getClass(beanName);
+
 		EntityInfo entityInfo = new EntityInfo();
 		entityInfo.setClassComment(getClassComment(beanClass));
 		List<Field> constraint = getConstraintFields(beanClass);
