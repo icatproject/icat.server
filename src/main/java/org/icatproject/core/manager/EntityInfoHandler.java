@@ -611,7 +611,6 @@ public class EntityInfoHandler {
 		return getPrivateEntityInfo(objectClass).constructor;
 	}
 
-	@SuppressWarnings("unchecked")
 	public static EntityInfo getEntityInfo(String beanName) throws IcatException {
 		Class<? extends EntityBaseBean> beanClass = getClass(beanName);
 
