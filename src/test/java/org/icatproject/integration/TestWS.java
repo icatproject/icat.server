@@ -239,7 +239,7 @@ public class TestWS {
 			fail("Should have thrown exception");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-			assertEquals("Applicatio is not an EntityBaseBean", e.getMessage());
+			assertEquals("Applicatio is not an ICAT entity", e.getMessage());
 		}
 
 		ps = new PublicStep();
@@ -1138,7 +1138,7 @@ public class TestWS {
 			fail("No throw");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-			assertEquals("Investigator is not an EntityBaseBean", e.getMessage());
+			assertEquals("Investigator is not an ICAT entity", e.getMessage());
 		}
 		try {
 			session.get("Dataset INCLUDE Investigation, Facility, Instrument", dsId);
@@ -1508,7 +1508,7 @@ public class TestWS {
 			fail("No throw");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-			assertEquals("Investigator is not an EntityBaseBean", e.getMessage());
+			assertEquals("Investigator is not an ICAT entity", e.getMessage());
 		}
 		try {
 			session.get("Dataset INCLUDE Investigation, Facility, Instrument", dsId);
