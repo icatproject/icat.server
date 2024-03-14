@@ -822,6 +822,7 @@ public class EntityBeanManager {
 			int needed = maxCount - acceptedResults.size();
 			if (newResults.size() > needed) {
 				acceptedResults.addAll(newResults.subList(0, needed));
+				return newResults.get(needed - 1);
 			} else {
 				acceptedResults.addAll(newResults);
 			}
