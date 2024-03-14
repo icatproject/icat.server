@@ -269,14 +269,6 @@ public class TestRS {
 
 		id = search(session, "SELECT f.id FROM Facility f WHERE f.name = 'Test port facility'", 1).getJsonNumber(0)
 				.longValueExact();
-		keys = new HashMap<>();
-		keys.put("name", "NewFac");
-		idClone = session.cloneEntity("Facility", id, keys);
-		assertEquals(8, search(session, "SELECT COUNT(x) FROM Investigation x", 1).getInt(0));
-		assertEquals(16, search(session, "SELECT COUNT(x) FROM DatafileParameter x", 1).getInt(0));
-		assertEquals(2, search(session, "SELECT COUNT(x) FROM Facility x", 1).getInt(0));
-		assertEquals(32, search(session, "SELECT COUNT(x) FROM Datafile x", 1).getInt(0));
-
 		try {
 			keys = new HashMap<>();
 			idClone = session.cloneEntity("Facility", id, keys);
@@ -387,10 +379,11 @@ public class TestRS {
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
 
-		JsonArray array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
-				dft.parse("2011-12-31T23:59:59+0000"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
-				"Professor", 20, 1);
-		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
+		// This does not work any more as there is no direct relation between investigation and samples now
+		// JsonArray array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00+0000"),
+		//		dft.parse("2011-12-31T23:59:59+0000"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
+		//		"Professor", 20, 1);
+		// checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
 		// change user
 		searchInvestigations(session, "db/fred", "title AND one", null, null, parameters, null, null, 20, 0);
@@ -399,7 +392,7 @@ public class TestRS {
 		searchInvestigations(session, "db/tr", "title AND two", null, null, parameters, null, null, 20, 0);
 
 		// Only working to a minute
-		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:01+0000"),
+		JsonArray array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:01+0000"),
 				dft.parse("2011-12-31T23:59:59+0000"), parameters, null, null, 20, 1);
 		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
@@ -500,7 +493,7 @@ public class TestRS {
 	@Test
 	public void testVersion() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		assertTrue(icat.getVersion().startsWith("6."));
+		assertTrue(icat.getVersion().startsWith("7."));
 	}
 
 	@Test

@@ -67,6 +67,7 @@ import org.icatproject.core.entity.InvestigationFunding;
 import org.icatproject.core.entity.InvestigationGroup;
 import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.InvestigationParameter;
+import org.icatproject.core.entity.InvestigationSample;
 import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Job;
@@ -216,8 +217,8 @@ public class EntityInfoHandler {
 			Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class, Study.class, 
 			DataPublication.class, DataPublicationDate.class, DataPublicationUser.class, DataPublicationType.class, 
 			Affiliation.class, RelatedItem.class, FundingReference.class, DataPublicationFunding.class,
-			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class, 
-			InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class,
+			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, InvestigationSample.class,
+			StudyInvestigation.class, InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class,
 			InvestigationFacilityCycle.class);
 	private static Set<String> entityNames = new HashSet<>();
 

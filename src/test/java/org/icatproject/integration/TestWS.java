@@ -71,7 +71,7 @@ import org.junit.After;
  */
 public class TestWS {
 
-	private static final String version = "6.0.";
+	private static final String version = "7.0.";
 	private static Random random;
 	private static WSession session;
 
@@ -199,23 +199,6 @@ public class TestWS {
 		return dsp;
 	}
 
-	private Sample addSample(Investigation inv, String sampleName) {
-		Sample sample = new Sample();
-		sample.setName(sampleName);
-		inv.getSamples().add(sample);
-		return sample;
-	}
-
-	private SampleParameter addSampleParameter(Sample sample, Object o, ParameterType p) {
-		SampleParameter sp = new SampleParameter();
-		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
-			sp.setDateTimeValue((XMLGregorianCalendar) o);
-		}
-		sp.setType(p);
-		sample.getParameters().add(sp);
-		return sp;
-	}
-
 	@Test
 	public void publicTable() throws Exception {
 		session.addRule(null, "DatafileFormat", "R");
@@ -257,7 +240,7 @@ public class TestWS {
 	@Test
 	public void entities() throws Exception {
 		List<String> entities = session.getEntityNames();
-		assertEquals(52, entities.size());
+		assertEquals(53, entities.size());
 		assertTrue(entities.contains("Application"));
 	}
 
@@ -479,7 +462,7 @@ public class TestWS {
 		// Samples - via investigation
 
 		session.addRule(null,
-				"SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
+				"SELECT s FROM Sample s JOIN s.investigationSamples invs JOIN invs.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
 				"CRU");
 
 		// Samples - via dataset
@@ -493,7 +476,7 @@ public class TestWS {
 
 		// Clean up
 		session.delRule(null,
-				"SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
+				"SELECT s FROM Sample s JOIN s.investigationSamples invs JOIN invs.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user",
 				"CRU");
 		session.delRule(null,
 				"SELECT s FROM Sample AS s JOIN s.datasets AS ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst JOIN inst.instrumentScientists AS instSci JOIN instSci.user user WHERE user.name = :user",
@@ -822,37 +805,7 @@ public class TestWS {
 		Dataset wobble = addDataset(inv, "Wobble", dst);
 		addDatafile(wobble, "wob1", dft1);
 
-		Sample sample = addSample(inv, "S1");
-		addSample(inv, "S2");
-
-		addSampleParameter(sample, date, p);
-
 		session.registerInvestigation(inv);
-
-		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter", inv.getId());
-		assertEquals(0, inv.getSamples().size());
-
-		session.addRule("notroot", "Sample", "R");
-
-		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter", inv.getId());
-		assertEquals(2, inv.getSamples().size());
-		for (Sample s : inv.getSamples()) {
-			assertEquals(0, s.getParameters().size());
-		}
-
-		session.addRule("notroot", "SampleParameter", "R");
-
-		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter", inv.getId());
-		assertEquals(2, inv.getSamples().size());
-		for (Sample s : inv.getSamples()) {
-			if (s.getName().equals("S1")) {
-				assertEquals(1, s.getParameters().size());
-			} else if (s.getName().equals("S2")) {
-				assertEquals(0, s.getParameters().size());
-			} else {
-				fail("Neither S1 nor S2");
-			}
-		}
 	}
 
 	@Test
@@ -1825,11 +1778,6 @@ public class TestWS {
 		// Nested select
 		results = session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafiles df) = 2");
 		assertEquals(2, results.size());
-
-		results = session.search(
-				"SELECT i.id FROM Investigation i JOIN i.samples s JOIN s.type st " + "WHERE i.type.name = 'Data' "
-						+ "AND st.id = (SELECT st2.id FROM SampleType st2 JOIN st2.samples s2 JOIN s2.investigation i2 WHERE i2.id=i.id) "
-						+ "ORDER BY st.name");
 
 		assertEquals(3, session.search("SELECT i FROM Investigation i").size());
 		assertEquals(3, session.search("SELECT i.facility FROM Investigation i").size());
