@@ -14,9 +14,9 @@ jobs:
         java_version: [11, 17]
 
     steps:
-      # Setup Java & Python
+      # Setup Java
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4.2.1
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.java_version }}
@@ -24,9 +24,17 @@ jobs:
       - name: Run apt-get update
         run: sudo apt-get update
 
+      - name: Cache local Maven repository
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       # ICAT Ansible clone and install dependencies
       - name: Checkout icat-ansible
-        uses: actions/checkout@v2
+        uses: actions/checkout@cd7d8d697e10461458bc61a30d094dc601a8b017 # v4.0.0
         with:
           repository: icatproject-contrib/icat-ansible
           path: icat-ansible
@@ -62,7 +70,7 @@ jobs:
           ansible-playbook icat-ansible/icat_server_dev_hosts.yml -i icat-ansible/hosts --vault-password-file icat-ansible/vault_pass.txt -vv
 
       - name: Checkout icat-server
-        uses: actions/checkout@v2
+        uses: actions/checkout@cd7d8d697e10461458bc61a30d094dc601a8b017 # v4.0.0
 
       # Payara must be sourced otherwise the Maven build command fails
       - name: Run Build
