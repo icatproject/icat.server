@@ -15,8 +15,6 @@ import org.icatproject.core.manager.EntityInfoHandler.Relationship;
  */
 public class DagHandler {
 
-	private static EntityInfoHandler pkHandler = EntityInfoHandler.getInstance();
-
 	/**
 	 * A nested structure with a bean a relationship and the set of steps. It is a set because there
 	 * may be a need to follow more than one chain of entities.
@@ -114,7 +112,7 @@ public class DagHandler {
 			Class<? extends EntityBaseBean> from, Set<Class<? extends EntityBaseBean>> allBeans,
 			Set<Class<? extends EntityBaseBean>> used) throws IcatException {
 		Set<Step> steps = new HashSet<Step>();
-		Set<Relationship> navto = pkHandler.getRelatedEntities(from);
+		Set<Relationship> navto = EntityInfoHandler.getRelatedEntities(from);
 		for (Relationship relationship : navto) {
 			Class<? extends EntityBaseBean> bean = relationship.getDestinationBean();
 			if (allBeans.contains(bean) && !bean.equals(predecessor)) {
@@ -167,7 +165,7 @@ public class DagHandler {
 			Class<? extends EntityBaseBean> from, Set<Class<? extends EntityBaseBean>> allBeans,
 			Set<Class<? extends EntityBaseBean>> used, boolean followCascades) throws IcatException {
 		Set<Step> steps = new HashSet<Step>();
-		Set<Relationship> navto = pkHandler.getRelatedEntities(from);
+		Set<Relationship> navto = EntityInfoHandler.getRelatedEntities(from);
 		for (Relationship relationship : navto) {
 			if (!relationship.isCollection() || followCascades) {
 				Class<? extends EntityBaseBean> bean = relationship.getDestinationBean();

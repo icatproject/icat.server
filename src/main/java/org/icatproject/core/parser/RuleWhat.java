@@ -25,8 +25,6 @@ public class RuleWhat {
 
 	private Pattern idPattern = Pattern.compile("^[a-zA-Z_$]([\\w_$])*$");
 
-	EntityInfoHandler ei = EntityInfoHandler.getInstance();
-
 	public RuleWhat(String query) throws ParserException, IcatException {
 		List<Token> tokens;
 		try {
@@ -56,7 +54,7 @@ public class RuleWhat {
 
 		if (offset > 0) {
 			Class<? extends EntityBaseBean> bean = fromClause.getAuthzMap().get(idVar + ".id");
-			if (ei.getFieldsByName(bean).get(attribute) == null) {
+			if (EntityInfoHandler.getFieldsByName(bean).get(attribute) == null) {
 				throw new ParserException(bean + " does not have attribute " + attribute);
 			}
 		}

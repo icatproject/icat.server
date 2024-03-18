@@ -34,12 +34,6 @@ public class NotificationMessage {
 		}
 	}
 
-	private final static EntityInfoHandler entityInfoHandler = EntityInfoHandler.getInstance();
-
-	public static EntityInfoHandler getEntityinfohandler() {
-		return entityInfoHandler;
-	}
-
 	private Message message;
 
 	public NotificationMessage(Operation operation, EntityBaseBean bean, EntityManager manager,

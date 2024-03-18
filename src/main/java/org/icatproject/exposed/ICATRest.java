@@ -111,8 +111,6 @@ public class ICATRest {
 		}
 	}
 
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	private Map<String, ExtendedAuthenticator> authPlugins;
 
 	@EJB
@@ -303,7 +301,7 @@ public class ICATRest {
 		}
 		Entry<String, JsonValue> entry = entity.entrySet().iterator().next();
 		String beanName = entry.getKey();
-		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		Class<? extends EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
 		JsonObject contents = (JsonObject) entry.getValue();
 
 		EntityBaseBean bean = null;
@@ -724,11 +722,11 @@ public class ICATRest {
 		}
 
 		Class<? extends EntityBaseBean> klass = bean.getClass();
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		Set<Field> atts = eiHandler.getAttributes(klass);
-		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
+		Set<Field> atts = EntityInfoHandler.getAttributes(klass);
+		Set<Field> updaters = EntityInfoHandler.getSettersForUpdate(klass).keySet();
 
-		for (Field field : eiHandler.getFields(klass)) {
+		for (Field field : EntityInfoHandler.getFields(klass)) {
 			Object value = null;
 			try {
 				value = getters.get(field).invoke(bean);

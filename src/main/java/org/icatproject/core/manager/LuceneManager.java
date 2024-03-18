@@ -46,7 +46,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
@@ -118,7 +117,7 @@ public class LuceneManager {
 			try {
 				logger.debug("About to index {} {} records", ids.size(), entityName);
 				this.entityName = entityName;
-				klass = (Class<? extends EntityBaseBean>) Class.forName(Constants.ENTITY_PREFIX + entityName);
+				klass = EntityInfoHandler.getClass(entityName);
 				this.ids = ids;
 				manager = entityManagerFactory.createEntityManager();
 				this.start = start;
@@ -130,7 +129,7 @@ public class LuceneManager {
 
 		@Override
 		public Long call() throws Exception {
-			if (eiHandler.hasLuceneDoc(klass)) {
+			if (EntityInfoHandler.hasLuceneDoc(klass)) {
 
 				URI uri = new URIBuilder(luceneApi.server).setPath(LuceneApi.basePath + "/addNow/" + entityName)
 						.build();
@@ -299,8 +298,6 @@ public class LuceneManager {
 		}
 	}
 
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	final static Logger logger = LoggerFactory.getLogger(LuceneManager.class);
 
 	final static Marker fatal = MarkerFactory.getMarker("FATAL");
@@ -347,7 +344,7 @@ public class LuceneManager {
 
 	public void addDocument(EntityBaseBean bean) throws IcatException {
 		String entityName = bean.getClass().getSimpleName();
-		if (eiHandler.hasLuceneDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
+		if (EntityInfoHandler.hasLuceneDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (JsonGenerator gen = Json.createGenerator(baos)) {
 				gen.writeStartArray();
@@ -425,7 +422,7 @@ public class LuceneManager {
 	}
 
 	public void deleteDocument(EntityBaseBean bean) throws IcatException {
-		if (eiHandler.hasLuceneDoc(bean.getClass())) {
+		if (EntityInfoHandler.hasLuceneDoc(bean.getClass())) {
 			String entityName = bean.getClass().getSimpleName();
 			Long id = bean.getId();
 			enqueue(entityName, null, id);
@@ -540,7 +537,7 @@ public class LuceneManager {
 
 	public void updateDocument(EntityBaseBean bean) throws IcatException {
 		String entityName = bean.getClass().getSimpleName();
-		if (eiHandler.hasLuceneDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
+		if (EntityInfoHandler.hasLuceneDoc(bean.getClass()) && entitiesToIndex.contains(entityName)) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (JsonGenerator gen = Json.createGenerator(baos)) {
 				gen.writeStartArray();

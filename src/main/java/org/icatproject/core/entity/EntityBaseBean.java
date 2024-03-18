@@ -40,8 +40,6 @@ import org.slf4j.LoggerFactory;
 @MappedSuperclass
 public abstract class EntityBaseBean implements Serializable {
 
-	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	private static final Logger logger = LoggerFactory.getLogger(EntityBaseBean.class);
 
 	@Column(name = "CREATE_ID", nullable = false)
@@ -84,8 +82,8 @@ public abstract class EntityBaseBean implements Serializable {
 	public void addToLucene(LuceneManager lucene) throws IcatException {
 		lucene.addDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
-		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		Set<Relationship> rs = EntityInfoHandler.getRelatedEntities(klass);
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
 		for (Relationship r : rs) {
 			if (r.isCollection()) {
 				Method m = getters.get(r.getField());
@@ -147,9 +145,9 @@ public abstract class EntityBaseBean implements Serializable {
 
 		ids.get(beanName).add(id);
 		try {
-			Map<Field, Method> getters = eiHandler.getGetters(klass);
+			Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
 			if (one) {
-				for (Relationship r : eiHandler.getOnes(klass)) {
+				for (Relationship r : EntityInfoHandler.getOnes(klass)) {
 					Field att = r.getField();
 					EntityBaseBean value = allowedOne(r, getters.get(att), gateKeeper, userId, manager);
 					if (value != null) {
@@ -307,8 +305,8 @@ public abstract class EntityBaseBean implements Serializable {
 		}
 
 		Class<? extends EntityBaseBean> klass = this.getClass();
-		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		Set<Relationship> rs = EntityInfoHandler.getRelatedEntities(klass);
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
 		for (Relationship r : rs) {
 			if (r.isCollection()) {
 				Method m = getters.get(r.getField());
@@ -342,16 +340,16 @@ public abstract class EntityBaseBean implements Serializable {
 			}
 		}
 		try {
-			Constructor<? extends EntityBaseBean> con = eiHandler.getConstructor(klass);
+			Constructor<? extends EntityBaseBean> con = EntityInfoHandler.getConstructor(klass);
 			EntityBaseBean clone = con.newInstance();
 			clone.id = this.id;
 			clone.createTime = this.createTime;
 			clone.createId = this.createId;
 			clone.modTime = this.modTime;
 			clone.modId = this.modId;
-			Set<Field> atts = eiHandler.getAttributes(klass);
-			Map<Field, Method> getters = eiHandler.getGetters(klass);
-			Map<Field, Method> setters = eiHandler.getSettersForUpdate(klass);
+			Set<Field> atts = EntityInfoHandler.getAttributes(klass);
+			Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
+			Map<Field, Method> setters = EntityInfoHandler.getSettersForUpdate(klass);
 			for (Field att : atts) {
 				Object value = getters.get(att).invoke(this);
 				if (value != null) {
@@ -359,7 +357,7 @@ public abstract class EntityBaseBean implements Serializable {
 				}
 			}
 			if (one) {
-				for (Relationship r : eiHandler.getOnes(klass)) {
+				for (Relationship r : EntityInfoHandler.getOnes(klass)) {
 					Field att = r.getField();
 					EntityBaseBean value = allowedOne(r, getters.get(att), gateKeeper, userId, manager);
 					if (value != null) {

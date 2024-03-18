@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 
 public class FromClause {
 
-	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	private String clause;
 
 	private Map<String, Class<? extends EntityBaseBean>> authzMap = new HashMap<>();
@@ -50,7 +48,7 @@ public class FromClause {
 			String val = t.getValue();
 			sb.append(" " + val);
 			if (t.getType() == Token.Type.NAME) {
-				if (EntityInfoHandler.getAlphabeticEntityNames().contains(val)) {
+				if (EntityInfoHandler.getEntityNamesList().contains(val)) {
 					currentEntity = EntityInfoHandler.getClass(val);
 				} else {
 					int dot = val.indexOf('.');
@@ -72,7 +70,7 @@ public class FromClause {
 							int dotn = val.indexOf(".", dot + 1);
 							String relPath = dotn < 0 ? val.substring(dot + 1) : val.substring(dot + 1, dotn);
 
-							Relationship r = eiHandler.getRelationshipsByName(currentEntity).get(relPath);
+							Relationship r = EntityInfoHandler.getRelationshipsByName(currentEntity).get(relPath);
 							if (r == null) {
 								throw new ParserException(
 										currentEntity.getSimpleName() + " has no relationship field " + relPath);
@@ -107,7 +105,7 @@ public class FromClause {
 				int dotn = idPath.indexOf(".", dot + 1);
 				String relPath = dotn < 0 ? idPath.substring(dot + 1) : idPath.substring(dot + 1, dotn);
 
-				Field f = eiHandler.getFieldsByName(bean).get(relPath);
+				Field f = EntityInfoHandler.getFieldsByName(bean).get(relPath);
 				if (f == null) {
 					throw new ParserException(bean.getSimpleName() + " has no field " + relPath);
 				}
