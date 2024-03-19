@@ -43,7 +43,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceUnit;
 
-import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.Datafile;
@@ -123,7 +122,7 @@ public class SearchManager {
 			try {
 				logger.debug("About to index {} {} records after id {}", ids.size(), entityName, start);
 				this.entityName = entityName;
-				klass = (Class<? extends EntityBaseBean>) Class.forName(Constants.ENTITY_PREFIX + entityName);
+				klass = EntityInfoHandler.getClass(entityName);
 				this.ids = ids;
 				manager = entityManagerFactory.createEntityManager();
 				this.start = start;
@@ -135,7 +134,7 @@ public class SearchManager {
 
 		@Override
 		public Long call() throws Exception {
-			if (eiHandler.hasSearchDoc(klass)) {
+			if (EntityInfoHandler.hasSearchDoc(klass)) {
 				searchApi.addNow(entityName, ids, manager, klass, getBeanDocExecutor);
 			}
 			return start;
@@ -359,8 +358,6 @@ public class SearchManager {
 		}
 	}
 
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	final static Logger logger = LoggerFactory.getLogger(SearchManager.class);
 
 	final static Marker fatal = MarkerFactory.getMarker("FATAL");
@@ -447,7 +444,7 @@ public class SearchManager {
 
 	public void addDocument(EntityBaseBean bean) throws IcatException {
 		Class<? extends EntityBaseBean> klass = bean.getClass();
-		if (eiHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
+		if (EntityInfoHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
 			enqueue(SearchApi.encodeOperation("create", bean));
 			enqueueAggregation(bean);
 		}
@@ -519,7 +516,7 @@ public class SearchManager {
 	}
 
 	public void deleteDocument(EntityBaseBean bean) throws IcatException {
-		if (eiHandler.hasSearchDoc(bean.getClass())) {
+		if (EntityInfoHandler.hasSearchDoc(bean.getClass())) {
 			enqueue(SearchApi.encodeDeletion(bean));
 			enqueueAggregation(bean);
 		}
@@ -805,7 +802,7 @@ public class SearchManager {
 
 	public void updateDocument(EntityBaseBean bean) throws IcatException {
 		Class<? extends EntityBaseBean> klass = bean.getClass();
-		if (eiHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
+		if (EntityInfoHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
 			enqueue(SearchApi.encodeOperation("update", bean));
 			enqueueAggregation(bean);
 		}

@@ -94,8 +94,6 @@ public class Porter {
 	private final static DateFormat dfZoned = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 	private final static DateFormat dfNoZone = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-	private final static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	@PostConstruct
 	void init() {
 		importCacheSize = propertyHandler.getImportCacheSize();
@@ -492,9 +490,9 @@ public class Porter {
 
 						}
 						Class<? extends EntityBaseBean> klass = bean.getClass();
-						Map<Field, Method> getters = eiHandler.getGetters(klass);
-						Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
-						for (Field f : eiHandler.getFields(klass)) {
+						Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
+						Set<Field> updaters = EntityInfoHandler.getSettersForUpdate(klass).keySet();
+						for (Field f : EntityInfoHandler.getFields(klass)) {
 							if (updaters.contains(f)) {
 								if (EntityBaseBean.class.isAssignableFrom(f.getType())) {
 									EntityBaseBean beanField = (EntityBaseBean) getters.get(f).invoke(bean);

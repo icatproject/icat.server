@@ -365,25 +365,24 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	 */
 	public static Map<String, Relationship[]> getDocumentFields() throws IcatException {
 		if (documentFields.size() == 0) {
-			EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-			Relationship[] typeRelationships = { eiHandler.getRelationshipsByName(Investigation.class).get("type") };
+			Relationship[] typeRelationships = { EntityInfoHandler.getRelationshipsByName(Investigation.class).get("type") };
 			Relationship[] facilityRelationships = {
-					eiHandler.getRelationshipsByName(Investigation.class).get("facility") };
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("facility") };
 			Relationship[] investigationFacilityCyclesRelationships = {
-					eiHandler.getRelationshipsByName(Investigation.class).get("investigationFacilityCycles") };
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("investigationFacilityCycles") };
 			Relationship[] instrumentRelationships = {
-					eiHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"),
-					eiHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument") };
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"),
+					EntityInfoHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument") };
 			Relationship[] parameterRelationships = {
-					eiHandler.getRelationshipsByName(Investigation.class).get("parameters") };
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("parameters") };
 			Relationship[] parameterTypeRelationships = {
-					eiHandler.getRelationshipsByName(Investigation.class).get("parameters"),
-					eiHandler.getRelationshipsByName(InvestigationParameter.class).get("type") };
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("parameters"),
+					EntityInfoHandler.getRelationshipsByName(InvestigationParameter.class).get("type") };
 			Relationship[] sampleRelationships = {
-					eiHandler.getRelationshipsByName(Investigation.class).get("samples") };
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("samples") };
 			Relationship[] sampleTypeRelationships = {
-					eiHandler.getRelationshipsByName(Investigation.class).get("samples"),
-					eiHandler.getRelationshipsByName(Sample.class).get("type") };
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("samples"),
+					EntityInfoHandler.getRelationshipsByName(Sample.class).get("type") };
 			documentFields.put("name", null);
 			documentFields.put("visitId", null);
 			documentFields.put("title", null);

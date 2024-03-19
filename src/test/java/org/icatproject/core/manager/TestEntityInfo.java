@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.DataCollection;
 import org.icatproject.core.entity.DataCollectionDatafile;
@@ -37,11 +36,9 @@ import org.junit.Test;
 
 public class TestEntityInfo {
 
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	@Test(expected = IcatException.class)
 	public void testBadname() throws Exception {
-		eiHandler.getEntityInfo("Fred");
+		EntityInfoHandler.getEntityInfo("Fred");
 	}
 
 	@Test
@@ -53,12 +50,11 @@ public class TestEntityInfo {
 				"SampleType", "SampleParameter", "Technique", "User"));
 		for (String beanName : EntityInfoHandler.getEntityNamesList()) {
 			@SuppressWarnings("unchecked")
-			Class<? extends EntityBaseBean> bean = (Class<? extends EntityBaseBean>) Class
-					.forName(Constants.ENTITY_PREFIX + beanName);
+			Class<? extends EntityBaseBean> bean = EntityInfoHandler.getClass(beanName);
 			if (docdbeans.contains(beanName)) {
-				assertTrue(beanName + " doesn't hasSearchDoc, but it should", eiHandler.hasSearchDoc(bean));
+				assertTrue(EntityInfoHandler.hasSearchDoc(bean));
 			} else {
-				assertFalse(beanName + " hasSearchDoc, but is not one of " + docdbeans, eiHandler.hasSearchDoc(bean));
+				assertFalse(EntityInfoHandler.hasSearchDoc(bean));
 			}
 		}
 	}
@@ -66,38 +62,38 @@ public class TestEntityInfo {
 	@Test
 	public void testExportHeaders() throws Exception {
 		assertEquals("Facility(daysUntilRelease:0,description:1,fullName:2,name:3,url:4)",
-				eiHandler.getExportHeader(Facility.class));
+				EntityInfoHandler.getExportHeader(Facility.class));
 		assertEquals("InvestigationType(description:0,facility(name:1),name:2)",
-				eiHandler.getExportHeader(InvestigationType.class));
+				EntityInfoHandler.getExportHeader(InvestigationType.class));
 		assertEquals(
 				"Investigation(doi:0,endDate:1,facility(name:2),fileCount:3,fileSize:4,name:5,releaseDate:6,"
 						+ "startDate:7,summary:8,title:9,type(facility(name:10),name:11),visitId:12)",
-				eiHandler.getExportHeader(Investigation.class));
+				EntityInfoHandler.getExportHeader(Investigation.class));
 		assertEquals(
 				"Dataset(complete:0,description:1,doi:2,endDate:3,fileCount:4,fileSize:5,investigation(facility(name:6),"
 						+ "name:7,visitId:8),location:9,name:10,sample(investigation(facility(name:11),"
 						+ "name:12,visitId:13),name:14),startDate:15,type(facility(name:16),name:17))",
-				eiHandler.getExportHeader(Dataset.class));
-		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
+				EntityInfoHandler.getExportHeader(Dataset.class));
+		assertEquals("DataCollection(?:0,doi:1)", EntityInfoHandler.getExportHeader(DataCollection.class));
 		assertEquals(
 				"Job(?:0,application(facility(name:1),name:2,version:3),arguments:4,inputDataCollection(?:5),outputDataCollection(?:6))",
-				eiHandler.getExportHeader(Job.class));
-		assertEquals("Study(?:0,description:1,endDate:2,name:3,pid:4,startDate:5,status:6,user(name:7))",
-				eiHandler.getExportHeader(Study.class));
+				EntityInfoHandler.getExportHeader(Job.class));
+		assertEquals( "Study(?:0,description:1,endDate:2,name:3,pid:4,startDate:5,status:6,user(name:7))",
+				EntityInfoHandler.getExportHeader(Study.class));
 		assertEquals(
 				"DatasetParameter(dataset(investigation(facility(name:0),name:1,visitId:2),name:3),"
 						+ "dateTimeValue:4,error:5,numericValue:6,rangeBottom:7,rangeTop:8,stringValue:9,"
 						+ "type(facility(name:10),name:11,units:12))",
-				eiHandler.getExportHeader(DatasetParameter.class));
+				EntityInfoHandler.getExportHeader(DatasetParameter.class));
 		assertEquals("ParameterType(applicableToDataCollection:0,applicableToDatafile:1,applicableToDataset:2,"
 				+ "applicableToInvestigation:3,applicableToSample:4,description:5,enforced:6,facility(name:7),"
 				+ "maximumNumericValue:8,minimumNumericValue:9,name:10,pid:11,units:12,unitsFullName:13,"
-				+ "valueType:14,verified:15)", eiHandler.getExportHeader(ParameterType.class));
-		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
-		assertEquals("Rule(?:0,crudFlags:1,grouping(name:2),what:3)", eiHandler.getExportHeader(Rule.class));
+				+ "valueType:14,verified:15)", EntityInfoHandler.getExportHeader(ParameterType.class));
+		assertEquals("DataCollection(?:0,doi:1)", EntityInfoHandler.getExportHeader(DataCollection.class));
+		assertEquals("Rule(?:0,crudFlags:1,grouping(name:2),what:3)", EntityInfoHandler.getExportHeader(Rule.class));
 		assertEquals(
 				"DataCollectionDatafile(dataCollection(?:0),datafile(dataset(investigation(facility(name:1),name:2,visitId:3),name:4),name:5))",
-				eiHandler.getExportHeader(DataCollectionDatafile.class));
+				EntityInfoHandler.getExportHeader(DataCollectionDatafile.class));
 	}
 
 	@Test
@@ -105,38 +101,38 @@ public class TestEntityInfo {
 		assertEquals(
 				"Facility(createId:0,createTime:1,modId:2,"
 						+ "modTime:3,daysUntilRelease:4,description:5,fullName:6,name:7,url:8)",
-				eiHandler.getExportHeaderAll(Facility.class));
+				EntityInfoHandler.getExportHeaderAll(Facility.class));
 		assertEquals(
 				"InvestigationType(createId:0,createTime:1,modId:2,"
 						+ "modTime:3,description:4,facility(name:5),name:6)",
-				eiHandler.getExportHeaderAll(InvestigationType.class));
+				EntityInfoHandler.getExportHeaderAll(InvestigationType.class));
 		assertEquals(
 				"Investigation(createId:0,createTime:1,modId:2,modTime:3,"
 						+ "doi:4,endDate:5,facility(name:6),fileCount:7,fileSize:8,name:9,releaseDate:10,"
 						+ "startDate:11,summary:12,title:13,type(facility(name:14),name:15),visitId:16)",
-				eiHandler.getExportHeaderAll(Investigation.class));
+				EntityInfoHandler.getExportHeaderAll(Investigation.class));
 		assertEquals(
 				"Dataset(createId:0,createTime:1,modId:2,modTime:3,"
 						+ "complete:4,description:5,doi:6,endDate:7,fileCount:8,fileSize:9,"
 						+ "investigation(facility(name:10),name:11,visitId:12),location:13,name:14,"
 						+ "sample(investigation(facility(name:15),name:16,visitId:17),"
 						+ "name:18),startDate:19,type(facility(name:20),name:21))",
-				eiHandler.getExportHeaderAll(Dataset.class));
+				EntityInfoHandler.getExportHeaderAll(Dataset.class));
 		assertEquals("DataCollection(?:0,createId:1,createTime:2,modId:3,modTime:4,doi:5)",
-				eiHandler.getExportHeaderAll(DataCollection.class));
+				EntityInfoHandler.getExportHeaderAll(DataCollection.class));
 		assertEquals(
 				"Job(?:0,createId:1,createTime:2,modId:3,modTime:4,"
 						+ "application(facility(name:5),name:6,version:7),arguments:8,"
 						+ "inputDataCollection(?:9),outputDataCollection(?:10))",
-				eiHandler.getExportHeaderAll(Job.class));
-		assertEquals("Study(?:0,description:1,endDate:2,name:3,pid:4,startDate:5,status:6,user(name:7))",
-				eiHandler.getExportHeader(Study.class));
+				EntityInfoHandler.getExportHeaderAll(Job.class));
+		assertEquals( "Study(?:0,description:1,endDate:2,name:3,pid:4,startDate:5,status:6,user(name:7))",
+				EntityInfoHandler.getExportHeader(Study.class));
 		assertEquals(
 				"DatasetParameter(createId:0,createTime:1,modId:2,modTime:3,"
 						+ "dataset(investigation(facility(name:4),name:5,visitId:6),name:7),"
 						+ "dateTimeValue:8,error:9,numericValue:10,rangeBottom:11,"
 						+ "rangeTop:12,stringValue:13,type(facility(name:14),name:15,units:16))",
-				eiHandler.getExportHeaderAll(DatasetParameter.class));
+				EntityInfoHandler.getExportHeaderAll(DatasetParameter.class));
 		assertEquals(
 				"ParameterType(createId:0,createTime:1,modId:2,modTime:3,"
 						+ "applicableToDataCollection:4,applicableToDatafile:5,"
@@ -144,27 +140,27 @@ public class TestEntityInfo {
 						+ "applicableToSample:8,description:9,enforced:10,facility(name:11),"
 						+ "maximumNumericValue:12,minimumNumericValue:13,name:14,pid:15,"
 						+ "units:16,unitsFullName:17,valueType:18,verified:19)",
-				eiHandler.getExportHeaderAll(ParameterType.class));
-		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
+				EntityInfoHandler.getExportHeaderAll(ParameterType.class));
+		assertEquals("DataCollection(?:0,doi:1)", EntityInfoHandler.getExportHeader(DataCollection.class));
 		assertEquals("Rule(?:0,createId:1,createTime:2,modId:3,modTime:4," + "crudFlags:5,grouping(name:6),what:7)",
-				eiHandler.getExportHeaderAll(Rule.class));
+				EntityInfoHandler.getExportHeaderAll(Rule.class));
 		assertEquals(
 				"DataCollectionDatafile(createId:0,createTime:1,modId:2,modTime:3,"
 						+ "dataCollection(?:4),datafile(dataset(investigation(facility(name:5),"
 						+ "name:6,visitId:7),name:8),name:9))",
-				eiHandler.getExportHeaderAll(DataCollectionDatafile.class));
+				EntityInfoHandler.getExportHeaderAll(DataCollectionDatafile.class));
 	}
 
 	@Test
 	public void testExportNull() throws Exception {
-		assertEquals("NULL", eiHandler.getExportNull(Facility.class));
-		assertEquals("NULL,NA", eiHandler.getExportNull(InvestigationType.class));
-		assertEquals("NULL,NA,NA", eiHandler.getExportNull(Investigation.class));
-		assertEquals("NULL,NA,NA,NA", eiHandler.getExportNull(Dataset.class));
-		assertEquals("", eiHandler.getExportNull(DataCollection.class));
-		assertEquals("", eiHandler.getExportNull(Job.class));
-		assertEquals("NULL,NA,NA,NA,NA,NA,NA", eiHandler.getExportNull(DatasetParameter.class));
-		assertEquals("NULL,NA,NA", eiHandler.getExportNull(ParameterType.class));
+		assertEquals("NULL", EntityInfoHandler.getExportNull(Facility.class));
+		assertEquals("NULL,NA", EntityInfoHandler.getExportNull(InvestigationType.class));
+		assertEquals("NULL,NA,NA", EntityInfoHandler.getExportNull(Investigation.class));
+		assertEquals("NULL,NA,NA,NA", EntityInfoHandler.getExportNull(Dataset.class));
+		assertEquals("", EntityInfoHandler.getExportNull(DataCollection.class));
+		assertEquals("", EntityInfoHandler.getExportNull(Job.class));
+		assertEquals("NULL,NA,NA,NA,NA,NA,NA", EntityInfoHandler.getExportNull(DatasetParameter.class));
+		assertEquals("NULL,NA,NA", EntityInfoHandler.getExportNull(ParameterType.class));
 	}
 
 	@Test
@@ -198,7 +194,7 @@ public class TestEntityInfo {
 	private void testField(String result, Class<? extends EntityBaseBean> klass) throws Exception {
 		String sep = "";
 		StringBuilder sb = new StringBuilder();
-		for (Field f : eiHandler.getFields(klass)) {
+		for (Field f : EntityInfoHandler.getFields(klass)) {
 			sb.append(sep + f.getName());
 			sep = ",";
 		}
@@ -216,7 +212,7 @@ public class TestEntityInfo {
 	}
 
 	private void testConstraint(Class<? extends EntityBaseBean> klass, String... name) throws Exception {
-		List<Field> result = eiHandler.getConstraintFields(klass);
+		List<Field> result = EntityInfoHandler.getConstraintFields(klass);
 		if (name.length == 0) {
 			assertEquals("One", 0, result.size());
 		} else {
@@ -232,7 +228,7 @@ public class TestEntityInfo {
 
 	@Test
 	public void testFieldByName() throws Exception {
-		Map<String, Field> fields = eiHandler.getFieldsByName(EntityInfoHandler.getClass("DatafileParameter"));
+		Map<String, Field> fields = EntityInfoHandler.getFieldsByName(EntityInfoHandler.getClass("DatafileParameter"));
 		assertEquals("protected java.lang.Long org.icatproject.core.entity.EntityBaseBean.id",
 				fields.get("id").toString());
 		assertEquals(
@@ -290,7 +286,7 @@ public class TestEntityInfo {
 	}
 
 	private void testRel(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
-		Set<Relationship> results = eiHandler.getRelatedEntities(klass);
+		Set<Relationship> results = EntityInfoHandler.getRelatedEntities(klass);
 		Set<String> rStrings = new HashSet<String>();
 		for (Relationship rel : results) {
 			rStrings.add(rel.toString());
@@ -299,7 +295,7 @@ public class TestEntityInfo {
 		for (String rel : rels) {
 			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel));
 		}
-		Set<Entry<String, Relationship>> map = eiHandler.getRelationshipsByName(klass).entrySet();
+		Set<Entry<String, Relationship>> map = EntityInfoHandler.getRelationshipsByName(klass).entrySet();
 		assertEquals(rels.length, map.size());
 		for (Entry<String, Relationship> e : map) {
 			Relationship rel = e.getValue();
@@ -327,7 +323,7 @@ public class TestEntityInfo {
 	}
 
 	private void testOne(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
-		Set<Relationship> results = eiHandler.getOnes(klass);
+		Set<Relationship> results = EntityInfoHandler.getOnes(klass);
 		Set<String> rStrings = new HashSet<String>();
 		for (Relationship rel : results) {
 			rStrings.add(rel.getDestinationBean().getSimpleName());
@@ -352,7 +348,7 @@ public class TestEntityInfo {
 	}
 
 	private void testNNF(Class<? extends EntityBaseBean> klass, String... nnfs) throws Exception {
-		List<Field> results = eiHandler.getNotNullableFields(klass);
+		List<Field> results = EntityInfoHandler.getNotNullableFields(klass);
 		Set<String> rStrings = new HashSet<String>();
 		for (Field field : results) {
 			rStrings.add(field.getName());
@@ -379,7 +375,7 @@ public class TestEntityInfo {
 	}
 
 	private void testSF(Class<? extends EntityBaseBean> klass, String... sfs) throws Exception {
-		Map<Field, Integer> results = eiHandler.getStringFields(klass);
+		Map<Field, Integer> results = EntityInfoHandler.getStringFields(klass);
 		Set<String> rStrings = new HashSet<String>();
 		for (Entry<Field, Integer> entry : results.entrySet()) {
 			rStrings.add(entry.getKey().getName() + " " + entry.getValue());
@@ -438,7 +434,7 @@ public class TestEntityInfo {
 	}
 
 	private void testRelInkey(Class<? extends EntityBaseBean> klass, String... fieldNames) throws Exception {
-		Set<Field> results = eiHandler.getRelInKey(klass);
+		Set<Field> results = EntityInfoHandler.getRelInKey(klass);
 		Set<String> rStrings = new HashSet<String>();
 		for (Field field : results) {
 			rStrings.add(field.getName());
@@ -451,7 +447,7 @@ public class TestEntityInfo {
 	}
 
 	private void testGetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
-		Map<Field, Method> results = eiHandler.getGetters(klass);
+		Map<Field, Method> results = EntityInfoHandler.getGetters(klass);
 		assertEquals(klass.getSimpleName() + " count", count, results.size());
 		for (Entry<Field, Method> entry : results.entrySet()) {
 			String cap = entry.getKey().getName();
@@ -462,7 +458,7 @@ public class TestEntityInfo {
 	}
 
 	private void testSettersForUpdate(Class<? extends EntityBaseBean> klass, int count) throws Exception {
-		Map<Field, Method> results = eiHandler.getSettersForUpdate(klass);
+		Map<Field, Method> results = EntityInfoHandler.getSettersForUpdate(klass);
 
 		assertEquals(klass.getSimpleName() + " count", count, results.size());
 		for (Entry<Field, Method> entry : results.entrySet()) {
@@ -474,7 +470,7 @@ public class TestEntityInfo {
 	}
 
 	private void testSetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
-		Map<Field, Method> results = eiHandler.getSetters(klass);
+		Map<Field, Method> results = EntityInfoHandler.getSetters(klass);
 		assertEquals(klass.getSimpleName() + " count", count, results.size());
 		for (Entry<Field, Method> entry : results.entrySet()) {
 			String cap = entry.getKey().getName();

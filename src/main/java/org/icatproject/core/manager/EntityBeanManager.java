@@ -57,7 +57,6 @@ import jakarta.transaction.UserTransaction;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 
-import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.Datafile;
@@ -122,8 +121,6 @@ public class EntityBeanManager {
 
 	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	private static final Logger logger = LoggerFactory.getLogger(EntityBeanManager.class);
 
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
@@ -165,15 +162,15 @@ public class EntityBeanManager {
 	private String buildKey(EntityBaseBean bean, Map<String, Map<Long, String>> exportCaches)
 			throws IcatException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Class<? extends EntityBaseBean> klass = bean.getClass();
-		List<Field> constraintFields = eiHandler.getConstraintFields(klass);
+		List<Field> constraintFields = EntityInfoHandler.getConstraintFields(klass);
 		if (constraintFields.isEmpty()) {
 			return '"' + bean.getId().toString() + '"';
 		}
-		List<Field> fields = eiHandler.getFields(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		Map<String, Field> fieldMap = eiHandler.getFieldsByName(klass);
-		Set<Field> atts = eiHandler.getAttributes(klass);
-		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
+		List<Field> fields = EntityInfoHandler.getFields(klass);
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
+		Map<String, Field> fieldMap = EntityInfoHandler.getFieldsByName(klass);
+		Set<Field> atts = EntityInfoHandler.getAttributes(klass);
+		Set<Field> updaters = EntityInfoHandler.getSettersForUpdate(klass).keySet();
 		StringBuilder sb = new StringBuilder();
 		boolean first = true;
 		for (Field field : fields) {
@@ -208,8 +205,8 @@ public class EntityBeanManager {
 	private boolean checkIdentityChange(EntityBaseBean thisBean, EntityBaseBean fromBean) throws IcatException {
 
 		Class<? extends EntityBaseBean> klass = thisBean.getClass();
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		for (Field field : eiHandler.getRelInKey(klass)) {
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
+		for (Field field : EntityInfoHandler.getRelInKey(klass)) {
 			try {
 				Method m = getters.get(field);
 				EntityBaseBean newValue = (EntityBaseBean) m.invoke(fromBean, new Object[0]);
@@ -424,9 +421,9 @@ public class EntityBeanManager {
 				 * Now look for duplicates within the list of objects provided
 				 */
 				Class<? extends EntityBaseBean> entityClass = bean.getClass();
-				Map<Field, Method> getters = eiHandler.getGetters(entityClass);
+				Map<Field, Method> getters = EntityInfoHandler.getGetters(entityClass);
 
-				List<Field> constraint = eiHandler.getConstraintFields(entityClass);
+				List<Field> constraint = EntityInfoHandler.getConstraintFields(entityClass);
 				if (!constraint.isEmpty()) {
 					for (int i = 0; i < pos; i++) {
 						boolean diff = false;
@@ -707,7 +704,7 @@ public class EntityBeanManager {
 				} else {
 					if (value == null) {
 						output.write(
-								eiHandler.getExportNull((Class<? extends EntityBaseBean>) field.getType()).getBytes());
+								EntityInfoHandler.getExportNull((Class<? extends EntityBaseBean>) field.getType()).getBytes());
 					} else {
 						long obId = ((EntityBaseBean) value).getId();
 						String obType = value.getClass().getSimpleName();
@@ -735,20 +732,20 @@ public class EntityBeanManager {
 			throws IcatException, IOException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException {
 		logger.debug("Export " + (ids == null ? "complete" : "partial") + " " + beanName);
-		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		Class<? extends EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
 		output.write((linesep).getBytes());
 		if (allAttributes) {
-			output.write(eiHandler.getExportHeaderAll(klass).getBytes());
+			output.write(EntityInfoHandler.getExportHeaderAll(klass).getBytes());
 		} else {
-			output.write(eiHandler.getExportHeader(klass).getBytes());
+			output.write(EntityInfoHandler.getExportHeader(klass).getBytes());
 		}
 		output.write((linesep).getBytes());
-		List<Field> fields = eiHandler.getFields(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		Map<String, Field> fieldMap = eiHandler.getFieldsByName(klass);
-		Set<Field> atts = eiHandler.getAttributes(klass);
-		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
-		boolean qcolumn = eiHandler.getConstraintFields(klass).isEmpty();
+		List<Field> fields = EntityInfoHandler.getFields(klass);
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
+		Map<String, Field> fieldMap = EntityInfoHandler.getFieldsByName(klass);
+		Set<Field> atts = EntityInfoHandler.getAttributes(klass);
+		Set<Field> updaters = EntityInfoHandler.getSettersForUpdate(klass).keySet();
+		boolean qcolumn = EntityInfoHandler.getConstraintFields(klass).isEmpty();
 		boolean notRootUser = !rootUserNames.contains(userId);
 
 		if (ids == null) {
@@ -934,8 +931,8 @@ public class EntityBeanManager {
 
 	private List<EntityBaseBean> getDependentBeans(EntityBaseBean bean) throws IcatException {
 		Class<? extends EntityBaseBean> klass = bean.getClass();
-		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		Set<Relationship> rs = EntityInfoHandler.getRelatedEntities(klass);
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
 		List<EntityBaseBean> beans = new ArrayList<>();
 		for (Relationship r : rs) {
 			if (r.isCollection()) {
@@ -956,7 +953,7 @@ public class EntityBeanManager {
 	}
 
 	public EntityInfo getEntityInfo(String beanName) throws IcatException {
-		return eiHandler.getEntityInfo(beanName);
+		return EntityInfoHandler.getEntityInfo(beanName);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1232,8 +1229,8 @@ public class EntityBeanManager {
 
 		if (other != null) {
 			Class<? extends EntityBaseBean> entityClass = bean.getClass();
-			Map<Field, Method> getters = eiHandler.getGetters(entityClass);
-			List<Field> constraint = eiHandler.getConstraintFields(entityClass);
+			Map<Field, Method> getters = EntityInfoHandler.getGetters(entityClass);
+			List<Field> constraint = EntityInfoHandler.getConstraintFields(entityClass);
 
 			StringBuilder erm = new StringBuilder();
 			for (Field f : constraint) {
@@ -1258,8 +1255,8 @@ public class EntityBeanManager {
 	private void isValid(EntityBaseBean bean) throws IcatException {
 		logger.trace("Checking validity of {}", bean);
 		Class<? extends EntityBaseBean> klass = bean.getClass();
-		List<Field> notNullFields = eiHandler.getNotNullableFields(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		List<Field> notNullFields = EntityInfoHandler.getNotNullableFields(klass);
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
 
 		for (Field field : notNullFields) {
 
@@ -1277,7 +1274,7 @@ public class EntityBeanManager {
 			}
 		}
 
-		Map<Field, Integer> stringFields = eiHandler.getStringFields(klass);
+		Map<Field, Integer> stringFields = EntityInfoHandler.getStringFields(klass);
 		for (Entry<Field, Integer> entry : stringFields.entrySet()) {
 			Field field = entry.getKey();
 			Integer length = entry.getValue();
@@ -1386,8 +1383,8 @@ public class EntityBeanManager {
 	public EntityBaseBean lookup(EntityBaseBean bean, EntityManager manager) throws IcatException {
 		Class<? extends EntityBaseBean> entityClass = bean.getClass();
 
-		Map<Field, Method> getters = eiHandler.getGetters(entityClass);
-		List<Field> constraint = eiHandler.getConstraintFields(entityClass);
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(entityClass);
+		List<Field> constraint = EntityInfoHandler.getConstraintFields(entityClass);
 		if (constraint.isEmpty()) {
 			return null;
 		}
@@ -1640,27 +1637,27 @@ public class EntityBeanManager {
 			if (target.equals("SampleParameter")) {
 				Relationship sampleRelationship;
 				if (klass.getSimpleName().equals("Investigation")) {
-					sampleRelationship = eiHandler.getRelationshipsByName(klass).get("samples");
+					sampleRelationship = EntityInfoHandler.getRelationshipsByName(klass).get("samples");
 				} else {
 					if (klass.getSimpleName().equals("Datafile")) {
-						Relationship datasetRelationship = eiHandler.getRelationshipsByName(klass).get("dataset");
+						Relationship datasetRelationship = EntityInfoHandler.getRelationshipsByName(klass).get("dataset");
 						if (!gateKeeper.allowed(datasetRelationship)) {
 							return null;
 						}
 					}
-					sampleRelationship = eiHandler.getRelationshipsByName(Dataset.class).get("sample");
+					sampleRelationship = EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample");
 				}
-				Relationship parameterRelationship = eiHandler.getRelationshipsByName(Sample.class).get("parameters");
+				Relationship parameterRelationship = EntityInfoHandler.getRelationshipsByName(Sample.class).get("parameters");
 				if (!gateKeeper.allowed(sampleRelationship) || !gateKeeper.allowed(parameterRelationship)) {
 					return null;
 				}
 				return SearchManager.buildFacetQuery(filterObject, jsonFacet);
 			} else if (target.contains("Parameter")) {
-				relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
+				relationship = EntityInfoHandler.getRelationshipsByName(klass).get("parameters");
 			} else if (target.contains("DatasetTechnique")) {
-				relationship = eiHandler.getRelationshipsByName(klass).get("datasetTechniques");
+				relationship = EntityInfoHandler.getRelationshipsByName(klass).get("datasetTechniques");
 			} else {
-				relationship = eiHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
+				relationship = EntityInfoHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
 			}
 
 			if (gateKeeper.allowed(relationship)) {
@@ -1698,19 +1695,19 @@ public class EntityBeanManager {
 			if (target.equals("SampleParameter")) {
 				Relationship sampleRelationship;
 				if (parentName.equals("Investigation")) {
-					sampleRelationship = eiHandler.getRelationshipsByName(klass).get("samples");
+					sampleRelationship = EntityInfoHandler.getRelationshipsByName(klass).get("samples");
 				} else {
 					if (parentName.equals("Datafile")) {
-						Relationship datasetRelationship = eiHandler.getRelationshipsByName(klass).get("dataset");
+						Relationship datasetRelationship = EntityInfoHandler.getRelationshipsByName(klass).get("dataset");
 						if (!gateKeeper.allowed(datasetRelationship)) {
 							logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed", target,
 								parentName);
 							return null;
 						}
 					}
-					sampleRelationship = eiHandler.getRelationshipsByName(Dataset.class).get("sample");
+					sampleRelationship = EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample");
 				}
-				Relationship parameterRelationship = eiHandler.getRelationshipsByName(Sample.class).get("parameters");
+				Relationship parameterRelationship = EntityInfoHandler.getRelationshipsByName(Sample.class).get("parameters");
 				if (!gateKeeper.allowed(sampleRelationship) || !gateKeeper.allowed(parameterRelationship)) {
 					logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed", target,
 						parentName);
@@ -1722,14 +1719,14 @@ public class EntityBeanManager {
 				String resultIdField = "id";
 				if (parentName.equals("Datafile")) {
 					resultIdField = "investigation.id";
-					relationships.add(eiHandler.getRelationshipsByName(Datafile.class).get("dataset"));
-					relationships.add(eiHandler.getRelationshipsByName(Dataset.class).get("investigation"));
+					relationships.add(EntityInfoHandler.getRelationshipsByName(Datafile.class).get("dataset"));
+					relationships.add(EntityInfoHandler.getRelationshipsByName(Dataset.class).get("investigation"));
 				} else if (parentName.equals("Dataset")) {
 					resultIdField = "investigation.id";
-					relationships.add(eiHandler.getRelationshipsByName(Dataset.class).get("investigation"));
+					relationships.add(EntityInfoHandler.getRelationshipsByName(Dataset.class).get("investigation"));
 				}
-				relationships.add(eiHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"));
-				relationships.add(eiHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument"));
+				relationships.add(EntityInfoHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"));
+				relationships.add(EntityInfoHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument"));
 				for (Relationship r : relationships) {
 					if (!gateKeeper.allowed(r)) {
 						logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed", target,
@@ -1739,9 +1736,9 @@ public class EntityBeanManager {
 				}
 				return SearchManager.buildFacetQuery(results, resultIdField, "investigation.id", jsonFacet);
 			} else if (target.contains("Parameter")) {
-				relationship = eiHandler.getRelationshipsByName(klass).get("parameters");
+				relationship = EntityInfoHandler.getRelationshipsByName(klass).get("parameters");
 			} else {
-				relationship = eiHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
+				relationship = EntityInfoHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
 			}
 
 			if (gateKeeper.allowed(relationship)) {
@@ -1770,11 +1767,9 @@ public class EntityBeanManager {
 	public void searchPopulate(String entityName, Long minId, Long maxId, boolean delete, EntityManager manager)
 			throws IcatException {
 		if (searchActive) {
-			try {
-				Class.forName(Constants.ENTITY_PREFIX + entityName);
-			} catch (ClassNotFoundException e) {
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
-			}
+			// Throws IcatException if entityName is not an ICAT entity
+			EntityInfoHandler.getClass(entityName);
+
 			searchManager.populate(entityName, minId, maxId, delete);
 		}
 	}
@@ -1783,8 +1778,8 @@ public class EntityBeanManager {
 	// would be processed by JPA which gets confused by it.
 	private void merge(EntityBaseBean thisBean, Object fromBean, EntityManager manager) throws IcatException {
 		Class<? extends EntityBaseBean> klass = thisBean.getClass();
-		Map<Field, Method> setters = eiHandler.getSettersForUpdate(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		Map<Field, Method> setters = EntityInfoHandler.getSettersForUpdate(klass);
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
 
 		for (Entry<Field, Method> fieldAndMethod : setters.entrySet()) {
 			Field field = fieldAndMethod.getKey();
@@ -1814,12 +1809,12 @@ public class EntityBeanManager {
 	private void parseEntity(EntityBaseBean bean, JsonObject contents, Class<? extends EntityBaseBean> klass,
 			EntityManager manager, List<EntityBaseBean> creates, Map<EntityBaseBean, Boolean> localUpdates,
 			boolean create, String userId) throws IcatException {
-		Map<String, Field> fieldsByName = eiHandler.getFieldsByName(klass);
-		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
-		Map<Field, Method> setters = eiHandler.getSetters(klass);
-		Map<String, Relationship> rels = eiHandler.getRelationshipsByName(klass);
-		Map<String, Method> getters = eiHandler.getGettersFromName(klass);
-		Set<Field> relInKey = eiHandler.getRelInKey(klass);
+		Map<String, Field> fieldsByName = EntityInfoHandler.getFieldsByName(klass);
+		Set<Field> updaters = EntityInfoHandler.getSettersForUpdate(klass).keySet();
+		Map<Field, Method> setters = EntityInfoHandler.getSetters(klass);
+		Map<String, Relationship> rels = EntityInfoHandler.getRelationshipsByName(klass);
+		Map<String, Method> getters = EntityInfoHandler.getGettersFromName(klass);
+		Set<Field> relInKey = EntityInfoHandler.getRelInKey(klass);
 
 		boolean deleteAllowed = false;
 		if (!create) {
@@ -2299,7 +2294,7 @@ public class EntityBeanManager {
 
 		Entry<String, JsonValue> entry = entity.entrySet().iterator().next();
 		String beanName = entry.getKey();
-		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		Class<? extends EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
 		JsonValue value = entry.getValue();
 		if (value.getValueType() != ValueType.OBJECT) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
@@ -2386,8 +2381,8 @@ public class EntityBeanManager {
 			for (Entry<Class<? extends EntityBaseBean>, List<EntityBaseBean>> pair : beansByClass.entrySet()) {
 				Class<? extends EntityBaseBean> entityClass = pair.getKey();
 				List<EntityBaseBean> beans = pair.getValue();
-				Map<Field, Method> getters = eiHandler.getGetters(entityClass);
-				List<Field> constraint = eiHandler.getConstraintFields(entityClass);
+				Map<Field, Method> getters = EntityInfoHandler.getGetters(entityClass);
+				List<Field> constraint = EntityInfoHandler.getConstraintFields(entityClass);
 				if (!constraint.isEmpty()) {
 					for (EntityBaseBean bean1 : beans) {
 						for (EntityBaseBean bean2 : beans) {
@@ -2454,7 +2449,7 @@ public class EntityBeanManager {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		logger.info("{} cloning {}/{}", userId, beanName, id);
 
-		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		Class<? extends EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
 		EntityBaseBean bean = manager.find(klass, id);
 		if (bean == null) {
 			throw new IcatException(IcatExceptionType.NO_SUCH_OBJECT_FOUND, beanName + ":" + id);
@@ -2467,10 +2462,10 @@ public class EntityBeanManager {
 		}
 		Map<EntityBaseBean, EntityBaseBean> clonedTo = new HashMap<>();
 		clonedTo.put(bean, clone);
-		Map<Field, Method> setters = eiHandler.getSettersForUpdate(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		List<Field> constraintFields = eiHandler.getConstraintFields(klass);
-		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
+		Map<Field, Method> setters = EntityInfoHandler.getSettersForUpdate(klass);
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
+		List<Field> constraintFields = EntityInfoHandler.getConstraintFields(klass);
+		Set<Relationship> rs = EntityInfoHandler.getRelatedEntities(klass);
 
 		for (Entry<Field, Method> fieldAndMethod : setters.entrySet()) {
 			Field field = fieldAndMethod.getKey();
@@ -2645,9 +2640,9 @@ public class EntityBeanManager {
 							clonedCollection.add(subClone);
 							clonedTo.put(c, subClone);
 
-							Map<Field, Method> subSetters = eiHandler.getSettersForUpdate(subKlass);
-							Map<Field, Method> subGetters = eiHandler.getGetters(subKlass);
-							Set<Relationship> subRs = eiHandler.getRelatedEntities(subKlass);
+							Map<Field, Method> subSetters = EntityInfoHandler.getSettersForUpdate(subKlass);
+							Map<Field, Method> subGetters = EntityInfoHandler.getGetters(subKlass);
+							Set<Relationship> subRs = EntityInfoHandler.getRelatedEntities(subKlass);
 
 							for (Entry<Field, Method> fieldAndMethod : subSetters.entrySet()) {
 								Field field = fieldAndMethod.getKey();

@@ -68,8 +68,6 @@ public class GateKeeper {
 		}
 	};
 
-	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	private final static Pattern tsRegExp = Pattern
 			.compile("\\{\\s*ts\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s*\\}");
 
@@ -459,8 +457,8 @@ public class GateKeeper {
 		logger.info("Consider {}", contents);
 		Class<? extends EntityBaseBean> klass = bean.getClass();
 		String simpleName = klass.getSimpleName();
-		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
-		Map<String, Field> fieldsByName = eiHandler.getFieldsByName(klass);
+		Set<Field> updaters = EntityInfoHandler.getSettersForUpdate(klass).keySet();
+		Map<String, Field> fieldsByName = EntityInfoHandler.getFieldsByName(klass);
 
 		for (Entry<String, JsonValue> fentry : contents.entrySet()) {
 			String fName = fentry.getKey();

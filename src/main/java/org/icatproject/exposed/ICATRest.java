@@ -96,8 +96,6 @@ public class ICATRest {
 
 	private final static DateFormat df8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
 	private Map<String, ExtendedAuthenticator> authPlugins;
 
 	@EJB
@@ -288,7 +286,7 @@ public class ICATRest {
 		}
 		Entry<String, JsonValue> entry = entity.entrySet().iterator().next();
 		String beanName = entry.getKey();
-		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		Class<? extends EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
 		JsonObject contents = (JsonObject) entry.getValue();
 
 		EntityBaseBean bean = null;
@@ -709,11 +707,11 @@ public class ICATRest {
 		}
 
 		Class<? extends EntityBaseBean> klass = bean.getClass();
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		Set<Field> atts = eiHandler.getAttributes(klass);
-		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
+		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
+		Set<Field> atts = EntityInfoHandler.getAttributes(klass);
+		Set<Field> updaters = EntityInfoHandler.getSettersForUpdate(klass).keySet();
 
-		for (Field field : eiHandler.getFields(klass)) {
+		for (Field field : EntityInfoHandler.getFields(klass)) {
 			Object value = null;
 			try {
 				value = getters.get(field).invoke(bean);
@@ -1091,7 +1089,7 @@ public class ICATRest {
 	 * Perform a free text search against a dedicated (non-DB) search engine
 	 * component for entire Documents.
 	 * 
-	 * @summary Free text Document search.
+	 * @title Free text Document search.
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -1319,7 +1317,7 @@ public class ICATRest {
 	/**
 	 * Performs subsequent faceting for a particular query containing a list of ids.
 	 * 
-	 * @summary Document faceting.
+	 * @title Document faceting.
 	 * 
 	 * @param sessionId a sessionId of a user which takes the form
 	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>

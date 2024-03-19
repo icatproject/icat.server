@@ -287,20 +287,19 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	 */
 	public static Map<String, Relationship[]> getDocumentFields() throws IcatException {
 		if (documentFields.size() == 0) {
-			EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-			Relationship[] sampleRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("sample") };
-			Relationship[] sampleTypeRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("sample"),
-					eiHandler.getRelationshipsByName(Sample.class).get("type") };
-			Relationship[] typeRelationships = { eiHandler.getRelationshipsByName(Dataset.class).get("type") };
+			Relationship[] sampleRelationships = { EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample") };
+			Relationship[] sampleTypeRelationships = { EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample"),
+					EntityInfoHandler.getRelationshipsByName(Sample.class).get("type") };
+			Relationship[] typeRelationships = { EntityInfoHandler.getRelationshipsByName(Dataset.class).get("type") };
 			Relationship[] investigationRelationships = {
-					eiHandler.getRelationshipsByName(Dataset.class).get("investigation") };
+					EntityInfoHandler.getRelationshipsByName(Dataset.class).get("investigation") };
 			Relationship[] investigationFacilityCyclesRelationships = {
-					eiHandler.getRelationshipsByName(Dataset.class).get("investigation"),
-					eiHandler.getRelationshipsByName(Investigation.class).get("investigationFacilityCycles") };
+					EntityInfoHandler.getRelationshipsByName(Dataset.class).get("investigation"),
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("investigationFacilityCycles") };
 			Relationship[] instrumentRelationships = {
-					eiHandler.getRelationshipsByName(Dataset.class).get("investigation"),
-					eiHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"),
-					eiHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument") };
+					EntityInfoHandler.getRelationshipsByName(Dataset.class).get("investigation"),
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"),
+					EntityInfoHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument") };
 			documentFields.put("name", null);
 			documentFields.put("description", null);
 			documentFields.put("doi", null);

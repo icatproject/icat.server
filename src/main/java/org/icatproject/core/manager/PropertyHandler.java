@@ -415,10 +415,9 @@ public class PropertyHandler {
 				String notificationList = props.getString(key);
 				formattedProps.add(key + " " + notificationList);
 
-				EntityInfoHandler ei = EntityInfoHandler.getInstance();
 				for (String entity : notificationList.split("\\s+")) {
 					try {
-						ei.getEntityInfo(entity);
+						EntityInfoHandler.getEntityInfo(entity);
 					} catch (IcatException e) {
 						String msg = "Value '" + entity + "' specified in 'notification.list' is not an ICAT entity";
 						logger.error(fatal, msg);
