@@ -19,7 +19,7 @@ import jakarta.json.JsonValue.ValueType;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
-import org.icatproject.utils.IcatUnits.SystemValue;
+import org.icatproject.utils.IcatUnits.Value;
 
 /**
  * Utilities for building queries in Json understood by Opensearch.
@@ -425,12 +425,12 @@ public class OpensearchQuery {
 		JsonNumber to = nestedFilter.getJsonNumber("to");
 		String units = nestedFilter.getString("units", null);
 		if (units != null) {
-			SystemValue fromValue = opensearchApi.icatUnits.new SystemValue(from.doubleValue(), units);
-			SystemValue toValue = opensearchApi.icatUnits.new SystemValue(to.doubleValue(), units);
-			if (fromValue.value != null && toValue.value != null) {
+			Value fromValue = opensearchApi.icatUnits.convertValueToSiUnits(from.doubleValue(), units);
+			Value toValue = opensearchApi.icatUnits.convertValueToSiUnits(to.doubleValue(), units);
+			if (fromValue != null && toValue != null) {
 				// If we were able to parse the units, apply query to the SI value
 				String fieldSI = field + "." + nestedField + "SI";
-				queryObjectsList.add(buildDoubleRangeQuery(fieldSI, fromValue.value, toValue.value));
+				queryObjectsList.add(buildDoubleRangeQuery(fieldSI, fromValue.numericalValue, toValue.numericalValue));
 			} else {
 				// If units could not be parsed, make them part of the query on the raw data
 				queryObjectsList.add(buildRangeQuery(field + "." + nestedField, from, to));
@@ -460,13 +460,13 @@ public class OpensearchQuery {
 		JsonNumber exact = nestedFilter.getJsonNumber("exact");
 		String units = nestedFilter.getString("units", null);
 		if (units != null) {
-			SystemValue exactValue = opensearchApi.icatUnits.new SystemValue(exact.doubleValue(), units);
-			if (exactValue.value != null) {
+			Value exactValue = opensearchApi.icatUnits.convertValueToSiUnits(exact.doubleValue(), units);
+			if (exactValue != null) {
 				// If we were able to parse the units, apply query to the SI value
-				JsonObject bottomQuery = buildDoubleRangeQuery(field + ".rangeBottomSI", null, exactValue.value);
-				JsonObject topQuery = buildDoubleRangeQuery(field + ".rangeTopSI", exactValue.value, null);
+				JsonObject bottomQuery = buildDoubleRangeQuery(field + ".rangeBottomSI", null, exactValue.numericalValue);
+				JsonObject topQuery = buildDoubleRangeQuery(field + ".rangeTopSI", exactValue.numericalValue, null);
 				JsonObject inRangeQuery = buildBoolQuery(Arrays.asList(bottomQuery, topQuery), null);
-				JsonObject exactQuery = buildTermQuery(field + "." + nestedField + "SI", exactValue.value);
+				JsonObject exactQuery = buildTermQuery(field + "." + nestedField + "SI", exactValue.numericalValue);
 				queryObjectsList.add(buildBoolQuery(null, Arrays.asList(inRangeQuery, exactQuery)));
 			} else {
 				// If units could not be parsed, make them part of the query on the raw data

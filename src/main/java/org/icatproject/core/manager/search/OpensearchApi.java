@@ -50,7 +50,7 @@ import org.icatproject.core.entity.Technique;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.manager.Rest;
 import org.icatproject.utils.IcatUnits;
-import org.icatproject.utils.IcatUnits.SystemValue;
+import org.icatproject.utils.IcatUnits.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1081,17 +1081,15 @@ public class OpensearchApi extends SearchApi {
 	 * @param rebuilder    JsonObjectBuilder being used to create a new document
 	 *                     with converted units.
 	 * @param valueString  Field name of the numeric value.
-	 * @param numericValue Value to possibly be converted.
+	 * @param numericalValue Value to possibly be converted.
 	 */
 	private void convertUnits(JsonObject document, JsonObjectBuilder rebuilder, String valueString,
-			Double numericValue) {
+			double numericalValue) {
 		String unitString = document.getString("type.units");
-		SystemValue systemValue = icatUnits.new SystemValue(numericValue, unitString);
-		if (systemValue.units != null) {
-			rebuilder.add("type.unitsSI", systemValue.units);
-		}
-		if (systemValue.value != null) {
-			rebuilder.add(valueString, systemValue.value);
+		Value value = icatUnits.convertValueToSiUnits(numericalValue, unitString);
+		if (value != null) {
+			rebuilder.add("type.unitsSI", value.units);
+			rebuilder.add(valueString + "SI", value.numericalValue);
 		}
 	}
 
@@ -1111,18 +1109,18 @@ public class OpensearchApi extends SearchApi {
 		for (String key : document.keySet()) {
 			rebuilder.add(key, document.get(key));
 		}
-		Double numericValue = document.containsKey("numericValue")
-				? document.getJsonNumber("numericValue").doubleValue()
-				: null;
-		Double rangeBottom = document.containsKey("rangeBottom")
-				? document.getJsonNumber("rangeBottom").doubleValue()
-				: null;
-		Double rangeTop = document.containsKey("rangeTop")
-				? document.getJsonNumber("rangeTop").doubleValue()
-				: null;
-		convertUnits(document, rebuilder, "numericValueSI", numericValue);
-		convertUnits(document, rebuilder, "rangeBottomSI", rangeBottom);
-		convertUnits(document, rebuilder, "rangeTopSI", rangeTop);
+		if (document.containsKey("numericValue")) {
+			double numericValue = document.getJsonNumber("numericValue").doubleValue();
+			convertUnits(document, rebuilder, "numericValueSI", numericValue);
+		}
+		if (document.containsKey("rangeBottom")) {
+			double rangeBottom = document.getJsonNumber("rangeBottom").doubleValue();
+			convertUnits(document, rebuilder, "rangeBottomSI", rangeBottom);
+		}
+		if (document.containsKey("rangeTop")) {
+			double rangeTop = document.getJsonNumber("rangeTop").doubleValue();
+			convertUnits(document, rebuilder, "rangeTopSI", rangeTop);
+		}
 		document = rebuilder.build();
 		return document;
 	}
