@@ -2,8 +2,12 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +17,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A type of data set")
 @SuppressWarnings("serial")
@@ -34,6 +40,8 @@ public class DatasetType extends EntityBaseBean implements Serializable {
 	@Comment("A short name identifying this data set type within the facility")
 	@Column(name = "NAME", nullable = false)
 	private String name;
+
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("type.name", "type.id"));
 
 	/* Needed for JPA */
 	public DatasetType() {
@@ -69,6 +77,12 @@ public class DatasetType extends EntityBaseBean implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "type.name", name);
+		SearchApi.encodeLong(gen, "type.id", id);
 	}
 
 }

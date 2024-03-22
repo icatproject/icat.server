@@ -114,7 +114,7 @@ public class EntityInfoHandler {
 		final Map<String, Method> gettersFromName;
 		final Map<String, Relationship> relationshipsByName;
 		final Set<Field> relInKey;
-		final boolean hasLuceneDoc;
+		final boolean hasSearchDoc;
 
 		public PrivateEntityInfo(Set<Relationship> rels, List<Field> notNullableFields, Map<Field, Method> getters,
 				Map<String, Method> gettersFromName, Map<Field, Integer> stringFields, Map<Field, Method> setters,
@@ -122,7 +122,7 @@ public class EntityInfoHandler {
 				Map<Field, String> fieldComments, Set<Relationship> ones, Set<Field> attributes,
 				Constructor<? extends EntityBaseBean> constructor, Map<String, Field> fieldByName, String exportHeader,
 				String exportNull, List<Field> fields, String exportHeaderAll,
-				Map<String, Relationship> relationshipsByName, Set<Field> relInKey, boolean hasLuceneDoc) {
+				Map<String, Relationship> relationshipsByName, Set<Field> relInKey, boolean hasSearchDoc) {
 
 			// Use copyOf to create unmodifiable collections
 			this.relatedEntities = Set.copyOf(rels);
@@ -145,7 +145,7 @@ public class EntityInfoHandler {
 			this.exportHeaderAll = exportHeaderAll;
 			this.relationshipsByName = Map.copyOf(relationshipsByName);
 			this.relInKey = Set.copyOf(relInKey);
-			this.hasLuceneDoc = hasLuceneDoc;
+			this.hasSearchDoc = hasSearchDoc;
 		}
 	}
 
@@ -567,17 +567,17 @@ public class EntityInfoHandler {
 			}
 		}
 
-		boolean hasLuceneDoc = true;
+		boolean hasSearchDoc = true;
 		try {
 			objectClass.getDeclaredMethod("getDoc", JsonGenerator.class);
 		} catch (NoSuchMethodException e) {
-			hasLuceneDoc = false;
+			hasSearchDoc = false;
 		}
 
 		return new PrivateEntityInfo(rels, notNullableFields, getters, gettersFromName, stringFields, setters, updaters,
 				constraintFields, commentString, comments, ones, attributes, constructor, fieldsByName,
 				exportHeader.toString(), exportNull.toString(), fields, exportHeaderAll.toString(), relationshipsByName,
-				relInKey, hasLuceneDoc);
+				relInKey, hasSearchDoc);
 	}
 
 	private static PrivateEntityInfo getPrivateEntityInfo(Class<? extends EntityBaseBean> objectClass) {
@@ -765,8 +765,8 @@ public class EntityInfoHandler {
 	}
 
 	/** Return true if getDoc() method exists else false */
-	public static boolean hasLuceneDoc(Class<? extends EntityBaseBean> objectClass) {
-		return getPrivateEntityInfo(objectClass).hasLuceneDoc;
+	public static boolean hasSearchDoc(Class<? extends EntityBaseBean> objectClass) {
+		return getPrivateEntityInfo(objectClass).hasSearchDoc;
 	}
 
 	private static int setRelHeader(int n, Field field, StringBuilder exportHeader, StringBuilder exportNull, boolean con) {
