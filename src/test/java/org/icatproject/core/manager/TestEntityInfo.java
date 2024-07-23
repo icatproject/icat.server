@@ -2,6 +2,7 @@ package org.icatproject.core.manager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
@@ -431,6 +432,14 @@ public class TestEntityInfo {
 		testRelInkey(Datafile.class, "dataset");
 		testRelInkey(Facility.class);
 		testRelInkey(DataCollectionDatafile.class, "dataCollection", "datafile");
+	}
+
+	@Test
+	public void testAbstractEntities() throws Exception {
+		assertNotNull(EntityInfoHandler.getClass("Parameter"));
+		assertNotNull(EntityInfoHandler.getEntityInfo("Parameter"));
+		assertNotNull(EntityInfoHandler.getClass("EntityBaseBean"));
+		assertNotNull(EntityInfoHandler.getEntityInfo("EntityBaseBean"));
 	}
 
 	private void testRelInkey(Class<? extends EntityBaseBean> klass, String... fieldNames) throws Exception {
