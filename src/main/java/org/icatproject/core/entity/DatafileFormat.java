@@ -2,8 +2,12 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +17,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A data file format")
 @SuppressWarnings("serial")
@@ -50,6 +56,8 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 	@Comment("The version if needed.  The version code may be part of the basic name")
 	@Column(name = "VERSION", nullable = false)
 	private String version;
+
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("datafileFormat.name", "datafileFormat.id"));
 
 	/* Needed for JPA */
 	public DatafileFormat() {
@@ -93,6 +101,12 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "datafileFormat.name", name);
+		SearchApi.encodeLong(gen, "datafileFormat.id", id);
 	}
 
 }

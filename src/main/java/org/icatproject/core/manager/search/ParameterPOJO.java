@@ -1,4 +1,4 @@
-package org.icatproject.core.manager;
+package org.icatproject.core.manager.search;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -6,13 +6,13 @@ import java.util.Date;
 @SuppressWarnings("serial")
 public class ParameterPOJO implements Serializable {
 
-	String name;
-	String units;
-	String stringValue;
-	Date lowerDateValue;
-	Date upperDateValue;
-	Double lowerNumericValue;
-	Double upperNumericValue;
+	public String name;
+	public String units;
+	public String stringValue;
+	public Date lowerDateValue;
+	public Date upperDateValue;
+	public Double lowerNumericValue;
+	public Double upperNumericValue;
 
 	public ParameterPOJO(String name, String units, String stringValue) {
 		this.name = name;
@@ -43,7 +43,7 @@ public class ParameterPOJO implements Serializable {
 		if (stringValue != null) {
 			sb.append(" stringValue:" + stringValue);
 		} else if (lowerDateValue != null) {
-			sb.append(" lowerDateValue:" + lowerDateValue + " upperDateValue:" + upperDateValue);
+			sb.append(" lowerDateValue:" + lowerDateValue.getTime() + " upperDateValue:" + upperDateValue.getTime());
 		} else if (lowerNumericValue != null) {
 			sb.append(", lowerNumericValue:" + lowerNumericValue + " upperNumericValue:" + upperNumericValue);
 		}
