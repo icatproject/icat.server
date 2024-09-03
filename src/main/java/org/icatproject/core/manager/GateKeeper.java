@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -40,7 +38,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
-import org.icatproject.core.entity.PublicStep;
 import org.icatproject.core.entity.Rule;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.slf4j.Logger;
@@ -73,17 +70,21 @@ public class GateKeeper {
 
 	@PersistenceContext(unitName = "icat")
 	private EntityManager gateKeeperManager;
+
 	private final Logger logger = LoggerFactory.getLogger(GateKeeper.class);
 	Marker fatal = MarkerFactory.getMarker("FATAL");
 
 	private int maxIdsInQuery;
 
 	@EJB
+	GateKeeperHelper gateKeeperHelper;
+
+	@EJB
 	PropertyHandler propertyHandler;
 
-	private Map<String, Set<String>> publicSteps = new ConcurrentSkipListMap<>();
+	private Map<String, Set<String>> publicSteps;
 
-	private Set<String> publicTables = new ConcurrentSkipListSet<>();
+	private Set<String> publicTables;
 
 	private Set<String> rootUserNames;
 
@@ -105,17 +106,16 @@ public class GateKeeper {
 	 */
 	public boolean allowed(Relationship r) {
 		String beanName = r.getDestinationBean().getSimpleName();
-		if (publicTables.contains(beanName)) {
+		if (getPublicTables().contains(beanName)) {
 			return true;
 		}
+
 		String originBeanName = r.getOriginBean().getSimpleName();
-		if (publicStepsStale) {
-			updatePublicSteps();
-		}
-		Set<String> fieldNames = publicSteps.get(originBeanName);
+		Set<String> fieldNames = getPublicSteps().get(originBeanName);
 		if (fieldNames != null && fieldNames.contains(r.getField().getName())) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -155,6 +155,13 @@ public class GateKeeper {
 		}
 	}
 
+	private Map<String, Set<String>> getPublicSteps() {
+		if (publicStepsStale) {
+			updatePublicSteps();
+		}
+		return publicSteps;
+	}
+
 	public Set<String> getPublicTables() {
 		if (publicTablesStale) {
 			updatePublicTables();
@@ -177,10 +184,7 @@ public class GateKeeper {
 			return beans;
 		}
 
-		TypedQuery<String> query = manager.createNamedQuery(Rule.INCLUDE_QUERY, String.class)
-				.setParameter("member", userId).setParameter("bean", simpleName);
-
-		List<String> restrictions = query.getResultList();
+		List<String> restrictions = gateKeeperHelper.getRules(Rule.INCLUDE_QUERY, userId, simpleName);
 		logger.debug("Got " + restrictions.size() + " authz queries for READ by " + userId + " to a "
 				+ objectClass.getSimpleName());
 
@@ -295,9 +299,7 @@ public class GateKeeper {
 		}
 
 		logger.debug("Checking " + qName + " " + user + " " + simpleName);
-		TypedQuery<String> query = manager.createNamedQuery(qName, String.class).setParameter("member", user)
-				.setParameter("bean", simpleName);
-		List<String> restrictions = query.getResultList();
+		List<String> restrictions = gateKeeperHelper.getRules(qName, user, simpleName);
 		logger.debug(
 				"Got " + restrictions.size() + " authz queries for " + access + " by " + user + " to a " + simpleName);
 
@@ -375,10 +377,7 @@ public class GateKeeper {
 				if (updaters.contains(field)) {
 					String qName = Rule.UPDATE_ATTRIBUTE_QUERY;
 					logger.debug("Checking " + qName + " " + user + " " + simpleName + "." + fName);
-					TypedQuery<String> query = manager.createNamedQuery(qName, String.class)
-							.setParameter("member", user).setParameter("bean", simpleName)
-							.setParameter("attribute", fName);
-					List<String> restrictions = query.getResultList();
+					List<String> restrictions = gateKeeperHelper.getRules(qName, user, simpleName, fName);
 					logger.debug("Got " + restrictions.size() + " authz queries for UPDATE by " + user + " to a "
 							+ simpleName + "." + fName);
 					boolean ok = false;
@@ -477,33 +476,14 @@ public class GateKeeper {
 	}
 
 	public void updatePublicSteps() {
-		List<PublicStep> steps = gateKeeperManager.createNamedQuery(PublicStep.GET_ALL_QUERY, PublicStep.class)
-				.getResultList();
-		publicSteps.clear();
-		for (PublicStep step : steps) {
-			Set<String> fieldNames = publicSteps.get(step.getOrigin());
-			if (fieldNames == null) {
-				fieldNames = new ConcurrentSkipListSet<>();
-				publicSteps.put(step.getOrigin(), fieldNames);
-			}
-			fieldNames.add(step.getField());
-		}
+		publicSteps = gateKeeperHelper.getPublicSteps();
 		publicStepsStale = false;
-		logger.debug("There are " + steps.size() + " publicSteps");
+		logger.debug("There are " + publicSteps.size() + " publicSteps: " + publicSteps.toString());
 	}
 
 	public void updatePublicTables() {
-		try {
-			List<String> tableNames = gateKeeperManager.createNamedQuery(Rule.PUBLIC_QUERY, String.class)
-					.getResultList();
-			publicTables.clear();
-			publicTables.addAll(tableNames);
-			publicTablesStale = false;
-			logger.debug("There are " + publicTables.size() + " publicTables");
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Unexpected exception", e);
-		}
+		publicTables = gateKeeperHelper.getPublicTables();
+		publicTablesStale = false;
+		logger.debug("There are " + publicTables.size() + " publicTables: " + publicTables.toString());
 	}
-
 }
