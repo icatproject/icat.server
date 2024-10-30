@@ -13,8 +13,8 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
+import org.icatproject.core.manager.search.SearchApi;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.LuceneApi;
 
 @Comment("A parameter associated with a data set")
 @SuppressWarnings("serial")
@@ -56,6 +56,6 @@ public class DatasetParameter extends Parameter implements Serializable {
 	@Override
 	public void getDoc(JsonGenerator gen) {
 		super.getDoc(gen);
-		LuceneApi.encodeSortedDocValuesField(gen, "dataset", dataset.id);
+		SearchApi.encodeLong(gen, "dataset.id", dataset.id);
 	}
 }

@@ -2,8 +2,12 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +17,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A type of investigation")
 @SuppressWarnings("serial")
@@ -51,6 +57,8 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
 		this.investigations = investigations;
 	}
 
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("type.name", "type.id"));
+
 	/* Needed for JPA */
 	public InvestigationType() {
 	}
@@ -69,6 +77,12 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	@Override
+	public void getDoc(JsonGenerator gen) {
+		SearchApi.encodeString(gen, "type.name", name);
+		SearchApi.encodeLong(gen, "type.id", id);
 	}
 
 }
