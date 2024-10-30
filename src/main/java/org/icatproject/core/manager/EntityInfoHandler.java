@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
@@ -70,6 +71,7 @@ import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.Keyword;
+import org.icatproject.core.entity.Parameter;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.PermissibleStringValue;
 import org.icatproject.core.entity.PublicStep;
@@ -223,6 +225,10 @@ public class EntityInfoHandler {
 			InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class,
 			InvestigationFacilityCycle.class);
 
+	// All entities, plus the abstract classes Parameter and EntityBaseBean
+	private static final List<Class<? extends EntityBaseBean>> EXTENDED_ENTITIES =
+		Stream.concat(ENTITIES.stream(), List.of(Parameter.class, EntityBaseBean.class).stream()).collect(Collectors.toUnmodifiableList());
+
 	// All entity names in export order
 	private static final List<String> EXPORT_ENTITY_NAMES =
 		ENTITIES.stream().map((entity) -> entity.getSimpleName()).collect(Collectors.toUnmodifiableList());
@@ -233,11 +239,11 @@ public class EntityInfoHandler {
 
 	// Map of entity name -> entity class
 	private static final Map<String, Class<? extends EntityBaseBean>> ENTITY_NAME_MAP =
-		ENTITIES.stream().collect(Collectors.toUnmodifiableMap((entity) -> entity.getSimpleName(), (entity) -> entity));
+		EXTENDED_ENTITIES.stream().collect(Collectors.toUnmodifiableMap((entity) -> entity.getSimpleName(), (entity) -> entity));
 
 	// Map of entity class -> PrivateEntityInfo
 	private static final Map<Class<? extends EntityBaseBean>, PrivateEntityInfo> PRIVATE_ENTITY_INFO_MAP =
-		ENTITIES.stream().collect(Collectors.toUnmodifiableMap((entity) -> entity, (entity) -> buildEi(entity)));
+		EXTENDED_ENTITIES.stream().collect(Collectors.toUnmodifiableMap((entity) -> entity, (entity) -> buildEi(entity)));
 
 	public static Class<? extends EntityBaseBean> getClass(String tableName) throws IcatException {
 		Class<? extends EntityBaseBean> entityClass = ENTITY_NAME_MAP.get(tableName);
