@@ -2,14 +2,22 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Represents an experimental technique")
 @SuppressWarnings("serial")
@@ -29,6 +37,9 @@ public class Technique extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "technique")
 	private List<DatasetTechnique> datasetTechniques = new ArrayList<DatasetTechnique>();
+
+	public static Set<String> docFields = new HashSet<>(
+			Arrays.asList("technique.id", "technique.name", "technique.description", "technique.pid"));
 
 	public String getName() {
 		return name;
@@ -60,5 +71,13 @@ public class Technique extends EntityBaseBean implements Serializable {
 
 	public void setDatasetTechniques(List<DatasetTechnique> datasetTechniques) {
 		this.datasetTechniques = datasetTechniques;
+	}
+
+	@Override
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		SearchApi.encodeLong(gen, "technique.id", id);
+		SearchApi.encodeString(gen, "technique.name", name);
+		SearchApi.encodeNullableString(gen, "technique.description", description);
+		SearchApi.encodeNullableString(gen, "technique.pid", pid);
 	}
 }

@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.JoinColumn;
@@ -12,6 +13,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
+import org.icatproject.core.manager.search.SearchApi;
 import org.icatproject.core.manager.GateKeeper;
 
 @Comment("A parameter associated with a sample")
@@ -49,6 +51,12 @@ public class SampleParameter extends Parameter implements Serializable {
 
 	public void setSample(Sample sample) {
 		this.sample = sample;
+	}
+
+	@Override
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		super.getDoc(manager, gen);
+		SearchApi.encodeLong(gen, "sample.id", sample.id);
 	}
 
 }

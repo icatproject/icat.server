@@ -2,14 +2,22 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("An experimental facility")
 @SuppressWarnings("serial")
@@ -66,6 +74,8 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
 	private List<DataPublicationType> dataPublicationTypes = new ArrayList<DataPublicationType>();
+
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("facility.name", "facility.id"));
 
 	/* Needed for JPA */
 	public Facility() {
@@ -197,6 +207,12 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	public void setDataPublicationTypes(List<DataPublicationType> dataPublicationTypes) {
 		this.dataPublicationTypes = dataPublicationTypes;
+	}
+
+	@Override
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		SearchApi.encodeString(gen, "facility.name", name);
+		SearchApi.encodeLong(gen, "facility.id", id);
 	}
 
 }

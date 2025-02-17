@@ -5,12 +5,14 @@ import java.io.Serializable;
 import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Many to many relationship between investigation and user. It is expected that this will show the association of "
 		+ "individual users with an investigation which might be derived from the proposal. It may also be used as the "
@@ -38,12 +40,13 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
-		if (user.getFullName() != null) {
-			LuceneApi.encodeTextfield(gen, "text", user.getFullName());
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		if (user.getName() == null) {
+			user = manager.find(user.getClass(), user.id);
 		}
-		LuceneApi.encodeStringField(gen, "name", user.getName());
-		LuceneApi.encodeSortedDocValuesField(gen, "investigation", investigation.id);
+		user.getDoc(manager, gen);
+		SearchApi.encodeLong(gen, "investigation.id", investigation.id);
+		SearchApi.encodeLong(gen, "id", id);
 	}
 
 	public String getRole() {

@@ -3,12 +3,15 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -18,7 +21,10 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 
-import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.core.manager.EntityInfoHandler.Relationship;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("An investigation or experiment")
 @SuppressWarnings("serial")
@@ -107,6 +113,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@Comment("Identifier for the visit to which this investigation is related")
 	@Column(name = "VISIT_ID", nullable = false)
 	private String visitId;
+
+	private static final Map<String, Relationship[]> documentFields = new HashMap<>();
 
 	/* Needed for JPA */
 	public Investigation() {
@@ -313,33 +321,100 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
-		StringBuilder sb = new StringBuilder(visitId + " " + name + " " + facility.getName() + " " + type.getName());
-		if (summary != null) {
-			sb.append(" " + summary);
-		}
-		if (doi != null) {
-			sb.append(" " + doi);
-		}
-		if (title != null) {
-			sb.append(" " + title);
-		}
-		LuceneApi.encodeTextfield(gen, "text", sb.toString());
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		SearchApi.encodeString(gen, "name", name);
+		SearchApi.encodeString(gen, "visitId", visitId);
+		SearchApi.encodeString(gen, "title", title);
+		SearchApi.encodeNullableString(gen, "summary", summary);
+		SearchApi.encodeNullableString(gen, "doi", doi);
 
 		if (startDate != null) {
-			LuceneApi.encodeStringField(gen, "startDate", startDate);
+			SearchApi.encodeLong(gen, "startDate", startDate);
+			SearchApi.encodeLong(gen, "date", startDate);
 		} else {
-			LuceneApi.encodeStringField(gen, "startDate", createTime);
+			SearchApi.encodeLong(gen, "startDate", createTime);
+			SearchApi.encodeLong(gen, "date", createTime);
 		}
 
 		if (endDate != null) {
-			LuceneApi.encodeStringField(gen, "endDate", endDate);
+			SearchApi.encodeLong(gen, "endDate", endDate);
 		} else {
-			LuceneApi.encodeStringField(gen, "endDate", modTime);
+			SearchApi.encodeLong(gen, "endDate", modTime);
 		}
+		SearchApi.encodeLong(gen, "fileSize", fileSize, 0L);
+		SearchApi.encodeLong(gen, "fileCount", fileCount, 0L);
 
-		LuceneApi.encodeSortedDocValuesField(gen, "id", id);
+		SearchApi.encodeLong(gen, "id", id);
 
-		LuceneApi.encodeStoredId(gen, id);
+		if (facility.getName() == null) {
+			facility = manager.find(facility.getClass(), facility.id);
+		}
+		facility.getDoc(manager, gen);
+
+		if (type.getName() == null) {
+			type = manager.find(type.getClass(), type.id);
+		}
+		type.getDoc(manager, gen);
+	}
+
+	/**
+	 * Gets the fields used in the search component for this entity, and the
+	 * relationships that would restrict the content of those fields.
+	 * 
+	 * @return Map of field names (as they appear on the search document) against
+	 *         the Relationships that need to be allowed for that field to be
+	 *         viewable. If there are no restrictive relationships, then the value
+	 *         will be null.
+	 * @throws IcatException If the EntityInfoHandler cannot find one of the
+	 *                       Relationships.
+	 */
+	public static Map<String, Relationship[]> getDocumentFields() throws IcatException {
+		if (documentFields.size() == 0) {
+			Relationship[] typeRelationships = { EntityInfoHandler.getRelationshipsByName(Investigation.class).get("type") };
+			Relationship[] facilityRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("facility") };
+			Relationship[] investigationFacilityCyclesRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("investigationFacilityCycles") };
+			Relationship[] instrumentRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"),
+					EntityInfoHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument") };
+			Relationship[] parameterRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("parameters") };
+			Relationship[] parameterTypeRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("parameters"),
+					EntityInfoHandler.getRelationshipsByName(InvestigationParameter.class).get("type") };
+			Relationship[] sampleRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("samples") };
+			Relationship[] sampleTypeRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("samples"),
+					EntityInfoHandler.getRelationshipsByName(Sample.class).get("type") };
+			documentFields.put("name", null);
+			documentFields.put("visitId", null);
+			documentFields.put("title", null);
+			documentFields.put("summary", null);
+			documentFields.put("doi", null);
+			documentFields.put("startDate", null);
+			documentFields.put("endDate", null);
+			documentFields.put("date", null);
+			documentFields.put("fileSize", null);
+			documentFields.put("fileCount", null);
+			documentFields.put("id", null);
+			documentFields.put("facility.name", facilityRelationships);
+			documentFields.put("facility.id", null);
+			documentFields.put("type.name", typeRelationships);
+			documentFields.put("type.id", null);
+			documentFields.put("InvestigationFacilityCycle facilityCycle.id", investigationFacilityCyclesRelationships);
+			documentFields.put("InvestigationInstrument instrument.fullName", instrumentRelationships);
+			documentFields.put("InvestigationInstrument instrument.id", instrumentRelationships);
+			documentFields.put("InvestigationInstrument instrument.name", instrumentRelationships);
+			documentFields.put("InvestigationParameter type.name", parameterTypeRelationships);
+			documentFields.put("InvestigationParameter stringValue", parameterRelationships);
+			documentFields.put("InvestigationParameter numericValue", parameterRelationships);
+			documentFields.put("InvestigationParameter dateTimeValue", parameterRelationships);
+			documentFields.put("Sample sample.id", sampleRelationships);
+			documentFields.put("Sample sample.name", sampleRelationships);
+			documentFields.put("Sample type.name", sampleTypeRelationships);
+		}
+		return documentFields;
 	}
 }
