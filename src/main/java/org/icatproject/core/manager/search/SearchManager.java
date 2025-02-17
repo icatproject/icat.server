@@ -208,7 +208,7 @@ public class SearchManager {
 								String query = "SELECT e FROM " + entityName + " e WHERE e.id = " + line;
 								try {
 									EntityBaseBean entity = entityManager.createQuery(query, klass).getSingleResult();
-									updateDocument(entity);
+									updateDocument(entityManager, entity);
 								} catch (Exception e) {
 									logger.error("{} with id {} not found, continue", entityName, line);
 								}
@@ -442,10 +442,10 @@ public class SearchManager {
 		return requestedFields;
 	}
 
-	public void addDocument(EntityBaseBean bean) throws IcatException {
+	public void addDocument(EntityManager manager, EntityBaseBean bean) throws IcatException {
 		Class<? extends EntityBaseBean> klass = bean.getClass();
 		if (EntityInfoHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
-			enqueue(SearchApi.encodeOperation("create", bean));
+			enqueue(SearchApi.encodeOperation(manager, "create", bean));
 			enqueueAggregation(bean);
 		}
 	}
@@ -800,10 +800,10 @@ public class SearchManager {
 		}
 	}
 
-	public void updateDocument(EntityBaseBean bean) throws IcatException {
+	public void updateDocument(EntityManager manager, EntityBaseBean bean) throws IcatException {
 		Class<? extends EntityBaseBean> klass = bean.getClass();
 		if (EntityInfoHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
-			enqueue(SearchApi.encodeOperation("update", bean));
+			enqueue(SearchApi.encodeOperation(manager, "update", bean));
 			enqueueAggregation(bean);
 		}
 	}

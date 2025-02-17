@@ -11,6 +11,7 @@ import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -320,16 +321,12 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "name", name);
 		SearchApi.encodeString(gen, "visitId", visitId);
 		SearchApi.encodeString(gen, "title", title);
-		if (summary != null) {
-			SearchApi.encodeString(gen, "summary", summary);
-		}
-		if (doi != null) {
-			SearchApi.encodeString(gen, "doi", doi);
-		}
+		SearchApi.encodeNullableString(gen, "summary", summary);
+		SearchApi.encodeNullableString(gen, "doi", doi);
 
 		if (startDate != null) {
 			SearchApi.encodeLong(gen, "startDate", startDate);
@@ -344,12 +341,20 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		} else {
 			SearchApi.encodeLong(gen, "endDate", modTime);
 		}
-		SearchApi.encodeLong(gen, "fileSize", fileSize);
-		SearchApi.encodeLong(gen, "fileCount", fileCount);
+		SearchApi.encodeLong(gen, "fileSize", fileSize, 0L);
+		SearchApi.encodeLong(gen, "fileCount", fileCount, 0L);
 
 		SearchApi.encodeLong(gen, "id", id);
-		facility.getDoc(gen);
-		type.getDoc(gen);
+
+		if (facility.getName() == null) {
+			facility = manager.find(facility.getClass(), facility.id);
+		}
+		facility.getDoc(manager, gen);
+
+		if (type.getName() == null) {
+			type = manager.find(type.getClass(), type.id);
+		}
+		type.getDoc(manager, gen);
 	}
 
 	/**

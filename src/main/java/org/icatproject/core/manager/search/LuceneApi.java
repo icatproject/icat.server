@@ -100,7 +100,7 @@ public class LuceneApi extends SearchApi {
 						EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
 						if (bean != null) {
 							gen.writeStartObject();
-							bean.getDoc(gen);
+							bean.getDoc(manager, gen);
 							gen.writeEnd();
 						}
 					}

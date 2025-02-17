@@ -363,9 +363,9 @@ public class ICAT {
 		if (e.getType() == IcatExceptionType.INTERNAL) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			e.printStackTrace(new PrintStream(baos));
-			logger.debug("Internal exception " + baos.toString());
+			logger.error("Internal exception " + baos.toString());
 		} else {
-			logger.debug("IcatException " + e.getType() + " " + e.getMessage()
+			logger.error("IcatException " + e.getType() + " " + e.getMessage()
 					+ (e.getOffset() >= 0 ? " at offset " + e.getOffset() : ""));
 		}
 	}

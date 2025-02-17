@@ -123,7 +123,26 @@ public abstract class SearchApi {
 	 * @param name  Name of the field.
 	 * @param value Long value to encode as a long.
 	 */
-	public static void encodeLong(JsonGenerator gen, String name, Long value) {
+	public static void encodeLong(JsonGenerator gen, String name, Long value, long defaultValue) {
+		if (value == null){
+			gen.write(name, defaultValue);
+		} else {
+			gen.write(name, value);
+		}
+	}
+
+	/**
+	 * Writes a key value pair to the JsonGenerator being used to encode an entity.
+	 * 
+	 * @param gen   JsonGenerator being used to encode.
+	 * @param name  Name of the field.
+	 * @param value Long value to encode as a long.
+	 * @throws IcatException 
+	 */
+	public static void encodeLong(JsonGenerator gen, String name, Long value) throws IcatException {
+		if (value == null){
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Attempting to set " + name + " to null");
+		}
 		gen.write(name, value);
 	}
 
@@ -137,7 +156,7 @@ public abstract class SearchApi {
 	 *         <code>{`operation`: {"_index": `entityName`, "_id": `id`, "doc": {...}}}</code>
 	 * @throws IcatException
 	 */
-	public static String encodeOperation(String operation, EntityBaseBean bean) throws IcatException {
+	public static String encodeOperation(EntityManager manager, String operation, EntityBaseBean bean) throws IcatException {
 		Long icatId = bean.getId();
 		if (icatId == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, bean + " had null id");
@@ -148,7 +167,7 @@ public abstract class SearchApi {
 			gen.writeStartObject().writeStartObject(operation);
 			gen.write("_index", entityName).write("_id", icatId);
 			gen.writeStartObject("doc");
-			bean.getDoc(gen);
+			bean.getDoc(manager, gen);
 			gen.writeEnd().writeEnd().writeEnd();
 		}
 		return baos.toString();
@@ -162,7 +181,11 @@ public abstract class SearchApi {
 	 * @param value String value to encode as a string.
 	 */
 	public static void encodeString(JsonGenerator gen, String name, String value) {
-		gen.write(name, value);
+		if (value != null) {
+			gen.write(name, value);
+		} else {
+			logger.warn("Cannot encode field {} as it was unexpectedly null", name);
+		}
 	}
 
 	/**
@@ -173,7 +196,7 @@ public abstract class SearchApi {
 	 * @param name  Name of the field.
 	 * @param value String value to encode as a string.
 	 */
-	public static void encodeText(JsonGenerator gen, String name, String value) {
+	public static void encodeNullableString(JsonGenerator gen, String name, String value) {
 		if (value != null) {
 			gen.write(name, value);
 		}

@@ -80,8 +80,8 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 
 	// This is only used by the older create and createMany calls and not by the
 	// new Restful write call
-	public void addToSearch(SearchManager searchManager) throws IcatException {
-		searchManager.addDocument(this);
+	public void addToSearch(EntityManager manager, SearchManager searchManager) throws IcatException {
+		searchManager.addDocument(manager, this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = EntityInfoHandler.getRelatedEntities(klass);
 		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
@@ -93,7 +93,7 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
 					if (!collection.isEmpty()) {
 						for (EntityBaseBean bean : collection) {
-							bean.addToSearch(searchManager);
+							bean.addToSearch(manager, searchManager);
 						}
 					}
 				} catch (Exception e) {
@@ -437,7 +437,7 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 	 * This should be overridden by classes wishing to index things in a search
 	 * engine
 	 */
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
 	}
 
 }

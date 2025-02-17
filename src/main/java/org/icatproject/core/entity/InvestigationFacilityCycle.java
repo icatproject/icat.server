@@ -4,11 +4,13 @@ import java.io.Serializable;
 
 import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Many to many relationship between investigation and facilityCycle. "
@@ -47,7 +49,7 @@ public class InvestigationFacilityCycle extends EntityBaseBean implements Serial
     }
 
     @Override
-    public void getDoc(JsonGenerator gen) {
+    public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
         SearchApi.encodeLong(gen, "facilityCycle.id", facilityCycle.id);
         SearchApi.encodeLong(gen, "investigation.id", investigation.id);
         SearchApi.encodeLong(gen, "id", id);

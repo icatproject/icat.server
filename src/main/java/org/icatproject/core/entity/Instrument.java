@@ -8,6 +8,7 @@ import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -15,6 +16,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Used by a user within an investigation")
@@ -153,10 +155,8 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
-		if (fullName != null) {
-			SearchApi.encodeText(gen, "instrument.fullName", fullName);
-		}
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		SearchApi.encodeNullableString(gen, "instrument.fullName", fullName);
 		SearchApi.encodeString(gen, "instrument.name", name);
 		SearchApi.encodeLong(gen, "instrument.id", id);
 	}

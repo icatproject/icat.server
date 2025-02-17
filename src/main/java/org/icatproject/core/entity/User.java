@@ -11,10 +11,12 @@ import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A user of the facility")
@@ -167,10 +169,8 @@ public class User extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
-		if (fullName != null) {
-			SearchApi.encodeText(gen, "user.fullName", fullName);
-		}
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		SearchApi.encodeNullableString(gen, "user.fullName", fullName);
 		SearchApi.encodeString(gen, "user.name", name);
 		SearchApi.encodeLong(gen, "user.id", id);
 	}

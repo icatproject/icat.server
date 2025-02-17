@@ -258,7 +258,7 @@ public class EntityBeanManager {
 				long beanId = bean.getId();
 
 				if (searchActive) {
-					bean.addToSearch(searchManager);
+					bean.addToSearch(manager, searchManager);
 				}
 				userTransaction.commit();
 				if (logRequests.contains(CallType.WRITE)) {
@@ -390,7 +390,7 @@ public class EntityBeanManager {
 
 				if (searchActive) {
 					for (EntityBaseBean bean : beans) {
-						bean.addToSearch(searchManager);
+						bean.addToSearch(manager, searchManager);
 					}
 				}
 
@@ -2140,7 +2140,7 @@ public class EntityBeanManager {
 					transmitter.processMessage("update", ip, baos.toString(), startMillis);
 				}
 				if (searchActive) {
-					searchManager.updateDocument(beanManaged);
+					searchManager.updateDocument(manager, beanManaged);
 				}
 				return notification;
 			} catch (IcatException e) {
@@ -2240,10 +2240,10 @@ public class EntityBeanManager {
 
 				if (searchActive) {
 					for (EntityBaseBean eb : creates) {
-						searchManager.addDocument(eb);
+						searchManager.addDocument(manager, eb);
 					}
 					for (EntityBaseBean eb : updates) {
-						searchManager.updateDocument(eb);
+						searchManager.updateDocument(manager, eb);
 					}
 				}
 
@@ -2593,7 +2593,7 @@ public class EntityBeanManager {
 
 		if (searchActive) {
 			for (EntityBaseBean c : clonedTo.values()) {
-				searchManager.addDocument(c);
+				searchManager.addDocument(manager, c);
 			}
 		}
 

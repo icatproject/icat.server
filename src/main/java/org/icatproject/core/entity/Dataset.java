@@ -11,6 +11,7 @@ import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -233,14 +234,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "name", name);
-		if (description != null) {
-			SearchApi.encodeString(gen, "description", description);
-		}
-		if (doi != null) {
-			SearchApi.encodeString(gen, "doi", doi);
-		}
+		SearchApi.encodeNullableString(gen, "description", description);
+		SearchApi.encodeNullableString(gen, "doi", doi);
 		if (startDate != null) {
 			SearchApi.encodeLong(gen, "startDate", startDate);
 			SearchApi.encodeLong(gen, "date", startDate);
@@ -253,10 +250,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		} else {
 			SearchApi.encodeLong(gen, "endDate", modTime);
 		}
-		SearchApi.encodeLong(gen, "fileSize", fileSize);
-		SearchApi.encodeLong(gen, "fileCount", fileCount);
+		SearchApi.encodeLong(gen, "fileSize", fileSize, 0L);
+		SearchApi.encodeLong(gen, "fileCount", fileCount, 0L);
 		SearchApi.encodeLong(gen, "id", id);
 		if (investigation != null) {
+			if (investigation.getName() == null || investigation.getVisitId() == null
+					|| investigation.getTitle() == null || investigation.getCreateTime() == null) {
+				investigation = manager.find(investigation.getClass(), investigation.id);
+			}
 			SearchApi.encodeLong(gen, "investigation.id", investigation.id);
 			SearchApi.encodeString(gen, "investigation.name", investigation.getName());
 			SearchApi.encodeString(gen, "investigation.title", investigation.getTitle());
@@ -269,9 +270,16 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		}
 
 		if (sample != null) {
-			sample.getDoc(gen);
+			if (sample.getName() == null) {
+				sample = manager.find(sample.getClass(), sample.id);
+			}
+			sample.getDoc(manager, gen);
 		}
-		type.getDoc(gen);
+
+		if (type.getName() == null) {
+			type = manager.find(type.getClass(), type.id);
+		}
+		type.getDoc(manager, gen);
 	}
 
 	/**
@@ -287,8 +295,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	 */
 	public static Map<String, Relationship[]> getDocumentFields() throws IcatException {
 		if (documentFields.size() == 0) {
-			Relationship[] sampleRelationships = { EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample") };
-			Relationship[] sampleTypeRelationships = { EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample"),
+			Relationship[] sampleRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample") };
+			Relationship[] sampleTypeRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample"),
 					EntityInfoHandler.getRelationshipsByName(Sample.class).get("type") };
 			Relationship[] typeRelationships = { EntityInfoHandler.getRelationshipsByName(Dataset.class).get("type") };
 			Relationship[] investigationRelationships = {

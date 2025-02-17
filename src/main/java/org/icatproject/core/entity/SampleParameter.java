@@ -54,8 +54,8 @@ public class SampleParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
-		super.getDoc(gen);
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		super.getDoc(manager, gen);
 		SearchApi.encodeLong(gen, "sample.id", sample.id);
 	}
 

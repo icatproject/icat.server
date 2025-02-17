@@ -162,7 +162,7 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
 		if (stringValue != null) {
 			SearchApi.encodeString(gen, "stringValue", stringValue);
 		} else if (numericValue != null) {
@@ -176,7 +176,11 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 		if (rangeBottom != null) {
 			SearchApi.encodeDouble(gen, "rangeBottom", rangeBottom);
 		}
-		type.getDoc(gen);
+
+		if (type.getName() == null || type.getUnits() == null) {
+			type = manager.find(type.getClass(), type.id);
+		}
+		type.getDoc(manager, gen);
 		SearchApi.encodeLong(gen, "id", id);
 	}
 

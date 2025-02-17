@@ -11,10 +11,12 @@ import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Represents an experimental technique")
@@ -72,10 +74,10 @@ public class Technique extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeLong(gen, "technique.id", id);
 		SearchApi.encodeString(gen, "technique.name", name);
-		SearchApi.encodeString(gen, "technique.description", description);
-		SearchApi.encodeString(gen, "technique.pid", pid);
+		SearchApi.encodeNullableString(gen, "technique.description", description);
+		SearchApi.encodeNullableString(gen, "technique.pid", pid);
 	}
 }

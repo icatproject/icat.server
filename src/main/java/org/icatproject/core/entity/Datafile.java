@@ -11,6 +11,7 @@ import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -201,21 +202,18 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "name", name);
-		if (description != null) {
-			SearchApi.encodeString(gen, "description", description);
-		}
-		if (location != null) {
-			SearchApi.encodeString(gen, "location", location);
-		}
-		if (doi != null) {
-			SearchApi.encodeString(gen, "doi", doi);
-		}
-		SearchApi.encodeLong(gen, "fileSize", fileSize);
+		SearchApi.encodeNullableString(gen, "description", description);
+		SearchApi.encodeNullableString(gen, "location", location);
+		SearchApi.encodeNullableString(gen, "doi", doi);
+		SearchApi.encodeLong(gen, "fileSize", fileSize, 0L);
 		SearchApi.encodeLong(gen, "fileCount", 1L); // Always 1, but makes sorting on fields consistent
 		if (datafileFormat != null) {
-			datafileFormat.getDoc(gen);
+			if (datafileFormat.getName() == null) {
+				datafileFormat = manager.find(datafileFormat.getClass(), datafileFormat.id);
+			}
+			datafileFormat.getDoc(manager, gen);
 		}
 		if (datafileModTime != null) {
 			SearchApi.encodeLong(gen, "date", datafileModTime);
@@ -225,15 +223,26 @@ public class Datafile extends EntityBaseBean implements Serializable {
 			SearchApi.encodeLong(gen, "date", modTime);
 		}
 		SearchApi.encodeLong(gen, "id", id);
+
 		if (dataset != null) {
+			if (dataset.getName() == null || dataset.getInvestigation() == null) {
+				dataset = manager.find(dataset.getClass(), dataset.id);
+			}
 			SearchApi.encodeLong(gen, "dataset.id", dataset.id);
 			SearchApi.encodeString(gen, "dataset.name", dataset.getName());
 			Sample sample = dataset.getSample();
 			if (sample != null) {
-				sample.getDoc(gen);
+				if (sample.getName() == null) {
+					sample = manager.find(sample.getClass(), sample.id);
+				}
+				sample.getDoc(manager, gen);
 			}
 			Investigation investigation = dataset.getInvestigation();
 			if (investigation != null) {
+				if (investigation.getName() == null || investigation.getVisitId() == null
+						|| investigation.getTitle() == null || investigation.getCreateTime() == null) {
+					investigation = manager.find(investigation.getClass(), investigation.id);
+				}
 				SearchApi.encodeLong(gen, "investigation.id", investigation.id);
 				SearchApi.encodeString(gen, "investigation.name", investigation.getName());
 				SearchApi.encodeString(gen, "visitId", investigation.getVisitId());

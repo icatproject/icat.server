@@ -11,10 +11,12 @@ import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("An experimental facility")
@@ -208,7 +210,7 @@ public class Facility extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "facility.name", name);
 		SearchApi.encodeLong(gen, "facility.id", id);
 	}

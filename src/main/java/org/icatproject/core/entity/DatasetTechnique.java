@@ -4,12 +4,14 @@ import java.io.Serializable;
 
 import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Represents a many-to-many relationship between a dataset and the experimental technique being used to create that Dataset")
@@ -43,9 +45,12 @@ public class DatasetTechnique extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeLong(gen, "id", id);
 		SearchApi.encodeLong(gen, "dataset.id", dataset.id);
-		technique.getDoc(gen);
+		if (technique.getName() == null) {
+			technique = manager.find(technique.getClass(), technique.id);
+		}
+		technique.getDoc(manager, gen);
 	}
 }

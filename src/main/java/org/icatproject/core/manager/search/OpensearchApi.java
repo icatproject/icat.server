@@ -334,7 +334,7 @@ public class OpensearchApi extends SearchApi {
 					gen.writeStartObject().writeStartObject("create");
 					gen.write("_index", entityName).write("_id", bean.getId());
 					gen.writeStartObject("doc");
-					bean.getDoc(gen);
+					bean.getDoc(manager, gen);
 					gen.writeEnd().writeEnd().writeEnd();
 				}
 			}

@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -575,7 +576,7 @@ public class EntityInfoHandler {
 
 		boolean hasSearchDoc = true;
 		try {
-			objectClass.getDeclaredMethod("getDoc", JsonGenerator.class);
+			objectClass.getDeclaredMethod("getDoc", EntityManager.class, JsonGenerator.class);
 		} catch (NoSuchMethodException e) {
 			hasSearchDoc = false;
 		}
