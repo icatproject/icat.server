@@ -176,12 +176,15 @@ public class SearchManager {
 
 		private EntityManager entityManager;
 
-		public AggregateFilesHandler(EntityManager entityManager) {
-			this.entityManager = entityManager;
+		public AggregateFilesHandler(EntityManagerFactory entityManagerFactory) {
+			entityManager = entityManagerFactory.createEntityManager();
 		}
 
 		@Override
 		public void run() {
+			EntityManagerFactory entityManagerFactory = entityManager.getEntityManagerFactory();
+			entityManager.close();
+			entityManager = entityManagerFactory.createEntityManager();
 			aggregate(datasetAggregationFileLock, datasetAggregationFile, Dataset.class);
 			aggregate(investigationAggregationFileLock, investigationAggregationFile, Investigation.class);
 		}
@@ -760,8 +763,7 @@ public class SearchManager {
 						propertyHandler.getSearchEnqueuedRequestIntervalMillis());
 				aggregateFilesIntervalMillis = propertyHandler.getSearchAggregateFilesIntervalMillis();
 				if (aggregateFilesIntervalMillis > 0) {
-					EntityManager entityManager = entityManagerFactory.createEntityManager();
-					timer.schedule(new AggregateFilesHandler(entityManager), 0L, aggregateFilesIntervalMillis);
+					timer.schedule(new AggregateFilesHandler(entityManagerFactory), 0L, aggregateFilesIntervalMillis);
 				}
 				entitiesToIndex = propertyHandler.getEntitiesToIndex();
 				logger.info("Initialised SearchManager at {}", urls);
