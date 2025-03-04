@@ -1585,14 +1585,14 @@ public class EntityBeanManager {
 				if (System.currentTimeMillis() - startMillis > searchMaxSearchTimeMillis) {
 					long maxTimeSeconds = searchMaxSearchTimeMillis / 1000;
 					String msg = "Search cancelled for exceeding " + maxTimeSeconds + " seconds";
-					logger.warn(msg + ": user=" + userName + " query=" + jo.toString());
+					logger.warn(msg + ": user={} query={}", userName, jo);
 					throw new IcatException(IcatExceptionType.INTERNAL, msg);
 				}
 			} while (results.size() < minCount);
 		} catch (IcatException e) {
 			String message = e.getMessage();
-			if (message instanceof String && message.startsWith("Search cancelled for exceeding")) {
-				logger.warn(message + ": user=" + userName + " query=" + jo.toString());
+			if (message != null && message.startsWith("Search cancelled for exceeding")) {
+				logger.warn(message + ": user={} query={}", userName, jo);
 			}
 			throw e;
 		}
