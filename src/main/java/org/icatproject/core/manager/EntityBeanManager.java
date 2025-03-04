@@ -1564,27 +1564,38 @@ public class EntityBeanManager {
 			String sort, EntityManager manager, Class<? extends EntityBaseBean> klass, long startMillis,
 			List<ScoredEntityBaseBean> results, List<String> fields) throws IcatException {
 		JsonValue lastSearchAfter;
-		do {
-			SearchResult lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, searchSearchBlockSize, sort, fields);
-			List<ScoredEntityBaseBean> allResults = lastSearchResult.getResults();
-			ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, maxCount, userName, manager,
-					klass);
-			if (lastBean == null) {
-				// Haven't stopped early, so use the Lucene provided searchAfter document
-				lastSearchAfter = lastSearchResult.getSearchAfter();
-				if (lastSearchAfter == null) {
-					return null; // If searchAfter is null, we ran out of results so stop here
+		try {
+			do {
+				SearchResult lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, searchSearchBlockSize,
+						sort, fields);
+				List<ScoredEntityBaseBean> allResults = lastSearchResult.getResults();
+				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, maxCount, userName, manager,
+						klass);
+				if (lastBean == null) {
+					// Haven't stopped early, so use the Lucene provided searchAfter document
+					lastSearchAfter = lastSearchResult.getSearchAfter();
+					if (lastSearchAfter == null) {
+						return null; // If searchAfter is null, we ran out of results so stop here
+					}
+					searchAfter = lastSearchAfter;
+				} else {
+					// Have stopped early by reaching the limit, so build a searchAfter document
+					return searchManager.buildSearchAfter(lastBean, sort);
 				}
-				searchAfter = lastSearchAfter;
-			} else {
-				// Have stopped early by reaching the limit, so build a searchAfter document
-				return searchManager.buildSearchAfter(lastBean, sort);
+				if (System.currentTimeMillis() - startMillis > searchMaxSearchTimeMillis) {
+					long maxTimeSeconds = searchMaxSearchTimeMillis / 1000;
+					String msg = "Search cancelled for exceeding " + maxTimeSeconds + " seconds";
+					logger.warn(msg + ": user=" + userName + " query=" + jo.toString());
+					throw new IcatException(IcatExceptionType.INTERNAL, msg);
+				}
+			} while (results.size() < minCount);
+		} catch (IcatException e) {
+			String message = e.getMessage();
+			if (message instanceof String && message.startsWith("Search cancelled for exceeding")) {
+				logger.warn(message + ": user=" + userName + " query=" + jo.toString());
 			}
-			if (System.currentTimeMillis() - startMillis > searchMaxSearchTimeMillis) {
-				String msg = "Search cancelled for exceeding " + searchMaxSearchTimeMillis / 1000 + " seconds";
-				throw new IcatException(IcatExceptionType.INTERNAL, msg);
-			}
-		} while (results.size() < minCount);
+			throw e;
+		}
 		return lastSearchAfter;
 	}
 
