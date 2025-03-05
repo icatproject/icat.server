@@ -3,12 +3,15 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -20,7 +23,10 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
-import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.core.manager.EntityInfoHandler.Relationship;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A data file")
 @SuppressWarnings("serial")
@@ -76,6 +82,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sourceDatafile")
 	private List<RelatedDatafile> sourceDatafiles = new ArrayList<RelatedDatafile>();
+
+	private static final Map<String, Relationship[]> documentFields = new HashMap<>();
 
 	/* Needed for JPA */
 	public Datafile() {
@@ -194,26 +202,120 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
-		StringBuilder sb = new StringBuilder(name);
-		if (description != null) {
-			sb.append(" " + description);
-		}
-		if (doi != null) {
-			sb.append(" " + doi);
-		}
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		SearchApi.encodeString(gen, "name", name);
+		SearchApi.encodeNullableString(gen, "description", description);
+		SearchApi.encodeNullableString(gen, "location", location);
+		SearchApi.encodeNullableString(gen, "doi", doi);
+		SearchApi.encodeLong(gen, "fileSize", fileSize, 0L);
+		SearchApi.encodeLong(gen, "fileCount", 1L); // Always 1, but makes sorting on fields consistent
 		if (datafileFormat != null) {
-			sb.append(" " + datafileFormat.getName());
+			if (datafileFormat.getName() == null) {
+				datafileFormat = manager.find(datafileFormat.getClass(), datafileFormat.id);
+			}
+			datafileFormat.getDoc(manager, gen);
 		}
-		LuceneApi.encodeTextfield(gen, "text", sb.toString());
 		if (datafileModTime != null) {
-			LuceneApi.encodeStringField(gen, "date", datafileModTime);
+			SearchApi.encodeLong(gen, "date", datafileModTime);
 		} else if (datafileCreateTime != null) {
-			LuceneApi.encodeStringField(gen, "date", datafileCreateTime);
+			SearchApi.encodeLong(gen, "date", datafileCreateTime);
 		} else {
-			LuceneApi.encodeStringField(gen, "date", modTime);
+			SearchApi.encodeLong(gen, "date", modTime);
 		}
-		LuceneApi.encodeStoredId(gen, id);
-		LuceneApi.encodeStringField(gen, "dataset", dataset.id);
+		SearchApi.encodeLong(gen, "id", id);
+
+		if (dataset != null) {
+			if (dataset.getName() == null || dataset.getInvestigation() == null) {
+				dataset = manager.find(dataset.getClass(), dataset.id);
+			}
+			SearchApi.encodeLong(gen, "dataset.id", dataset.id);
+			SearchApi.encodeString(gen, "dataset.name", dataset.getName());
+			Sample sample = dataset.getSample();
+			if (sample != null) {
+				if (sample.getName() == null) {
+					sample = manager.find(sample.getClass(), sample.id);
+				}
+				sample.getDoc(manager, gen);
+			}
+			Investigation investigation = dataset.getInvestigation();
+			if (investigation != null) {
+				if (investigation.getName() == null || investigation.getVisitId() == null
+						|| investigation.getTitle() == null || investigation.getCreateTime() == null) {
+					investigation = manager.find(investigation.getClass(), investigation.id);
+				}
+				SearchApi.encodeLong(gen, "investigation.id", investigation.id);
+				SearchApi.encodeString(gen, "investigation.name", investigation.getName());
+				SearchApi.encodeString(gen, "visitId", investigation.getVisitId());
+				if (investigation.getStartDate() != null) {
+					SearchApi.encodeLong(gen, "investigation.startDate", investigation.getStartDate());
+				} else if (investigation.getCreateTime() != null) {
+					SearchApi.encodeLong(gen, "investigation.startDate", investigation.getCreateTime());
+				}
+			}
+		}
 	}
+
+	/**
+	 * Gets the fields used in the search component for this entity, and the
+	 * relationships that would restrict the content of those fields.
+	 * 
+	 * @return Map of field names (as they appear on the search document) against
+	 *         the Relationships that need to be allowed for that field to be
+	 *         viewable. If there are no restrictive relationships, then the value
+	 *         will be null.
+	 * @throws IcatException If the EntityInfoHandler cannot find one of the
+	 *                       Relationships.
+	 */
+	public static Map<String, Relationship[]> getDocumentFields() throws IcatException {
+		if (documentFields.size() == 0) {
+			Relationship[] datafileFormatRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Datafile.class).get("datafileFormat") };
+			Relationship[] datasetRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Datafile.class).get("dataset") };
+			Relationship[] investigationRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Datafile.class).get("dataset"),
+					EntityInfoHandler.getRelationshipsByName(Dataset.class).get("investigation") };
+			Relationship[] investigationFacilityCyclesRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Datafile.class).get("dataset"),
+					EntityInfoHandler.getRelationshipsByName(Dataset.class).get("investigation"),
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("investigationFacilityCycles") };
+			Relationship[] instrumentRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Datafile.class).get("dataset"),
+					EntityInfoHandler.getRelationshipsByName(Dataset.class).get("investigation"),
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"),
+					EntityInfoHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument") };
+			Relationship[] sampleRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Datafile.class).get("dataset"),
+					EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample"),
+					EntityInfoHandler.getRelationshipsByName(Sample.class).get("type") };
+			Relationship[] sampleTypeRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Datafile.class).get("dataset"),
+					EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample") };
+			documentFields.put("name", null);
+			documentFields.put("description", null);
+			documentFields.put("location", null);
+			documentFields.put("doi", null);
+			documentFields.put("date", null);
+			documentFields.put("fileSize", null);
+			documentFields.put("fileCount", null);
+			documentFields.put("id", null);
+			documentFields.put("dataset.id", null);
+			documentFields.put("dataset.name", datasetRelationships);
+			documentFields.put("sample.id", datasetRelationships);
+			documentFields.put("sample.name", sampleRelationships);
+			documentFields.put("sample.investigation.id", sampleRelationships);
+			documentFields.put("sample.type.id", sampleRelationships);
+			documentFields.put("sample.type.name", sampleTypeRelationships);
+			documentFields.put("investigation.id", datasetRelationships);
+			documentFields.put("investigation.name", investigationRelationships);
+			documentFields.put("investigation.startDate", investigationRelationships);
+			documentFields.put("visitId", investigationRelationships);
+			documentFields.put("datafileFormat.id", null);
+			documentFields.put("datafileFormat.name", datafileFormatRelationships);
+			documentFields.put("InvestigationFacilityCycle facilityCycle.id", investigationFacilityCyclesRelationships);
+			documentFields.put("InvestigationInstrument instrument.id", instrumentRelationships);
+		}
+		return documentFields;
+	}
+
 }

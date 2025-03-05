@@ -42,14 +42,24 @@ notification.Datafile = CU
 # Call logging setup
 log.list = SESSION WRITE READ INFO
 
-# Lucene
-lucene.url = https://localhost:8181
-lucene.populateBlockSize = 10000
-lucene.directory = ${HOME}/data/icat/lucene
-lucene.backlogHandlerIntervalSeconds = 60
-lucene.enqueuedRequestIntervalSeconds = 5
-# The entities to index with Lucene. For example, remove 'Datafile' and 'DatafileParameter' if the number of datafiles exceeds lucene's limit of 2^32 entries in an index
-!lucene.entitiesToIndex = Datafile Dataset Investigation InvestigationUser DatafileParameter DatasetParameter InvestigationParameter Sample
+# Search Engine
+# LUCENE, OPENSEARCH and ELASTICSEARCH engines are supported, however the latter two are considered experimental
+search.engine = LUCENE
+search.urls = https://localhost:8181
+search.populateBlockSize = 10000
+# Recommend setting search.searchBlockSize equal to maxIdsInQuery, so that all results can be authorised at once
+# If search.searchBlockSize > maxIdsInQuery, then multiple auth checks may be needed for a single search
+# The optimal value depends on how likely a user's auth request fails: larger values are more efficient when rejection is more likely
+search.searchBlockSize = 1000
+search.directory = ${HOME}/data/icat/search
+search.backlogHandlerIntervalSeconds = 60
+search.enqueuedRequestIntervalSeconds = 5
+search.aggregateFilesIntervalSeconds = 3600
+search.maxSearchTimeSeconds = 5
+# Configure this option to prevent certain entities being indexed
+# For example, remove Datafile and DatafileParameter if these are not of interest
+# Note then when commented out, the full set of all possible entities will be indexed - to disable all search functionality, instead comment out search.engine or search.urls
+!search.entitiesToIndex = Datafile DatafileFormat DatafileParameter Dataset DatasetParameter DatasetType DatasetTechnique Facility Instrument InstrumentScientist Investigation InvestigationInstrument InvestigationParameter InvestigationType InvestigationUser ParameterType Sample SampleType SampleParameter User
 
 # List members of cluster
 !cluster = http://vm200.nubes.stfc.ac.uk:8080 https://smfisher:8181				

@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TimeZone;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -69,17 +67,22 @@ import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
+import org.icatproject.core.entity.Datafile;
+import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.ParameterPOJO;
 import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
-import org.icatproject.core.manager.ScoredEntityBaseBean;
+import org.icatproject.core.manager.search.FacetDimension;
+import org.icatproject.core.manager.search.FacetLabel;
+import org.icatproject.core.manager.search.ScoredEntityBaseBean;
+import org.icatproject.core.manager.search.SearchResult;
 import org.icatproject.utils.ContainerGetter.ContainerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,24 +95,6 @@ public class ICATRest {
 	private static Logger logger = LoggerFactory.getLogger(ICATRest.class);
 
 	private final static DateFormat df8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-
-	private static SimpleDateFormat df;
-
-	static {
-		df = new SimpleDateFormat("yyyyMMddHHmm");
-		TimeZone tz = TimeZone.getTimeZone("GMT");
-		df.setTimeZone(tz);
-	}
-
-	private static Date dec(String value) throws java.text.ParseException {
-		if (value == null) {
-			return null;
-		} else {
-			synchronized (df) {
-				return df.parse(value);
-			}
-		}
-	}
 
 	private Map<String, ExtendedAuthenticator> authPlugins;
 
@@ -928,9 +913,14 @@ public class ICATRest {
 	}
 
 	/**
-	 * perform a lucene search
+	 * Perform a free text search against a dedicated (non-DB) search engine
+	 * component for entity ids.
 	 * 
-	 * @title lucene search
+	 * @title Free text id search.
+	 * 
+	 * @deprecated in favour of {@link #searchDocuments}, which offers more
+	 *             functionality and returns full documents rather than just ICAT
+	 *             ids.
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -1021,7 +1011,7 @@ public class ICATRest {
 	 * @param maxCount
 	 *            maximum number of entities to return
 	 * 
-	 * @return set of entities encoded as json
+	 * @return set of entity ids and relevance scores encoded as json
 	 * 
 	 * @throws IcatException
 	 *             when something is wrong
@@ -1029,8 +1019,10 @@ public class ICATRest {
 	@GET
 	@Path("lucene/data")
 	@Produces(MediaType.APPLICATION_JSON)
+	@Deprecated
 	public String lucene(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
-			@QueryParam("query") String query, @QueryParam("maxCount") int maxCount) throws IcatException {
+			@QueryParam("query") String query, @QueryParam("maxCount") int maxCount)
+			throws IcatException {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}
@@ -1039,69 +1031,50 @@ public class ICATRest {
 		try (JsonReader jr = Json.createReader(new ByteArrayInputStream(query.getBytes()))) {
 			JsonObject jo = jr.readObject();
 			String target = jo.getString("target", null);
-			String user = jo.getString("user", null);
-			String text = jo.getString("text", null);
-			String lower = jo.getString("lower", null);
-			String upper = jo.getString("upper", null);
-			List<ParameterPOJO> parms = new ArrayList<>();
 			if (jo.containsKey("parameters")) {
 				for (JsonValue val : jo.getJsonArray("parameters")) {
-					JsonObject parm = (JsonObject) val;
-					String name = parm.getString("name", null);
+					JsonObject parameter = (JsonObject) val;
+					String name = parameter.getString("name", null);
 					if (name == null) {
 						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "name not set in one of parameters");
 					}
-					String units = parm.getString("units", null);
+					String units = parameter.getString("units", null);
 					if (units == null) {
 						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 								"units not set in parameter '" + name + "'");
 					}
-					if (parm.containsKey("stringValue")) {
-						parms.add(new ParameterPOJO(name, units, parm.getString("stringValue")));
-					} else if (parm.containsKey("lowerDateValue") && parm.containsKey("upperDateValue")) {
-						synchronized (df) {
-							parms.add(new ParameterPOJO(name, units, df.parse(parm.getString("lowerDateValue")),
-									df.parse(parm.getString("upperDateValue"))));
-						}
-					} else if (parm.containsKey("lowerNumericValue") && parm.containsKey("upperNumericValue")) {
-						parms.add(new ParameterPOJO(name, units, parm.getJsonNumber("lowerNumericValue").doubleValue(),
-								parm.getJsonNumber("upperNumericValue").doubleValue()));
-					} else {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER, parm.toString());
+					// If we don't have either a string, pair of dates, or pair of numbers, throw
+					if (!(parameter.containsKey("stringValue")
+							|| (parameter.containsKey("lowerDateValue")
+									&& parameter.containsKey("upperDateValue"))
+							|| (parameter.containsKey("lowerNumericValue")
+									&& parameter.containsKey("upperNumericValue")))) {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER, parameter.toString());
 					}
 				}
 			}
 			List<ScoredEntityBaseBean> objects;
+			Class<? extends EntityBaseBean> klass;
 
 			if (target.equals("Investigation")) {
-				List<String> samples = new ArrayList<>();
-				if (jo.containsKey("samples")) {
-					for (JsonValue val : jo.getJsonArray("samples")) {
-						JsonString samp = (JsonString) val;
-						samples.add(samp.getString());
-					}
-				}
-				String userFullName = jo.getString("userFullName", null);
-				objects = beanManager.luceneInvestigations(userName, user, text, dec(lower), dec(upper), parms, samples,
-						userFullName, maxCount, manager, request.getRemoteAddr());
-
+				klass = Investigation.class;
 			} else if (target.equals("Dataset")) {
-				objects = beanManager.luceneDatasets(userName, user, text, dec(lower), dec(upper), parms, maxCount,
-						manager, request.getRemoteAddr());
-
+				klass = Dataset.class;
 			} else if (target.equals("Datafile")) {
-				objects = beanManager.luceneDatafiles(userName, user, text, dec(lower), dec(upper), parms, maxCount,
-						manager, request.getRemoteAddr());
-
+				klass = Datafile.class;
 			} else {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
 			}
+			logger.debug("Free text search with query: {}", jo.toString());
+			objects = beanManager.freeTextSearch(userName, jo, maxCount, manager, request.getRemoteAddr(), klass);
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartArray();
 			for (ScoredEntityBaseBean sb : objects) {
 				gen.writeStartObject();
-				gen.write("id", sb.getEntityBaseBeanId());
-				gen.write("score", sb.getScore());
+				gen.write("id", sb.getId());
+				if (!Float.isNaN(sb.getScore())) {
+					gen.write("score", sb.getScore());
+				}
 				gen.writeEnd();
 			}
 			gen.writeEnd();
@@ -1109,8 +1082,321 @@ public class ICATRest {
 			return baos.toString();
 		} catch (JsonException e) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "JsonException " + e.getMessage());
-		} catch (ParseException e) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "ParserException " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Perform a free text search against a dedicated (non-DB) search engine
+	 * component for entire Documents.
+	 * 
+	 * @title Free text Document search.
+	 * 
+	 * @param sessionId
+	 *            a sessionId of a user which takes the form
+	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 * @param query
+	 *            json encoded query object. One of the fields is "target" which
+	 *            must be "Investigation", "Dataset" or "Datafile". The other
+	 *            fields are all optional:
+	 *            <dl>
+	 *            <dt>user</dt>
+	 *            <dd>name of user as in the User table which may include a
+	 *            prefix</dd>
+	 *            <dt>text</dt>
+	 *            <dd>some text occurring somewhere in the entity. This is
+	 *            understood by the <a href=
+	 *            "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *            >lucene parser</a> but avoid trying to use fields.</dd>
+	 *            <dt>lower</dt>
+	 *            <dd>earliest date to search for in the form
+	 *            <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *            timezone. In the case of an investigation or data set search
+	 *            the date is compared with the start date and in the case of a
+	 *            data file the date field is used.</dd>
+	 *            <dt>upper</dt>
+	 *            <dd>latest date to search for in the form
+	 *            <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *            timezone. In the case of an investigation or data set search
+	 *            the date is compared with the end date and in the case of a
+	 *            data file the date field is used.</dd>
+	 *            <dt>parameters</dt>
+	 *            <dd>this holds a list of json parameter objects all of which
+	 *            must match. Parameters have the following fields, all of which
+	 *            are optional:
+	 *            <dl>
+	 *            <dt>name</dt>
+	 *            <dd>A wildcard search for a parameter with this name.
+	 *            Supported wildcards are <code>*</code>, which matches any
+	 *            character sequence (including the empty one), and
+	 *            <code>?</code>, which matches any single character.
+	 *            <code>\</code> is the escape character. Note this query can be
+	 *            slow, as it needs to iterate over many terms. In order to
+	 *            prevent extremely slow queries, a name should not start with
+	 *            the wildcard <code>*</code></dd>
+	 *            <dt>units</dt>
+	 *            <dd>A wildcard search for a parameter with these units.
+	 *            Supported wildcards are <code>*</code>, which matches any
+	 *            character sequence (including the empty one), and
+	 *            <code>?</code>, which matches any single character.
+	 *            <code>\</code> is the escape character. Note this query can be
+	 *            slow, as it needs to iterate over many terms. In order to
+	 *            prevent extremely slow queries, units should not start with
+	 *            the wildcard <code>*</code></dd>
+	 *            <dt>stringValue</dt>
+	 *            <dd>A wildcard search for a parameter stringValue. Supported
+	 *            wildcards are <code>*</code>, which matches any character
+	 *            sequence (including the empty one), and <code>?</code>, which
+	 *            matches any single character. <code>\</code> is the escape
+	 *            character. Note this query can be slow, as it needs to iterate
+	 *            over many terms. In order to prevent extremely slow queries,
+	 *            requested stringValues should not start with the wildcard
+	 *            <code>*</code></dd>
+	 *            <dt>lowerDateValue and upperDateValue</dt>
+	 *            <dd>latest and highest date to search for in the form
+	 *            <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *            timezone. This should be used to search on parameters having a
+	 *            dateValue. If only one bound is set the restriction has not
+	 *            effect.</dd>
+	 *            <dt>lowerNumericValue and upperNumericValue</dt>
+	 *            <dd>This should be used to search on parameters having a
+	 *            numericValue. If only one bound is set the restriction has not
+	 *            effect.</dd>
+	 *            </dl>
+	 *            </dd>
+	 *            <dt>samples</dt>
+	 *            <dd>A json array of strings each of which must match text
+	 *            found in a sample. This is understood by the <a href=
+	 *            "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *            >lucene parser</a> but avoid trying to use fields. This is
+	 *            only respected in the case of an investigation search.</dd>
+	 *            <dt>userFullName</dt>
+	 *            <dd>Full name of user in the User table which may contain
+	 *            titles etc. Matching is done by the <a href=
+	 *            "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *            >lucene parser</a> but avoid trying to use fields. This is
+	 *            only respected in the case of an investigation search.</dd>
+	 *            </dl>
+	 * @param searchAfter String representing the last returned document of a
+	 *                    previous search, so that new results will be from after
+	 *                    this document. The representation should be a JSON array,
+	 *                    but the nature of the values will depend on the sort
+	 *                    applied.
+	 * 
+	 * @param sort        json encoded sort object. Each key should be a field on
+	 *                    the targeted Document, with a value of "asc" or "desc" to
+	 *                    specify the order of the results. Multiple pairs can be
+	 *                    provided, in which case each subsequent sort is used as a
+	 *                    tiebreaker for the previous one. If no sort is specified,
+	 *                    then results will be returned in order of relevance to the
+	 *                    search query, with their search engine id as a tiebreaker.
+	 * 
+	 * @param minCount    minimum number of entities to return
+	 * 
+	 * @param maxCount    maximum number of entities to return
+	 * 
+	 * @param restrict    Whether to perform a quicker search which restricts the
+	 *                    results based on an InvestigationUser or
+	 *                    InstrumentScientist being able to read their "own" data.
+	 * 
+	 * @return Set of entity ids, relevance scores and Document source encoded as
+	 *         json.
+	 * 
+	 * @throws IcatException
+	 *                       when something is wrong
+	 */
+	@GET
+	@Path("search/documents")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String searchDocuments(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
+			@QueryParam("query") String query, @QueryParam("search_after") String searchAfter,
+			@QueryParam("minCount") int minCount, @QueryParam("maxCount") int maxCount, @QueryParam("sort") String sort,
+			@QueryParam("restrict") boolean restrict) throws IcatException {
+		if (query == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
+		}
+		if (minCount == 0) {
+			minCount = 10;
+		}
+		if (maxCount == 0) {
+			maxCount = 100;
+		}
+		String userName = beanManager.getUserName(sessionId, manager);
+		JsonValue searchAfterValue = null;
+		if (searchAfter != null && searchAfter.length() > 0) {
+			try (JsonReader jr = Json.createReader(new StringReader(searchAfter))) {
+				searchAfterValue = jr.read();
+			}
+		}
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonReader jr = Json.createReader(new StringReader(query))) {
+			JsonObject jo = jr.readObject();
+			if (restrict && !jo.containsKey("user")) {
+				JsonObjectBuilder builder = Json.createObjectBuilder();
+				for (Entry<String, JsonValue> entry : jo.entrySet()) {
+					builder.add(entry.getKey(), entry.getValue());
+				}
+				jo = builder.add("user", userName).build();
+			}
+			String target = jo.getString("target", null);
+			if (jo.containsKey("parameters")) {
+				for (JsonValue val : jo.getJsonArray("parameters")) {
+					JsonObject parameter = (JsonObject) val;
+					String name = parameter.getString("name", null);
+					if (name == null) {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "name not set in one of parameters");
+					}
+					String units = parameter.getString("units", null);
+					if (units == null) {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+								"units not set in parameter '" + name + "'");
+					}
+					// If we don't have either a string, pair of dates, or pair of numbers, throw
+					if (!(parameter.containsKey("stringValue")
+							|| (parameter.containsKey("lowerDateValue")
+									&& parameter.containsKey("upperDateValue"))
+							|| (parameter.containsKey("lowerNumericValue")
+									&& parameter.containsKey("upperNumericValue")))) {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+								"value not set in parameter '" + name + "'");
+					}
+				}
+			}
+			SearchResult result;
+			Class<? extends EntityBaseBean> klass;
+
+			if (target.equals("Investigation")) {
+				klass = Investigation.class;
+			} else if (target.equals("Dataset")) {
+				klass = Dataset.class;
+			} else if (target.equals("Datafile")) {
+				klass = Datafile.class;
+			} else {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
+			}
+
+			result = beanManager.freeTextSearchDocs(userName, jo, searchAfterValue, minCount, maxCount, sort,
+					manager, request.getRemoteAddr(), klass);
+
+			JsonGenerator gen = Json.createGenerator(baos);
+			gen.writeStartObject();
+			JsonValue newSearchAfter = result.getSearchAfter();
+			if (newSearchAfter != null) {
+				gen.write("search_after", newSearchAfter);
+			}
+
+			List<FacetDimension> dimensions = result.getDimensions();
+			if (dimensions != null && dimensions.size() > 0) {
+				gen.writeStartObject("dimensions");
+				for (FacetDimension dimension : dimensions) {
+					gen.writeStartObject(dimension.getTarget() + "." + dimension.getDimension());
+					for (FacetLabel label : dimension.getFacets()) {
+						gen.write(label.getLabel(), label.getValue());
+					}
+					gen.writeEnd();
+				}
+				gen.writeEnd();
+			}
+
+			gen.writeStartArray("results");
+			for (ScoredEntityBaseBean sb : result.getResults()) {
+				gen.writeStartObject();
+				gen.write("id", sb.getId());
+				if (!Float.isNaN(sb.getScore())) {
+					gen.write("score", sb.getScore());
+				}
+				gen.write("source", sb.getSource());
+				gen.writeEnd();
+			}
+			gen.writeEnd().writeEnd().close();
+			return baos.toString();
+		} catch (JsonException e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "JsonException " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Performs subsequent faceting for a particular query containing a list of ids.
+	 * 
+	 * @title Document faceting.
+	 * 
+	 * @param sessionId a sessionId of a user which takes the form
+	 *                  <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 * @param query     Json of the format
+	 *                  <code>{
+	 *   "target": `target`,
+	 *   "facets": [
+	 *     {
+	 *       "target": `facetTarget`,
+	 *       "dimensions": [
+	 *         {"dimension": `dimension`, "ranges": [{"key": `key`, "from": `from`, "to": `to`}, ...]},
+	 *         ...
+	 *       ]
+	 *     },
+	 *     ...
+	 *   ],
+	 *   "filter": {`termField`: `value`, `termsField`: [...], ...}
+	 * }</code>
+	 * @return Facet labels and counts for the provided query
+	 * @throws IcatException If something goes wrong
+	 */
+	@GET
+	@Path("facet/documents")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String facetDocuments(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
+			@QueryParam("query") String query) throws IcatException {
+		if (query == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
+		}
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonReader jr = Json.createReader(new StringReader(query))) {
+			JsonObject jo = jr.readObject();
+
+			String target = jo.getString("target", null);
+
+			SearchResult result;
+			Class<? extends EntityBaseBean> klass;
+
+			if (target.equals("Investigation")) {
+				klass = Investigation.class;
+			} else if (target.equals("Dataset")) {
+				klass = Dataset.class;
+			} else if (target.equals("Datafile")) {
+				klass = Datafile.class;
+			} else {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
+			}
+
+			result = beanManager.facetDocs(jo, klass);
+
+			JsonGenerator gen = Json.createGenerator(baos);
+			gen.writeStartObject();
+			List<FacetDimension> dimensions = result.getDimensions();
+			if (dimensions != null && dimensions.size() > 0) {
+				gen.writeStartObject("dimensions");
+				for (FacetDimension dimension : dimensions) {
+					gen.writeStartObject(dimension.getTarget() + "." + dimension.getDimension());
+					for (FacetLabel label : dimension.getFacets()) {
+						logger.debug("From and to: ", label.getFrom(), label.getTo());
+						if (label.getFrom() != null && label.getTo() != null) {
+							gen.writeStartObject(label.getLabel());
+							gen.write("from", label.getFrom());
+							gen.write("to", label.getTo());
+							gen.write("count", label.getValue());
+							gen.writeEnd();
+						} else {
+							gen.write(label.getLabel(), label.getValue());
+						}
+					}
+					gen.writeEnd();
+				}
+				gen.writeEnd();
+			}
+
+			gen.writeEnd().close();
+			return baos.toString();
+		} catch (JsonException e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "JsonException " + e.getMessage());
 		}
 	}
 
@@ -1149,9 +1435,9 @@ public class ICATRest {
 	}
 
 	/**
-	 * Stop population of the lucene database if it is running.
+	 * Stop population of the search engine if it is running.
 	 * 
-	 * @title Lucene Clear
+	 * @title Search engine clear
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1161,15 +1447,15 @@ public class ICATRest {
 	 */
 	@DELETE
 	@Path("lucene/db")
-	public void luceneClear(@QueryParam("sessionId") String sessionId) throws IcatException {
+	public void searchClear(@QueryParam("sessionId") String sessionId) throws IcatException {
 		checkRoot(sessionId);
-		beanManager.luceneClear();
+		beanManager.searchClear();
 	}
 
 	/**
-	 * Forces a commit of the lucene database
+	 * Forces a commit of the search engine
 	 * 
-	 * @title Lucene Commit
+	 * @title Search engine commit
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1179,15 +1465,15 @@ public class ICATRest {
 	 */
 	@POST
 	@Path("lucene/db")
-	public void luceneCommit(@FormParam("sessionId") String sessionId) throws IcatException {
+	public void searchCommit(@FormParam("sessionId") String sessionId) throws IcatException {
 		checkRoot(sessionId);
-		beanManager.luceneCommit();
+		beanManager.searchCommit();
 	}
 
 	/**
-	 * Return a list of class names for which population is going on
+	 * Return a list of class names for which search engine population is ongoing
 	 * 
-	 * @title lucene GetPopulating
+	 * @title Search engine get populating
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user listed in rootUserNames
@@ -1199,12 +1485,12 @@ public class ICATRest {
 	@GET
 	@Path("lucene/db")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String luceneGetPopulating(@QueryParam("sessionId") String sessionId) throws IcatException {
+	public String searchGetPopulating(@QueryParam("sessionId") String sessionId) throws IcatException {
 		checkRoot(sessionId);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
 		gen.writeStartArray();
-		for (String name : beanManager.luceneGetPopulating()) {
+		for (String name : beanManager.searchGetPopulating()) {
 			gen.write(name);
 		}
 		gen.writeEnd().close();
@@ -1238,6 +1524,10 @@ public class ICATRest {
 	/**
 	 * Clear and repopulate lucene documents for the specified entityName
 	 * 
+	 * @deprecated in favour of {@link #searchPopulate}, which allows an upper limit
+	 *             on population to be set and makes deletion of existing documents
+	 *             optional.
+	 * 
 	 * @title Lucene Populate
 	 * 
 	 * @param sessionId
@@ -1252,10 +1542,37 @@ public class ICATRest {
 	 */
 	@POST
 	@Path("lucene/db/{entityName}/{minid}")
+	@Deprecated
 	public void lucenePopulate(@FormParam("sessionId") String sessionId, @PathParam("entityName") String entityName,
 			@PathParam("minid") long minid) throws IcatException {
 		checkRoot(sessionId);
-		beanManager.lucenePopulate(entityName, minid, manager);
+		beanManager.searchPopulate(entityName, minid, null, true, manager);
+	}
+
+	/**
+	 * Populates search engine documents for the specified entityName.
+	 * 
+	 * Optionally, this will also delete all existing documents of entityName. This
+	 * should only be used when repopulating from scratch is needed.
+	 * 
+	 * @param sessionId  a sessionId of a user listed in rootUserNames
+	 * @param entityName the name of the entity
+	 * @param minId      Process entities with id values greater than (NOT equal to)
+	 *                   this value
+	 * @param maxId      Process entities up to and including with id up to and
+	 *                   including this value
+	 * @param delete     If true, then all existing documents of this type will be
+	 *                   deleted before adding new ones.
+	 * @throws IcatException when something is wrong
+	 */
+	@POST
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Path("lucene/db/{entityName}")
+	public void searchPopulate(@FormParam("sessionId") String sessionId, @PathParam("entityName") String entityName,
+			@FormParam("minId") Long minId, @FormParam("maxId") Long maxId, @FormParam("delete") boolean delete)
+			throws IcatException {
+		checkRoot(sessionId);
+		beanManager.searchPopulate(entityName, minId, maxId, delete, manager);
 	}
 
 	/**

@@ -92,6 +92,8 @@ public class GateKeeper {
 
 	private boolean publicTablesStale;
 
+	private boolean publicSearchFieldsStale;
+
 	private Map<String, String> cluster;
 
 	private String basePath = "/icat";
@@ -169,32 +171,117 @@ public class GateKeeper {
 		return publicTables;
 	}
 
-	public List<EntityBaseBean> getReadable(String userId, List<EntityBaseBean> beans, EntityManager manager) {
+	public Boolean getPublicSearchFieldsStale() {
+		return publicSearchFieldsStale;
+	}
 
-		if (beans.size() == 0) {
-			return beans;
-		}
-
-		EntityBaseBean object = beans.get(0);
-
-		Class<? extends EntityBaseBean> objectClass = object.getClass();
-		String simpleName = objectClass.getSimpleName();
+	/**
+	 * Gets READ restrictions that apply to entities of type simpleName, that are
+	 * relevant for the given userId. If userId belongs to a root user, or one of
+	 * the restrictions is itself null, then null is returned. This corresponds to a
+	 * case where the user can READ any entity of type simpleName.
+	 * 
+	 * @param userId     The user making the READ request.
+	 * @param simpleName The name of the requested entity type.
+	 * @param manager    The EntityManager to use.
+	 * @return Returns a list of restrictions that apply to the requested entity
+	 *         type. If there are no restrictions, then returns null.
+	 */
+	private List<String> getRestrictions(String userId, String simpleName, EntityManager manager) {
 		if (rootUserNames.contains(userId)) {
 			logger.info("\"Root\" user " + userId + " is allowed READ to " + simpleName);
-			return beans;
+			return null;
 		}
 
 		List<String> restrictions = gateKeeperHelper.getRules(Rule.INCLUDE_QUERY, userId, simpleName);
 		logger.debug("Got " + restrictions.size() + " authz queries for READ by " + userId + " to a "
-				+ objectClass.getSimpleName());
+				+ simpleName);
 
 		for (String restriction : restrictions) {
 			logger.debug("Query: " + restriction);
 			if (restriction == null) {
 				logger.info("Null restriction => READ permitted to " + simpleName);
-				return beans;
+				return null;
 			}
 		}
+
+		return restrictions;
+	}
+
+	/**
+	 * Returns a sub list of the passed entities that the user has READ access to.
+	 * Note that this method accepts and returns instances of EntityBaseBean, unlike
+	 * getReadableIds.
+	 * 
+	 * @param userId  The user making the READ request.
+	 * @param beans   The entities the user wants to READ.
+	 * @param manager The EntityManager to use.
+	 * @return A list of entities the user has read access to
+	 */
+	public List<EntityBaseBean> getReadable(String userId, List<EntityBaseBean> beans, EntityManager manager) {
+
+		if (beans.size() == 0) {
+			return beans;
+		}
+		EntityBaseBean object = beans.get(0);
+		Class<? extends EntityBaseBean> objectClass = object.getClass();
+		String simpleName = objectClass.getSimpleName();
+
+		List<String> restrictions = getRestrictions(userId, simpleName, manager);
+		if (restrictions == null) {
+			return beans;
+		}
+
+		Set<Long> readableIds = getReadableIds(userId, beans, restrictions, manager);
+
+		List<EntityBaseBean> results = new ArrayList<>();
+		for (EntityBaseBean bean : beans) {
+			if (readableIds.contains(bean.getId())) {
+				results.add(bean);
+			}
+		}
+		return results;
+	}
+
+	/**
+	 * Returns a set of ids that indicate entities of type simpleName that the user
+	 * has READ access to. If all of the entities can be READ (restrictions are
+	 * null) then null is returned. Note that while this accepts anything that
+	 * HasEntityId, the ids are returned as a Set<Long> unlike getReadable.
+	 * 
+	 * @param userId     The user making the READ request.
+	 * @param entities   The entities to check.
+	 * @param simpleName The name of the requested entity type.
+	 * @param manager    The EntityManager to use.
+	 * @return Set of the ids that the user has read access to. If there are no
+	 *         restrictions, then returns null.
+	 */
+	public Set<Long> getReadableIds(String userId, List<? extends HasEntityId> entities, String simpleName,
+			EntityManager manager) {
+
+		if (entities.size() == 0) {
+			return null;
+		}
+
+		List<String> restrictions = getRestrictions(userId, simpleName, manager);
+		if (restrictions == null) {
+			return null;
+		}
+
+		return getReadableIds(userId, entities, restrictions, manager);
+	}
+
+	/**
+	 * Returns a set of ids that indicate entities that the user has READ access to.
+	 * 
+	 * @param userId       The user making the READ request.
+	 * @param entities     The entities to check.
+	 * @param restrictions The restrictions applying to the entities.
+	 * @param manager      The EntityManager to use.
+	 * @return Set of the ids that the user has read access to.
+	 */
+	private Set<Long> getReadableIds(String userId, List<? extends HasEntityId> entities, List<String> restrictions,
+			EntityManager manager) {
 
 		/*
 		 * IDs are processed in batches to avoid Oracle error: ORA-01795:
@@ -205,13 +292,13 @@ public class GateKeeper {
 		StringBuilder sb = null;
 
 		int i = 0;
-		for (EntityBaseBean bean : beans) {
+		for (HasEntityId entity : entities) {
 			if (i == 0) {
 				sb = new StringBuilder();
-				sb.append(bean.getId());
+				sb.append(entity.getId());
 				i = 1;
 			} else {
-				sb.append("," + bean.getId());
+				sb.append("," + entity.getId());
 				i++;
 			}
 			if (i == maxIdsInQuery) {
@@ -224,27 +311,21 @@ public class GateKeeper {
 			idLists.add(sb.toString());
 		}
 
-		logger.debug("Check readability of " + beans.size() + " beans has been divided into " + idLists.size()
+		logger.debug("Check readability of " + entities.size() + " beans has been divided into " + idLists.size()
 				+ " queries.");
 
-		Set<Long> ids = new HashSet<>();
+		Set<Long> readableIds = new HashSet<>();
 		for (String idList : idLists) {
 			for (String qString : restrictions) {
 				TypedQuery<Long> q = manager.createQuery(qString.replace(":pkids", idList), Long.class);
 				if (qString.contains(":user")) {
 					q.setParameter("user", userId);
 				}
-				ids.addAll(q.getResultList());
+				readableIds.addAll(q.getResultList());
 			}
 		}
 
-		List<EntityBaseBean> results = new ArrayList<>();
-		for (EntityBaseBean bean : beans) {
-			if (ids.contains(bean.getId())) {
-				results.add(bean);
-			}
-		}
-		return results;
+		return readableIds;
 	}
 
 	public Set<String> getRootUserNames() {
@@ -285,7 +366,7 @@ public class GateKeeper {
 		if (access == AccessType.CREATE) {
 			qName = Rule.CREATE_QUERY;
 		} else if (access == AccessType.READ) {
-			if (publicTables.contains(simpleName)) {
+			if (getPublicTables().contains(simpleName)) { // TODO see other comment on publicTables vs getPublicTables
 				logger.info("All are allowed " + access + " to " + simpleName);
 				return true;
 			}
@@ -337,10 +418,16 @@ public class GateKeeper {
 
 	public void markPublicStepsStale() {
 		publicStepsStale = true;
+		publicSearchFieldsStale = true;
 	}
 
 	public void markPublicTablesStale() {
 		publicTablesStale = true;
+		publicSearchFieldsStale = true;
+	}
+
+	public void markPublicSearchFieldsFresh() {
+		publicSearchFieldsStale = false;
 	}
 
 	/**

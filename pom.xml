@@ -3,7 +3,7 @@
 
 	<groupId>org.icatproject</groupId>
 	<artifactId>icat.server</artifactId>
-	<version>6.0.2-SNAPSHOT</version>
+	<version>6.1.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>ICAT Server</name>
 	<description>A metadata catalogue to support Large Facility experimental data, 
@@ -113,13 +113,13 @@
 		<dependency>
 			<groupId>org.icatproject</groupId>
 			<artifactId>icat.utils</artifactId>
-			<version>4.16.1</version>
+			<version>4.17.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.icatproject</groupId>
 			<artifactId>icat.client</artifactId>
-			<version>6.0.0</version>
+			<version>6.1.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -231,7 +231,8 @@
 					</excludes>
 					<systemPropertyVariables>
 						<javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
-						<luceneUrl>${luceneUrl}</luceneUrl>
+						<searchEngine>${searchEngine}</searchEngine>
+						<searchUrls>${searchUrls}</searchUrls>
 					</systemPropertyVariables>
 					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>
@@ -249,7 +250,8 @@
 					<systemPropertyVariables>
 						<javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
 						<serverUrl>${serverUrl}</serverUrl>
-						<luceneUrl>${luceneUrl}</luceneUrl>
+						<searchEngine>${searchEngine}</searchEngine>
+						<searchUrls>${searchUrls}</searchUrls>
 					</systemPropertyVariables>
 				</configuration>
 				<executions>
@@ -324,7 +326,8 @@
 								<argument>src/test/scripts/prepare_test.py</argument>
 								<argument>${containerHome}</argument>
 								<argument>${serverUrl}</argument>
-								<argument>${luceneUrl}</argument>
+								<argument>${searchEngine}</argument>
+								<argument>${searchUrls}</argument>
 							</arguments>
 						</configuration>
 						<goals>
@@ -402,6 +405,3 @@
 	</reporting>
 
 </project>
-
-
-

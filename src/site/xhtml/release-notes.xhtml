@@ -6,6 +6,18 @@
 
 	<h1>ICAT Server Release Notes</h1>
 
+	<h2>6.1.0</h2>
+	<p>Add support for Open/Elasticsearch engine backends for free text searches. Adds to REST endpoints for free-text searches, and deprecates old functionality. Significant changes to the functionality and performance of searches:</p>
+	<ul>
+		<li>Ability to search on over 2 billion documents</li>
+		<li>Enable sorting on specific entity fields</li>
+		<li>"Infinitely" search the data by using the searchAfter parameter</li>
+		<li>Faceted searches</li>
+		<li>Replace single "text" field with specific fields that reflect the ICAT schema to allow field targeting</li>
+		<li>Support for unit conversion on numeric Parameters</li>
+		<li>Support for synonym injection</li>
+	</ul>
+
 	<h2>6.0.1</h2>
 	<p>Ensures that authorization rules are read in a separate transaction.</p>
 

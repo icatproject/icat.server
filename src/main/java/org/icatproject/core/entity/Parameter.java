@@ -16,8 +16,8 @@ import jakarta.persistence.TemporalType;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
+import org.icatproject.core.manager.search.SearchApi;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.LuceneApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,16 +162,26 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
-		LuceneApi.encodeStringField(gen, "name", type.getName());
-		LuceneApi.encodeStringField(gen, "units", type.getUnits());
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
 		if (stringValue != null) {
-			LuceneApi.encodeStringField(gen, "stringValue", stringValue);
+			SearchApi.encodeString(gen, "stringValue", stringValue);
 		} else if (numericValue != null) {
-			LuceneApi.encodeDoubleField(gen, "numericValue", numericValue);
+			SearchApi.encodeDouble(gen, "numericValue", numericValue);
 		} else if (dateTimeValue != null) {
-			LuceneApi.encodeStringField(gen, "dateTimeValue", dateTimeValue);
+			SearchApi.encodeLong(gen, "dateTimeValue", dateTimeValue);
 		}
+		if (rangeTop != null) {
+			SearchApi.encodeDouble(gen, "rangeTop", rangeTop);
+		}
+		if (rangeBottom != null) {
+			SearchApi.encodeDouble(gen, "rangeBottom", rangeBottom);
+		}
+
+		if (type.getName() == null || type.getUnits() == null) {
+			type = manager.find(type.getClass(), type.id);
+		}
+		type.getDoc(manager, gen);
+		SearchApi.encodeLong(gen, "id", id);
 	}
 
 }

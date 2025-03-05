@@ -2,17 +2,25 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A parameter type with unique name and units")
 @SuppressWarnings("serial")
@@ -90,6 +98,9 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 
 	@Comment("If ordinary users are allowed to create their own parameter types this indicates that this one has been approved")
 	private boolean verified;
+
+	public static Set<String> docFields = new HashSet<>(
+			Arrays.asList("type.name", "type.units", "type.unitsSI", "numericValueSI", "type.id"));
 
 	/* Needed for JPA */
 	public ParameterType() {
@@ -269,6 +280,13 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 
 	public void setVerified(boolean verified) {
 		this.verified = verified;
+	}
+
+	@Override
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		SearchApi.encodeString(gen, "type.name", name);
+		SearchApi.encodeString(gen, "type.units", units);
+		SearchApi.encodeLong(gen, "type.id", id);
 	}
 
 }

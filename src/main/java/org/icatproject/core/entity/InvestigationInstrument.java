@@ -2,12 +2,17 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Represents a many-to-many relationship between an investigation and the instruments assigned")
 @SuppressWarnings("serial")
@@ -37,6 +42,16 @@ public class InvestigationInstrument extends EntityBaseBean implements Serializa
 
 	public void setInvestigation(Investigation investigation) {
 		this.investigation = investigation;
+	}
+
+	@Override
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		if (instrument.getName() == null) {
+			instrument = manager.find(instrument.getClass(), instrument.id);
+		}
+		instrument.getDoc(manager, gen);
+		SearchApi.encodeLong(gen, "investigation.id", investigation.id);
+		SearchApi.encodeLong(gen, "id", id);
 	}
 
 }

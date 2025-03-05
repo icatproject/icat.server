@@ -2,14 +2,22 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A user of the facility")
 @SuppressWarnings("serial")
@@ -53,6 +61,8 @@ public class User extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<DataPublicationUser> dataPublicationUsers = new ArrayList<DataPublicationUser>();
+
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("user.name", "user.fullName", "user.id"));
 
 	public User() {
 	}
@@ -156,6 +166,13 @@ public class User extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "User[name=" + name + "]";
+	}
+
+	@Override
+	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+		SearchApi.encodeNullableString(gen, "user.fullName", fullName);
+		SearchApi.encodeString(gen, "user.name", name);
+		SearchApi.encodeLong(gen, "user.id", id);
 	}
 
 }

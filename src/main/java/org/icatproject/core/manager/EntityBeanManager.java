@@ -63,11 +63,17 @@ import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.ParameterValueType;
+import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.PropertyHandler.CallType;
 import org.icatproject.core.manager.PropertyHandler.Operation;
+import org.icatproject.core.manager.search.FacetDimension;
+import org.icatproject.core.manager.search.ScoredEntityBaseBean;
+import org.icatproject.core.manager.search.SearchManager;
+import org.icatproject.core.manager.search.SearchResult;
 import org.icatproject.core.oldparser.OldGetQuery;
 import org.icatproject.core.oldparser.OldInput;
 import org.icatproject.core.oldparser.OldLexerException;
@@ -132,7 +138,7 @@ public class EntityBeanManager {
 	Transmitter transmitter;
 
 	@EJB
-	LuceneManager lucene;
+	SearchManager searchManager;
 
 	private boolean log;
 
@@ -142,9 +148,11 @@ public class EntityBeanManager {
 
 	private Map<String, NotificationRequest> notificationRequests;
 
-	private boolean luceneActive;
+	private boolean searchActive;
+	private long searchMaxSearchTimeMillis;
 
 	private int maxEntities;
+	private int searchSearchBlockSize;
 
 	private long exportCacheSize;
 	private Set<String> rootUserNames;
@@ -249,8 +257,8 @@ public class EntityBeanManager {
 
 				long beanId = bean.getId();
 
-				if (luceneActive) {
-					bean.addToLucene(lucene);
+				if (searchActive) {
+					bean.addToSearch(manager, searchManager);
 				}
 				userTransaction.commit();
 				if (logRequests.contains(CallType.WRITE)) {
@@ -380,9 +388,9 @@ public class EntityBeanManager {
 					transmitter.processMessage("createMany", ip, baos.toString(), startMillis);
 				}
 
-				if (luceneActive) {
+				if (searchActive) {
 					for (EntityBaseBean bean : beans) {
-						bean.addToLucene(lucene);
+						bean.addToSearch(manager, searchManager);
 					}
 				}
 
@@ -499,9 +507,9 @@ public class EntityBeanManager {
 
 				userTransaction.commit();
 
-				if (luceneActive) {
+				if (searchActive) {
 					for (EntityBaseBean bean : allBeansToDelete) {
-						lucene.deleteDocument(bean);
+						searchManager.deleteDocument(bean);
 					}
 				}
 
@@ -778,30 +786,64 @@ public class EntityBeanManager {
 		}
 	}
 
-	private void filterReadAccess(List<ScoredEntityBaseBean> results, List<ScoredEntityBaseBean> allResults,
+	/**
+	 * Performs authorisation for READ access on the newResults. Instead of
+	 * returning the entries which can be READ, they are added to the end of
+	 * acceptedResults, ensuring it doesn't exceed maxCount or maxEntities.
+	 * 
+	 * @param acceptedResults List containing already authorised entities. Entries
+	 *                        in newResults that pass authorisation will be added to
+	 *                        acceptedResults.
+	 * @param newResults      List containing new results to check READ access to.
+	 *                        Entries in newResults that pass authorisation will be
+	 *                        added to acceptedResults.
+	 * @param maxCount        The maximum size of acceptedResults. Once reached, no
+	 *                        more entries from newResults will be added.
+	 * @param userId          The user attempting to read the newResults.
+	 * @param manager         The EntityManager to use.
+	 * @param klass           The Class of the EntityBaseBean that is being
+	 *                        filtered.
+	 * @throws IcatException If more entities than the configuration option
+	 *                       maxEntities would be added to acceptedResults, then an
+	 *                       IcatException is thrown instead.
+	 */
+	private ScoredEntityBaseBean filterReadAccess(List<ScoredEntityBaseBean> acceptedResults, List<ScoredEntityBaseBean> newResults,
 			int maxCount, String userId, EntityManager manager, Class<? extends EntityBaseBean> klass)
 			throws IcatException {
 
-		logger.debug("Got " + allResults.size() + " results from Lucene");
-		for (ScoredEntityBaseBean sr : allResults) {
-			long entityId = sr.getEntityBaseBeanId();
-			EntityBaseBean beanManaged = manager.find(klass, entityId);
-			if (beanManaged != null) {
-				try {
-					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
-					results.add(new ScoredEntityBaseBean(entityId, sr.getScore()));
-					if (results.size() > maxEntities) {
+		logger.debug("Got " + newResults.size() + " results from search engine");
+		Set<Long> allowedIds = gateKeeper.getReadableIds(userId, newResults, klass.getSimpleName(), manager);
+		if (allowedIds == null) {
+			// A null result means there are no restrictions on the readable ids, so add as
+			// many newResults as we need to reach maxCount
+			int needed = maxCount - acceptedResults.size();
+			if (newResults.size() > needed) {
+				acceptedResults.addAll(newResults.subList(0, needed));
+				return newResults.get(needed - 1);
+			} else {
+				acceptedResults.addAll(newResults);
+			}
+			if (acceptedResults.size() > maxEntities) {
+				throw new IcatException(IcatExceptionType.VALIDATION,
+						"attempt to return more than " + maxEntities + " entities");
+			}
+		} else {
+			// Otherwise, add results in order until we reach maxCount
+			for (ScoredEntityBaseBean newResult : newResults) {
+				if (allowedIds.contains(newResult.getId())) {
+					acceptedResults.add(newResult);
+					if (acceptedResults.size() > maxEntities) {
 						throw new IcatException(IcatExceptionType.VALIDATION,
 								"attempt to return more than " + maxEntities + " entities");
 					}
-					if (results.size() == maxCount) {
-						break;
+					if (acceptedResults.size() == maxCount) {
+						logger.debug("maxCount {} reached", maxCount);
+						return newResult;
 					}
-				} catch (IcatException e) {
-					// Nothing to do
 				}
 			}
 		}
+		return null;
 	}
 
 	private EntityBaseBean find(EntityBaseBean bean, EntityManager manager) throws IcatException {
@@ -1149,8 +1191,10 @@ public class EntityBeanManager {
 		logRequests = propertyHandler.getLogSet();
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
-		luceneActive = lucene.isActive();
+		searchActive = searchManager.isActive();
+		searchMaxSearchTimeMillis = propertyHandler.getSearchMaxSearchTimeMillis();
 		maxEntities = propertyHandler.getMaxEntities();
+		searchSearchBlockSize = propertyHandler.getSearchSearchBlockSize();
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
 		key = propertyHandler.getKey();
@@ -1375,160 +1419,369 @@ public class EntityBeanManager {
 		return results.get(0);
 	}
 
-	public void luceneClear() throws IcatException {
-		if (luceneActive) {
-			lucene.clear();
+	public void searchClear() throws IcatException {
+		if (searchActive) {
+			searchManager.clear();
 		}
 	}
 
-	public void luceneCommit() throws IcatException {
-		if (luceneActive) {
-			lucene.commit();
+	public void searchCommit() throws IcatException {
+		if (searchActive) {
+			searchManager.commit();
 		}
 	}
 
-	public List<ScoredEntityBaseBean> luceneDatafiles(String userName, String user, String text, Date lower, Date upper,
-			List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip) throws IcatException {
-		long startMillis = log ? System.currentTimeMillis() : 0;
+	/**
+	 * Performs a search on a single entity, and authorises the results before
+	 * returning. Does not support sorting or searchAfter.
+	 * 
+	 * @param userName User performing the search, used for authorisation.
+	 * @param jo       JsonObject containing the details of the query to be used.
+	 * @param maxCount The maximum number of results to collect before returning. If
+	 *                 a batch from the search engine has more than this many
+	 *                 authorised results, then the excess results will be
+	 *                 discarded.
+	 * @param manager  EntityManager for finding entities from their Id.
+	 * @param ip       Used for logging only.
+	 * @param klass    Class of the entity to search.
+	 * @return SearchResult for the query.
+	 * @throws IcatException
+	 */
+	public List<ScoredEntityBaseBean> freeTextSearch(String userName, JsonObject jo, int maxCount,
+			EntityManager manager, String ip, Class<? extends EntityBaseBean> klass) throws IcatException {
+		long startMillis = System.currentTimeMillis();
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
-		if (luceneActive) {
-			LuceneSearchResult last = null;
-			Long uid = null;
-			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
-			/*
-			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to Lucene
-			 */
-			int blockSize = Math.max(1000, maxCount);
-
-			do {
-				if (last == null) {
-					last = lucene.datafiles(user, text, lower, upper, parms, blockSize);
-					uid = last.getUid();
-				} else {
-					last = lucene.datafilesAfter(uid, blockSize);
-				}
-				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userName, manager, Datafile.class);
-			} while (results.size() != maxCount && allResults.size() == blockSize);
-			/* failing lucene retrieval calls clean up before throwing */
-			lucene.freeSearcher(uid);
+		if (searchActive) {
+			searchDocuments(userName, jo, null, maxCount, maxCount, null, manager, klass,
+					startMillis, results, Arrays.asList("id"));
 		}
+		logSearch(userName, ip, startMillis, results, "freeTextSearch");
+		return results;
+	}
 
+	/**
+	 * Performs a search on a single entity, and authorises the results before
+	 * returning.
+	 * 
+	 * @param userName    User performing the search, used for authorisation.
+	 * @param jo          JsonObject containing the details of the query to be used.
+	 * @param searchAfter JsonValue representation of the final result from a
+	 *                    previous search.
+	 * @param minCount    The minimum number of results to collect before returning.
+	 *                    If a batch from the search engine has at least this many
+	 *                    authorised results, no further batches will be requested.
+	 * @param maxCount    The maximum number of results to collect before returning.
+	 *                    If a batch from the search engine has more than this many
+	 *                    authorised results, then the excess results will be
+	 *                    discarded.
+	 * @param sort        String of Json representing sort criteria.
+	 * @param manager     EntityManager for finding entities from their Id.
+	 * @param ip          Used for logging only.
+	 * @param klass       Class of the entity to search.
+	 * @return SearchResult for the query.
+	 * @throws IcatException
+	 */
+	public SearchResult freeTextSearchDocs(String userName, JsonObject jo, JsonValue searchAfter, int minCount,
+			int maxCount, String sort, EntityManager manager, String ip, Class<? extends EntityBaseBean> klass)
+			throws IcatException {
+		long startMillis = System.currentTimeMillis();
+		JsonValue lastSearchAfter = null;
+		List<ScoredEntityBaseBean> results = new ArrayList<>();
+		List<FacetDimension> dimensions = new ArrayList<>();
+		if (searchActive) {
+			List<String> fields = SearchManager.getPublicSearchFields(gateKeeper, klass.getSimpleName());
+			lastSearchAfter = searchDocuments(userName, jo, searchAfter, maxCount, minCount, sort, manager, klass,
+					startMillis, results, fields);
+
+			if (jo.containsKey("facets")) {
+				List<JsonObject> jsonFacets = jo.getJsonArray("facets").getValuesAs(JsonObject.class);
+				for (JsonObject jsonFacet : jsonFacets) {
+					String target = jsonFacet.getString("target");
+					JsonObject facetQuery = buildFacetQuery(klass, target, results, jsonFacet);
+					if (facetQuery != null) {
+						dimensions.addAll(searchManager.facetSearch(target, facetQuery, results.size(), 10));
+					}
+				}
+			}
+		}
+		logSearch(userName, ip, startMillis, results, "freeTextSearchDocs");
+		return new SearchResult(lastSearchAfter, results, dimensions);
+	}
+
+	/**
+	 * Performs logging dependent on the value of logRequests.
+	 * 
+	 * @param userName    User performing the search
+	 * @param ip          Used for logging only
+	 * @param startMillis The start time of the search in milliseconds
+	 * @param results     List of authorised search results
+	 * @param operation   Name of the calling function
+	 */
+	private void logSearch(String userName, String ip, long startMillis, List<ScoredEntityBaseBean> results,
+			String operation) {
 		if (logRequests.contains("R")) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
 				gen.write("userName", userName);
 				if (results.size() > 0) {
-					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+					gen.write("entityId", results.get(0).getId());
 				}
 				gen.writeEnd();
 			}
-			transmitter.processMessage("luceneDatafiles", ip, baos.toString(), startMillis);
+			transmitter.processMessage(operation, ip, baos.toString(), startMillis);
 		}
 		logger.debug("Returning {} results", results.size());
-		return results;
 	}
 
-	public List<ScoredEntityBaseBean> luceneDatasets(String userName, String user, String text, Date lower, Date upper,
-			List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip) throws IcatException {
-		long startMillis = log ? System.currentTimeMillis() : 0;
-		List<ScoredEntityBaseBean> results = new ArrayList<>();
-		if (luceneActive) {
-			LuceneSearchResult last = null;
-			Long uid = null;
-			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
-			/*
-			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to Lucene
-			 */
-			int blockSize = Math.max(1000, maxCount);
-
+	/**
+	 * Performs batches of searches, the results of which are authorised. Results
+	 * are collected until they run out, minCount is reached, or too much time
+	 * elapses.
+	 * 
+	 * @param userName    User performing the search, used for authorisation.
+	 * @param jo          JsonObject containing the details of the query to be used.
+	 * @param searchAfter JsonValue representation of the final result from a
+	 *                    previous search.
+	 * @param minCount    The minimum number of results to collect before returning.
+	 *                    If a batch from the search engine has at least this many
+	 *                    authorised results, no further batches will be requested.
+	 * @param maxCount    The maximum number of results to collect before returning.
+	 *                    If a batch from the search engine has more than this many
+	 *                    authorised results, then the excess results will be
+	 *                    discarded.
+	 * @param sort        String of Json representing sort criteria.
+	 * @param manager     EntityManager for finding entities from their Id.
+	 * @param klass       Class of the entity to search.
+	 * @param startMillis The start time of the search in milliseconds
+	 * @param results     List of results from the search. Authorised results will
+	 *                    be appended to this List.
+	 * @param fields      Fields to include in the returned Documents.
+	 * @return JsonValue representing the last result of the search, formatted to
+	 *         allow future searches to "search after" this result. May be null.
+	 * @throws IcatException If the search exceeds the maximum allowed time.
+	 */
+	private JsonValue searchDocuments(String userName, JsonObject jo, JsonValue searchAfter, int maxCount, int minCount,
+			String sort, EntityManager manager, Class<? extends EntityBaseBean> klass, long startMillis,
+			List<ScoredEntityBaseBean> results, List<String> fields) throws IcatException {
+		JsonValue lastSearchAfter;
+		try {
 			do {
-				if (last == null) {
-					last = lucene.datasets(user, text, lower, upper, parms, blockSize);
-					uid = last.getUid();
+				SearchResult lastSearchResult = searchManager.freeTextSearch(jo, searchAfter, searchSearchBlockSize,
+						sort, fields);
+				List<ScoredEntityBaseBean> allResults = lastSearchResult.getResults();
+				ScoredEntityBaseBean lastBean = filterReadAccess(results, allResults, maxCount, userName, manager,
+						klass);
+				if (lastBean == null) {
+					// Haven't stopped early, so use the Lucene provided searchAfter document
+					lastSearchAfter = lastSearchResult.getSearchAfter();
+					if (lastSearchAfter == null) {
+						return null; // If searchAfter is null, we ran out of results so stop here
+					}
+					searchAfter = lastSearchAfter;
 				} else {
-					last = lucene.datasetsAfter(uid, blockSize);
+					// Have stopped early by reaching the limit, so build a searchAfter document
+					return searchManager.buildSearchAfter(lastBean, sort);
 				}
-				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userName, manager, Dataset.class);
-			} while (results.size() != maxCount && allResults.size() == blockSize);
-			/* failing lucene retrieval calls clean up before throwing */
-			lucene.freeSearcher(uid);
-		}
-		if (logRequests.contains("R")) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-				gen.write("userName", userName);
-				if (results.size() > 0) {
-					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+				if (System.currentTimeMillis() - startMillis > searchMaxSearchTimeMillis) {
+					long maxTimeSeconds = searchMaxSearchTimeMillis / 1000;
+					String msg = "Search cancelled for exceeding " + maxTimeSeconds + " seconds";
+					logger.warn(msg + ": user={} query={}", userName, jo);
+					throw new IcatException(IcatExceptionType.INTERNAL, msg);
 				}
-				gen.writeEnd();
+			} while (results.size() < minCount);
+		} catch (IcatException e) {
+			String message = e.getMessage();
+			if (message != null && message.startsWith("Search cancelled for exceeding")) {
+				logger.warn(message + ": user={} query={}", userName, jo);
 			}
-			transmitter.processMessage("luceneDatasets", ip, baos.toString(), startMillis);
+			throw e;
 		}
-		logger.debug("Returning {} results", results.size());
-		return results;
+		return lastSearchAfter;
 	}
 
-	public List<String> luceneGetPopulating() {
-		if (luceneActive) {
-			return lucene.getPopulating();
+	/**
+	 * Perform faceting on entities of klass using the criteria contained in jo.
+	 * 
+	 * @param jo    JsonObject containing "facets" key with a value of a JsonArray
+	 *              of JsonObjects.
+	 * @param klass Class of the entity to facet.
+	 * @return SearchResult with only the dimensions set.
+	 * @throws IcatException
+	 */
+	public SearchResult facetDocs(JsonObject jo, Class<? extends EntityBaseBean> klass) throws IcatException {
+		List<FacetDimension> dimensions = new ArrayList<>();
+		if (searchActive && jo.containsKey("facets")) {
+			List<JsonObject> jsonFacets = jo.getJsonArray("facets").getValuesAs(JsonObject.class);
+			for (JsonObject jsonFacet : jsonFacets) {
+				String target = jsonFacet.getString("target");
+				JsonObject filterObject = jo.getJsonObject("filter");
+				JsonObject facetQuery = buildFacetQuery(klass, target, filterObject, jsonFacet);
+				if (facetQuery != null) {
+					dimensions.addAll(searchManager.facetSearch(target, facetQuery, 1000, 10));
+				}
+			}
+		}
+		return new SearchResult(dimensions);
+	}
+
+	/**
+	 * Formats Json for requesting faceting. Performs the logic needed to ensure
+	 * that we do not facet on a field that should not be visible.
+	 * 
+	 * @param klass        Class of the entity to facet.
+	 * @param target       The entity which directly posses the dimensions of
+	 *                     interest. Note this may be different than the klass, for
+	 *                     example if klass is Investigation then target might be
+	 *                     InvestigationParameter.
+	 * @param filterObject JsonObject to be used as the query.
+	 * @param jsonFacet    JsonObject containing the dimensions to facet.
+	 * @return JsonObject with the format
+	 *         <code>{"query": `filterObject`, "dimensions": [...]}</code>
+	 * @throws IcatException
+	 */
+	private JsonObject buildFacetQuery(Class<? extends EntityBaseBean> klass, String target, JsonObject filterObject,
+			JsonObject jsonFacet) throws IcatException {
+		if (target.equals(klass.getSimpleName())) {
+			return SearchManager.buildFacetQuery(filterObject, jsonFacet);
+		} else {
+			Relationship relationship;
+			if (target.equals("SampleParameter")) {
+				Relationship sampleRelationship;
+				if (klass.getSimpleName().equals("Investigation")) {
+					sampleRelationship = EntityInfoHandler.getRelationshipsByName(klass).get("samples");
+				} else {
+					if (klass.getSimpleName().equals("Datafile")) {
+						Relationship datasetRelationship = EntityInfoHandler.getRelationshipsByName(klass).get("dataset");
+						if (!gateKeeper.allowed(datasetRelationship)) {
+							return null;
+						}
+					}
+					sampleRelationship = EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample");
+				}
+				Relationship parameterRelationship = EntityInfoHandler.getRelationshipsByName(Sample.class).get("parameters");
+				if (!gateKeeper.allowed(sampleRelationship) || !gateKeeper.allowed(parameterRelationship)) {
+					return null;
+				}
+				return SearchManager.buildFacetQuery(filterObject, jsonFacet);
+			} else if (target.contains("Parameter")) {
+				relationship = EntityInfoHandler.getRelationshipsByName(klass).get("parameters");
+			} else if (target.contains("DatasetTechnique")) {
+				relationship = EntityInfoHandler.getRelationshipsByName(klass).get("datasetTechniques");
+			} else {
+				relationship = EntityInfoHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
+			}
+
+			if (gateKeeper.allowed(relationship)) {
+				return SearchManager.buildFacetQuery(filterObject, jsonFacet);
+			} else {
+				logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed",
+						target, klass.getSimpleName());
+				return null;
+			}
+		}
+	}
+
+	/**
+	 * Formats Json for requesting faceting. Performs the logic needed to ensure
+	 * that we do not facet on a field that should not be visible.
+	 * 
+	 * @param klass     Class of the entity to facet.
+	 * @param target    The entity which directly posses the dimensions of interest.
+	 *                  Note this may be different than the klass, for example if
+	 *                  klass is Investigation then target might be
+	 *                  InvestigationParameter.
+	 * @param results   List of results from a previous search, containing entity
+	 *                  ids.
+	 * @param jsonFacet JsonObject containing the dimensions to facet.
+	 * @return <code>{"query": {`idField`: [...]}, "dimensions": [...]}</code>
+	 * @throws IcatException
+	 */
+	private JsonObject buildFacetQuery(Class<? extends EntityBaseBean> klass, String target,
+			List<ScoredEntityBaseBean> results, JsonObject jsonFacet) throws IcatException {
+		String parentName = klass.getSimpleName();
+		if (target.equals(parentName)) {
+			return SearchManager.buildFacetQuery(results, "id", jsonFacet);
+		} else {
+			Relationship relationship;
+			if (target.equals("SampleParameter")) {
+				Relationship sampleRelationship;
+				if (parentName.equals("Investigation")) {
+					sampleRelationship = EntityInfoHandler.getRelationshipsByName(klass).get("samples");
+				} else {
+					if (parentName.equals("Datafile")) {
+						Relationship datasetRelationship = EntityInfoHandler.getRelationshipsByName(klass).get("dataset");
+						if (!gateKeeper.allowed(datasetRelationship)) {
+							logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed", target,
+								parentName);
+							return null;
+						}
+					}
+					sampleRelationship = EntityInfoHandler.getRelationshipsByName(Dataset.class).get("sample");
+				}
+				Relationship parameterRelationship = EntityInfoHandler.getRelationshipsByName(Sample.class).get("parameters");
+				if (!gateKeeper.allowed(sampleRelationship) || !gateKeeper.allowed(parameterRelationship)) {
+					logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed", target,
+						parentName);
+					return null;
+				}
+				return SearchManager.buildFacetQuery(results, "sample.id", "sample.id", jsonFacet);
+			} else if (target.equals("InvestigationInstrument")) {
+				List<Relationship> relationships = new ArrayList<>();
+				String resultIdField = "id";
+				if (parentName.equals("Datafile")) {
+					resultIdField = "investigation.id";
+					relationships.add(EntityInfoHandler.getRelationshipsByName(Datafile.class).get("dataset"));
+					relationships.add(EntityInfoHandler.getRelationshipsByName(Dataset.class).get("investigation"));
+				} else if (parentName.equals("Dataset")) {
+					resultIdField = "investigation.id";
+					relationships.add(EntityInfoHandler.getRelationshipsByName(Dataset.class).get("investigation"));
+				}
+				relationships.add(EntityInfoHandler.getRelationshipsByName(Investigation.class).get("investigationInstruments"));
+				relationships.add(EntityInfoHandler.getRelationshipsByName(InvestigationInstrument.class).get("instrument"));
+				for (Relationship r : relationships) {
+					if (!gateKeeper.allowed(r)) {
+						logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed", target,
+							parentName);
+						return null;
+					}
+				}
+				return SearchManager.buildFacetQuery(results, resultIdField, "investigation.id", jsonFacet);
+			} else if (target.contains("Parameter")) {
+				relationship = EntityInfoHandler.getRelationshipsByName(klass).get("parameters");
+			} else {
+				relationship = EntityInfoHandler.getRelationshipsByName(klass).get(target.toLowerCase() + "s");
+			}
+
+			if (gateKeeper.allowed(relationship)) {
+				if (target.equals("Sample") && parentName.equals("Investigation")) {
+					// As samples can be one to many on Investigations or one to one on Datasets, they do not follow
+					// usual naming conventions in the document mapping
+					return SearchManager.buildFacetQuery(results, "sample.investigation.id", jsonFacet);
+				}
+				return SearchManager.buildFacetQuery(results, parentName.toLowerCase() + ".id", jsonFacet);
+			} else {
+				logger.debug("Cannot collect facets for {} as Relationship with parent {} is not allowed",
+						target, parentName);
+				return null;
+			}
+		}
+	}
+
+	public List<String> searchGetPopulating() {
+		if (searchActive) {
+			return searchManager.getPopulating();
 		} else {
 			return Collections.emptyList();
 		}
 	}
 
-	public List<ScoredEntityBaseBean> luceneInvestigations(String userName, String user, String text, Date lower,
-			Date upper, List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxCount,
-			EntityManager manager, String ip) throws IcatException {
-		long startMillis = log ? System.currentTimeMillis() : 0;
-		List<ScoredEntityBaseBean> results = new ArrayList<>();
-		if (luceneActive) {
-			LuceneSearchResult last = null;
-			Long uid = null;
-			List<ScoredEntityBaseBean> allResults = Collections.emptyList();
-			/*
-			 * As results may be rejected and maxCount may be 1 ensure that we
-			 * don't make a huge number of calls to Lucene
-			 */
-			int blockSize = Math.max(1000, maxCount);
-
-			do {
-				if (last == null) {
-					last = lucene.investigations(user, text, lower, upper, parms, samples, userFullName, blockSize);
-					uid = last.getUid();
-				} else {
-					last = lucene.investigationsAfter(uid, blockSize);
-				}
-				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userName, manager, Investigation.class);
-			} while (results.size() != maxCount && allResults.size() == blockSize);
-			/* failing lucene retrieval calls clean up before throwing */
-			lucene.freeSearcher(uid);
-		}
-		if (logRequests.contains("R")) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-				gen.write("userName", userName);
-				if (results.size() > 0) {
-					gen.write("entityId", results.get(0).getEntityBaseBeanId());
-				}
-				gen.writeEnd();
-			}
-			transmitter.processMessage("luceneInvestigations", ip, baos.toString(), startMillis);
-		}
-		logger.debug("Returning {} results", results.size());
-		return results;
-	}
-
-	public void lucenePopulate(String entityName, long minid, EntityManager manager) throws IcatException {
-		if (luceneActive) {
+	public void searchPopulate(String entityName, Long minId, Long maxId, boolean delete, EntityManager manager)
+			throws IcatException {
+		if (searchActive) {
 			// Throws IcatException if entityName is not an ICAT entity
 			EntityInfoHandler.getClass(entityName);
 
-			lucene.populate(entityName, minid);
+			searchManager.populate(entityName, minId, maxId, delete);
 		}
 	}
 
@@ -1897,8 +2150,8 @@ public class EntityBeanManager {
 					}
 					transmitter.processMessage("update", ip, baos.toString(), startMillis);
 				}
-				if (luceneActive) {
-					lucene.updateDocument(beanManaged);
+				if (searchActive) {
+					searchManager.updateDocument(manager, beanManaged);
 				}
 				return notification;
 			} catch (IcatException e) {
@@ -1970,7 +2223,7 @@ public class EntityBeanManager {
 				userTransaction.commit();
 
 				/*
-				 * Nothing should be able to go wrong now so log, update lucene
+				 * Nothing should be able to go wrong now so log, update
 				 * and send notification messages
 				 */
 				if (logRequests.contains(CallType.WRITE)) {
@@ -1996,12 +2249,12 @@ public class EntityBeanManager {
 					}
 				}
 
-				if (luceneActive) {
+				if (searchActive) {
 					for (EntityBaseBean eb : creates) {
-						lucene.addDocument(eb);
+						searchManager.addDocument(manager, eb);
 					}
 					for (EntityBaseBean eb : updates) {
-						lucene.updateDocument(eb);
+						searchManager.updateDocument(manager, eb);
 					}
 				}
 
@@ -2334,7 +2587,7 @@ public class EntityBeanManager {
 		}
 
 		/*
-		 * Nothing should be able to go wrong now so log, update lucene and send
+		 * Nothing should be able to go wrong now so log, update and send
 		 * notification messages
 		 */
 		if (logRequests.contains(CallType.WRITE)) {
@@ -2349,9 +2602,9 @@ public class EntityBeanManager {
 			transmitter.processMessage("write", ip, baos.toString(), startMillis);
 		}
 
-		if (luceneActive) {
+		if (searchActive) {
 			for (EntityBaseBean c : clonedTo.values()) {
-				lucene.addDocument(c);
+				searchManager.addDocument(manager, c);
 			}
 		}
 
