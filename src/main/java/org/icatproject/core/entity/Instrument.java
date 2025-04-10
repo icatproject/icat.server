@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import jakarta.json.stream.JsonGenerator;
@@ -55,6 +56,12 @@ public class Instrument extends EntityBaseBean implements Serializable {
 
 	@Comment("A URL associated with this instrument")
 	private String url;
+
+	@Comment("Date when the instrument was commissioned")
+	private Date startDate;
+
+	@Comment("Date when the instrument was decommissioned")
+	private Date endDate;
 
 	@Comment("Shifts associated with this instrument")
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
@@ -118,6 +125,14 @@ public class Instrument extends EntityBaseBean implements Serializable {
 		return this.shifts;
 	}
 
+	public Date getStartDate() {
+		return this.startDate;
+	}
+
+	public Date getEndDate() {
+		return this.endDate;
+	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
@@ -152,6 +167,14 @@ public class Instrument extends EntityBaseBean implements Serializable {
 
 	public void setShifts(List<Shift> shifts) {
 		this.shifts = shifts;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 
 	@Override
