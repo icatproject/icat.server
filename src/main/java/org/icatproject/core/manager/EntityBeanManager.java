@@ -1489,7 +1489,7 @@ public class EntityBeanManager {
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		List<FacetDimension> dimensions = new ArrayList<>();
 		if (searchActive) {
-			List<String> fields = SearchManager.getPublicSearchFields(gateKeeper, klass.getSimpleName());
+			List<String> fields = searchManager.getPublicSearchFields(gateKeeper, klass.getSimpleName());
 			lastSearchAfter = searchDocuments(userName, jo, searchAfter, maxCount, minCount, sort, manager, klass,
 					startMillis, results, fields);
 
