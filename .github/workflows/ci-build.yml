@@ -38,7 +38,6 @@ jobs:
         with:
           repository: icatproject-contrib/icat-ansible
           path: icat-ansible
-          ref: icat-6.1
       - name: Install Ansible
         run: pip install -r icat-ansible/requirements.txt
 
@@ -52,6 +51,9 @@ jobs:
       - name: Replace default payara user with Actions user
         run: |
           sed -i -e "s/^payara_user: \"glassfish\"/payara_user: \"runner\"/" icat-ansible/group_vars/all/vars.yml
+      - name: Disable DB triggers
+        run: |
+          echo 'icat_server_install_db_triggers: false' >> icat-ansible/group_vars/all/vars.yml
 
       # Force hostname to localhost - bug fix for previous ICAT Ansible issues on Actions
       - name: Change hostname to localhost
