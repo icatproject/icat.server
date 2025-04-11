@@ -28,33 +28,34 @@ for f in glob.glob("src/test/install/*.war"):
 shutil.copy("src/main/config/run.properties.example",
             "src/test/install/run.properties.example")
 
-with open("src/test/install/run.properties", "w") as f:
-    contents = [
-        "lifetimeMinutes = 120",
-        "rootUserNames = db/root",
-        "maxEntities = 10000",
-        "maxIdsInQuery = 500",
-        "importCacheSize = 50",
-        "exportCacheSize = 50",
-        "authn.list = db",
-        "authn.db.url = %s" % icat_url,
-        "authn.simple.url = %s" % icat_url,
-        "notification.list = Dataset Datafile",
-        "notification.Dataset = CU",
-        "notification.Datafile = CU",
-        "log.list = SESSION WRITE READ INFO",
-        "search.engine = %s" % search_engine,
-        "search.urls = %s" % search_urls,
-        "search.populateBlockSize = 10000",
-        "search.searchBlockSize = 1000",
-        "search.directory = %s/data/search" % subst["HOME"],
-        "search.backlogHandlerIntervalSeconds = 60",
-        "search.enqueuedRequestIntervalSeconds = 3",
-        "search.aggregateFilesIntervalSeconds = 3600",
-        "search.maxSearchTimeSeconds = 5",
-        "key = wombat"
-    ]
-    f.write("\n".join(contents))
+if not os.path.exists("src/test/install/run.properties"):
+    with open("src/test/install/run.properties", "w") as f:
+        contents = [
+            "lifetimeMinutes = 120",
+            "rootUserNames = db/root",
+            "maxEntities = 10000",
+            "maxIdsInQuery = 500",
+            "importCacheSize = 50",
+            "exportCacheSize = 50",
+            "authn.list = db",
+            "authn.db.url = %s" % icat_url,
+            "authn.simple.url = %s" % icat_url,
+            "notification.list = Dataset Datafile",
+            "notification.Dataset = CU",
+            "notification.Datafile = CU",
+            "log.list = SESSION WRITE READ INFO",
+            "search.engine = %s" % search_engine,
+            "search.urls = %s" % search_urls,
+            "search.populateBlockSize = 10000",
+            "search.searchBlockSize = 1000",
+            "search.directory = %s/data/search" % subst["HOME"],
+            "search.backlogHandlerIntervalSeconds = 60",
+            "search.enqueuedRequestIntervalSeconds = 3",
+            "search.aggregateFilesIntervalSeconds = 3600",
+            "search.maxSearchTimeSeconds = 5",
+            "key = wombat"
+        ]
+        f.write("\n".join(contents))
 
 if not os.path.exists("src/test/install/setup.properties"):
     with open("src/test/install/setup.properties", "w") as f:
