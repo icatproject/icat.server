@@ -1,13 +1,15 @@
 package org.icatproject.core.manager.search;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,6 +56,7 @@ import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.PropertyHandler.SearchEngine;
+import org.icatproject.core.manager.search.queue.RotatingFileQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -63,45 +66,86 @@ import org.slf4j.MarkerFactory;
 @Singleton
 public class SearchManager {
 
+	// TODO: Make this configurable
+	private static int INDEX_BATCH_SIZE = 500;
+
 	public class EnqueuedSearchRequestHandler extends TimerTask {
 
 		@Override
 		public void run() {
+			while (true) {
+				synchronized (queue.getReadLock()) {
+					Path path;
+					try {
+						path = queue.getReadPath();
+					} catch (IcatException e) {
+						// Already logged
+						return;
+					}
 
-			synchronized (queueFileLock) {
-				if (queueFile.length() != 0) {
-					logger.debug("Will attempt to process {}", queueFile);
+					if (path == null) {
+						logger.debug("No queue file available to process");
+						return;
+					}
+
+					Path dotnewPath = Paths.get(path + ".new");
+
+					logger.debug("Will attempt to process {}", path);
+
 					StringBuilder sb = new StringBuilder("[");
-					try (BufferedReader reader = new BufferedReader(new FileReader(queueFile))) {
-						String line;
-						while ((line = reader.readLine()) != null) {
+
+					try (BufferedReader reader = Files.newBufferedReader(path)) {
+						for (int i = 0; i < INDEX_BATCH_SIZE; i++) {
+							String line = reader.readLine();
+							if (line == null) {
+								break;
+							}
+
 							if (sb.length() != 1) {
 								sb.append(',');
 							}
 							sb.append(line);
 						}
+
+						sb.append(']');
+
+						try (BufferedWriter writer = Files.newBufferedWriter(dotnewPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+							String line;
+							while ((line = reader.readLine()) != null) {
+								writer.write(line);
+								writer.newLine();
+							}
+						} catch (IOException e) {
+							logger.error("Error writing to {}", dotnewPath, e);
+							return;
+						}
 					} catch (IOException e) {
-						logger.error("Problems reading from {} : {}", queueFile, e.getMessage());
+						logger.error("Error reading from {}", path, e);
 						return;
 					}
-					sb.append(']');
 
 					try {
 						searchApi.modify(sb.toString());
+						searchApi.commit();
 						logger.info("Enqueued search documents now all indexed");
-					} catch (Exception e) {
+						Files.move(dotnewPath, path, StandardCopyOption.REPLACE_EXISTING);
+					} catch (IcatException e) {
 						// Catch all exceptions so the Timer doesn't end unexpectedly
 						// Record failures in a flat file to be examined periodically
-						logger.error("Search engine failed to modify documents with error {} : {}", e.getClass(),
-								e.getMessage());
+						logger.error("Search engine failed to modify documents", e);
 						try {
-							synchronizedWrite(sb.toString(), backlogHandlerFileLock, backlogHandlerFile);
+							backlog.synchronizedWrite(sb.toString());
+							Files.move(dotnewPath, path,StandardCopyOption.REPLACE_EXISTING);
 						} catch (IcatException e2) {
-							// Already logged the error
+							// Already logged
+							return;
+						} catch (IOException e2) {
+							logger.error("Error moving file {} -> {}", dotnewPath, path, e);
+							return;
 						}
-					} finally {
-						queueFile.delete();
-						logger.debug("finish processing, queue File removed");
+					} catch (IOException e) {
+						logger.error("Error moving file {} -> {}", dotnewPath, path, e);
+						return;
 					}
 				}
 			}
@@ -145,24 +189,59 @@ public class SearchManager {
 
 		@Override
 		public void run() {
-			synchronized (backlogHandlerFileLock) {
-				if (backlogHandlerFile.length() != 0) {
-					logger.debug("Will attempt to process {}", backlogHandlerFile);
-					try (BufferedReader reader = new BufferedReader(new FileReader(backlogHandlerFile))) {
-						String line;
-						while ((line = reader.readLine()) != null) {
-							searchApi.modify(line);
-						}
-						backlogHandlerFile.delete();
-						logger.info("Pending search records now all inserted");
-					} catch (IOException e) {
-						logger.error("Problems reading from {} : {}", backlogHandlerFile, e.getMessage());
+			while (true) {
+				synchronized (backlog.getReadLock()) {
+					Path path;
+					try {
+						path = backlog.getReadPath();
 					} catch (IcatException e) {
-						logger.error("Failed to put previously failed entries into search engine " + e.getMessage());
-					} catch (Throwable e) {
-						logger.error("Something unexpected happened " + e.getClass() + " " + e.getMessage());
+						// Already logged
+						return;
 					}
-					logger.debug("finish processing");
+
+					if (path == null) {
+						logger.debug("No backlog file available to process");
+						return;
+					}
+
+					Path dotnewPath = Paths.get(path + ".new");
+
+					logger.debug("Will attempt to process {}", path);
+
+					String line;
+					try (BufferedReader reader = Files.newBufferedReader(path)) {
+						line = reader.readLine();
+						if (line == null) {
+							break;
+						}
+
+						try (BufferedWriter writer = Files.newBufferedWriter(dotnewPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+							String line2;
+							while ((line2 = reader.readLine()) != null) {
+								writer.write(line2);
+								writer.newLine();
+							}
+						} catch (IOException e) {
+							logger.error("Error writing to {}", dotnewPath, e);
+							return;
+						}
+					} catch (IOException e) {
+						logger.error("Error reading from {}", path, e);
+						return;
+					}
+
+					try {
+						searchApi.modify(line);
+						searchApi.commit();
+						logger.info("Enqueued search documents now all indexed");
+						Files.move(dotnewPath, path, StandardCopyOption.REPLACE_EXISTING);
+					} catch (IcatException e) {
+						logger.error("Search engine failed to modify documents", e);
+						return;
+					} catch (IOException e) {
+						logger.error("Error moving file {} -> {}", dotnewPath, path, e);
+						return;
+					}
 				}
 			}
 		}
@@ -185,8 +264,8 @@ public class SearchManager {
 			EntityManagerFactory entityManagerFactory = entityManager.getEntityManagerFactory();
 			entityManager.close();
 			entityManager = entityManagerFactory.createEntityManager();
-			aggregate(datasetAggregationFileLock, datasetAggregationFile, Dataset.class);
-			aggregate(investigationAggregationFileLock, investigationAggregationFile, Investigation.class);
+			aggregate(datasetAggregation, Dataset.class);
+			aggregate(investigationAggregation, Investigation.class);
 		}
 
 		/**
@@ -198,34 +277,52 @@ public class SearchManager {
 		 * @param file     File to read the ids of entities from
 		 * @param klass    Class of the entity to be aggregated
 		 */
-		private void aggregate(Long fileLock, File file, Class<? extends EntityBaseBean> klass) {
+		private void aggregate(RotatingFileQueue aggregationQueue, Class<? extends EntityBaseBean> klass) {
 			String entityName = klass.getSimpleName();
-			synchronized (fileLock) {
-				if (file.length() != 0) {
-					logger.debug("Will attempt to process {}", file);
-					try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-						String line;
-						Set<String> ids = new HashSet<>();
-						while ((line = reader.readLine()) != null) {
-							if (ids.add(line)) { // True if id not yet encountered
-								String query = "SELECT e FROM " + entityName + " e WHERE e.id = " + line;
-								try {
-									EntityBaseBean entity = entityManager.createQuery(query, klass).getSingleResult();
-									updateDocument(entityManager, entity);
-								} catch (Exception e) {
-									logger.error("{} with id {} not found, continue", entityName, line);
-								}
+
+			synchronized (aggregationQueue.getReadLock()) {
+				Path path;
+				try {
+					path = aggregationQueue.getReadPath();
+				} catch (IcatException e) {
+					// Already logged
+					return;
+				}
+
+				if (path == null) {
+					logger.debug("No aggregation file available to process");
+					return;
+				}
+
+				logger.debug("Will attempt to process {}", path);
+
+				try (BufferedReader reader = Files.newBufferedReader(path)) {
+					String line;
+					Set<String> ids = new HashSet<>();
+					while ((line = reader.readLine()) != null) {
+						if (ids.add(line)) { // True if id not yet encountered
+							String query = "SELECT e FROM " + entityName + " e WHERE e.id = " + line;
+							try {
+								EntityBaseBean entity = entityManager.createQuery(query, klass).getSingleResult();
+								updateDocument(entityManager, entity);
+							} catch (Exception e) { //TODO: refine this
+								logger.error("{} with id {} not found, continue", entityName, line);
 							}
 						}
-						file.delete();
-						logger.info(entityName + " aggregations performed");
-					} catch (IOException e) {
-						logger.error("Problems reading from {} : {}", file, e.getMessage());
-					} catch (Throwable e) {
-						logger.error("Something unexpected happened " + e.getClass() + " " + e.getMessage());
 					}
-					logger.debug("finish processing");
+				} catch (IOException e) {
+					logger.error("Error reading from {}", path, e);
+					return;
 				}
+
+				try {
+					Files.delete(path);
+				} catch (IOException e) {
+					logger.error("Error deleting aggregate file: {}", path, e);
+					return;
+				}
+
+				logger.debug("Finish processing aggregate file: {}", path);
 			}
 		}
 	}
@@ -395,25 +492,14 @@ public class SearchManager {
 
 	private long aggregateFilesIntervalMillis;
 
-	private Long backlogHandlerFileLock = 0L;
-
-	private Long queueFileLock = 0L;
-
-	private Long datasetAggregationFileLock = 0L;
-
-	private Long investigationAggregationFileLock = 0L;
+	private RotatingFileQueue queue;
+	private RotatingFileQueue backlog;
+	private RotatingFileQueue datasetAggregation;
+	private RotatingFileQueue investigationAggregation;
 
 	private Timer timer;
 
 	private Set<String> entitiesToIndex;
-
-	private File backlogHandlerFile;
-
-	private File queueFile;
-
-	private File datasetAggregationFile;
-
-	private File investigationAggregationFile;
 
 	private SearchEngine searchEngine;
 
@@ -454,28 +540,7 @@ public class SearchManager {
 	}
 
 	private void enqueue(String json) throws IcatException {
-		synchronizedWrite(json, queueFileLock, queueFile);
-	}
-
-	/**
-	 * @param line     String to write to file, followed by \n.
-	 * @param fileLock Lock for the file
-	 * @param file     File to write to
-	 * @throws IcatException
-	 */
-	private void synchronizedWrite(String line, Long fileLock, File file) throws IcatException {
-		synchronized (fileLock) {
-			try {
-				logger.trace("Writing {} to {}", line, file.getAbsolutePath());
-				FileWriter output = new FileWriter(file, true);
-				output.write(line + "\n");
-				output.close();
-			} catch (IOException e) {
-				String msg = "Problems writing to " + queueFile + " " + e.getMessage();
-				logger.error(msg);
-				throw new IcatException(IcatExceptionType.INTERNAL, msg);
-			}
-		}
+		queue.synchronizedWrite(json);
 	}
 
 	/**
@@ -490,11 +555,10 @@ public class SearchManager {
 		if (bean.getClass().getSimpleName().equals("Datafile") && aggregateFilesIntervalMillis > 0) {
 			Dataset dataset = ((Datafile) bean).getDataset();
 			if (dataset != null) {
-				synchronizedWrite(dataset.getId().toString(), datasetAggregationFileLock, datasetAggregationFile);
+				datasetAggregation.synchronizedWrite(dataset.getId().toString());
 				Investigation investigation = dataset.getInvestigation();
 				if (investigation != null) {
-					synchronizedWrite(investigation.getId().toString(), investigationAggregationFileLock,
-							investigationAggregationFile);
+					investigationAggregation.synchronizedWrite(investigation.getId().toString());
 				}
 			}
 		}
@@ -640,7 +704,18 @@ public class SearchManager {
 
 	private void pushPendingCalls() {
 		timer.schedule(new EnqueuedSearchRequestHandler(), 0L);
-		while (queueFile.length() != 0) {
+
+		while (true) {
+			try {
+				// This will return null iff there is nothing left in the queue
+				if (queue.getReadPath() == null) {
+					return;
+				}
+			} catch (IcatException e) {
+				// Already logged
+				return;
+			}
+
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -656,7 +731,11 @@ public class SearchManager {
 			try {
 				populateExecutor.shutdown();
 				getBeanDocExecutor.shutdown();
+
+				// Presumably, this is to wait for indexing to complete before shutting down?
+				// TODO: Need a way to gracefully stop indexing quickly and confirm that it is complete.
 				pushPendingCalls();
+
 				timer.cancel();
 				timer = null;
 				logger.info("Closed down SearchManager");
@@ -749,10 +828,10 @@ public class SearchManager {
 
 				populateBlockSize = propertyHandler.getSearchPopulateBlockSize();
 				Path searchDirectory = propertyHandler.getSearchDirectory();
-				backlogHandlerFile = searchDirectory.resolve("backLog").toFile();
-				queueFile = searchDirectory.resolve("queue").toFile();
-				datasetAggregationFile = searchDirectory.resolve("datasetAggregation").toFile();
-				investigationAggregationFile = searchDirectory.resolve("investigationAggregation").toFile();
+				backlog = new RotatingFileQueue(searchDirectory, "backLog");
+				queue = new RotatingFileQueue(searchDirectory,"queue");
+				datasetAggregation = new RotatingFileQueue(searchDirectory,"datasetAggregation");
+				investigationAggregation = new RotatingFileQueue(searchDirectory,"investigationAggregation");
 				maxThreads = Runtime.getRuntime().availableProcessors();
 				populateExecutor = Executors.newWorkStealingPool(maxThreads);
 				getBeanDocExecutor = Executors.newCachedThreadPool();
