@@ -136,6 +136,7 @@ public class SearchManager {
 						try {
 							backlog.synchronizedWrite(sb.toString());
 							Files.move(dotnewPath, path,StandardCopyOption.REPLACE_EXISTING);
+							return;
 						} catch (IcatException e2) {
 							// Already logged
 							return;
