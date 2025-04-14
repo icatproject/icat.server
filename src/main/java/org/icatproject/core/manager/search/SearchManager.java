@@ -84,7 +84,7 @@ public class SearchManager {
 					}
 
 					if (path == null) {
-						logger.debug("No queue file available to process");
+						logger.trace("No queue file available to process");
 						return;
 					}
 
@@ -200,7 +200,7 @@ public class SearchManager {
 					}
 
 					if (path == null) {
-						logger.debug("No backlog file available to process");
+						logger.trace("No backlog file available to process");
 						return;
 					}
 
@@ -290,7 +290,7 @@ public class SearchManager {
 				}
 
 				if (path == null) {
-					logger.debug("No aggregation file available to process");
+					logger.trace("No aggregation file available to process");
 					return;
 				}
 

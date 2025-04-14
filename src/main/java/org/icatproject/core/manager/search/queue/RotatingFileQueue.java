@@ -69,7 +69,7 @@ public class RotatingFileQueue {
 	}
 
 	private void rotate() throws IcatException {
-		logger.debug("Rotating queue file: {}", writePath);
+		logger.trace("Rotating queue file: {}", writePath);
 
 		synchronized (readLock) {
 			// get current list of numbered files
@@ -132,7 +132,7 @@ public class RotatingFileQueue {
 				return entry.getValue();
 			}
 
-			logger.debug("Rotating queue file due to exhaustion: {}", writePath);
+			logger.trace("Rotating queue file due to exhaustion: {}", writePath);
 			rotate();
 
 			Map.Entry<Integer, Path> entry = getNumberedFiles().lastEntry();
