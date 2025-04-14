@@ -67,10 +67,9 @@ import org.slf4j.MarkerFactory;
 @Singleton
 public class SearchManager {
 
-	// TODO: Make this configurable
-	private static int INDEX_BATCH_SIZE = 500;
-	private static int INDEX_BATCHES_PER_TIMER = 10;
-	private static int BACKLOG_LINES_PER_TIMER = 10;
+	public static final int DEFAULT_INDEX_BATCH_SIZE = 500;
+	public static final int DEFAULT_INDEX_BATCHES_PER_TIMER = 10;
+	public static final int DEFAULT_BACKLOG_LINES_PER_TIMER = 10;
 
 	public class EnqueuedSearchRequestHandler extends TimerTask {
 
@@ -79,7 +78,7 @@ public class SearchManager {
 			int numIndexed = 0;
 			int numBatches = 0;
 
-			while (numBatches < INDEX_BATCHES_PER_TIMER) {
+			while (numBatches < indexBatchesPerTimer) {
 				synchronized (queue.getReadLock()) {
 					int numIndexedInBatch = 0;
 
@@ -103,7 +102,7 @@ public class SearchManager {
 					StringBuilder sb = new StringBuilder("[");
 
 					try (BufferedReader reader = Files.newBufferedReader(path)) {
-						while (numIndexedInBatch < INDEX_BATCH_SIZE) {
+						while (numIndexedInBatch < indexBatchSize) {
 							String line = reader.readLine();
 							if (line == null) {
 								break;
@@ -209,7 +208,7 @@ public class SearchManager {
 		public void run() {
 			int numLines = 0;
 
-			while (numLines < BACKLOG_LINES_PER_TIMER) {
+			while (numLines < backlogLinesPerTimer) {
 				synchronized (backlog.getReadLock()) {
 					Path path;
 					try {
@@ -535,6 +534,10 @@ public class SearchManager {
 	private List<URL> urls;
 
 	private final Map<String, List<String>> publicSearchFields = new HashMap<>();
+
+	private int indexBatchSize;
+	private int indexBatchesPerTimer;
+	private int backlogLinesPerTimer;
 
 	/**
 	 * Gets (and if necessary, builds) the fields which should be returned as part
@@ -867,6 +870,11 @@ public class SearchManager {
 					timer.schedule(new AggregateFilesHandler(entityManagerFactory), 0L, aggregateFilesIntervalMillis);
 				}
 				entitiesToIndex = propertyHandler.getEntitiesToIndex();
+
+				indexBatchSize = propertyHandler.getSearchIndexBatchSize();
+				indexBatchesPerTimer = propertyHandler.getSearchIndexBatchesPerTimer();
+				backlogLinesPerTimer = propertyHandler.getSearchBacklogLinesPerTimer();
+
 				logger.info("Initialised SearchManager at {}", urls);
 			} catch (Exception e) {
 				logger.error(fatal, "Problem setting up SearchManager", e);
