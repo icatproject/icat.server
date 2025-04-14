@@ -43,6 +43,7 @@ import jakarta.json.JsonValue;
 import jakarta.json.JsonValue.ValueType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceUnit;
 
 import org.icatproject.core.IcatException;
@@ -307,8 +308,11 @@ public class SearchManager {
 							try {
 								EntityBaseBean entity = entityManager.createQuery(query, klass).getSingleResult();
 								updateDocument(entityManager, entity);
-							} catch (Exception e) { //TODO: refine this
-								logger.error("{} with id {} not found, continue", entityName, line);
+							} catch (NoResultException e) {
+								logger.debug("{} with id {} not found, continue", entityName, line);
+							} catch (IcatException e) {
+								logger.error("Failed to index aggregation", e);
+								return;
 							}
 						}
 					}
