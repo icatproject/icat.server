@@ -68,12 +68,13 @@ public class SearchManager {
 
 	// TODO: Make this configurable
 	private static int INDEX_BATCH_SIZE = 500;
+	private static int INDEX_BATCHES_PER_TIMER = 10;
 
 	public class EnqueuedSearchRequestHandler extends TimerTask {
 
 		@Override
 		public void run() {
-			while (true) {
+			for (int i = 0; i < INDEX_BATCHES_PER_TIMER; i++) {
 				synchronized (queue.getReadLock()) {
 					Path path;
 					try {
@@ -95,7 +96,7 @@ public class SearchManager {
 					StringBuilder sb = new StringBuilder("[");
 
 					try (BufferedReader reader = Files.newBufferedReader(path)) {
-						for (int i = 0; i < INDEX_BATCH_SIZE; i++) {
+						for (int j = 0; j < INDEX_BATCH_SIZE; j++) {
 							String line = reader.readLine();
 							if (line == null) {
 								break;
@@ -190,7 +191,7 @@ public class SearchManager {
 
 		@Override
 		public void run() {
-			while (true) {
+			for (int i = 0; i < INDEX_BATCHES_PER_TIMER; i++) {
 				synchronized (backlog.getReadLock()) {
 					Path path;
 					try {
