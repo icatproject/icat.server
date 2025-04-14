@@ -1,7 +1,7 @@
 package org.icatproject.core.manager.search.queue;
 
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
+import java.nio.file.NoSuchFileException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,7 +54,7 @@ public class RotatingFileQueue {
 		long size = 0L;
 		try {
 			size = Files.size(writePath);
-		} catch (FileNotFoundException e) {
+		} catch (NoSuchFileException e) {
 			// Ignore
 		} catch (IOException e) {
 			logger.warn("Error checking queue file size: {}", writePath, e);
