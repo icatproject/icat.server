@@ -734,20 +734,13 @@ public class SearchManager {
 	private void exit() {
 		logger.info("Closing down SearchManager");
 		if (active) {
-			try {
-				populateExecutor.shutdown();
-				getBeanDocExecutor.shutdown();
+			populateExecutor.shutdown();
+			getBeanDocExecutor.shutdown();
 
-				// Presumably, this is to wait for indexing to complete before shutting down?
-				// TODO: Need a way to gracefully stop indexing quickly and confirm that it is complete.
-				pushPendingCalls();
+			// Stops new TimerTask executions. If a TimerTask is currently running, it will continue until completed.
+			timer.cancel();
 
-				timer.cancel();
-				timer = null;
-				logger.info("Closed down SearchManager");
-			} catch (Exception e) {
-				logger.error(fatal, "Problem closing down SearchManager", e);
-			}
+			logger.info("Closed down SearchManager");
 		}
 	}
 
