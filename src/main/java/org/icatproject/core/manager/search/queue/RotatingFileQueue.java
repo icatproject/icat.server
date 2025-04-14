@@ -175,7 +175,7 @@ public class RotatingFileQueue {
 						Integer n = Integer.valueOf(end);
 						filemap.put(n, file);
 					} catch (NumberFormatException e) {
-						logger.warn("Ignoring file: {}", directory);
+						logger.warn("Ignoring file: {}", file);
 						// Ignore
 					}
 				}
