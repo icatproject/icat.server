@@ -70,13 +70,19 @@ public class SearchManager {
 	// TODO: Make this configurable
 	private static int INDEX_BATCH_SIZE = 500;
 	private static int INDEX_BATCHES_PER_TIMER = 10;
+	private static int BACKLOG_LINES_PER_TIMER = 10;
 
 	public class EnqueuedSearchRequestHandler extends TimerTask {
 
 		@Override
 		public void run() {
-			for (int i = 0; i < INDEX_BATCHES_PER_TIMER; i++) {
+			int numIndexed = 0;
+			int numBatches = 0;
+
+			while (numBatches < INDEX_BATCHES_PER_TIMER) {
 				synchronized (queue.getReadLock()) {
+					int numIndexedInBatch = 0;
+
 					Path path;
 					try {
 						path = queue.getReadPath();
@@ -87,7 +93,7 @@ public class SearchManager {
 
 					if (path == null) {
 						logger.trace("No queue file available to process");
-						return;
+						break;
 					}
 
 					Path dotnewPath = Paths.get(path + ".new");
@@ -97,7 +103,7 @@ public class SearchManager {
 					StringBuilder sb = new StringBuilder("[");
 
 					try (BufferedReader reader = Files.newBufferedReader(path)) {
-						for (int j = 0; j < INDEX_BATCH_SIZE; j++) {
+						while (numIndexedInBatch < INDEX_BATCH_SIZE) {
 							String line = reader.readLine();
 							if (line == null) {
 								break;
@@ -107,6 +113,9 @@ public class SearchManager {
 								sb.append(',');
 							}
 							sb.append(line);
+
+							numIndexedInBatch++;
+							numIndexed++;
 						}
 
 						sb.append(']');
@@ -129,7 +138,7 @@ public class SearchManager {
 					try {
 						searchApi.modify(sb.toString());
 						searchApi.commit();
-						logger.info("Enqueued search documents now all indexed");
+						logger.debug("Indexed a batch of {} documents", numIndexedInBatch);
 						Files.move(dotnewPath, path, StandardCopyOption.REPLACE_EXISTING);
 					} catch (IcatException e) {
 						// Catch all exceptions so the Timer doesn't end unexpectedly
@@ -151,6 +160,12 @@ public class SearchManager {
 						return;
 					}
 				}
+
+				numBatches++;
+			}
+
+			if (numIndexed > 0) {
+				logger.info("Indexed {} documents in {} batches", numIndexed, numBatches);
 			}
 		}
 	}
@@ -192,7 +207,9 @@ public class SearchManager {
 
 		@Override
 		public void run() {
-			for (int i = 0; i < INDEX_BATCHES_PER_TIMER; i++) {
+			int numLines = 0;
+
+			while (numLines < BACKLOG_LINES_PER_TIMER) {
 				synchronized (backlog.getReadLock()) {
 					Path path;
 					try {
@@ -204,7 +221,7 @@ public class SearchManager {
 
 					if (path == null) {
 						logger.trace("No backlog file available to process");
-						return;
+						break;
 					}
 
 					Path dotnewPath = Paths.get(path + ".new");
@@ -236,7 +253,7 @@ public class SearchManager {
 					try {
 						searchApi.modify(line);
 						searchApi.commit();
-						logger.info("Enqueued search documents now all indexed");
+						logger.debug("Indexed a line from the backlog");
 						Files.move(dotnewPath, path, StandardCopyOption.REPLACE_EXISTING);
 					} catch (IcatException e) {
 						logger.error("Search engine failed to modify documents", e);
@@ -246,6 +263,12 @@ public class SearchManager {
 						return;
 					}
 				}
+
+				numLines++;
+			}
+
+			if (numLines > 0) {
+				logger.info("Indexed {} lines from the backlog", numLines);
 			}
 		}
 	}
