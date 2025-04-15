@@ -78,30 +78,29 @@ public class SearchManager {
 			int numIndexed = 0;
 			int numBatches = 0;
 
-			while (numBatches < indexBatchesPerTimer) {
-				synchronized (queue.getReadLock()) {
-					int numIndexedInBatch = 0;
+			synchronized (queue.getReadLock()) {
+				Path path;
+				try {
+					path = queue.getReadPath();
+				} catch (IcatException e) {
+					// Already logged
+					return;
+				}
 
-					Path path;
-					try {
-						path = queue.getReadPath();
-					} catch (IcatException e) {
-						// Already logged
-						return;
-					}
+				if (path == null) {
+					logger.trace("No queue file available to process");
+					return;
+				}
 
-					if (path == null) {
-						logger.trace("No queue file available to process");
-						break;
-					}
+				Path dotnewPath = Paths.get(path + ".new");
 
-					Path dotnewPath = Paths.get(path + ".new");
+				logger.info("Will attempt to process {}", path);
 
-					logger.debug("Will attempt to process {}", path);
+				try (BufferedReader reader = Files.newBufferedReader(path)) {
+					while (numBatches < indexBatchesPerTimer) {
+						int numIndexedInBatch = 0;
 
-					StringBuilder sb = new StringBuilder("[");
-
-					try (BufferedReader reader = Files.newBufferedReader(path)) {
+						StringBuilder sb = new StringBuilder("[");
 						while (numIndexedInBatch < indexBatchSize) {
 							String line = reader.readLine();
 							if (line == null) {
@@ -114,58 +113,60 @@ public class SearchManager {
 							sb.append(line);
 
 							numIndexedInBatch++;
-							numIndexed++;
 						}
-
 						sb.append(']');
 
-						try (BufferedWriter writer = Files.newBufferedWriter(dotnewPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-							String line;
-							while ((line = reader.readLine()) != null) {
-								writer.write(line);
-								writer.newLine();
-							}
-						} catch (IOException e) {
-							logger.error("Error writing to {}", dotnewPath, e);
-							return;
+						if (numIndexedInBatch == 0) {
+							break;
 						}
-					} catch (IOException e) {
-						logger.error("Error reading from {}", path, e);
-						return;
+
+						try {
+							searchApi.modify(sb.toString());
+							searchApi.commit();
+							logger.debug("Indexed a batch of {} documents", numIndexedInBatch);
+						} catch (IcatException e) {
+							logger.error("Search engine failed to modify documents", e);
+							try {
+								backlog.synchronizedWrite(sb.toString());
+								logger.info("Written a line of {} documents to the backlog", numIndexedInBatch);
+								break;
+							} catch (IcatException e2) {
+								// Already logged
+								return;
+							}
+						}
+
+						numIndexed += numIndexedInBatch;
+						numBatches++;
 					}
 
-					try {
-						searchApi.modify(sb.toString());
-						searchApi.commit();
-						logger.debug("Indexed a batch of {} documents", numIndexedInBatch);
-						Files.move(dotnewPath, path, StandardCopyOption.REPLACE_EXISTING);
-					} catch (IcatException e) {
-						// Catch all exceptions so the Timer doesn't end unexpectedly
-						// Record failures in a flat file to be examined periodically
-						logger.error("Search engine failed to modify documents", e);
-						try {
-							backlog.synchronizedWrite(sb.toString());
-							Files.move(dotnewPath, path,StandardCopyOption.REPLACE_EXISTING);
-							return;
-						} catch (IcatException e2) {
-							// Already logged
-							return;
-						} catch (IOException e2) {
-							logger.error("Error moving file {} -> {}", dotnewPath, path, e);
-							return;
+					try (BufferedWriter writer = Files.newBufferedWriter(dotnewPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+						while (true) {
+							String line = reader.readLine();
+							if (line == null) {
+								break;
+							}
+							writer.write(line);
+							writer.newLine();
 						}
 					} catch (IOException e) {
-						logger.error("Error moving file {} -> {}", dotnewPath, path, e);
+						logger.error("Error writing to {}", dotnewPath, e);
 						return;
 					}
+				} catch (IOException e) {
+					logger.error("Error reading from {}", path, e);
+					return;
 				}
 
-				numBatches++;
+				try {
+					Files.move(dotnewPath, path, StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					logger.error("Error moving file {} -> {}", dotnewPath, path, e);
+					return;
+				}
 			}
 
-			if (numIndexed > 0) {
-				logger.info("Indexed {} documents in {} batches", numIndexed, numBatches);
-			}
+			logger.info("Indexed {} documents in {} batches", numIndexed, numBatches);
 		}
 	}
 
@@ -208,67 +209,70 @@ public class SearchManager {
 		public void run() {
 			int numLines = 0;
 
-			while (numLines < backlogLinesPerTimer) {
-				synchronized (backlog.getReadLock()) {
-					Path path;
-					try {
-						path = backlog.getReadPath();
-					} catch (IcatException e) {
-						// Already logged
-						return;
-					}
+			synchronized (backlog.getReadLock()) {
+				Path path;
+				try {
+					path = backlog.getReadPath();
+				} catch (IcatException e) {
+					// Already logged
+					return;
+				}
 
-					if (path == null) {
-						logger.trace("No backlog file available to process");
-						break;
-					}
+				if (path == null) {
+					logger.trace("No backlog file available to process");
+					return;
+				}
 
-					Path dotnewPath = Paths.get(path + ".new");
+				Path dotnewPath = Paths.get(path + ".new");
 
-					logger.debug("Will attempt to process {}", path);
+				logger.info("Will attempt to process {}", path);
 
-					String line;
-					try (BufferedReader reader = Files.newBufferedReader(path)) {
-						line = reader.readLine();
+				try (BufferedReader reader = Files.newBufferedReader(path)) {
+					while (numLines < backlogLinesPerTimer) {
+						String line = reader.readLine();
 						if (line == null) {
 							break;
 						}
 
-						try (BufferedWriter writer = Files.newBufferedWriter(dotnewPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-							String line2;
-							while ((line2 = reader.readLine()) != null) {
-								writer.write(line2);
-								writer.newLine();
-							}
-						} catch (IOException e) {
-							logger.error("Error writing to {}", dotnewPath, e);
+						try {
+							searchApi.modify(line);
+							searchApi.commit();
+							logger.debug("Indexed a line from the backlog");
+						} catch (IcatException e) {
+							logger.error("Search engine failed to modify documents", e);
 							return;
 						}
-					} catch (IOException e) {
-						logger.error("Error reading from {}", path, e);
-						return;
+
+						numLines++;
 					}
 
-					try {
-						searchApi.modify(line);
-						searchApi.commit();
-						logger.debug("Indexed a line from the backlog");
-						Files.move(dotnewPath, path, StandardCopyOption.REPLACE_EXISTING);
-					} catch (IcatException e) {
-						logger.error("Search engine failed to modify documents", e);
-						return;
+					try (BufferedWriter writer = Files.newBufferedWriter(dotnewPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+						while (true) {
+							String line = reader.readLine();
+							if (line == null) {
+								break;
+							}
+							writer.write(line);
+							writer.newLine();
+						}
 					} catch (IOException e) {
-						logger.error("Error moving file {} -> {}", dotnewPath, path, e);
+						logger.error("Error writing to {}", dotnewPath, e);
 						return;
 					}
+				} catch (IOException e) {
+					logger.error("Error reading from {}", path, e);
+					return;
 				}
 
-				numLines++;
+				try {
+					Files.move(dotnewPath, path, StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					logger.error("Error moving file {} -> {}", dotnewPath, path, e);
+					return;
+				}
 			}
 
-			if (numLines > 0) {
-				logger.info("Indexed {} lines from the backlog", numLines);
-			}
+			logger.info("Indexed {} lines from the backlog", numLines);
 		}
 	}
 
