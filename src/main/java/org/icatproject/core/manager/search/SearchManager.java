@@ -419,7 +419,7 @@ public class SearchManager {
 
 	private List<URL> urls;
 
-	private static final Map<String, List<String>> publicSearchFields = new HashMap<>();
+	private final Map<String, List<String>> publicSearchFields = new HashMap<>();
 
 	/**
 	 * Gets (and if necessary, builds) the fields which should be returned as part
@@ -431,7 +431,7 @@ public class SearchManager {
 	 *         entity is authorised.
 	 * @throws IcatException
 	 */
-	public static List<String> getPublicSearchFields(GateKeeper gateKeeper, String simpleName) throws IcatException {
+	public List<String> getPublicSearchFields(GateKeeper gateKeeper, String simpleName) throws IcatException {
 		if (gateKeeper.getPublicSearchFieldsStale() || publicSearchFields.size() == 0) {
 			logger.info("Building public search fields from public tables and steps");
 			publicSearchFields.put("Datafile", buildPublicSearchFields(gateKeeper, Datafile.getDocumentFields()));
