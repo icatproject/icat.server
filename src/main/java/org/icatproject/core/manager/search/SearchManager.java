@@ -70,6 +70,7 @@ public class SearchManager {
 	public static final int DEFAULT_INDEX_BATCH_SIZE = 500;
 	public static final int DEFAULT_INDEX_BATCHES_PER_TIMER = 10;
 	public static final int DEFAULT_BACKLOG_LINES_PER_TIMER = 10;
+	public static final long DEFAULT_QUEUE_FILE_MAX_SIZE = 10_000_000L;
 
 	public class EnqueuedSearchRequestHandler extends TimerTask {
 
@@ -542,6 +543,7 @@ public class SearchManager {
 	private int indexBatchSize;
 	private int indexBatchesPerTimer;
 	private int backlogLinesPerTimer;
+	private long queueFileMaxSize;
 
 	/**
 	 * Gets (and if necessary, builds) the fields which should be returned as part
@@ -855,12 +857,17 @@ public class SearchManager {
 							"Search engine {} not supported, must be one of " + SearchEngine.values());
 				}
 
-				populateBlockSize = propertyHandler.getSearchPopulateBlockSize();
 				Path searchDirectory = propertyHandler.getSearchDirectory();
-				backlog = new RotatingFileQueue(searchDirectory, "backLog");
-				queue = new RotatingFileQueue(searchDirectory,"queue");
-				datasetAggregation = new RotatingFileQueue(searchDirectory,"datasetAggregation");
-				investigationAggregation = new RotatingFileQueue(searchDirectory,"investigationAggregation");
+				indexBatchSize = propertyHandler.getSearchIndexBatchSize();
+				indexBatchesPerTimer = propertyHandler.getSearchIndexBatchesPerTimer();
+				backlogLinesPerTimer = propertyHandler.getSearchBacklogLinesPerTimer();
+				queueFileMaxSize = propertyHandler.getSearchQueueFileMaxSize();
+				queue = new RotatingFileQueue(searchDirectory, "queue", queueFileMaxSize);
+				backlog = new RotatingFileQueue(searchDirectory, "backLog", queueFileMaxSize);
+				datasetAggregation = new RotatingFileQueue(searchDirectory,"datasetAggregation", queueFileMaxSize);
+				investigationAggregation = new RotatingFileQueue(searchDirectory,"investigationAggregation", queueFileMaxSize);
+
+				populateBlockSize = propertyHandler.getSearchPopulateBlockSize();
 				maxThreads = Runtime.getRuntime().availableProcessors();
 				populateExecutor = Executors.newWorkStealingPool(maxThreads);
 				getBeanDocExecutor = Executors.newCachedThreadPool();
@@ -874,10 +881,6 @@ public class SearchManager {
 					timer.schedule(new AggregateFilesHandler(entityManagerFactory), 0L, aggregateFilesIntervalMillis);
 				}
 				entitiesToIndex = propertyHandler.getEntitiesToIndex();
-
-				indexBatchSize = propertyHandler.getSearchIndexBatchSize();
-				indexBatchesPerTimer = propertyHandler.getSearchIndexBatchesPerTimer();
-				backlogLinesPerTimer = propertyHandler.getSearchBacklogLinesPerTimer();
 
 				logger.info("Initialised SearchManager at {}", urls);
 			} catch (Exception e) {

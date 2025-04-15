@@ -19,20 +19,21 @@ import org.slf4j.LoggerFactory;
 
 public class RotatingFileQueue {
 
-	private static final long MAX_SIZE = 10_000_000L;
 	private static final Logger logger = LoggerFactory.getLogger(RotatingFileQueue.class);
 
 	private final Path directory;
 	private final String filename;
 	private final Path writePath;
+	private final long maxSize;
 
 	private final Object writeLock = new Object();
 	private final Object readLock = new Object();
 
-	public RotatingFileQueue(Path directory, String filename) {
+	public RotatingFileQueue(Path directory, String filename, long maxSize) {
 		this.directory = directory;
 		this.filename = filename;
 		this.writePath = directory.resolve(filename);
+		this.maxSize = maxSize;
 	}
 
 	public void synchronizedWrite(String line) throws IcatException {
@@ -60,7 +61,7 @@ public class RotatingFileQueue {
 			logger.warn("Error checking queue file size: {}", writePath, e);
 			// Ignore
 		}
-		if (size > MAX_SIZE) {
+		if (size > maxSize) {
 			logger.debug("Rotating queue file due to size {}: {}", size, writePath);
 			return true;
 		}

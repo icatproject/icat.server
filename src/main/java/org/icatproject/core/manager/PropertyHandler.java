@@ -318,6 +318,7 @@ public class PropertyHandler {
 	private int searchIndexBatchSize;
 	private int searchIndexBatchesPerTimer;
 	private int searchBacklogLinesPerTimer;
+	private long searchQueueFileMaxSize;
 
 	@PostConstruct
 	private void init() {
@@ -625,6 +626,14 @@ public class PropertyHandler {
 			} else {
 				searchBacklogLinesPerTimer = SearchManager.DEFAULT_BACKLOG_LINES_PER_TIMER;
 			}
+
+			key = "search.queueFileMaxSize";
+			if (props.has(key)) {
+				searchQueueFileMaxSize = props.getPositiveLong(key);
+				formattedProps.add("search.queueFileMaxSize " + searchQueueFileMaxSize);
+			} else {
+				searchQueueFileMaxSize = SearchManager.DEFAULT_QUEUE_FILE_MAX_SIZE;
+			}
 		} catch (CheckedPropertyException e) {
 			abend(e.getMessage());
 		}
@@ -730,5 +739,9 @@ public class PropertyHandler {
 
 	public int getSearchBacklogLinesPerTimer() {
 		return searchBacklogLinesPerTimer;
+	}
+
+	public long getSearchQueueFileMaxSize() {
+		return searchQueueFileMaxSize;
 	}
 }
