@@ -51,6 +51,7 @@ import org.icatproject.authentication.Authentication;
 import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
+import org.icatproject.core.manager.search.SearchManager;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 import org.icatproject.utils.ContainerGetter;
@@ -314,6 +315,10 @@ public class PropertyHandler {
 	private String unitAliasOptions;
 	private Map<String, String> cluster = new HashMap<>();
 	private long searchEnqueuedRequestIntervalMillis;
+	private int searchIndexBatchSize;
+	private int searchIndexBatchesPerTimer;
+	private int searchBacklogLinesPerTimer;
+	private long searchQueueFileMaxSize;
 
 	@PostConstruct
 	private void init() {
@@ -597,6 +602,38 @@ public class PropertyHandler {
 			if (containerType == ContainerType.UNKNOWN) {
 				abend("Container type " + containerType + " is not recognised");
 			}
+
+			key = "search.indexBatchSize";
+			if (props.has(key)) {
+				searchIndexBatchSize = props.getPositiveInt(key);
+				formattedProps.add("search.indexBatchSize " + searchIndexBatchSize);
+			} else {
+				searchIndexBatchSize = SearchManager.DEFAULT_INDEX_BATCH_SIZE;
+			}
+
+			key = "search.indexBatchesPerTimer";
+			if (props.has(key)) {
+				searchIndexBatchesPerTimer = props.getPositiveInt(key);
+				formattedProps.add("search.indexBatchesPerTimer " + searchIndexBatchesPerTimer);
+			} else {
+				searchIndexBatchesPerTimer = SearchManager.DEFAULT_INDEX_BATCHES_PER_TIMER;
+			}
+
+			key = "search.backlogLinesPerTimer";
+			if (props.has(key)) {
+				searchBacklogLinesPerTimer = props.getPositiveInt(key);
+				formattedProps.add("search.backlogLinesPerTimer " + searchBacklogLinesPerTimer);
+			} else {
+				searchBacklogLinesPerTimer = SearchManager.DEFAULT_BACKLOG_LINES_PER_TIMER;
+			}
+
+			key = "search.queueFileMaxSize";
+			if (props.has(key)) {
+				searchQueueFileMaxSize = props.getPositiveLong(key);
+				formattedProps.add("search.queueFileMaxSize " + searchQueueFileMaxSize);
+			} else {
+				searchQueueFileMaxSize = SearchManager.DEFAULT_QUEUE_FILE_MAX_SIZE;
+			}
 		} catch (CheckedPropertyException e) {
 			abend(e.getMessage());
 		}
@@ -692,4 +729,19 @@ public class PropertyHandler {
 		return unitAliasOptions;
 	}
 
+	public int getSearchIndexBatchSize() {
+		return searchIndexBatchSize;
+	}
+
+	public int getSearchIndexBatchesPerTimer() {
+		return searchIndexBatchesPerTimer;
+	}
+
+	public int getSearchBacklogLinesPerTimer() {
+		return searchBacklogLinesPerTimer;
+	}
+
+	public long getSearchQueueFileMaxSize() {
+		return searchQueueFileMaxSize;
+	}
 }
