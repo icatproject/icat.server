@@ -1856,6 +1856,10 @@ public class TestWS {
 
 		query = "SELECT f.name FROM Facility f WHERE f.name LIKE 'Test$_$_Facility' ESCAPE '$'";
 		assertEquals("Count", 1, session.search(query).size());
+
+		// Check that nulls are returned in FieldSets
+		results = session.search("SELECT null, max(i.id) FROM Investigation i");
+		assertNull(((FieldSet)results.get(0)).getFields().get(0));
 	}
 
 	@Test
