@@ -20,8 +20,4 @@ public class FieldSet implements Serializable {
     public Object[] getFields() {
         return fields;
     }
-
-    public void setFields() {
-        this.fields = fields;
-    }
 }
