@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
@@ -159,8 +160,8 @@ public class RotatingFileQueue {
 	private NavigableMap<Integer, Path> getNumberedFiles() throws IcatException {
 		synchronized (readLock) {
 			List<Path> files;
-			try {
-				files = Files.list(directory).collect(Collectors.toList());
+			try (Stream<Path> list = Files.list(directory)) {
+				files = list.collect(Collectors.toList());
 			} catch (IOException e) {
 				logger.error("Error reading directory: {}", directory, e);
 				throw new IcatException(IcatExceptionType.INTERNAL, "Error reading queue file directory");
