@@ -11,7 +11,6 @@ import jakarta.persistence.UniqueConstraint;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
-import org.icatproject.core.manager.GateKeeper;
 
 @Comment("A parameter associated with a DataCollection")
 @SuppressWarnings("serial")
@@ -33,9 +32,8 @@ public class DataCollectionParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
-			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode);
+	public void preparePersist(String modId, EntityManager manager, PersistMode persistMode) throws IcatException {
+		super.preparePersist(modId, manager, persistMode);
 		if (!type.isApplicableToDataCollection()) { // type has been checked as
 													// not null by super
 													// call

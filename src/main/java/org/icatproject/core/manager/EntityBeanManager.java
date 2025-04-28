@@ -245,7 +245,7 @@ public class EntityBeanManager {
 			}
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
-				bean.preparePersist(userId, manager, gateKeeper, persistMode);
+				bean.preparePersist(userId, manager, persistMode);
 				logger.trace(bean + " prepared for persist.");
 				manager.persist(bean);
 				logger.trace(bean + " persisted.");
@@ -285,7 +285,7 @@ public class EntityBeanManager {
 						+ e.getMessage());
 				updateCache();
 
-				bean.preparePersist(userId, manager, gateKeeper, persistMode);
+				bean.preparePersist(userId, manager, persistMode);
 				isUnique(bean, manager);
 				isValid(bean);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -309,7 +309,7 @@ public class EntityBeanManager {
 			userTransaction.begin();
 			try {
 				try {
-					bean.preparePersist(userId, manager, gateKeeper, PersistMode.IMPORT_OR_WS);
+					bean.preparePersist(userId, manager, PersistMode.IMPORT_OR_WS);
 					logger.debug(bean + " prepared for persist (createAllowed).");
 					manager.persist(bean);
 					logger.debug(bean + " persisted (createAllowed).");
@@ -321,7 +321,7 @@ public class EntityBeanManager {
 					userTransaction.rollback();
 					logger.debug("Transaction rolled back for creation of " + bean + " because of " + e.getClass() + " "
 							+ e.getMessage());
-					bean.preparePersist(userId, manager, gateKeeper, PersistMode.IMPORT_OR_WS);
+					bean.preparePersist(userId, manager, PersistMode.IMPORT_OR_WS);
 					isUnique(bean, manager);
 					isValid(bean);
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -363,7 +363,7 @@ public class EntityBeanManager {
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 				for (EntityBaseBean bean : beans) {
-					bean.preparePersist(userId, manager, gateKeeper, PersistMode.IMPORT_OR_WS);
+					bean.preparePersist(userId, manager, PersistMode.IMPORT_OR_WS);
 					logger.trace(bean + " prepared for persist.");
 					manager.persist(bean);
 					logger.trace(bean + " persisted.");
@@ -411,7 +411,7 @@ public class EntityBeanManager {
 				int pos = crs.size();
 				EntityBaseBean bean = beans.get(pos);
 				try {
-					bean.preparePersist(userId, manager, gateKeeper, PersistMode.IMPORT_OR_WS);
+					bean.preparePersist(userId, manager, PersistMode.IMPORT_OR_WS);
 					isUnique(bean, manager);
 					isValid(bean);
 				} catch (IcatException e1) {
@@ -2135,7 +2135,7 @@ public class EntityBeanManager {
 				if (identityChange) {
 					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.CREATE, manager);
 				}
-				beanManaged.postMergeFixup(manager, gateKeeper);
+				beanManaged.postMergeFixup(manager);
 				manager.flush();
 				logger.trace("Updated bean " + bean + " flushed.");
 				NotificationMessage notification = new NotificationMessage(Operation.U, bean, manager,
@@ -2164,7 +2164,7 @@ public class EntityBeanManager {
 				EntityBaseBean beanManaged = find(bean, manager);
 				beanManaged.setModId(userId);
 				merge(beanManaged, bean, manager);
-				beanManaged.postMergeFixup(manager, gateKeeper);
+				beanManaged.postMergeFixup(manager);
 				isValid(beanManaged);
 				logger.error("Internal error", e);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -2340,13 +2340,13 @@ public class EntityBeanManager {
 		}
 
 		try {
-			bean.preparePersist(userId, manager, gateKeeper, PersistMode.REST);
+			bean.preparePersist(userId, manager, PersistMode.REST);
 			if (create) {
 				manager.persist(bean);
 				logger.trace(bean + " persisted.");
 			}
 			for (EntityBaseBean b : localUpdates.keySet()) {
-				b.postMergeFixup(manager, gateKeeper);
+				b.postMergeFixup(manager);
 			}
 			manager.flush();
 			logger.trace(bean + " flushed.");
@@ -2533,7 +2533,7 @@ public class EntityBeanManager {
 		}
 
 		cloneOneToManys(bean, clone, klass, getters, setters, rs, manager, clonedTo, userId);
-		clone.preparePersist(userId, manager, gateKeeper, PersistMode.CLONE);
+		clone.preparePersist(userId, manager, PersistMode.CLONE);
 		logger.trace(clone + " prepared for persist.");
 
 		try {
@@ -2575,7 +2575,7 @@ public class EntityBeanManager {
 				logger.trace("Transaction rolled back for creation of " + clone + " because of " + e.getClass() + " "
 						+ e.getMessage());
 				updateCache();
-				bean.preparePersist(userId, manager, gateKeeper, PersistMode.CLONE);
+				bean.preparePersist(userId, manager, PersistMode.CLONE);
 				isUnique(clone, manager);
 				isValid(clone);
 				logger.error("Database unhappy", e);

@@ -110,7 +110,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 	public Rule() {
 	}
 
-	private void fixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
+	private void fixup(EntityManager manager) throws IcatException {
 		this.crudFlags = this.crudFlags.toUpperCase().trim();
 		for (int i = 0; i < this.crudFlags.length(); i++) {
 			final char ch = this.crudFlags.charAt(i);
@@ -226,13 +226,13 @@ public class Rule extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void postMergeFixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
-		super.postMergeFixup(manager, gateKeeper);
+	public void postMergeFixup(EntityManager manager) throws IcatException {
+		super.postMergeFixup(manager);
 		this.c = false;
 		this.r = false;
 		this.u = false;
 		this.d = false;
-		this.fixup(manager, gateKeeper);
+		this.fixup(manager);
 		logger.debug("postMergeFixup of Rule for " + this.crudFlags + " of " + this.what);
 	}
 
@@ -255,10 +255,9 @@ public class Rule extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
-			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode);
-		this.fixup(manager, gateKeeper);
+	public void preparePersist(String modId, EntityManager manager, PersistMode persistMode) throws IcatException {
+		super.preparePersist(modId, manager, persistMode);
+		this.fixup(manager);
 		logger.debug("PreparePersist of Rule for " + this.crudFlags + " of " + this.what);
 	}
 

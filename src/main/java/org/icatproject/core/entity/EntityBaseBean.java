@@ -237,7 +237,7 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 	 * If this method is overridden it should normally be called as well by
 	 * super.postMergeFixup()
 	 */
-	public void postMergeFixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
+	public void postMergeFixup(EntityManager manager) throws IcatException {
 		// Do nothing by default
 	}
 
@@ -246,8 +246,7 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 	 * super.preparePersist(). Note that it recurses down through all to-many
 	 * relationships.
 	 */
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
-			throws IcatException {
+	public void preparePersist(String modId, EntityManager manager, PersistMode persistMode) throws IcatException {
 
 		logger.trace("preparePersist of " + this + " for state " + persistMode);
 
@@ -317,7 +316,7 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 					if (!collection.isEmpty()) {
 						Method rev = r.getInverseSetter();
 						for (EntityBaseBean bean : collection) {
-							bean.preparePersist(modId, manager, gateKeeper, persistMode);
+							bean.preparePersist(modId, manager, persistMode);
 							rev.invoke(bean, this);
 						}
 					}

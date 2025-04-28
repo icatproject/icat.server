@@ -17,7 +17,6 @@ import jakarta.persistence.TemporalType;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.search.SearchApi;
-import org.icatproject.core.manager.GateKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,9 +114,9 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
+	public void preparePersist(String modId, EntityManager manager, PersistMode persistMode)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode);
+		super.preparePersist(modId, manager, persistMode);
 		check(manager);
 	}
 
@@ -156,8 +155,8 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void postMergeFixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
-		super.postMergeFixup(manager, gateKeeper);
+	public void postMergeFixup(EntityManager manager) throws IcatException {
+		super.postMergeFixup(manager);
 		check(manager);
 	}
 
