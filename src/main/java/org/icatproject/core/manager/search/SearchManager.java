@@ -72,6 +72,9 @@ public class SearchManager {
 	public static final int DEFAULT_BACKLOG_LINES_PER_TIMER = 10;
 	public static final long DEFAULT_QUEUE_FILE_MAX_SIZE = 10_000_000L;
 
+	// Used to tell the indexing threads to stop
+	private volatile boolean stopping = false;
+
 	public class EnqueuedSearchRequestHandler extends TimerTask {
 
 		@Override
@@ -139,6 +142,10 @@ public class SearchManager {
 
 						numIndexed += numIndexedInBatch;
 						numBatches++;
+
+						if (stopping) {
+							break;
+						}
 					}
 
 					try (BufferedWriter writer = Files.newBufferedWriter(dotnewPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
@@ -245,6 +252,10 @@ public class SearchManager {
 						}
 
 						numLines++;
+
+						if (stopping) {
+							break;
+						}
 					}
 
 					try (BufferedWriter writer = Files.newBufferedWriter(dotnewPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
@@ -771,6 +782,8 @@ public class SearchManager {
 
 			// Stops new TimerTask executions. If a TimerTask is currently running, it will continue until completed.
 			timer.cancel();
+			// Signal the indexing threads to break out of their loop
+			stopping = true;
 
 			logger.info("Closed down SearchManager");
 		}
