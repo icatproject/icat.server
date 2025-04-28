@@ -15,8 +15,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -27,7 +25,6 @@ import jakarta.jms.JMSException;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -64,12 +61,6 @@ public class GateKeeper {
 			}
 		}
 	};
-
-	private final static Pattern tsRegExp = Pattern
-			.compile("\\{\\s*ts\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s*\\}");
-
-	@PersistenceContext(unitName = "icat")
-	private EntityManager gateKeeperManager;
 
 	private final Logger logger = LoggerFactory.getLogger(GateKeeper.class);
 	Marker fatal = MarkerFactory.getMarker("FATAL");
@@ -119,26 +110,6 @@ public class GateKeeper {
 		}
 
 		return false;
-	}
-
-	public void checkJPQL(String query) throws IcatException {
-
-		Matcher m = tsRegExp.matcher(query);
-
-		query = m.replaceAll(" CURRENT_TIMESTAMP ");
-		try {
-			gateKeeperManager.createQuery(query);
-		} catch (Exception e) {
-			m.reset();
-			if (m.find()) {
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-						"Timestamp literals have been replaced... " + e.getMessage());
-			} else {
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
-			}
-
-		}
-
 	}
 
 	@PreDestroy()

@@ -27,6 +27,7 @@ import org.icatproject.core.oldparser.OldSearchQuery;
 import org.icatproject.core.oldparser.OldTokenizer;
 import org.icatproject.core.parser.ParserException;
 import org.icatproject.core.parser.RuleWhat;
+import org.icatproject.core.utils.JpqlChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +147,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 			logger.debug("New style rule: " + query);
 		} else {
 			/* This should be pure JPQL so can check it */
-			gateKeeper.checkJPQL(query);
+			JpqlChecker.checkJPQL(query, manager);
 		}
 
 		RuleWhat rw;
