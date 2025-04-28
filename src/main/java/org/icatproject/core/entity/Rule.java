@@ -10,8 +10,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.PostPersist;
-import jakarta.persistence.PostRemove;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -19,7 +17,6 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.SingletonFinder;
 import org.icatproject.core.oldparser.OldInput;
 import org.icatproject.core.oldparser.OldLexerException;
 import org.icatproject.core.oldparser.OldParserException;
@@ -234,24 +231,6 @@ public class Rule extends EntityBaseBean implements Serializable {
 		this.d = false;
 		this.fixup(manager, gateKeeper);
 		logger.debug("postMergeFixup of Rule for " + this.crudFlags + " of " + this.what);
-	}
-
-	@PostPersist()
-	void postPersist() {
-		try {
-			SingletonFinder.getGateKeeper().requestUpdatePublicTables();
-		} catch (Throwable e) {
-			logger.error(e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	@PostRemove()
-	void postRemove() {
-		try {
-			SingletonFinder.getGateKeeper().requestUpdatePublicTables();
-		} catch (Throwable e) {
-			logger.error(e.getClass() + " " + e.getMessage());
-		}
 	}
 
 	@Override

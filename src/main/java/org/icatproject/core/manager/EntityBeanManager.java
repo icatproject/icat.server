@@ -283,7 +283,6 @@ public class EntityBeanManager {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for creation of " + bean + " because of " + e.getClass() + " "
 						+ e.getMessage());
-				updateCache();
 
 				bean.preparePersist(userId, manager, gateKeeper, persistMode);
 				isUnique(bean, manager);
@@ -407,7 +406,6 @@ public class EntityBeanManager {
 			} catch (Throwable e) {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for creation because of " + e.getClass() + " " + e.getMessage());
-				updateCache();
 				int pos = crs.size();
 				EntityBaseBean bean = beans.get(pos);
 				try {
@@ -531,7 +529,6 @@ public class EntityBeanManager {
 			} catch (Throwable e) {
 				logger.error("Problem in deleteMany", e);
 				userTransaction.rollback();
-				updateCache();
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), offset);
 			}
@@ -2160,7 +2157,6 @@ public class EntityBeanManager {
 				throw e;
 			} catch (Throwable e) {
 				userTransaction.rollback();
-				updateCache();
 				EntityBaseBean beanManaged = find(bean, manager);
 				beanManaged.setModId(userId);
 				merge(beanManaged, bean, manager);
@@ -2171,15 +2167,6 @@ public class EntityBeanManager {
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 			}
 		} catch (IllegalStateException | SecurityException | SystemException | NotSupportedException e) {
-			logger.error("Internal error", e);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	private void updateCache() throws IcatException {
-		try {
-			gateKeeper.updateCache();
-		} catch (JMSException e) {
 			logger.error("Internal error", e);
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
@@ -2574,7 +2561,6 @@ public class EntityBeanManager {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for creation of " + clone + " because of " + e.getClass() + " "
 						+ e.getMessage());
-				updateCache();
 				bean.preparePersist(userId, manager, gateKeeper, PersistMode.CLONE);
 				isUnique(clone, manager);
 				isValid(clone);

@@ -75,7 +75,6 @@ import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
@@ -101,9 +100,6 @@ public class ICATRest {
 	@EJB
 	EntityBeanManager beanManager;
 
-	@EJB
-	GateKeeper gatekeeper;
-
 	private int lifetimeMinutes;
 
 	@PersistenceContext(unitName = "icat")
@@ -123,8 +119,6 @@ public class ICATRest {
 	private int maxEntities;
 
 	private ContainerType containerType;
-
-	private Map<String, String> cluster;
 
 	private void checkRoot(String sessionId) throws IcatException {
 		String userId = beanManager.getUserName(sessionId, manager);
@@ -683,7 +677,6 @@ public class ICATRest {
 		rootUserNames = propertyHandler.getRootUserNames();
 		maxEntities = propertyHandler.getMaxEntities();
 		containerType = propertyHandler.getContainerType();
-		cluster = propertyHandler.getCluster();
 	}
 
 	/**
@@ -1398,40 +1391,6 @@ public class ICATRest {
 		} catch (JsonException e) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "JsonException " + e.getMessage());
 		}
-	}
-
-	/**
-	 * This is an internal call made by one icat instance to another in the same
-	 * cluster
-	 * 
-	 * @title markPublicTablesStale
-	 */
-	@POST
-	@Path("gatekeeper/markPublicTablesStale")
-	public void gatekeeperMarkPublicTablesStale(@Context HttpServletRequest request) {
-		logger.debug("Call to gatekeeper/markPublicTablesStale requested from {}", request.getRemoteAddr());
-		if (!cluster.containsKey(request.getRemoteAddr())) {
-			logger.warn("Call to gatekeeper/markPublicTablesStale made from {} is not allowed",
-					request.getRemoteAddr());
-		}
-		gatekeeper.markPublicTablesStale();
-
-	}
-
-	/**
-	 * This is an internal call made by one icat instance to another in the same
-	 * cluster
-	 * 
-	 * @title markPublicTablesStale
-	 */
-	@POST
-	@Path("gatekeeper/markPublicStepsStale")
-	public void gatekeeperMarkPublicStepsStale(@Context HttpServletRequest request) {
-		logger.debug("Call to gatekeeper/markPublicStepsStale requested from {}", request.getRemoteAddr());
-		if (!cluster.containsKey(request.getRemoteAddr())) {
-			logger.warn("Call to gatekeeper/markPublicStepsStale made from {} is not allowed", request.getRemoteAddr());
-		}
-		gatekeeper.markPublicStepsStale();
 	}
 
 	/**

@@ -7,8 +7,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.PostPersist;
-import jakarta.persistence.PostRemove;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -16,10 +14,7 @@ import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.SingletonFinder;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Comment("An allowed step for an INCLUDE identifed by the origin entity and the field name for navigation. "
 		+ "Including an entry here is much more efficient than having to use the authorization rules.")
@@ -30,7 +25,6 @@ import org.slf4j.LoggerFactory;
 public class PublicStep extends EntityBaseBean implements Serializable {
 
 	public static final String GET_ALL_QUERY = "AllowedStep.GetAllQuery";
-	private static final Logger logger = LoggerFactory.getLogger(PublicStep.class);
 
 	public String getOrigin() {
 		return origin;
@@ -88,23 +82,4 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 		super.preparePersist(modId, manager, gateKeeper, persistMode);
 		this.fixup(manager, gateKeeper);
 	}
-
-	@PostRemove()
-	void postRemove() {
-		try {
-			SingletonFinder.getGateKeeper().requestUpdatePublicSteps();
-		} catch (Throwable e) {
-			logger.error(e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	@PostPersist()
-	void postPersist() {
-		try {
-			SingletonFinder.getGateKeeper().requestUpdatePublicSteps();
-		} catch (Throwable e) {
-			logger.error(e.getClass() + " " + e.getMessage());
-		}
-	}
-
 }

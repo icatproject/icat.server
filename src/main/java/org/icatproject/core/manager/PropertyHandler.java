@@ -3,12 +3,10 @@ package org.icatproject.core.manager;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -313,7 +311,6 @@ public class PropertyHandler {
 	private long searchAggregateFilesIntervalMillis;
 	private long searchMaxSearchTimeMillis;
 	private String unitAliasOptions;
-	private Map<String, String> cluster = new HashMap<>();
 	private long searchEnqueuedRequestIntervalMillis;
 	private int searchIndexBatchSize;
 	private int searchIndexBatchesPerTimer;
@@ -554,43 +551,6 @@ public class PropertyHandler {
 				logger.info("Key is " + (digestKey == null ? "not set" : "set"));
 			}
 
-			key = "cluster";
-			if (props.has(key)) {
-				String clusterString = props.getString(key);
-				formattedProps.add(key + " " + clusterString);
-				cluster = new HashMap<>();
-				for (String urlString : clusterString.split("\\s+")) {
-					URL url = null;
-					try {
-						url = new URL(urlString);
-					} catch (MalformedURLException e) {
-						abend("Url in cluster " + urlString + " is not a valid URL");
-					}
-					String host = url.getHost();
-					InetAddress address = null;
-					try {
-						address = InetAddress.getByName(host);
-					} catch (UnknownHostException e) {
-						abend("Host " + host + " in cluster specification is not known");
-					}
-					String hostAddress = address.getHostAddress();
-					try {
-						if (hostAddress.equals(InetAddress.getLocalHost().getHostAddress())) {
-							continue;
-						}
-					} catch (UnknownHostException e) {
-						// Ignore
-					}
-
-					if (Arrays.asList("localhost.localdomain", "localhost", "127.0.0.1").contains(host)) {
-						continue;
-					}
-
-					cluster.put(address.getHostAddress(), url.toExternalForm());
-					logger.info("Cluster includes " + url.toExternalForm() + " " + hostAddress);
-				}
-			}
-
 			/* JMS stuff */
 			jmsTopicConnectionFactory = props.getString("jms.topicConnectionFactory",
 					"java:comp/DefaultJMSConnectionFactory");
@@ -638,10 +598,6 @@ public class PropertyHandler {
 			abend(e.getMessage());
 		}
 
-	}
-
-	public Map<String, String> getCluster() {
-		return cluster;
 	}
 
 	private void abend(String msg) {

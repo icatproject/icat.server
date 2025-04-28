@@ -1,37 +1,24 @@
 package org.icatproject.core.manager;
 
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
-import jakarta.jms.JMSException;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
@@ -85,13 +72,6 @@ public class GateKeeper {
 
 	private boolean publicSearchFieldsStale;
 
-	private Map<String, String> cluster;
-
-	private String basePath = "/icat";
-
-	private ExecutorService executor;
-
-	private Map<String, Future<?>> msgs = new HashMap<>();
 
 	/**
 	 * Return true if allowed because destination table is public or because
@@ -110,22 +90,6 @@ public class GateKeeper {
 		}
 
 		return false;
-	}
-
-	@PreDestroy()
-	private void exit() {
-		logger.info("GateKeeper closing down");
-		executor.shutdown();
-		try {
-			if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-				executor.shutdownNow();
-				if (!executor.awaitTermination(60, TimeUnit.SECONDS))
-					logger.error("Execution Pool did not terminate");
-			}
-		} catch (InterruptedException ie) {
-			executor.shutdownNow();
-			Thread.currentThread().interrupt();
-		}
 	}
 
 	private Map<String, Set<String>> getPublicSteps() {
@@ -308,14 +272,9 @@ public class GateKeeper {
 		logger.info("Creating GateKeeper singleton");
 		maxIdsInQuery = propertyHandler.getMaxIdsInQuery();
 		rootUserNames = propertyHandler.getRootUserNames();
-		cluster = propertyHandler.getCluster();
-
-		SingletonFinder.setGateKeeper(this);
 
 		updatePublicTables();
 		updatePublicSteps();
-
-		executor = Executors.newCachedThreadPool();
 
 		logger.info("Created GateKeeper singleton");
 	}
@@ -484,53 +443,13 @@ public class GateKeeper {
 	}
 
 	/** Do it locally and send requests to other icats */
-	public void requestUpdatePublicSteps() throws JMSException {
+	public void requestUpdatePublicSteps() {
 		markPublicStepsStale();
-		for (Entry<String, String> entry : cluster.entrySet()) {
-			sendMsg(entry.getValue(), "gatekeeper/markPublicStepsStale");
-		}
 	}
 
 	/** Do it locally and send requests to other icats */
 	public void requestUpdatePublicTables() {
 		markPublicTablesStale();
-		for (Entry<String, String> entry : cluster.entrySet()) {
-			sendMsg(entry.getValue(), "gatekeeper/markPublicTablesStale");
-		}
-	}
-
-	private void sendMsg(String url, String action) {
-		String key = url + " " + action;
-		Future<?> f = msgs.get(key);
-		if (f != null) {
-			f.cancel(true);
-		}
-		f = executor.submit(() -> {
-			while (true) {
-				try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-					URI uri = new URIBuilder(url).setPath(basePath + "/" + action).build();
-					HttpPost httpPost = new HttpPost(uri);
-					try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-						logger.debug("Sending message {} to {}", action, url);
-						Rest.checkStatus(response, IcatExceptionType.INTERNAL);
-						return;
-					}
-				} catch (Exception e) {
-					try {
-						logger.warn("Sending message {} to {} reports {}", action, url, e.getMessage());
-						TimeUnit.SECONDS.sleep(30);
-					} catch (InterruptedException e1) {
-						return;
-					}
-				}
-			}
-		});
-		msgs.put(key, f);
-	}
-
-	public void updateCache() throws JMSException {
-		requestUpdatePublicTables();
-		requestUpdatePublicSteps();
 	}
 
 	public void updatePublicSteps() {
