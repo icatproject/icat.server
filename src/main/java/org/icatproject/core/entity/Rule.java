@@ -2,7 +2,6 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
-import jakarta.ejb.EJB;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
@@ -13,12 +12,10 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.PostRemove;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
-import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.SingletonFinder;
 import org.icatproject.core.oldparser.OldInput;
 import org.icatproject.core.oldparser.OldLexerException;
@@ -57,10 +54,6 @@ public class Rule extends EntityBaseBean implements Serializable {
 	public static final String UPDATE_QUERY = "Rule.UpdateQuery";
 	public static final String UPDATE_ATTRIBUTE_QUERY = "Rule.UpdateAttributeQuery";
 	public static final String PUBLIC_QUERY = "Rule.PublicQuery";
-	@EJB
-	@XmlTransient
-	@Transient
-	private GateKeeper gatekeeper;
 
 	@XmlTransient
 	private String bean;
