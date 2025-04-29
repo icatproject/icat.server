@@ -2,8 +2,6 @@ package org.icatproject.core.manager;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +10,9 @@ import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
-import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.persistence.EntityManager;
@@ -29,49 +28,22 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-@Singleton
+@Stateless
 @Startup
 public class GateKeeper {
-
-	public static Comparator<String> stringsBySize = new Comparator<String>() {
-
-		@Override
-		public int compare(String o1, String o2) {
-			int l1 = o1.length();
-			int l2 = o2.length();
-			if (l1 < l2) {
-				return -1;
-			} else if (l1 == l2) {
-				return 0;
-			} else {
-				return 1;
-			}
-		}
-	};
 
 	private final Logger logger = LoggerFactory.getLogger(GateKeeper.class);
 	Marker fatal = MarkerFactory.getMarker("FATAL");
 
 	private int maxIdsInQuery;
 
-	@EJB
-	GateKeeperHelper gateKeeperHelper;
+	@Inject
+	GateKeeperRulesCache gateKeeperRulesCache;
 
 	@EJB
 	PropertyHandler propertyHandler;
 
-	private Map<String, Set<String>> publicSteps;
-
-	private Set<String> publicTables;
-
 	private Set<String> rootUserNames;
-
-	private boolean publicStepsStale;
-
-	private boolean publicTablesStale;
-
-	private boolean publicSearchFieldsStale;
-
 
 	/**
 	 * Return true if allowed because destination table is public or because
@@ -93,21 +65,11 @@ public class GateKeeper {
 	}
 
 	private Map<String, Set<String>> getPublicSteps() {
-		if (publicStepsStale) {
-			updatePublicSteps();
-		}
-		return publicSteps;
+		return gateKeeperRulesCache.getPublicSteps();
 	}
 
 	public Set<String> getPublicTables() {
-		if (publicTablesStale) {
-			updatePublicTables();
-		}
-		return publicTables;
-	}
-
-	public Boolean getPublicSearchFieldsStale() {
-		return publicSearchFieldsStale;
+		return gateKeeperRulesCache.getPublicTables();
 	}
 
 	/**
@@ -128,7 +90,7 @@ public class GateKeeper {
 			return null;
 		}
 
-		List<String> restrictions = gateKeeperHelper.getRules(Rule.INCLUDE_QUERY, userId, simpleName);
+		List<String> restrictions = gateKeeperRulesCache.getRules(Rule.INCLUDE_QUERY, userId, simpleName);
 		logger.debug("Got " + restrictions.size() + " authz queries for READ by " + userId + " to a "
 				+ simpleName);
 
@@ -272,10 +234,6 @@ public class GateKeeper {
 		logger.info("Creating GateKeeper singleton");
 		maxIdsInQuery = propertyHandler.getMaxIdsInQuery();
 		rootUserNames = propertyHandler.getRootUserNames();
-
-		updatePublicTables();
-		updatePublicSteps();
-
 		logger.info("Created GateKeeper singleton");
 	}
 
@@ -310,7 +268,7 @@ public class GateKeeper {
 		}
 
 		logger.debug("Checking " + qName + " " + user + " " + simpleName);
-		List<String> restrictions = gateKeeperHelper.getRules(qName, user, simpleName);
+		List<String> restrictions = gateKeeperRulesCache.getRules(qName, user, simpleName);
 		logger.debug(
 				"Got " + restrictions.size() + " authz queries for " + access + " by " + user + " to a " + simpleName);
 
@@ -322,17 +280,9 @@ public class GateKeeper {
 			}
 		}
 
-		/*
-		 * Sort a copy of the results by string length. It is probably faster to
-		 * evaluate a shorter query.
-		 */
-		List<String> sortedQueries = new ArrayList<String>();
-		sortedQueries.addAll(restrictions);
-		Collections.sort(sortedQueries, stringsBySize);
-
 		Long keyVal = object.getId();
 
-		for (String qString : sortedQueries) {
+		for (String qString : restrictions) {
 			TypedQuery<Long> q = manager.createQuery(qString, Long.class);
 			if (qString.contains(":user")) {
 				q.setParameter("user", user);
@@ -344,20 +294,6 @@ public class GateKeeper {
 			}
 		}
 		return false;
-	}
-
-	public void markPublicStepsStale() {
-		publicStepsStale = true;
-		publicSearchFieldsStale = true;
-	}
-
-	public void markPublicTablesStale() {
-		publicTablesStale = true;
-		publicSearchFieldsStale = true;
-	}
-
-	public void markPublicSearchFieldsFresh() {
-		publicSearchFieldsStale = false;
 	}
 
 	/**
@@ -394,7 +330,7 @@ public class GateKeeper {
 				if (updaters.contains(field)) {
 					String qName = Rule.UPDATE_ATTRIBUTE_QUERY;
 					logger.debug("Checking " + qName + " " + user + " " + simpleName + "." + fName);
-					List<String> restrictions = gateKeeperHelper.getRules(qName, user, simpleName, fName);
+					List<String> restrictions = gateKeeperRulesCache.getRules(qName, user, simpleName, fName);
 					logger.debug("Got " + restrictions.size() + " authz queries for UPDATE by " + user + " to a "
 							+ simpleName + "." + fName);
 					boolean ok = false;
@@ -405,17 +341,9 @@ public class GateKeeper {
 						}
 					}
 					if (!ok) {
-						/*
-						 * Sort a copy of the results by string length. It is
-						 * probably faster to evaluate a shorter query.
-						 */
-						List<String> sortedQueries = new ArrayList<String>();
-						sortedQueries.addAll(restrictions);
-						Collections.sort(sortedQueries, stringsBySize);
-
 						Long keyVal = bean.getId();
 
-						for (String qString : sortedQueries) {
+						for (String qString : restrictions) {
 							TypedQuery<Long> q = manager.createQuery(qString, Long.class);
 							if (qString.contains(":user")) {
 								q.setParameter("user", user);
@@ -437,30 +365,6 @@ public class GateKeeper {
 							"UPDATE access to this " + bean.getClass().getSimpleName() + " is not allowed.");
 				}
 			}
-
 		}
-
-	}
-
-	/** Do it locally and send requests to other icats */
-	public void requestUpdatePublicSteps() {
-		markPublicStepsStale();
-	}
-
-	/** Do it locally and send requests to other icats */
-	public void requestUpdatePublicTables() {
-		markPublicTablesStale();
-	}
-
-	public void updatePublicSteps() {
-		publicSteps = gateKeeperHelper.getPublicSteps();
-		publicStepsStale = false;
-		logger.debug("There are " + publicSteps.size() + " publicSteps: " + publicSteps.toString());
-	}
-
-	public void updatePublicTables() {
-		publicTables = gateKeeperHelper.getPublicTables();
-		publicTablesStale = false;
-		logger.debug("There are " + publicTables.size() + " publicTables: " + publicTables.toString());
 	}
 }

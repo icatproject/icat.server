@@ -549,8 +549,6 @@ public class SearchManager {
 
 	private List<URL> urls;
 
-	private final Map<String, List<String>> publicSearchFields = new HashMap<>();
-
 	private int indexBatchSize;
 	private int indexBatchesPerTimer;
 	private int backlogLinesPerTimer;
@@ -567,14 +565,13 @@ public class SearchManager {
 	 * @throws IcatException
 	 */
 	public List<String> getPublicSearchFields(GateKeeper gateKeeper, String simpleName) throws IcatException {
-		if (gateKeeper.getPublicSearchFieldsStale() || publicSearchFields.size() == 0) {
-			logger.info("Building public search fields from public tables and steps");
-			publicSearchFields.put("Datafile", buildPublicSearchFields(gateKeeper, Datafile.getDocumentFields()));
-			publicSearchFields.put("Dataset", buildPublicSearchFields(gateKeeper, Dataset.getDocumentFields()));
-			publicSearchFields.put("Investigation",
-					buildPublicSearchFields(gateKeeper, Investigation.getDocumentFields()));
-			gateKeeper.markPublicSearchFieldsFresh();
-		}
+
+		logger.info("Building public search fields from public tables and steps");
+		Map<String, List<String>> publicSearchFields = new HashMap<>();
+		publicSearchFields.put("Datafile",      buildPublicSearchFields(gateKeeper, Datafile.getDocumentFields()));
+		publicSearchFields.put("Dataset",       buildPublicSearchFields(gateKeeper, Dataset.getDocumentFields()));
+		publicSearchFields.put("Investigation", buildPublicSearchFields(gateKeeper, Investigation.getDocumentFields()));
+
 		List<String> requestedFields = publicSearchFields.get(simpleName);
 		logger.debug("{} has public fields {}", simpleName, requestedFields);
 		return requestedFields;

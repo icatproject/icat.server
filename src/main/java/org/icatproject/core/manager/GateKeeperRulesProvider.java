@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionManagement;
-import jakarta.ejb.TransactionManagementType;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.icatproject.core.entity.PublicStep;
 import org.icatproject.core.entity.Rule;
@@ -23,15 +23,15 @@ import org.icatproject.core.entity.Rule;
  * with bean-managed transactions (these never use the transaction of the
  * calling bean).
  */
-@Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-public class GateKeeperHelper {
+@ApplicationScoped
+@Transactional(TxType.REQUIRES_NEW)
+public class GateKeeperRulesProvider {
 
 	@PersistenceContext(unitName = "icat")
-	private EntityManager gateKeeperManager;
+	private EntityManager entityManager;
 
 	public List<String> getRules(String ruleQuery, String member, String bean, String attribute) {
-		return gateKeeperManager
+		return entityManager
 			.createNamedQuery(ruleQuery, String.class)
 			.setParameter("member", member)
 			.setParameter("bean", bean)
@@ -40,7 +40,7 @@ public class GateKeeperHelper {
 	}
 
 	public List<String> getRules(String ruleQuery, String member, String bean) {
-		return gateKeeperManager
+		return entityManager
 			.createNamedQuery(ruleQuery, String.class)
 			.setParameter("member", member)
 			.setParameter("bean", bean)
@@ -49,7 +49,7 @@ public class GateKeeperHelper {
 
 	public Map<String, Set<String>> getPublicSteps() {
 		Map<String, Set<String>> publicSteps = new HashMap<>();
-		List<PublicStep> steps = gateKeeperManager.createNamedQuery(PublicStep.GET_ALL_QUERY, PublicStep.class).getResultList();
+		List<PublicStep> steps = entityManager.createNamedQuery(PublicStep.GET_ALL_QUERY, PublicStep.class).getResultList();
 
 		for (PublicStep step : steps) {
 			Set<String> fieldNames = publicSteps.get(step.getOrigin());
@@ -66,7 +66,7 @@ public class GateKeeperHelper {
 	}
 
 	public Set<String> getPublicTables() {
-		List<String> tableNames = gateKeeperManager.createNamedQuery(Rule.PUBLIC_QUERY, String.class).getResultList();
+		List<String> tableNames = entityManager.createNamedQuery(Rule.PUBLIC_QUERY, String.class).getResultList();
 
 		// return unmodifiable copy
 		return Set.copyOf(tableNames);
