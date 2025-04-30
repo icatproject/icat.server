@@ -89,6 +89,7 @@ import org.icatproject.core.parser.ParserException;
 import org.icatproject.core.parser.SearchQuery;
 import org.icatproject.core.parser.Token;
 import org.icatproject.core.parser.Tokenizer;
+import org.icatproject.core.utils.JpqlChecker;
 import org.icatproject.utils.IcatSecurity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1023,7 +1024,7 @@ public class EntityBeanManager {
 					sb.append(token.getValue());
 					token = input.consume();
 				}
-				gateKeeper.checkJPQL(sb.toString());
+				JpqlChecker.checkJPQL(sb.toString(), manager);
 
 			} catch (ParserException e1) {
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
