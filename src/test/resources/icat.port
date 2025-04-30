@@ -10,8 +10,8 @@ User (name:0, fullName:1, familyName:2, givenName:3, affiliation:4)
 Facility ( name:0, daysUntilRelease:1, createId:2, createTime:3)
 "Test port facility", 90, "Zorro", 1920-05-16T16:58:26.12Z
 
-Instrument(facility(name:0), name:1, fullName:2, pid:3)
-"Test port facility", "EDDI", "EDDI - Energy Dispersive Diffraction", "ig:0815"
+Instrument(facility(name:0), name:1, fullName:2, pid:3, startDate:4, endDate:5)
+"Test port facility", "EDDI", "EDDI - Energy Dispersive Diffraction", "ig:0815", 2010-01-01T00:00:00Z, 2099-12-31T23:59:59Z
 
 InvestigationType (facility(name:0), name:1)
 "Test port facility", "atype"
