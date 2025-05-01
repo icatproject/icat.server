@@ -252,7 +252,7 @@ public class EntityBeanManager {
 				manager.flush();
 				logger.trace(bean + " flushed.");
 				// Check authz now everything persisted
-				gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
+				gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE);
 				NotificationMessage notification = new NotificationMessage(Operation.C, bean, notificationRequests);
 
 				long beanId = bean.getId();
@@ -327,7 +327,7 @@ public class EntityBeanManager {
 							"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 				}
 				try {
-					gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
+					gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE);
 					return true;
 				} catch (IcatException e) {
 					if (e.getType() != IcatExceptionType.INSUFFICIENT_PRIVILEGES) {
@@ -369,7 +369,7 @@ public class EntityBeanManager {
 					manager.flush();
 					logger.trace(bean + " flushed.");
 					// Check authz now everything persisted
-					gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
+					gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE);
 					NotificationMessage notification = new NotificationMessage(Operation.C, bean, notificationRequests);
 					CreateResponse cr = new CreateResponse(bean.getId(), notification);
 					crs.add(cr);
@@ -495,7 +495,7 @@ public class EntityBeanManager {
 						firstBean = beanManaged;
 					}
 					for (EntityBaseBean b : beansToDelete) {
-						gateKeeper.performAuthorisation(userId, b, AccessType.DELETE, manager);
+						gateKeeper.performAuthorisation(userId, b, AccessType.DELETE);
 					}
 					manager.remove(beanManaged);
 					manager.flush();
@@ -612,7 +612,7 @@ public class EntityBeanManager {
 					ids.put(s, new HashSet<Long>());
 				}
 				for (Object beanManaged : result) {
-					((EntityBaseBean) beanManaged).collectIds(ids, one, 0, steps, gateKeeper, userId, manager);
+					((EntityBaseBean) beanManaged).collectIds(ids, one, 0, steps, gateKeeper, userId);
 				}
 				result = null; // Give gc a chance
 
@@ -762,7 +762,7 @@ public class EntityBeanManager {
 				for (EntityBaseBean bean : beans) {
 					if (notRootUser) {
 						try {
-							gateKeeper.performAuthorisation(userId, bean, AccessType.READ, manager);
+							gateKeeper.performAuthorisation(userId, bean, AccessType.READ);
 						} catch (IcatException e) {
 							if (e.getType() == IcatExceptionType.INSUFFICIENT_PRIVILEGES) {
 								continue;
@@ -811,7 +811,7 @@ public class EntityBeanManager {
 			throws IcatException {
 
 		logger.debug("Got " + newResults.size() + " results from search engine");
-		Set<Long> allowedIds = gateKeeper.getReadableIds(userId, newResults, klass.getSimpleName(), manager);
+		Set<Long> allowedIds = gateKeeper.getReadableIds(userId, newResults, klass.getSimpleName());
 		if (allowedIds == null) {
 			// A null result means there are no restrictions on the readable ids, so add as
 			// many newResults as we need to reach maxCount
@@ -901,7 +901,7 @@ public class EntityBeanManager {
 					entityClass.getSimpleName() + "[id:" + primaryKey + "] not found.");
 		}
 
-		gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
+		gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ);
 		logger.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
 
 		IncludeClause include = getQuery.getInclude();
@@ -911,7 +911,7 @@ public class EntityBeanManager {
 			one = include.isOne();
 			steps = include.getSteps();
 		}
-		result = beanManaged.pruned(one, 0, steps, maxEntities, gateKeeper, userId, manager);
+		result = beanManaged.pruned(one, 0, steps, maxEntities, gateKeeper, userId);
 		logger.debug("Obtained " + result.getDescendantCount(maxEntities) + " entities.");
 
 		if (logRequests.contains(CallType.READ)) {
@@ -1205,7 +1205,7 @@ public class EntityBeanManager {
 			return createAllowed(userId, bean, manager, userTransaction);
 		} else {
 			try {
-				gateKeeper.performAuthorisation(userId, bean, accessType, manager);
+				gateKeeper.performAuthorisation(userId, bean, accessType);
 				return true;
 			} catch (IcatException e) {
 				if (e.getType() != IcatExceptionType.INSUFFICIENT_PRIVILEGES) {
@@ -1828,13 +1828,13 @@ public class EntityBeanManager {
 
 		boolean deleteAllowed = false;
 		if (!create) {
-			gateKeeper.performUpdateAuthorisation(userId, bean, contents, manager);
+			gateKeeper.performUpdateAuthorisation(userId, bean, contents);
 
 			/*
 			 * See if delete is allowed - it may not be relevant but need to
 			 * check now before modifications are made
 			 */
-			deleteAllowed = gateKeeper.isAccessAllowed(userId, bean, AccessType.DELETE, manager);
+			deleteAllowed = gateKeeper.isAccessAllowed(userId, bean, AccessType.DELETE);
 		}
 
 		boolean changedIdentity = false;
@@ -2044,8 +2044,7 @@ public class EntityBeanManager {
 					}
 					clones.add(null);
 				} else {
-					EntityBaseBean eb = ((EntityBaseBean) beanManaged).pruned(one, 0, steps, maxEntities, gateKeeper,
-							userId, manager);
+					EntityBaseBean eb = ((EntityBaseBean) beanManaged).pruned(one, 0, steps, maxEntities, gateKeeper, userId);
 					if ((descendantCount += eb.getDescendantCount(maxEntities)) > maxEntities) {
 						throw new IcatException(IcatExceptionType.VALIDATION,
 								"attempt to return more than " + maxEntities + " entities");
@@ -2093,10 +2092,10 @@ public class EntityBeanManager {
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 				EntityBaseBean beanManaged = find(bean, manager);
-				gateKeeper.performAuthorisation(userId, beanManaged, AccessType.UPDATE, manager);
+				gateKeeper.performAuthorisation(userId, beanManaged, AccessType.UPDATE);
 				boolean identityChange = checkIdentityChange(beanManaged, bean);
 				if (identityChange) {
-					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.DELETE, manager);
+					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.DELETE);
 				}
 
 				if (allAttributes) {
@@ -2131,7 +2130,7 @@ public class EntityBeanManager {
 				}
 				merge(beanManaged, bean, manager);
 				if (identityChange) {
-					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.CREATE, manager);
+					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.CREATE);
 				}
 				beanManaged.postMergeFixup(manager);
 				manager.flush();
@@ -2430,7 +2429,7 @@ public class EntityBeanManager {
 		// Check authz now everything persisted and update creates and
 		// updates
 		for (EntityBaseBean eb : localCreates) {
-			gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE, manager);
+			gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE);
 			creates.add(eb);
 		}
 
@@ -2438,7 +2437,7 @@ public class EntityBeanManager {
 			EntityBaseBean eb = beanEntry.getKey();
 			if (beanEntry.getValue()) {
 				// Identity has changed
-				gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE, manager);
+				gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE);
 			}
 			updates.add(eb);
 		}
@@ -2540,7 +2539,7 @@ public class EntityBeanManager {
 
 				// Check authz now everything flushed
 				for (EntityBaseBean c : clonedTo.values()) {
-					gateKeeper.performAuthorisation(userId, c, AccessType.CREATE, manager);
+					gateKeeper.performAuthorisation(userId, c, AccessType.CREATE);
 				}
 
 				// Update any Datafile.location values if key provided
@@ -2619,7 +2618,7 @@ public class EntityBeanManager {
 			Map<Field, Method> getters, Map<Field, Method> setters, Set<Relationship> rs, EntityManager manager,
 			Map<EntityBaseBean, EntityBaseBean> clonedTo, String userId) throws IcatException {
 
-		gateKeeper.performAuthorisation(userId, bean, AccessType.READ, manager);
+		gateKeeper.performAuthorisation(userId, bean, AccessType.READ);
 
 		for (Relationship r : rs) {
 			if (r.isCollection()) {
