@@ -2,8 +2,6 @@ package org.icatproject.core.manager;
 
 import java.util.Map;
 
-import jakarta.persistence.EntityManager;
-
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.PropertyHandler.Operation;
@@ -36,8 +34,7 @@ public class NotificationMessage {
 
 	private Message message;
 
-	public NotificationMessage(Operation operation, EntityBaseBean bean, EntityManager manager,
-			Map<String, NotificationRequest> notificationRequests) throws IcatException {
+	public NotificationMessage(Operation operation, EntityBaseBean bean, Map<String, NotificationRequest> notificationRequests) throws IcatException {
 		String entity = bean.getClass().getSimpleName();
 		String key = entity + ":" + operation.name();
 		NotificationRequest nr = notificationRequests.get(key);
