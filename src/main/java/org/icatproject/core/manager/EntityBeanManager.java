@@ -253,8 +253,7 @@ public class EntityBeanManager {
 				logger.trace(bean + " flushed.");
 				// Check authz now everything persisted
 				gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
-				NotificationMessage notification = new NotificationMessage(Operation.C, bean, manager,
-						notificationRequests);
+				NotificationMessage notification = new NotificationMessage(Operation.C, bean, notificationRequests);
 
 				long beanId = bean.getId();
 
@@ -371,8 +370,7 @@ public class EntityBeanManager {
 					logger.trace(bean + " flushed.");
 					// Check authz now everything persisted
 					gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
-					NotificationMessage notification = new NotificationMessage(Operation.C, bean, manager,
-							notificationRequests);
+					NotificationMessage notification = new NotificationMessage(Operation.C, bean, notificationRequests);
 					CreateResponse cr = new CreateResponse(bean.getId(), notification);
 					crs.add(cr);
 				}
@@ -2138,8 +2136,7 @@ public class EntityBeanManager {
 				beanManaged.postMergeFixup(manager);
 				manager.flush();
 				logger.trace("Updated bean " + bean + " flushed.");
-				NotificationMessage notification = new NotificationMessage(Operation.U, bean, manager,
-						notificationRequests);
+				NotificationMessage notification = new NotificationMessage(Operation.U, bean, notificationRequests);
 				userTransaction.commit();
 				if (logRequests.contains(CallType.WRITE)) {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -2261,13 +2258,11 @@ public class EntityBeanManager {
 
 				try {
 					for (EntityBaseBean eb : creates) {
-						notificationTransmitter.processMessage(
-								new NotificationMessage(Operation.C, eb, manager, notificationRequests));
+						notificationTransmitter.processMessage(new NotificationMessage(Operation.C, eb, notificationRequests));
 					}
 
 					for (EntityBaseBean eb : updates) {
-						notificationTransmitter.processMessage(
-								new NotificationMessage(Operation.U, eb, manager, notificationRequests));
+						notificationTransmitter.processMessage(new NotificationMessage(Operation.U, eb, notificationRequests));
 					}
 				} catch (JMSException e) {
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -2611,8 +2606,7 @@ public class EntityBeanManager {
 
 		for (EntityBaseBean c : clonedTo.values()) {
 			try {
-				notificationTransmitter
-						.processMessage(new NotificationMessage(Operation.C, c, manager, notificationRequests));
+				notificationTransmitter.processMessage(new NotificationMessage(Operation.C, c, notificationRequests));
 			} catch (JMSException e) {
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Operation completed but unable to send JMS message " + e.getMessage());
