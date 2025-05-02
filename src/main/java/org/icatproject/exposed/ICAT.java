@@ -69,7 +69,6 @@ import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfo;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.NotificationTransmitter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
@@ -87,9 +86,6 @@ public class ICAT {
 
 	@EJB
 	EntityBeanManager beanManager;
-
-	@EJB
-	GateKeeper gatekeeper;
 
 	private int lifetimeMinutes;
 
@@ -276,7 +272,7 @@ public class ICAT {
 	private void init() {
 		authPlugins = propertyHandler.getAuthPlugins();
 		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
-		rootUserNames = gatekeeper.getRootUserNames();
+		rootUserNames = propertyHandler.getRootUserNames();
 	}
 
 	@WebMethod
