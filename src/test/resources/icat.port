@@ -84,6 +84,9 @@ DataCollection(?:0)
 "b"
 "c"
 
+DataPublication(facility(name:0), content(?:1), title:2, pid:3)
+"Test port facility", "a", "Data Publication Title", "dp:1234"
+
 DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4), dataCollection(?:5))
 "Test port facility", "expt1", "one", "ds2", "df1 \t \r \n \\ \f \b \' \"",  "a"
 "Test port facility", "expt1", "one", "ds2", "df2",  "b"
