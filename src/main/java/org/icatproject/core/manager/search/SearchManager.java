@@ -44,6 +44,7 @@ import jakarta.json.JsonValue.ValueType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceException;
 import jakarta.persistence.PersistenceUnit;
 
 import org.icatproject.core.IcatException;
@@ -302,11 +303,15 @@ public class SearchManager {
 
 		@Override
 		public void run() {
-			EntityManagerFactory entityManagerFactory = entityManager.getEntityManagerFactory();
-			entityManager.close();
-			entityManager = entityManagerFactory.createEntityManager();
-			aggregate(datasetAggregation, Dataset.class);
-			aggregate(investigationAggregation, Investigation.class);
+			try {
+				EntityManagerFactory entityManagerFactory = entityManager.getEntityManagerFactory();
+				entityManager.close();
+				entityManager = entityManagerFactory.createEntityManager();
+				aggregate(datasetAggregation, Dataset.class);
+				aggregate(investigationAggregation, Investigation.class);
+			} catch (PersistenceException e) {
+				logger.error("Database error during aggregation", e);
+			}
 		}
 
 		/**
