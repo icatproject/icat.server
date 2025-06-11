@@ -45,12 +45,12 @@ public class DatasetTechnique extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeLong(gen, "id", id);
 		SearchApi.encodeLong(gen, "dataset.id", dataset.id);
 		if (technique.getName() == null) {
-			technique = manager.find(technique.getClass(), technique.id);
+			technique = entityManager.find(technique.getClass(), technique.id);
 		}
-		technique.getDoc(manager, gen);
+		technique.getDoc(entityManager, gen);
 	}
 }

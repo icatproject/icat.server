@@ -129,7 +129,7 @@ public class Porter {
 
 	}
 
-	public void importData(String jsonString, InputStream body, EntityManager manager, String ip) throws IcatException {
+	public void importData(String jsonString, InputStream body, EntityManager entityManager, String ip) throws IcatException {
 
 		@SuppressWarnings("serial")
 		LinkedHashMap<String, EntityBaseBean> jpqlCache = new LinkedHashMap<String, EntityBaseBean>() {
@@ -185,7 +185,7 @@ public class Porter {
 			}
 		}
 
-		String userId = getUserName(sessionId, manager);
+		String userId = getUserName(sessionId, entityManager);
 		boolean allAttributes = attributes == Attributes.ALL;
 		if (allAttributes && !rootUserNames.contains(userId)) {
 			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES,
@@ -231,7 +231,7 @@ public class Porter {
 				} else if (table == null) {
 					table = processTableHeader(line);
 				} else {
-					processTuple(table, line, userId, jpqlCache, ids, idCache, manager, duplicateAction, attributes, allAttributes, ip);
+					processTuple(table, line, userId, jpqlCache, ids, idCache, entityManager, duplicateAction, attributes, allAttributes, ip);
 				}
 			}
 			if (table != null) {
@@ -251,12 +251,12 @@ public class Porter {
 		}
 	}
 
-	private Session getSession(String sessionId, EntityManager manager) throws IcatException {
+	private Session getSession(String sessionId, EntityManager entityManager) throws IcatException {
 		Session session = null;
 		if (sessionId == null || sessionId.equals("")) {
 			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session Id cannot be null or empty.");
 		}
-		session = manager.find(Session.class, sessionId);
+		session = entityManager.find(Session.class, sessionId);
 		if (session == null) {
 			throw new IcatException(IcatException.IcatExceptionType.SESSION,
 					"Unable to find user by sessionid: " + sessionId);
@@ -264,9 +264,9 @@ public class Porter {
 		return session;
 	}
 
-	private String getUserName(String sessionId, EntityManager manager) throws IcatException {
+	private String getUserName(String sessionId, EntityManager entityManager) throws IcatException {
 		try {
-			Session session = getSession(sessionId, manager);
+			Session session = getSession(sessionId, entityManager);
 			String userName = session.getUserName();
 			logger.debug("user: " + userName + " is associated with: " + sessionId);
 			return userName;
@@ -277,7 +277,7 @@ public class Porter {
 	}
 
 	private void processTuple(Table table, String line, String userId, Map<String, EntityBaseBean> cache,
-			Map<String, Long> ids, LinkedHashMap<Long, EntityBaseBean> idCache, EntityManager manager,
+			Map<String, Long> ids, LinkedHashMap<Long, EntityBaseBean> idCache, EntityManager entityManager,
 			DuplicateAction duplicateAction, Attributes attributes, boolean allAttributes, String ip) throws
 			IcatException, LexerException, ParserException, IllegalArgumentException, InvocationTargetException,
 			IllegalAccessException {
@@ -359,7 +359,7 @@ public class Porter {
 						}
 						EntityBaseBean eb = idCache.get(id);
 						if (eb == null) {
-							eb = (EntityBaseBean) manager.find(f.getType(), id);
+							eb = (EntityBaseBean) entityManager.find(f.getType(), id);
 							if (eb == null) {
 								throw new ParserException(
 										"? field '" + token.getValue() + "' => id " + id + " no longer exists");
@@ -401,7 +401,7 @@ public class Porter {
 					EntityBaseBean eb = cache.get(key);
 					if (eb == null) {
 						logger.debug("'" + key + "' not found in import cache");
-						TypedQuery<EntityBaseBean> query = manager.createQuery(jpql, EntityBaseBean.class);
+						TypedQuery<EntityBaseBean> query = entityManager.createQuery(jpql, EntityBaseBean.class);
 						for (Attribute attribute : tableField.getAttributes()) {
 							int n = attribute.getFieldNum();
 							token = tokens.get(n);
@@ -585,7 +585,7 @@ public class Porter {
 		return table;
 	}
 
-	public Response exportData(String jsonString, EntityManager manager) throws IcatException {
+	public Response exportData(String jsonString, EntityManager entityManager) throws IcatException {
 		if (jsonString == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "json must not be null");
 		}
@@ -618,7 +618,7 @@ public class Porter {
 			}
 		}
 		logger.debug(sessionId + " issues " + query);
-		String userId = getUserName(sessionId, manager);
+		String userId = getUserName(sessionId, entityManager);
 		if (query != null) {
 			return beanManager.export(userId, query, attributes == Attributes.ALL);
 		} else {

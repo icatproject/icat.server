@@ -36,8 +36,8 @@ public class SampleParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, PersistMode persistMode) throws IcatException {
-		super.preparePersist(modId, manager, persistMode);
+	public void preparePersist(String modId, EntityManager entityManager, PersistMode persistMode) throws IcatException {
+		super.preparePersist(modId, entityManager, persistMode);
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}
@@ -52,8 +52,8 @@ public class SampleParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
-		super.getDoc(manager, gen);
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
+		super.getDoc(entityManager, gen);
 		SearchApi.encodeLong(gen, "sample.id", sample.id);
 	}
 

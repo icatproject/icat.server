@@ -80,8 +80,8 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 
 	// This is only used by the older create and createMany calls and not by the
 	// new Restful write call
-	public void addToSearch(EntityManager manager, SearchManager searchManager) throws IcatException {
-		searchManager.addDocument(manager, this);
+	public void addToSearch(EntityManager entityManager, SearchManager searchManager) throws IcatException {
+		searchManager.addDocument(entityManager, this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = EntityInfoHandler.getRelatedEntities(klass);
 		Map<Field, Method> getters = EntityInfoHandler.getGetters(klass);
@@ -93,7 +93,7 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
 					if (!collection.isEmpty()) {
 						for (EntityBaseBean bean : collection) {
-							bean.addToSearch(manager, searchManager);
+							bean.addToSearch(entityManager, searchManager);
 						}
 					}
 				} catch (Exception e) {
@@ -234,7 +234,7 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 	 * If this method is overridden it should normally be called as well by
 	 * super.postMergeFixup()
 	 */
-	public void postMergeFixup(EntityManager manager) throws IcatException {
+	public void postMergeFixup(EntityManager entityManager) throws IcatException {
 		// Do nothing by default
 	}
 
@@ -243,7 +243,7 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 	 * super.preparePersist(). Note that it recurses down through all to-many
 	 * relationships.
 	 */
-	public void preparePersist(String modId, EntityManager manager, PersistMode persistMode) throws IcatException {
+	public void preparePersist(String modId, EntityManager entityManager, PersistMode persistMode) throws IcatException {
 
 		logger.trace("preparePersist of " + this + " for state " + persistMode);
 
@@ -313,7 +313,7 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 					if (!collection.isEmpty()) {
 						Method rev = r.getInverseSetter();
 						for (EntityBaseBean bean : collection) {
-							bean.preparePersist(modId, manager, persistMode);
+							bean.preparePersist(modId, entityManager, persistMode);
 							rev.invoke(bean, this);
 						}
 					}
@@ -430,7 +430,7 @@ public abstract class EntityBaseBean implements HasEntityId, Serializable {
 	 * This should be overridden by classes wishing to index things in a search
 	 * engine
 	 */
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 	}
 
 }

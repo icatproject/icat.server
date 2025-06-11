@@ -234,7 +234,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "name", name);
 		SearchApi.encodeNullableString(gen, "description", description);
 		SearchApi.encodeNullableString(gen, "doi", doi);
@@ -256,7 +256,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		if (investigation != null) {
 			if (investigation.getName() == null || investigation.getVisitId() == null
 					|| investigation.getTitle() == null || investigation.getCreateTime() == null) {
-				investigation = manager.find(investigation.getClass(), investigation.id);
+				investigation = entityManager.find(investigation.getClass(), investigation.id);
 			}
 			SearchApi.encodeLong(gen, "investigation.id", investigation.id);
 			SearchApi.encodeString(gen, "investigation.name", investigation.getName());
@@ -271,15 +271,15 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 		if (sample != null) {
 			if (sample.getName() == null) {
-				sample = manager.find(sample.getClass(), sample.id);
+				sample = entityManager.find(sample.getClass(), sample.id);
 			}
-			sample.getDoc(manager, gen);
+			sample.getDoc(entityManager, gen);
 		}
 
 		if (type.getName() == null) {
-			type = manager.find(type.getClass(), type.id);
+			type = entityManager.find(type.getClass(), type.id);
 		}
-		type.getDoc(manager, gen);
+		type.getDoc(entityManager, gen);
 	}
 
 	/**

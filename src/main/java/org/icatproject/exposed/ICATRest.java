@@ -105,7 +105,7 @@ public class ICATRest {
 	private int lifetimeMinutes;
 
 	@PersistenceContext(unitName = "icat")
-	private EntityManager manager;
+	private EntityManager entityManager;
 
 	@EJB
 	Porter porter;
@@ -342,7 +342,7 @@ public class ICATRest {
 	@Path("port")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response exportData(@QueryParam("json") String jsonString) throws IcatException {
-		return porter.exportData(jsonString, manager);
+		return porter.exportData(jsonString, entityManager);
 	}
 
 	/**
@@ -377,7 +377,7 @@ public class ICATRest {
 		if (max != null) {
 			nMax = max;
 		}
-		List<Object> os = manager.createQuery(query, Object.class).setMaxResults(nMax).getResultList();
+		List<Object> os = entityManager.createQuery(query, Object.class).setMaxResults(nMax).getResultList();
 
 		StringBuilder sb = new StringBuilder();
 		if (os.size() == nMax) {
@@ -660,7 +660,7 @@ public class ICATRest {
 					if (name == null) {
 						name = part.getSubmittedFileName();
 					}
-					porter.importData(jsonString, stream, manager, request.getRemoteAddr());
+					porter.importData(jsonString, stream, entityManager, request.getRemoteAddr());
 				}
 			}
 		} catch (IOException e) {
