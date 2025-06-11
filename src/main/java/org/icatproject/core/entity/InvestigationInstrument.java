@@ -45,11 +45,11 @@ public class InvestigationInstrument extends EntityBaseBean implements Serializa
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		if (instrument.getName() == null) {
-			instrument = manager.find(instrument.getClass(), instrument.id);
+			instrument = entityManager.find(instrument.getClass(), instrument.id);
 		}
-		instrument.getDoc(manager, gen);
+		instrument.getDoc(entityManager, gen);
 		SearchApi.encodeLong(gen, "investigation.id", investigation.id);
 		SearchApi.encodeLong(gen, "id", id);
 	}

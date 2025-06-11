@@ -98,7 +98,7 @@ public class TestSearchApi {
 	}
 
 	@PersistenceUnit(unitName = "icat")
-	private EntityManager manager;
+	private EntityManager entityManager;
 
 	private static final String SEARCH_AFTER_NOT_NULL = "Expected searchAfter to be set, but it was null";
 	private static final List<String> datafileFields = Arrays.asList("id", "name", "location", "datafileFormat.name",
@@ -544,9 +544,9 @@ public class TestSearchApi {
 		Parameter dateParameter = parameter(3 * i, new Date(now + 60000 * k * k), dateParameterType, parent);
 		Parameter numericParameter = parameter(3 * i + 1, new Double(j * j), numericParameterType, parent);
 		Parameter stringParameter = parameter(3 * i + 2, "v" + i * i, stringParameterType, parent);
-		queue.add(SearchApi.encodeOperation(manager, "create", dateParameter));
-		queue.add(SearchApi.encodeOperation(manager, "create", numericParameter));
-		queue.add(SearchApi.encodeOperation(manager, "create", stringParameter));
+		queue.add(SearchApi.encodeOperation(entityManager, "create", dateParameter));
+		queue.add(SearchApi.encodeOperation(entityManager, "create", numericParameter));
+		queue.add(SearchApi.encodeOperation(entityManager, "create", stringParameter));
 	}
 
 	/**
@@ -568,13 +568,13 @@ public class TestSearchApi {
 			Date startDate = new Date(now + investigationId * 60000);
 			Date endDate = new Date(now + (investigationId + 1) * 60000);
 			Investigation investigation = investigation(investigationId, word, startDate, endDate);
-			queue.add(SearchApi.encodeOperation(manager, "create", investigation));
+			queue.add(SearchApi.encodeOperation(entityManager, "create", investigation));
 
 			InvestigationFacilityCycle investigationFacilityCycle = new InvestigationFacilityCycle();
 			investigationFacilityCycle.setId(new Long(investigationId));
 			investigationFacilityCycle.setFacilityCycle(facilityCycle);
 			investigationFacilityCycle.setInvestigation(investigation);
-			queue.add(SearchApi.encodeOperation(manager, "create", investigationFacilityCycle));
+			queue.add(SearchApi.encodeOperation(entityManager, "create", investigationFacilityCycle));
 
 			InvestigationInstrument investigationInstrument = new InvestigationInstrument();
 			investigationInstrument.setId(new Long(investigationId));
@@ -584,7 +584,7 @@ public class TestSearchApi {
 				investigationInstrument.setInstrument(instrumentOne);
 			}
 			investigationInstrument.setInvestigation(investigation);
-			queue.add(SearchApi.encodeOperation(manager, "create", investigationInstrument));
+			queue.add(SearchApi.encodeOperation(entityManager, "create", investigationInstrument));
 
 			for (int userId = 0; userId < NUMUSERS; userId++) {
 				if (investigationId % (userId + 1) == 1) {
@@ -593,7 +593,7 @@ public class TestSearchApi {
 					String name = letters.substring(userId, userId + 1) + userId;
 					InvestigationUser investigationUser = investigationUser(investigationUserId, userId, name, fullName,
 							investigation);
-					queue.add(SearchApi.encodeOperation(manager, "create", investigationUser));
+					queue.add(SearchApi.encodeOperation(entityManager, "create", investigationUser));
 					investigationUserId++;
 				}
 			}
@@ -628,11 +628,11 @@ public class TestSearchApi {
 				if (datasetId < NUMSAMP) {
 					word = word("SType ", datasetId);
 					Sample sample = sample(datasetId, word, investigation);
-					queue.add(SearchApi.encodeOperation(manager, "create", sample));
+					queue.add(SearchApi.encodeOperation(entityManager, "create", sample));
 					dataset.setSample(sample);
 				}
 
-				queue.add(SearchApi.encodeOperation(manager, "create", dataset));
+				queue.add(SearchApi.encodeOperation(entityManager, "create", dataset));
 
 				if (datasetId % 3 == 1) {
 					populateParameters(queue, datasetId, dataset);
@@ -646,7 +646,7 @@ public class TestSearchApi {
 					word = word("DF", datafileId % 26);
 					Datafile datafile = datafile(datafileId, word, "/dir/" + word, new Date(now + datafileId * 60000),
 							dataset);
-					queue.add(SearchApi.encodeOperation(manager, "create", datafile));
+					queue.add(SearchApi.encodeOperation(entityManager, "create", datafile));
 
 					if (datafileId % 4 == 1) {
 						populateParameters(queue, datafileId, datafile);
@@ -672,7 +672,7 @@ public class TestSearchApi {
 		instrument.setId(instrumentId);
 		instrument.setName("bl" + instrumentId);
 		instrument.setFullName("Beamline " + instrumentId);
-		queue.add(SearchApi.encodeOperation(manager, "create", instrument));
+		queue.add(SearchApi.encodeOperation(entityManager, "create", instrument));
 		User user = new User();
 		user.setId(new Long(NUMUSERS) + instrumentId);
 		user.setName("scientist_" + instrumentId);
@@ -680,7 +680,7 @@ public class TestSearchApi {
 		instrumentScientist.setId(instrumentId);
 		instrumentScientist.setInstrument(instrument);
 		instrumentScientist.setUser(user);
-		queue.add(SearchApi.encodeOperation(manager, "create", instrumentScientist));
+		queue.add(SearchApi.encodeOperation(entityManager, "create", instrumentScientist));
 		return instrument;
 	}
 
@@ -698,7 +698,7 @@ public class TestSearchApi {
 		technique.setName("technique" + techniqueId);
 		technique.setDescription("Technique number " + techniqueId);
 		technique.setPid(Long.toString(techniqueId));
-		queue.add(SearchApi.encodeOperation(manager, "create", technique));
+		queue.add(SearchApi.encodeOperation(entityManager, "create", technique));
 		return technique;
 	}
 
@@ -715,7 +715,7 @@ public class TestSearchApi {
 		datasetTechnique.setId(technique.getId() * 100 + dataset.getId());
 		datasetTechnique.setTechnique(technique);
 		datasetTechnique.setDataset(dataset);
-		queue.add(SearchApi.encodeOperation(manager, "create", datasetTechnique));
+		queue.add(SearchApi.encodeOperation(entityManager, "create", datasetTechnique));
 	}
 
 	private String word(int j, int k, int l) {
@@ -1272,9 +1272,9 @@ public class TestSearchApi {
 		List<String> fields = Arrays.asList("id", "fileSize", "fileCount");
 
 		// Create
-		String createInvestigation = SearchApi.encodeOperation(manager, "create", investigation);
-		String createDataset = SearchApi.encodeOperation(manager, "create", dataset);
-		String createDatafile = SearchApi.encodeOperation(manager, "create", datafile);
+		String createInvestigation = SearchApi.encodeOperation(entityManager, "create", investigation);
+		String createDataset = SearchApi.encodeOperation(entityManager, "create", dataset);
+		String createDatafile = SearchApi.encodeOperation(entityManager, "create", datafile);
 		modify(createInvestigation, createDataset, createDatafile);
 		checkFileSize(datafileQuery, fields, 123, 1);
 		checkFileSize(datasetQuery, fields, 123, 1);
@@ -1282,13 +1282,13 @@ public class TestSearchApi {
 
 		// Update
 		datafile.setFileSize(456L);
-		modify(SearchApi.encodeOperation(manager, "update", datafile));
+		modify(SearchApi.encodeOperation(entityManager, "update", datafile));
 		checkFileSize(datafileQuery, fields, 456, 1);
 		checkFileSize(datasetQuery, fields, 456, 1);
 		checkFileSize(investigationQuery, fields, 456, 1);
 
 		// Delete
-		modify(SearchApi.encodeOperation(manager, "delete", datafile));
+		modify(SearchApi.encodeOperation(entityManager, "delete", datafile));
 		checkFileSize(datasetQuery, fields, 0, 0);
 		checkFileSize(investigationQuery, fields, 0, 0);
 	}
@@ -1333,7 +1333,7 @@ public class TestSearchApi {
 		FacetDimension pngFacet = new FacetDimension("", "datafileFormat.name", new FacetLabel("png", 1L));
 
 		// Original
-		modify(SearchApi.encodeOperation(manager, "create", elephantDatafile));
+		modify(SearchApi.encodeOperation(entityManager, "create", elephantDatafile));
 		checkResults(searchApi.getResults(elephantQuery, null, 5, null, datafileFields), 42L);
 		checkResults(searchApi.getResults(rhinoQuery, null, 5, null, datafileFields));
 		checkResults(searchApi.getResults(pdfQuery, null, 5, null, datafileFields));
@@ -1343,7 +1343,7 @@ public class TestSearchApi {
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), lowFacet);
 
 		// Change name and add a format
-		modify(SearchApi.encodeOperation(manager, "update", rhinoDatafile));
+		modify(SearchApi.encodeOperation(entityManager, "update", rhinoDatafile));
 		checkResults(searchApi.getResults(elephantQuery, null, 5, null, datafileFields));
 		checkResults(searchApi.getResults(rhinoQuery, null, 5, null, datafileFields), 42L);
 		checkResults(searchApi.getResults(pdfQuery, null, 5, null, datafileFields), 42L);
@@ -1353,7 +1353,7 @@ public class TestSearchApi {
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), highFacet);
 
 		// Change just the format
-		modify(SearchApi.encodeOperation(manager, "update", pngFormat));
+		modify(SearchApi.encodeOperation(entityManager, "update", pngFormat));
 		checkResults(searchApi.getResults(elephantQuery, null, 5, null, datafileFields));
 		checkResults(searchApi.getResults(rhinoQuery, null, 5, null, datafileFields), 42L);
 		checkResults(searchApi.getResults(pdfQuery, null, 5, null, datafileFields));
@@ -1363,7 +1363,7 @@ public class TestSearchApi {
 		checkFacets(searchApi.facetSearch("Datafile", rangeFacetRequest, 5, 5), highFacet);
 
 		// Remove the format
-		modify(SearchApi.encodeOperation(manager, "delete", pngFormat));
+		modify(SearchApi.encodeOperation(entityManager, "delete", pngFormat));
 		checkResults(searchApi.getResults(elephantQuery, null, 5, null, datafileFields));
 		checkResults(searchApi.getResults(rhinoQuery, null, 5, null, datafileFields), 42L);
 		checkResults(searchApi.getResults(pdfQuery, null, 5, null, datafileFields));
@@ -1380,8 +1380,8 @@ public class TestSearchApi {
 		checkResults(searchApi.getResults(pngQuery, 5));
 
 		// Multiple commands at once
-		modify(SearchApi.encodeOperation(manager, "create", elephantDatafile),
-				SearchApi.encodeOperation(manager, "update", rhinoDatafile),
+		modify(SearchApi.encodeOperation(entityManager, "create", elephantDatafile),
+				SearchApi.encodeOperation(entityManager, "update", rhinoDatafile),
 				SearchApi.encodeDeletion(elephantDatafile),
 				SearchApi.encodeDeletion(rhinoDatafile));
 		checkResults(searchApi.getResults(elephantQuery, 5));
@@ -1427,7 +1427,7 @@ public class TestSearchApi {
 		Parameter parameter = parameter(0, 273000, parameterType, investigation);
 
 		// Create with units of mK
-		modify(SearchApi.encodeOperation(manager, "create", investigation), SearchApi.encodeOperation(manager, "create", parameter));
+		modify(SearchApi.encodeOperation(entityManager, "create", investigation), SearchApi.encodeOperation(entityManager, "create", parameter));
 		// Assert the raw value is still 273000 (mK)
 		checkFacets(searchApi.facetSearch("InvestigationParameter", mKFacetQuery, 5, 5), rawExpectedFacet);
 		// Assert the SI value is 273 (K)
@@ -1435,7 +1435,7 @@ public class TestSearchApi {
 
 		// Change units only to "celsius"
 		parameterType.setUnits("celsius");
-		modify(SearchApi.encodeOperation(manager, "update", parameter));
+		modify(SearchApi.encodeOperation(entityManager, "update", parameter));
 		// Assert the raw value is still 273000 (deg C)
 		checkFacets(searchApi.facetSearch("InvestigationParameter", celsiusFacetQuery, 5, 5), rawExpectedFacet);
 		// Assert the SI value is 273273.15 (K)
@@ -1443,7 +1443,7 @@ public class TestSearchApi {
 
 		// Change units to something wrong
 		parameterType.setUnits("wrong");
-		modify(SearchApi.encodeOperation(manager, "update", parameterType));
+		modify(SearchApi.encodeOperation(entityManager, "update", parameterType));
 		// Assert the raw value is still 273000 (wrong)
 		checkFacets(searchApi.facetSearch("InvestigationParameter", wrongFacetQuery, 5, 5), rawExpectedFacet);
 		// Assert that the SI value has not been set due to conversion failing
@@ -1478,10 +1478,10 @@ public class TestSearchApi {
 		JsonObject rangeFilter = filterBuilder.build();
 
 		// Create
-		modify(SearchApi.encodeOperation(manager, "create", numericInvestigation),
-				SearchApi.encodeOperation(manager, "create", rangeInvestigation),
-				SearchApi.encodeOperation(manager, "create", numericParameter),
-				SearchApi.encodeOperation(manager, "create", rangeParameter));
+		modify(SearchApi.encodeOperation(entityManager, "create", numericInvestigation),
+				SearchApi.encodeOperation(entityManager, "create", rangeInvestigation),
+				SearchApi.encodeOperation(entityManager, "create", numericParameter),
+				SearchApi.encodeOperation(entityManager, "create", rangeParameter));
 
 		JsonObject query = buildQuery("Investigation", null, null, null, null, null, null,
 				new Filter("investigationparameter", numericFilter));
@@ -1538,12 +1538,12 @@ public class TestSearchApi {
 				new Filter("sampleparameter", filter));
 
 		// Create
-		modify(SearchApi.encodeOperation(manager, "create", investigation),
-				SearchApi.encodeOperation(manager, "create", dataset),
-				SearchApi.encodeOperation(manager, "create", datafile),
-				SearchApi.encodeOperation(manager, "create", sample),
-				SearchApi.encodeOperation(manager, "create", parameterType),
-				SearchApi.encodeOperation(manager, "create", parameter));
+		modify(SearchApi.encodeOperation(entityManager, "create", investigation),
+				SearchApi.encodeOperation(entityManager, "create", dataset),
+				SearchApi.encodeOperation(entityManager, "create", datafile),
+				SearchApi.encodeOperation(entityManager, "create", sample),
+				SearchApi.encodeOperation(entityManager, "create", parameterType),
+				SearchApi.encodeOperation(entityManager, "create", parameter));
 
 		// Test
 		checkFacets(searchApi.facetSearch("SampleParameter", sampleParameterFacetQuery, 5, 5), sampleParemeterFacet);

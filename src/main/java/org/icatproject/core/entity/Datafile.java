@@ -202,7 +202,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "name", name);
 		SearchApi.encodeNullableString(gen, "description", description);
 		SearchApi.encodeNullableString(gen, "location", location);
@@ -211,9 +211,9 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		SearchApi.encodeLong(gen, "fileCount", 1L); // Always 1, but makes sorting on fields consistent
 		if (datafileFormat != null) {
 			if (datafileFormat.getName() == null) {
-				datafileFormat = manager.find(datafileFormat.getClass(), datafileFormat.id);
+				datafileFormat = entityManager.find(datafileFormat.getClass(), datafileFormat.id);
 			}
-			datafileFormat.getDoc(manager, gen);
+			datafileFormat.getDoc(entityManager, gen);
 		}
 		if (datafileModTime != null) {
 			SearchApi.encodeLong(gen, "date", datafileModTime);
@@ -226,22 +226,22 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
 		if (dataset != null) {
 			if (dataset.getName() == null || dataset.getInvestigation() == null) {
-				dataset = manager.find(dataset.getClass(), dataset.id);
+				dataset = entityManager.find(dataset.getClass(), dataset.id);
 			}
 			SearchApi.encodeLong(gen, "dataset.id", dataset.id);
 			SearchApi.encodeString(gen, "dataset.name", dataset.getName());
 			Sample sample = dataset.getSample();
 			if (sample != null) {
 				if (sample.getName() == null) {
-					sample = manager.find(sample.getClass(), sample.id);
+					sample = entityManager.find(sample.getClass(), sample.id);
 				}
-				sample.getDoc(manager, gen);
+				sample.getDoc(entityManager, gen);
 			}
 			Investigation investigation = dataset.getInvestigation();
 			if (investigation != null) {
 				if (investigation.getName() == null || investigation.getVisitId() == null
 						|| investigation.getTitle() == null || investigation.getCreateTime() == null) {
-					investigation = manager.find(investigation.getClass(), investigation.id);
+					investigation = entityManager.find(investigation.getClass(), investigation.id);
 				}
 				SearchApi.encodeLong(gen, "investigation.id", investigation.id);
 				SearchApi.encodeString(gen, "investigation.name", investigation.getName());

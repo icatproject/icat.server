@@ -15,13 +15,13 @@ public class SessionManager {
 	private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
 
 	@PersistenceContext(unitName = "icat")
-	private EntityManager manager;
+	private EntityManager entityManager;
 
 	// Run every hour
 	@Schedule(hour = "*")
 	public void removeExpiredSessions() {
 		try {
-			int n = manager.createNamedQuery(Session.DELETE_EXPIRED).executeUpdate();
+			int n = entityManager.createNamedQuery(Session.DELETE_EXPIRED).executeUpdate();
 			logger.debug(n + " sessions were removed");
 		} catch (Throwable e) {
 			logger.error(e.getClass() + " " + e.getMessage());

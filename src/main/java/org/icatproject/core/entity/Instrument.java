@@ -155,7 +155,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeNullableString(gen, "instrument.fullName", fullName);
 		SearchApi.encodeString(gen, "instrument.name", name);
 		SearchApi.encodeLong(gen, "instrument.id", id);

@@ -84,7 +84,7 @@ public class LuceneApi extends SearchApi {
 	}
 
 	@Override
-	public void addNow(String entityName, List<Long> ids, EntityManager manager,
+	public void addNow(String entityName, List<Long> ids, EntityManager entityManager,
 			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor)
 			throws IcatException, IOException, URISyntaxException {
 		URI uri = new URIBuilder(server).setPath(basePath + "/addNow/" + entityName).build();
@@ -97,10 +97,10 @@ public class LuceneApi extends SearchApi {
 				try (JsonGenerator gen = Json.createGenerator(beanDocs)) {
 					gen.writeStartArray();
 					for (Long id : ids) {
-						EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
+						EntityBaseBean bean = (EntityBaseBean) entityManager.find(klass, id);
 						if (bean != null) {
 							gen.writeStartObject();
-							bean.getDoc(manager, gen);
+							bean.getDoc(entityManager, gen);
 							gen.writeEnd();
 						}
 					}
@@ -110,7 +110,7 @@ public class LuceneApi extends SearchApi {
 					logger.error("About to throw internal exception for ids {} because of", ids, e);
 					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
 				} finally {
-					manager.close();
+					entityManager.close();
 				}
 			});
 

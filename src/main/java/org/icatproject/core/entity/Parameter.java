@@ -17,7 +17,6 @@ import jakarta.persistence.TemporalType;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.search.SearchApi;
-import org.icatproject.core.manager.GateKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,13 +114,13 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
+	public void preparePersist(String modId, EntityManager entityManager, PersistMode persistMode)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode);
-		check(manager);
+		super.preparePersist(modId, entityManager, persistMode);
+		check(entityManager);
 	}
 
-	private void check(EntityManager manager) throws IcatException {
+	private void check(EntityManager entityManager) throws IcatException {
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}
@@ -146,7 +145,7 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 			logger.debug("Parameter of type " + type.getName() + " has string value " + stringValue + " to be checked");
 			// The query is used because the ParameterType passed in may not
 			// include its PermissibleStringValues
-			List<String> values = manager.createNamedQuery("Parameter.psv", String.class)
+			List<String> values = entityManager.createNamedQuery("Parameter.psv", String.class)
 					.setParameter("tid", type.getId()).getResultList();
 			if (!values.isEmpty() && values.indexOf(stringValue) < 0) {
 				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Parameter of type "
@@ -156,13 +155,13 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void postMergeFixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
-		super.postMergeFixup(manager, gateKeeper);
-		check(manager);
+	public void postMergeFixup(EntityManager entityManager) throws IcatException {
+		super.postMergeFixup(entityManager);
+		check(entityManager);
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		if (stringValue != null) {
 			SearchApi.encodeString(gen, "stringValue", stringValue);
 		} else if (numericValue != null) {
@@ -178,9 +177,9 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 		}
 
 		if (type.getName() == null || type.getUnits() == null) {
-			type = manager.find(type.getClass(), type.id);
+			type = entityManager.find(type.getClass(), type.id);
 		}
-		type.getDoc(manager, gen);
+		type.getDoc(entityManager, gen);
 		SearchApi.encodeLong(gen, "id", id);
 	}
 

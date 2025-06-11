@@ -49,7 +49,7 @@ public class InvestigationFacilityCycle extends EntityBaseBean implements Serial
     }
 
     @Override
-    public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+    public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
         SearchApi.encodeLong(gen, "facilityCycle.id", facilityCycle.id);
         SearchApi.encodeLong(gen, "investigation.id", investigation.id);
         SearchApi.encodeLong(gen, "id", id);

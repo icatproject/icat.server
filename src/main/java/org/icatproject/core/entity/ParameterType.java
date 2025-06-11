@@ -283,7 +283,7 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "type.name", name);
 		SearchApi.encodeString(gen, "type.units", units);
 		SearchApi.encodeLong(gen, "type.id", id);

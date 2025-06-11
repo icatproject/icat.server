@@ -106,7 +106,7 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "datafileFormat.name", name);
 		SearchApi.encodeLong(gen, "datafileFormat.id", id);
 	}

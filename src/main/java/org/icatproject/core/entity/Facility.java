@@ -210,7 +210,7 @@ public class Facility extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "facility.name", name);
 		SearchApi.encodeLong(gen, "facility.id", id);
 	}

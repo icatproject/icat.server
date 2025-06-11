@@ -169,7 +169,7 @@ public class User extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeNullableString(gen, "user.fullName", fullName);
 		SearchApi.encodeString(gen, "user.name", name);
 		SearchApi.encodeLong(gen, "user.id", id);
