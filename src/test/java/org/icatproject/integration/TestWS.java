@@ -1,11 +1,11 @@
 package org.icatproject.integration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -59,11 +59,12 @@ import org.icatproject.User;
 import org.icatproject.UserGroup;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.utils.ContainerGetter.ContainerType;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /**
  * These tests are for those aspects that cannot be tested by the core tests. In
@@ -75,7 +76,7 @@ public class TestWS {
 	private static Random random;
 	private static WSession session;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		try {
 			random = new Random();
@@ -86,12 +87,12 @@ public class TestWS {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void initializeSession() throws Exception {
 		session.setAuthz();
 	}
 
-	@After
+	@AfterEach
 	public void clearSession() throws Exception {
 		session.clear();
 		session.clearAuthz();
@@ -728,7 +729,7 @@ public class TestWS {
 		}
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void manyBigGets() throws Exception {
 		Facility facility = session.createFacility("Test Facility", 90);
@@ -995,7 +996,7 @@ public class TestWS {
 		}
 	}
 
-	@Ignore("Needs Oracle for this test to be useful")
+	@Disabled("Needs Oracle for this test to be useful")
 	@Test
 	public void getInvestigationWithVeryManyDatasets() throws Exception {
 		WSession piOneSession = session.getSession("db", "username", "piOne", "password", "piOne");
@@ -1118,9 +1119,9 @@ public class TestWS {
 			assertTrue(df.getName().equals("wib1") || df.getName().equals("wib2"));
 			String tn = df.getDatafileFormat().getName();
 			if (df.getName().equals("wib1")) {
-				assertEquals(tn, "png");
+				assertEquals("png", tn);
 			} else {
-				assertEquals(tn, "bmp");
+				assertEquals("bmp", tn);
 			}
 		}
 
@@ -1190,21 +1191,21 @@ public class TestWS {
 
 		List<?> results = session.search("Dataset.id order by id");
 
-		assertEquals("Count", 4, results.size());
+		assertEquals(4, results.size(), "Count");
 
 		results = session.search("Dataset [name = 'Wibble']");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		Dataset ds = (Dataset) results.get(0);
-		assertEquals("No files", 0, ds.getDatafiles().size());
-		assertEquals("No params", 0, ds.getParameters().size());
-		assertNull("No inv", ds.getInvestigation());
+		assertEquals(0, ds.getDatafiles().size(), "No files");
+		assertEquals(0, ds.getParameters().size(), "No params");
+		assertNull(ds.getInvestigation(), "No inv");
 
 		results = session.search("Dataset INCLUDE Datafile[name = 'Wibble']");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		ds = (Dataset) results.get(0);
-		assertEquals("Files", 2, ds.getDatafiles().size());
-		assertEquals("No params", 0, ds.getParameters().size());
-		assertNull("No inv", ds.getInvestigation());
+		assertEquals(2, ds.getDatafiles().size(), "Files");
+		assertEquals(0, ds.getParameters().size(), "No params");
+		assertNull(ds.getInvestigation(), "No inv");
 
 		try {
 			results = session.search("Dataset INCLUDE 1, Datafile [name = 'Wibble']");
@@ -1228,58 +1229,58 @@ public class TestWS {
 		}
 
 		results = session.search("Dataset INCLUDE 1 [name = 'Wibble']");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		ds = (Dataset) results.get(0);
-		assertEquals("No files", 0, ds.getDatafiles().size());
-		assertEquals("No params", 0, ds.getParameters().size());
-		assertNotNull("Inv", ds.getInvestigation());
+		assertEquals(0, ds.getDatafiles().size(), "No files");
+		assertEquals(0, ds.getParameters().size(), "No params");
+		assertNotNull(ds.getInvestigation(), "Inv");
 
 		results = session.search("Dataset INCLUDE DatasetParameter [name = 'Wibble']");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		ds = (Dataset) results.get(0);
-		assertEquals("No Files", 0, ds.getDatafiles().size());
-		assertEquals("Params", 1, ds.getParameters().size());
-		assertNull("No inv", ds.getInvestigation());
+		assertEquals(0, ds.getDatafiles().size(), "No Files");
+		assertEquals(1, ds.getParameters().size(), "Params");
+		assertNull(ds.getInvestigation(), "No inv");
 
 		results = session.search("Dataset INCLUDE Datafile, DatasetParameter [name = 'Wibble']");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		ds = (Dataset) results.get(0);
-		assertEquals("Files", 2, ds.getDatafiles().size());
-		assertEquals("Params", 1, ds.getParameters().size());
-		assertNull("No inv", ds.getInvestigation());
+		assertEquals(2, ds.getDatafiles().size(), "Files");
+		assertEquals(1, ds.getParameters().size(), "Params");
+		assertNull(ds.getInvestigation(), "No inv");
 
 		results = session.search("Dataset INCLUDE Datafile, DatasetParameter, Investigation [name = 'Wibble']");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		ds = (Dataset) results.get(0);
-		assertEquals("Files", 2, ds.getDatafiles().size());
-		assertEquals("Params", 1, ds.getParameters().size());
-		assertNotNull("Inv", ds.getInvestigation());
+		assertEquals(2, ds.getDatafiles().size(), "Files");
+		assertEquals(1, ds.getParameters().size(), "Params");
+		assertNotNull(ds.getInvestigation(), "Inv");
 
 		results = session.search("Job");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		Job job = (Job) results.get(0);
-		assertNull("InputDataset", job.getInputDataCollection());
-		assertNull("OutputDataset", job.getOutputDataCollection());
+		assertNull(job.getInputDataCollection(), "InputDataset");
+		assertNull(job.getOutputDataCollection(), "OutputDataset");
 
 		results = session.search("Job");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		job = (Job) results.get(0);
-		assertNull("Application", job.getApplication());
+		assertNull(job.getApplication(), "Application");
 
 		results = session.search("Job INCLUDE Application");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		job = (Job) results.get(0);
-		assertNotNull("Application", job.getApplication());
+		assertNotNull(job.getApplication(), "Application");
 
 		results = session.search("Application");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		Application application = (Application) results.get(0);
-		assertEquals("InputDataset", 0, application.getJobs().size());
+		assertEquals(0, application.getJobs().size(), "InputDataset");
 
 		results = session.search("Application INCLUDE Job");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		application = (Application) results.get(0);
-		assertEquals("InputDataset", 1, application.getJobs().size());
+		assertEquals(1, application.getJobs().size(), "InputDataset");
 
 		try {
 			results = session.search("Job INCLUDE InputDataset, InputDatafile, Dataset, Datafile");
@@ -1354,7 +1355,7 @@ public class TestWS {
 	public void login() throws Exception {
 		double rm = session.getRemainingMinutes();
 		assertTrue(rm > 0);
-		assertTrue("API version", session.getApiVersion().startsWith(version));
+		assertTrue(session.getApiVersion().startsWith(version), "API version");
 		assertEquals("db/notroot", session.getUserName());
 		Thread.sleep(10);
 		rm = session.getRemainingMinutes();
@@ -1547,52 +1548,52 @@ public class TestWS {
 
 		List<?> results = session.search(
 				"Dataset.id " + "<-> DatasetParameter[type.name = 'TIMESTAMP'] " + "<-> Investigation[name <> 12]");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 
 		results = session.search("Datafile [name = 'fred'] <-> Dataset[id <> 42]");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 
 		String query = "Dataset.id  ORDER BY id [type.name IN :types] <-> Investigation[id BETWEEN :lower AND :upper]";
 
 		query = query.replace(":lower", Long.toString(invId)).replace(":upper", Long.toString(invId)).replace(":types",
 				"('GS', 'GQ')");
 		results = session.search(query);
-		assertEquals("Count", 4, results.size());
+		assertEquals(4, results.size(), "Count");
 
 		query = "Dataset.id ORDER BY startDate [type.name IN :types AND name >= :lower AND name <= :upper]";
 		query = query.replace(":lower", "'Wabble'").replace(":upper", "'Wobble'").replace(":types", "('GS', 'GQ')");
 		results = session.search(query);
-		assertEquals("Count", 2, results.size());
+		assertEquals(2, results.size(), "Count");
 
 		query = "ParameterType.name [description LIKE 'F%']";
 		results = session.search(query);
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		assertEquals("TIMESTAMP", results.get(0));
 
 		results = session.search("Datafile.name ORDER BY name");
-		assertEquals("Count", 6, results.size());
-		assertEquals("Result", "bill", results.get(0));
-		assertEquals("Result", "fred", results.get(1));
+		assertEquals(6, results.size(), "Count");
+		assertEquals("bill", results.get(0), "Result");
+		assertEquals("fred", results.get(1), "Result");
 
 		results = session.search(",1 Datafile.name ORDER BY name");
-		assertEquals("Count", 1, results.size());
-		assertEquals("Result", "bill", results.get(0));
+		assertEquals(1, results.size(), "Count");
+		assertEquals("bill", results.get(0), "Result");
 
 		results = session.search("1, Datafile.name ORDER BY name");
-		assertEquals("Count", 5, results.size());
-		assertEquals("Result", "fred", results.get(0));
+		assertEquals(5, results.size(), "Count");
+		assertEquals("fred", results.get(0), "Result");
 
 		results = session.search("1,1 Datafile.name ORDER BY name");
-		assertEquals("Count", 1, results.size());
-		assertEquals("Result", "fred", results.get(0));
+		assertEquals(1, results.size(), "Count");
+		assertEquals("fred", results.get(0), "Result");
 
 		results = session.search("100,1 Datafile.name ORDER BY name");
-		assertEquals("Count", 0, results.size());
+		assertEquals(0, results.size(), "Count");
 
 		results = session.search("0,100 Datafile.name ORDER BY name");
-		assertEquals("Count", 6, results.size());
-		assertEquals("Result", "bill", results.get(0));
-		assertEquals("Result", "fred", results.get(1));
+		assertEquals(6, results.size(), "Count");
+		assertEquals("bill", results.get(0), "Result");
+		assertEquals("fred", results.get(1), "Result");
 
 		results = session.search("Facility");
 		Facility facility = (Facility) results.get(0);
@@ -1690,7 +1691,7 @@ public class TestWS {
 				+ "investigation.investigationUsers as investigationUser, investigationUser.user as user "
 				+ "where user.name = :user ORDER BY investigation.startDate desc limit 0, 50 "
 				+ "include investigation.investigationInstruments.instrument");
-		assertEquals("Count", 2, results.size());
+		assertEquals(2, results.size(), "Count");
 
 		Date now = new Date(new Date().getTime() + 1001); // Move on a second
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
@@ -1722,11 +1723,11 @@ public class TestWS {
 
 		results = session.search("SELECT ds.id FROM Dataset ds JOIN ds.parameters dsp JOIN ds.investigation inv"
 				+ " WHERE dsp.type.name = 'TIMESTAMP' AND inv.name <> 12");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 
 		results = session
 				.search("SELECT df FROM Datafile df JOIN df.dataset ds WHERE df.name = 'fred' AND ds.id <> 42");
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 
 		String query = "SELECT ds.id FROM Dataset ds JOIN ds.investigation inv "
 				+ "WHERE ds.type.name IN :types AND inv.id BETWEEN :lower AND :upper " + "ORDER BY ds.id";
@@ -1734,60 +1735,60 @@ public class TestWS {
 				"('GS', 'GQ')");
 
 		results = session.search(query);
-		assertEquals("Count", 4, results.size());
+		assertEquals(4, results.size(), "Count");
 
 		query = "SELECT ds.id FROM Dataset ds WHERE ds.type.name IN :types AND ds.name >= :lower AND ds.name <= :upper ORDER BY ds.startDate";
 		query = query.replace(":lower", "'Wabble'").replace(":upper", "'Wobble'").replace(":types", "('GS', 'GQ')");
 		results = session.search(query);
-		assertEquals("Count", 2, results.size());
+		assertEquals(2, results.size(), "Count");
 
 		query = "SELECT pt.name FROM ParameterType pt WHERE pt.description LIKE 'F%'";
 		results = session.search(query);
-		assertEquals("Count", 1, results.size());
+		assertEquals(1, results.size(), "Count");
 		assertEquals("TIMESTAMP", results.get(0));
 
 		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name");
-		assertEquals("Count", 6, results.size());
-		assertEquals("Result", "bill", results.get(0));
-		assertEquals("Result", "fred", results.get(1));
+		assertEquals(6, results.size(), "Count");
+		assertEquals("bill", results.get(0), "Result");
+		assertEquals("fred", results.get(1), "Result");
 
 		results = session.search("SELECT df.name, df.fileSize FROM Datafile df ORDER BY df.name");
-		assertEquals("Count", 6, results.size());
+		assertEquals(6, results.size(), "Count");
 
-		assertEquals("Result", "bill", ((FieldSet) results.get(0)).getFields().get(0));
-		assertEquals("Result", 17L, ((FieldSet) results.get(0)).getFields().get(1));
-		assertEquals("Result", "fred", ((FieldSet) results.get(1)).getFields().get(0));
-		assertEquals("Result", 11L, ((FieldSet) results.get(1)).getFields().get(1));
+		assertEquals("bill", ((FieldSet) results.get(0)).getFields().get(0), "Result");
+		assertEquals(17L, ((FieldSet) results.get(0)).getFields().get(1), "Result");
+		assertEquals("fred", ((FieldSet) results.get(1)).getFields().get(0), "Result");
+		assertEquals(11L, ((FieldSet) results.get(1)).getFields().get(1), "Result");
 
 		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 0,1");
-		assertEquals("Count", 1, results.size());
-		assertEquals("Result", "bill", results.get(0));
+		assertEquals(1, results.size(), "Count");
+		assertEquals("bill", results.get(0), "Result");
 
 		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 1,100");
-		assertEquals("Count", 5, results.size());
-		assertEquals("Result", "fred", results.get(0));
+		assertEquals(5, results.size(), "Count");
+		assertEquals("fred", results.get(0), "Result");
 
 		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 1,1");
-		assertEquals("Count", 1, results.size());
-		assertEquals("Result", "fred", results.get(0));
+		assertEquals(1, results.size(), "Count");
+		assertEquals("fred", results.get(0), "Result");
 
 		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 100,1");
-		assertEquals("Count", 0, results.size());
+		assertEquals(0, results.size(), "Count");
 
 		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.name LIMIT 0,100");
-		assertEquals("Count", 6, results.size());
-		assertEquals("Result", "bill", results.get(0));
-		assertEquals("Result", "fred", results.get(1));
+		assertEquals(6, results.size(), "Count");
+		assertEquals("bill", results.get(0), "Result");
+		assertEquals("fred", results.get(1), "Result");
 
 		results = session.search("SELECT ds.name from Dataset ds JOIN ds.datafiles df1 JOIN ds.datafiles df2 "
 				+ "WHERE df1.name = 'fred' AND df2.name = 'bill'");
-		assertEquals("Count", 1, results.size());
-		assertEquals("Result", "dfsin", results.get(0));
+		assertEquals(1, results.size(), "Count");
+		assertEquals("dfsin", results.get(0), "Result");
 
 		results = session.search("SELECT ds.name from Dataset ds JOIN ds.datafiles df1 JOIN ds.datafiles df2 "
 				+ "WHERE LOWER(df1.name) = 'fred' AND df2.name = LOWER('bill')");
-		assertEquals("Count", 1, results.size());
-		assertEquals("Result", "dfsin", results.get(0));
+		assertEquals(1, results.size(), "Count");
+		assertEquals("dfsin", results.get(0), "Result");
 
 		results = session.search("SELECT f FROM Facility f");
 		Facility facility = (Facility) results.get(0);
@@ -1849,13 +1850,13 @@ public class TestWS {
 		session.createFacility("TestX_Facility", 90);
 
 		query = "SELECT f.name FROM Facility f WHERE f.name LIKE 'Test__Facility'";
-		assertEquals("Count", 3, session.search(query).size());
+		assertEquals(3, session.search(query).size(), "Count");
 
 		query = "SELECT f.name FROM Facility f WHERE f.name LIKE 'Test$_$_Facility'";
-		assertEquals("Count", 0, session.search(query).size());
+		assertEquals(0, session.search(query).size(), "Count");
 
 		query = "SELECT f.name FROM Facility f WHERE f.name LIKE 'Test$_$_Facility' ESCAPE '$'";
-		assertEquals("Count", 1, session.search(query).size());
+		assertEquals(1, session.search(query).size(), "Count");
 
 		// Check that nulls are returned in FieldSets
 		results = session.search("SELECT null, max(i.id) FROM Investigation i");
@@ -1939,28 +1940,28 @@ public class TestWS {
 		for (EntityField field : ei.getFields()) {
 			if (field.getName().equals("id")) {
 				assertEquals("Long", field.getType());
-				assertEquals(false, field.isNotNullable());
-				assertEquals(null, field.getComment());
+				assertFalse(field.isNotNullable());
+				assertNull(field.getComment());
 				assertEquals(RelType.ATTRIBUTE, field.getRelType());
-				assertEquals(null, field.getStringLength());
+				assertNull(field.getStringLength());
 			} else if (field.getName().equals("facility")) {
 				assertEquals("Facility", field.getType());
-				assertEquals(true, field.isNotNullable());
-				assertEquals(null, field.getComment());
+				assertTrue(field.isNotNullable());
+				assertNull(field.getComment());
 				assertEquals(RelType.ONE, field.getRelType());
-				assertEquals(null, field.getStringLength());
+				assertNull(field.getStringLength());
 			} else if (field.getName().equals("title")) {
 				assertEquals("String", field.getType());
-				assertEquals(true, field.isNotNullable());
+				assertTrue(field.isNotNullable());
 				assertEquals("Full title of the investigation", field.getComment());
 				assertEquals(RelType.ATTRIBUTE, field.getRelType());
 				assertEquals((Integer) 255, field.getStringLength());
 			} else if (field.getName().equals("investigationUsers")) {
 				assertEquals("InvestigationUser", field.getType());
-				assertEquals(false, field.isNotNullable());
-				assertEquals(null, field.getComment());
+				assertFalse(field.isNotNullable());
+				assertNull(field.getComment());
 				assertEquals(RelType.MANY, field.getRelType());
-				assertEquals(null, field.getStringLength());
+				assertNull(field.getStringLength());
 			} else {
 				n++;
 			}

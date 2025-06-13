@@ -1,7 +1,7 @@
 package org.icatproject.core.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,7 +13,8 @@ import org.icatproject.core.entity.DatafileFormat;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.InvestigationType;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 public class TestFrom {
 

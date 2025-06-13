@@ -1,21 +1,14 @@
 package org.icatproject.integration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
-import org.junit.rules.ErrorCollector;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.isA;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -67,6 +60,13 @@ import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
 import org.icatproject.PublicStep;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.rules.ErrorCollector;
+
 /**
  * These tests are for those aspects that cannot be tested by the core tests. In
  * particular does the INCLUDE mechanism work properly.
@@ -106,7 +106,7 @@ public class TestRS {
 		searchApi.clear();
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		try {
 			wSession = new WSession();
@@ -116,12 +116,12 @@ public class TestRS {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void initializeSession() throws Exception {
 		wSession.setAuthz();
 	}
 
-	@After
+	@AfterEach
 	public void clearSession() throws Exception {
 		wSession.clear();
 		wSession.clearAuthz();
@@ -143,7 +143,7 @@ public class TestRS {
 		return icat.login("db", credentials);
 	}
 
-	@Ignore("Test fails because of bug in eclipselink")
+	@Disabled("Test fails because of bug in eclipselink")
 	@Test
 	public void testDistinctBehaviour() throws Exception {
 		Session session = rootSession();
@@ -734,13 +734,13 @@ public class TestRS {
 		JsonArray facets = buildFacetRequest("Datafile");
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 10, null, facets, 3);
 		assertFalse(responseObject.containsKey("search_after"));
-		assertFalse(NO_DIMENSIONS, responseObject.containsKey("dimensions"));
+		assertFalse(responseObject.containsKey("dimensions"), NO_DIMENSIONS);
 
 		// Test no facets match on DatafileParameters due to lack of READ access
 		facets = buildFacetRequest("DatafileParameter");
 		responseObject = searchDatafiles(session, null, null, null, null, null, null, 10, null, facets, 3);
 		assertFalse(responseObject.containsKey("search_after"));
-		assertFalse(NO_DIMENSIONS, responseObject.containsKey("dimensions"));
+		assertFalse(responseObject.containsKey("dimensions"), NO_DIMENSIONS);
 
 		// Test facets match on DatafileParameters
 		wSession.addRule(null, "DatafileParameter", "R");
@@ -871,8 +871,7 @@ public class TestRS {
 		facets = buildFacetRequest("DatasetParameter");
 		responseObject = searchDatasets(session, null, null, null, null, null, null, 10, null, facets, 5);
 		assertFalse(responseObject.containsKey("search_after"));
-		assertFalse(NO_DIMENSIONS,
-				responseObject.containsKey("dimensions"));
+		assertFalse(responseObject.containsKey("dimensions"), NO_DIMENSIONS);
 
 		// Test facets match on DatasetParameters
 		wSession.addRule(null, "DatasetParameter", "R");
@@ -1028,7 +1027,7 @@ public class TestRS {
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
-		assertFalse(NO_DIMENSIONS, responseObject.containsKey("dimensions"));
+		assertFalse(responseObject.containsKey("dimensions"), NO_DIMENSIONS);
 
 		// Test facets match on InvestigationParameters
 		wSession.addRule(null, "InvestigationParameter", "R");
@@ -1043,7 +1042,7 @@ public class TestRS {
 		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
 				3);
 		assertFalse(responseObject.containsKey("search_after"));
-		assertFalse(NO_DIMENSIONS, responseObject.containsKey("dimensions"));
+		assertFalse(responseObject.containsKey("dimensions"), NO_DIMENSIONS);
 
 		// Test facets match on Sample
 		wSession.addRule(null, "Sample", "R");
@@ -1103,12 +1102,12 @@ public class TestRS {
 			List<Long> expectedCounts) {
 		Set<String> responseKeys = responseObject.keySet();
 		String dimensionsMessage = "Expected responseObject to contain 'dimensions', but it had keys " + responseKeys;
-		assertTrue(dimensionsMessage, responseObject.containsKey("dimensions"));
+		assertTrue(responseObject.containsKey("dimensions"), dimensionsMessage);
 
 		JsonObject dimensions = responseObject.getJsonObject("dimensions");
 		Set<String> dimensionKeys = dimensions.keySet();
 		String dimensionMessage = "Expected 'dimensions' to contain " + dimension + " but keys were " + dimensionKeys;
-		assertTrue(dimensionMessage, dimensions.containsKey(dimension));
+		assertTrue(dimensions.containsKey(dimension), dimensionMessage);
 
 		JsonObject labelsObject = dimensions.getJsonObject(dimension);
 		assertEquals(expectedLabels.size(), labelsObject.size());
@@ -1144,9 +1143,9 @@ public class TestRS {
 		assertEquals(expectations.size(), results.size());
 		for (int i = 0; i < expectations.size(); i++) {
 			JsonObject result = results.getJsonObject(i);
-			assertTrue("id not present in " + result.toString(), result.containsKey("id"));
+			assertTrue(result.containsKey("id"), "id not present in " + result.toString());
 			String message = "score " + (scored ? "not " : "") + "present in " + result.toString();
-			assertEquals(message, scored, result.containsKey("score"));
+			assertEquals(scored, result.containsKey("score"), message);
 
 			assertTrue(result.containsKey("source"));
 			JsonObject source = result.getJsonObject("source");
@@ -1156,12 +1155,11 @@ public class TestRS {
 				String key = entry.getKey();
 				String value = entry.getValue();
 				if (value == null) {
-					assertFalse("Source " + source.toString() + " should NOT contain " + key,
-							source.containsKey(key));
+					assertFalse(source.containsKey(key), "Source " + source.toString() + " should NOT contain " + key);
 				} else if (value.equals("notNull")) {
-					assertTrue("Source " + source.toString() + " should contain " + key, source.containsKey(key));
+					assertTrue(source.containsKey(key), "Source " + source.toString() + " should contain " + key);
 				} else {
-					assertTrue("Source " + source.toString() + " should contain " + key, source.containsKey(key));
+					assertTrue(source.containsKey(key), "Source " + source.toString() + " should contain " + key);
 					assertEquals(value, source.getString(key));
 				}
 			}
@@ -1409,7 +1407,7 @@ public class TestRS {
 				.getJsonObject(0).getJsonObject("Investigation");
 		Pattern p = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}");
 		for (String name : Arrays.asList("createTime", "modTime", "startDate", "endDate")) {
-			assertTrue(name + ": " + inv.getString(name), p.matcher(inv.getString(name)).find());
+			assertTrue(p.matcher(inv.getString(name)).find(), name + ": " + inv.getString(name));
 		}
 
 		// Make sure all types are handled properly
@@ -1531,7 +1529,7 @@ public class TestRS {
 			JsonObject result = results.getJsonObject(0);
 			JsonObject investigation = result.getJsonObject("Investigation");
 			String visitId = investigation.getString("visitId", null);
-			assertEquals("Wrong visitId in " + investigation.toString(), "zero", visitId);
+			assertEquals("zero", visitId, "Wrong visitId in " + investigation.toString());
 
 			query = "SELECT f.investigationTypes FROM Facility f";
 			wSession.addRule(null, "InvestigationType", "R");
@@ -2380,10 +2378,10 @@ public class TestRS {
 		for (String line : restrictedLines) {
 			System.out.println(line);
 			containsInvestigations = containsInvestigations || line.startsWith("Investigation");
-			assertFalse("Dataset" + restrictiveMessage, line.startsWith("Dataset"));
-			assertFalse("Facility" + restrictiveMessage, line.startsWith("Facility"));
+			assertFalse(line.startsWith("Dataset"), "Dataset" + restrictiveMessage);
+			assertFalse(line.startsWith("Facility"), "Facility" + restrictiveMessage);
 		}
-		assertTrue("Investigation" + permissiveMessage, containsInvestigations);
+		assertTrue(containsInvestigations, "Investigation" + permissiveMessage);
 
 		containsInvestigations = false;
 		boolean containsDatasets = false;
@@ -2394,15 +2392,15 @@ public class TestRS {
 			containsDatasets = containsDatasets || line.startsWith("Dataset");
 			containsFacilities = containsFacilities || line.startsWith("Facility");
 		}
-		assertTrue("Investigation" + permissiveMessage, containsInvestigations);
-		assertTrue("Dataset" + permissiveMessage, containsDatasets);
-		assertTrue("Facility" + permissiveMessage, containsFacilities);
+		assertTrue(containsInvestigations, "Investigation" + permissiveMessage);
+		assertTrue(containsDatasets, "Dataset" + permissiveMessage);
+		assertTrue(containsFacilities, "Facility" + permissiveMessage);
 
 		Files.delete(dump1);
 		Files.delete(dump2);
 	}
 
-	@Ignore("Test fails - appears brittle to differences in timezone")
+	@Disabled("Test fails - appears brittle to differences in timezone")
 	@Test
 	public void exportMetaDataQuery() throws Exception {
 		Session session = rootSession();
@@ -2427,8 +2425,8 @@ public class TestRS {
 		ts("Create dump ALL");
 		long n = dump.toFile().length();
 
-		assertTrue("Size is dependent upon time zone in which test is run " + n,
-				n == 2686 || n == 1518 || n == 2771 || n == 2776 || n == 2691);
+		assertTrue(n == 2686 || n == 1518 || n == 2771 || n == 2776 || n == 2691,
+				"Size is dependent upon time zone in which test is run " + n);
 
 		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.ALL);
 		Files.delete(dump);
