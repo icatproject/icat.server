@@ -59,7 +59,7 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	public PublicStep() {
 	}
 
-	private void fixup(EntityManager entityManager) throws IcatException {
+	private void fixup() throws IcatException {
 		Class<? extends EntityBaseBean> bean = EntityInfoHandler.getClass(origin);
 		Set<Relationship> rs = EntityInfoHandler.getRelatedEntities(bean);
 		boolean found = false;
@@ -78,14 +78,14 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	@Override
 	public void postMergeFixup(EntityManager entityManager) throws IcatException {
 		super.postMergeFixup(entityManager);
-		this.fixup(entityManager);
+		this.fixup();
 	}
 
 	@Override
 	public void preparePersist(String modId, EntityManager entityManager, PersistMode persistMode)
 			throws IcatException {
 		super.preparePersist(modId, entityManager, persistMode);
-		this.fixup(entityManager);
+		this.fixup();
 	}
 
 	@PostRemove()
