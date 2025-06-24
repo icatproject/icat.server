@@ -296,7 +296,7 @@ public class TestRS {
 		JsonArray st_null_response = search(session, "SELECT st from SampleType st WHERE st.name = 'N/A'", 1);
 		collector.checkThat(st_null_response.getJsonObject(0).containsKey("SampleType"), is(true));
 		collector.checkThat(st_null_response.getJsonObject(0).getJsonObject("SampleType").getString("pid"), is("st:004"));
-		collector.checkThat(st_null_response.getJsonObject(0).getJsonObject("SampleType").get("molecularFormula"), is(JsonValue.NULL));
+		collector.checkThat(st_null_response.getJsonObject(0).getJsonObject("SampleType").get("molecularFormula"), is(equalTo(null)));
 
 		/*
 		 * Expected: <[{"Sample":{"id":2181,"createId":"db/notroot","createTime":
