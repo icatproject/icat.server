@@ -288,6 +288,17 @@ public class TestRS {
 		collector.checkThat(st_response.getJsonObject(0).containsKey("SampleType"), is(true));
 
 		/*
+         * Expected: <[{"SampleType":{"id":????,"createId":"db/notroot","createTime":
+         * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+         * "2019-03-11T15:58:33.000Z","molecularFormula":null,"name":"N/A",
+         * "pid":"st:004","safetyInformation":"N/A","samples":[]}}]>
+         */
+		JsonArray st_null_response = search(session, "SELECT st from SampleType st WHERE st.name = 'N/A'", 1);
+		collector.checkThat(st_null_response.getJsonObject(0).containsKey("SampleType"), is(true));
+		collector.checkThat(st_null_response.getJsonObject(0).getJsonObject("SampleType").getString("pid"), is("st:004"));
+		collector.checkThat(st_null_response.getJsonObject(0).getJsonObject("SampleType").get("molecularFormula"), is(JsonValue.NULL));
+
+		/*
 		 * Expected: <[{"Sample":{"id":2181,"createId":"db/notroot","createTime":
 		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
 		 * "2019-03-11T15:58:33.000Z","datasets":[],"name":"Koh-I-Noor","parameters":[],
