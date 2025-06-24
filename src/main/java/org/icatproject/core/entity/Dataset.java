@@ -71,6 +71,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	@Comment("Identifies a location from which all the files of the data set might be accessed. It might be a directory")
+	@Column(length = 511)
 	private String location;
 
 	@Comment("A short name for the data set")
