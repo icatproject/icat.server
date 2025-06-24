@@ -40,10 +40,11 @@ Shift(investigation(facility(name:0), name:1, visitId:2), startDate:3, endDate:4
 "Test port facility", "expt1", "zero", 2014-01-01T00:00:00+01:00, 2014-01-01T18:00:00+01:00, "beamtime", "EDDI"
 "Test port facility", "expt1", "two", 2014-04-29T14:00:00+02:00, 2014-04-30T18:15:00+02:00, "preparing", null
 
-SampleType(facility(name:0), name:1, molecularFormula:2, safetyInformation:3)
-"Test port facility", "diamond", "C", "fairly harmless"
-"Test port facility", "graphite", "C", "bit messy"
-"Test port facility", "rust", "Fe3O4", "messy"
+SampleType(facility(name:0), name:1, molecularFormula:2, safetyInformation:3, pid:4)
+"Test port facility", "diamond", "C", "fairly harmless", "st:001"
+"Test port facility", "graphite", "C", "bit messy", "st:002" 
+"Test port facility", "rust", "Fe3O4", "messy", "st:003"
+"Test port facility", "N/A", null, "N/A", "st:004"
 
 Sample(investigation(facility(name:0), name:1, visitId:2), type(facility(name:0), name:3, molecularFormula:4), name:5, pid:6)
 "Test port facility", "expt1", "one", "diamond", "C", "Koh-I-Noor", "sdb:374717"
