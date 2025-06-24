@@ -193,14 +193,19 @@ public class TestRS {
 		collector.checkThat(fac_response.getJsonObject(0).containsKey("Facility"), is(true));
 
 		/*
-		 * Expected: <[{"Instrument":{"id":1449,"createId":"db/notroot","createTime":
-		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
-		 * "2019-03-11T15:58:33.000Z","fullName":"EDDI - Energy Dispersive Diffraction"
-		 * ,"instrumentScientists":[],"investigationInstruments":[],"name":"EDDI","pid":
-		 * "ig:0815","shifts":[]}}]>
-		 */
+ 		* Expected: <[{"Instrument":{"id":1449,"createId":"db/notroot","createTime":
+ 		* "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
+ 		* "2019-03-11T15:58:33.000Z","fullName":"EDDI - Energy Dispersive Diffraction"
+ 		* ,"instrumentScientists":[],"investigationInstruments":[],"name":"EDDI","pid":
+ 		* "ig:0815","shifts":[],"startDate":"2010-01-01T00:00:00.000Z","endDate":"2099-12-31T23:59:59.000Z"
+ 		* }}]>
+ 		*/
 		JsonArray inst_response = search(session, "SELECT i from Instrument i WHERE i.name = 'EDDI'", 1);
 		collector.checkThat(inst_response.getJsonObject(0).containsKey("Instrument"), is(true));
+		collector.checkThat(dft.parse(inst_response.getJsonObject(0).getJsonObject("Instrument")
+				.getString("startDate")), isA(Date.class));
+		collector.checkThat(dft.parse(inst_response.getJsonObject(0).getJsonObject("Instrument")
+				.getString("endDate")), isA(Date.class));
 
 		/*
 		 * Expected:
