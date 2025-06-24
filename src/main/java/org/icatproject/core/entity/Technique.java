@@ -74,7 +74,7 @@ public class Technique extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeLong(gen, "technique.id", id);
 		SearchApi.encodeString(gen, "technique.name", name);
 		SearchApi.encodeNullableString(gen, "technique.description", description);

@@ -182,7 +182,7 @@ public class SearchManager {
 	public class IndexSome implements Callable<Long> {
 
 		private List<Long> ids;
-		private EntityManager manager;
+		private EntityManager entityManager;
 		private Class<? extends EntityBaseBean> klass;
 		private String entityName;
 		private long start;
@@ -195,7 +195,7 @@ public class SearchManager {
 				this.entityName = entityName;
 				klass = EntityInfoHandler.getClass(entityName);
 				this.ids = ids;
-				manager = entityManagerFactory.createEntityManager();
+				entityManager = entityManagerFactory.createEntityManager();
 				this.start = start;
 			} catch (Exception e) {
 				logger.error("About to throw internal exception because of", e);
@@ -206,7 +206,7 @@ public class SearchManager {
 		@Override
 		public Long call() throws Exception {
 			if (EntityInfoHandler.hasSearchDoc(klass)) {
-				searchApi.addNow(entityName, ids, manager, klass, getBeanDocExecutor);
+				searchApi.addNow(entityName, ids, entityManager, klass, getBeanDocExecutor);
 			}
 			return start;
 		}
@@ -397,12 +397,12 @@ public class SearchManager {
 
 	public class PopulateThread extends Thread {
 
-		private EntityManager manager;
+		private EntityManager entityManager;
 		private EntityManagerFactory entityManagerFactory;
 
 		public PopulateThread(EntityManagerFactory entityManagerFactory) {
 			this.entityManagerFactory = entityManagerFactory;
-			manager = entityManagerFactory.createEntityManager();
+			entityManager = entityManagerFactory.createEntityManager();
 			logger.info("Start new populate thread");
 		}
 
@@ -439,7 +439,7 @@ public class SearchManager {
 								query += " WHERE e.id > " + start;
 							}
 							query += " ORDER BY e.id";
-							List<Long> ids = manager
+							List<Long> ids = entityManager
 									.createQuery(query, Long.class)
 									.setMaxResults(populateBlockSize).getResultList();
 							if (ids.size() == 0) {
@@ -475,7 +475,7 @@ public class SearchManager {
 							tasks.add(start);
 							start = ids.get(ids.size() - 1);
 
-							manager.clear();
+							entityManager.clear();
 						}
 
 						/* Wait for the last few to finish */
@@ -501,7 +501,7 @@ public class SearchManager {
 				logger.error("Problem encountered in", t);
 				populateMap.remove(populatingClassEntry.getKey());
 			} finally {
-				manager.close();
+				entityManager.close();
 				popState = PopState.STOPPED;
 			}
 		}
@@ -585,10 +585,10 @@ public class SearchManager {
 		return requestedFields;
 	}
 
-	public void addDocument(EntityManager manager, EntityBaseBean bean) throws IcatException {
+	public void addDocument(EntityManager entityManager, EntityBaseBean bean) throws IcatException {
 		Class<? extends EntityBaseBean> klass = bean.getClass();
 		if (EntityInfoHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
-			enqueue(SearchApi.encodeOperation(manager, "create", bean));
+			enqueue(SearchApi.encodeOperation(entityManager, "create", bean));
 			enqueueAggregation(bean);
 		}
 	}
@@ -936,10 +936,10 @@ public class SearchManager {
 		}
 	}
 
-	public void updateDocument(EntityManager manager, EntityBaseBean bean) throws IcatException {
+	public void updateDocument(EntityManager entityManager, EntityBaseBean bean) throws IcatException {
 		Class<? extends EntityBaseBean> klass = bean.getClass();
 		if (EntityInfoHandler.hasSearchDoc(klass) && entitiesToIndex.contains(klass.getSimpleName())) {
-			enqueue(SearchApi.encodeOperation(manager, "update", bean));
+			enqueue(SearchApi.encodeOperation(entityManager, "update", bean));
 			enqueueAggregation(bean);
 		}
 	}
