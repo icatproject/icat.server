@@ -364,7 +364,7 @@ public class TestEntityInfo {
 	@Test
 	public void stringFields() throws Exception {
 		testSF(Investigation.class, "visitId 255", "summary 4000", "name 255", "title 255", "doi 255");
-		testSF(Dataset.class, "name 255", "description 255", "location 255", "doi 255");
+		testSF(Dataset.class, "name 255", "description 255", "location 511", "doi 255");
 		testSF(Keyword.class, "name 255");
 		testSF(InvestigationUser.class, "role 255");
 		testSF(User.class, "name 255", "fullName 255", "givenName 255", "familyName 255", "affiliation 255",
