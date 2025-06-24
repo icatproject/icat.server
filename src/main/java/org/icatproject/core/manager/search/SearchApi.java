@@ -320,7 +320,7 @@ public abstract class SearchApi {
 	 * 
 	 * @param entityName         The entity to create documents for.
 	 * @param ids                List of ids corresponding to the documents to add.
-	 * @param manager            EntityManager for finding the beans from their id.
+	 * @param entityManager      EntityManager for finding the beans from their id.
 	 * @param klass              Class of the entity to create documents for.
 	 * @param getBeanDocExecutor
 	 * @throws IcatException
