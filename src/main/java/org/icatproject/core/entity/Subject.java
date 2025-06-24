@@ -40,7 +40,6 @@ public class Subject extends EntityBaseBean implements Serializable {
     @Comment("Classification code for the subject")
     private String classificationCode;
     
-    
     /* Needed for JPA */
     public Subject() {
     }
