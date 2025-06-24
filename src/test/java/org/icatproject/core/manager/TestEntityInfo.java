@@ -1,9 +1,10 @@
 package org.icatproject.core.manager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -33,13 +34,14 @@ import org.icatproject.core.entity.Rule;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.Study;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 public class TestEntityInfo {
 
-	@Test(expected = IcatException.class)
+	@Test
 	public void testBadname() throws Exception {
-		EntityInfoHandler.getEntityInfo("Fred");
+		assertThrows(IcatException.class, () -> EntityInfoHandler.getEntityInfo("Fred"));
 	}
 
 	@Test
@@ -215,14 +217,14 @@ public class TestEntityInfo {
 	private void testConstraint(Class<? extends EntityBaseBean> klass, String... name) throws Exception {
 		List<Field> result = EntityInfoHandler.getConstraintFields(klass);
 		if (name.length == 0) {
-			assertEquals("One", 0, result.size());
+			assertEquals(0, result.size(), "One");
 		} else {
-			assertFalse("One", 0 == result.size());
-			assertEquals(klass.getSimpleName() + " count", name.length, result.size());
+			assertFalse(0 == result.size(), "One");
+			assertEquals(name.length, result.size(), klass.getSimpleName() + " count");
 
 			int i = 0;
 			for (Field re : result) {
-				assertEquals(klass.getSimpleName() + " value " + i, name[i++], re.getName());
+				assertEquals(name[i++], re.getName(), klass.getSimpleName() + " value " + i);
 			}
 		}
 	}
@@ -292,16 +294,16 @@ public class TestEntityInfo {
 		for (Relationship rel : results) {
 			rStrings.add(rel.toString());
 		}
-		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());
+		assertEquals(rels.length, results.size(), klass.getSimpleName() + " count");
 		for (String rel : rels) {
-			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel));
+			assertTrue(rStrings.contains(rel), klass.getSimpleName() + " value " + rel);
 		}
 		Set<Entry<String, Relationship>> map = EntityInfoHandler.getRelationshipsByName(klass).entrySet();
 		assertEquals(rels.length, map.size());
 		for (Entry<String, Relationship> e : map) {
 			Relationship rel = e.getValue();
 			assertEquals(rel.getField().getName(), e.getKey());
-			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel.toString()));
+			assertTrue(rStrings.contains(rel.toString()), klass.getSimpleName() + " value " + rel);
 		}
 	}
 
@@ -330,9 +332,9 @@ public class TestEntityInfo {
 			rStrings.add(rel.getDestinationBean().getSimpleName());
 		}
 		// System.out.println(results);
-		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());
+		assertEquals(rels.length, results.size(), klass.getSimpleName() + " count");
 		for (String rel : rels) {
-			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel));
+			assertTrue(rStrings.contains(rel), klass.getSimpleName() + " value " + rel);
 		}
 	}
 
@@ -354,10 +356,10 @@ public class TestEntityInfo {
 		for (Field field : results) {
 			rStrings.add(field.getName());
 		}
-		assertEquals(klass.getSimpleName() + " count", nnfs.length, results.size());
+		assertEquals(nnfs.length, results.size(), klass.getSimpleName() + " count");
 
 		for (String nnf : nnfs) {
-			assertTrue(klass.getSimpleName() + " value " + nnf, rStrings.contains(nnf));
+			assertTrue(rStrings.contains(nnf), klass.getSimpleName() + " value " + nnf);
 		}
 	}
 
@@ -381,10 +383,10 @@ public class TestEntityInfo {
 		for (Entry<Field, Integer> entry : results.entrySet()) {
 			rStrings.add(entry.getKey().getName() + " " + entry.getValue());
 		}
-		assertEquals(klass.getSimpleName() + " count", sfs.length, results.size());
+		assertEquals(sfs.length, results.size(), klass.getSimpleName() + " count");
 
 		for (String sf : sfs) {
-			assertTrue(klass.getSimpleName() + " value " + sf, rStrings.contains(sf));
+			assertTrue(rStrings.contains(sf), klass.getSimpleName() + " value " + sf);
 		}
 	}
 
@@ -448,44 +450,44 @@ public class TestEntityInfo {
 		for (Field field : results) {
 			rStrings.add(field.getName());
 		}
-		assertEquals(klass.getSimpleName() + " count", fieldNames.length, results.size());
+		assertEquals(fieldNames.length, results.size(), klass.getSimpleName() + " count");
 
 		for (String fn : fieldNames) {
-			assertTrue(klass.getSimpleName() + " value " + fn, rStrings.contains(fn));
+			assertTrue(rStrings.contains(fn), klass.getSimpleName() + " value " + fn);
 		}
 	}
 
 	private void testGetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
 		Map<Field, Method> results = EntityInfoHandler.getGetters(klass);
-		assertEquals(klass.getSimpleName() + " count", count, results.size());
+		assertEquals(count, results.size(), klass.getSimpleName() + " count");
 		for (Entry<Field, Method> entry : results.entrySet()) {
 			String cap = entry.getKey().getName();
 			cap = Character.toUpperCase(cap.charAt(0)) + cap.substring(1);
 			String m = entry.getValue().getName();
-			assertTrue(klass.getSimpleName() + " value ", m.equals("get" + cap) || m.equals("is" + cap));
+			assertTrue(m.equals("get" + cap) || m.equals("is" + cap), klass.getSimpleName() + " value ");
 		}
 	}
 
 	private void testSettersForUpdate(Class<? extends EntityBaseBean> klass, int count) throws Exception {
 		Map<Field, Method> results = EntityInfoHandler.getSettersForUpdate(klass);
 
-		assertEquals(klass.getSimpleName() + " count", count, results.size());
+		assertEquals(count, results.size(), klass.getSimpleName() + " count");
 		for (Entry<Field, Method> entry : results.entrySet()) {
 			String cap = entry.getKey().getName();
 			cap = Character.toUpperCase(cap.charAt(0)) + cap.substring(1);
 			String m = entry.getValue().getName();
-			assertTrue(klass.getSimpleName() + " value ", m.equals("set" + cap));
+			assertTrue(m.equals("set" + cap), klass.getSimpleName() + " value ");
 		}
 	}
 
 	private void testSetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
 		Map<Field, Method> results = EntityInfoHandler.getSetters(klass);
-		assertEquals(klass.getSimpleName() + " count", count, results.size());
+		assertEquals(count, results.size(), klass.getSimpleName() + " count");
 		for (Entry<Field, Method> entry : results.entrySet()) {
 			String cap = entry.getKey().getName();
 			cap = Character.toUpperCase(cap.charAt(0)) + cap.substring(1);
 			String m = entry.getValue().getName();
-			assertTrue(klass.getSimpleName() + " value ", m.equals("set" + cap));
+			assertTrue(m.equals("set" + cap), klass.getSimpleName() + " value ");
 		}
 	}
 

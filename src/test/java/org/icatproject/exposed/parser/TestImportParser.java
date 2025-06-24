@@ -1,9 +1,10 @@
 package org.icatproject.exposed.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 import java.util.List;
@@ -11,19 +12,18 @@ import java.util.List;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.importParser.TableField;
-
 import org.icatproject.core.manager.importParser.ParserException;
 import org.icatproject.core.manager.importParser.Table;
-
 import org.icatproject.core.manager.importParser.Input;
 import org.icatproject.core.manager.importParser.Token;
 import org.icatproject.core.manager.importParser.Token.Type;
 import org.icatproject.core.manager.importParser.Tokenizer;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 public class TestImportParser {
 
-	@Test()
+	@Test
 	public void testDataCollection() throws Exception {
 		Table t = new Table(new Input(
 				Tokenizer.getTokens(" DataCollection(?:0)")));
@@ -40,7 +40,7 @@ public class TestImportParser {
 		assertEquals(1, tableFields.size());
 	}
 
-	@Test()
+	@Test
 	public void testJob() throws Exception {
 		Input input = new Input(
 				Tokenizer
@@ -96,18 +96,17 @@ public class TestImportParser {
 		assertEquals(3, tableFields.size());
 	}
 
-	@Test(expected = ParserException.class)
+	@Test
 	public void testBadFacility() throws Exception {
 		Input input = new Input(
 				Tokenizer
 						.getTokens(" Facility (createId:0, createTime:1,  "
 								+ "modId : 2,  modTime: 3, name :4, daysUntilRelease:5))"));
 		new Table(input);
-		input.checkEnded();
-
+		assertThrows(ParserException.class, () -> input.checkEnded());
 	}
 
-	@Test()
+	@Test
 	public void testFacility() throws Exception {
 		Input input = new Input(
 				Tokenizer
@@ -185,7 +184,7 @@ public class TestImportParser {
 		assertEquals(2, tableFields.size());
 	}
 
-	@Test()
+	@Test
 	public void testDatafile() throws Exception {
 		Table t = new Table(
 				new Input(
@@ -239,7 +238,7 @@ public class TestImportParser {
 		assertEquals(3, tableFields.size());
 	}
 
-	@Test()
+	@Test
 	public void testDataset() throws Exception {
 		Table t = new Table(
 				new Input(
@@ -312,7 +311,7 @@ public class TestImportParser {
 		assertEquals(5, tableFields.size());
 	}
 
-	@Test()
+	@Test
 	public void testInvestigation() throws Exception {
 		Table t = new Table(
 				new Input(
@@ -372,7 +371,7 @@ public class TestImportParser {
 		assertEquals(4, tableFields.size());
 	}
 
-	@Test()
+	@Test
 	public void testParameterType() throws Exception {
 		Table t = new Table(
 				new Input(

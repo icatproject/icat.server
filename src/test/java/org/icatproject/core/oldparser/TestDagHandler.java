@@ -1,8 +1,9 @@
 package org.icatproject.core.oldparser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,8 +24,8 @@ import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.User;
-import org.icatproject.core.oldparser.DagHandler;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 public class TestDagHandler {
 
@@ -39,15 +40,18 @@ public class TestDagHandler {
 		DagHandler.checkIncludes(Dataset.class, es);
 	}
 
-	@Test(expected = IcatException.class)
+	@Test
 	public void good2() throws Exception {
 		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
 		es.add(Investigation.class);
 		es.add(Datafile.class);
 		es.add(DatasetParameter.class);
 		es.add(User.class);
-		DagHandler.findSteps(Dataset.class, es);
-		DagHandler.checkIncludes(Dataset.class, es);
+		assertThrows(IcatException.class, () -> {
+			DagHandler.findSteps(Dataset.class, es);
+			// The line above throws the exception. The line below is never executed.
+			DagHandler.checkIncludes(Dataset.class, es);
+		});
 	}
 
 	@Test

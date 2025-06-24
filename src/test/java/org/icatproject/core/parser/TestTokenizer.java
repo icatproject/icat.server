@@ -1,10 +1,11 @@
 package org.icatproject.core.parser;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestTokenizer {
 
@@ -58,24 +59,24 @@ public class TestTokenizer {
 		}
 	}
 
-	@Test(expected = LexerException.class)
+	@Test
 	public void testBad1() throws Exception {
-		Tokenizer.getTokens("!");
+		assertThrows(LexerException.class, () -> Tokenizer.getTokens("!"));
 	}
 
-	@Test(expected = LexerException.class)
+	@Test
 	public void testBad2() throws Exception {
-		Tokenizer.getTokens("! ");
+		assertThrows(LexerException.class, () -> Tokenizer.getTokens("! "));
 	}
 
-	@Test(expected = LexerException.class)
+	@Test
 	public void testBad3() throws Exception {
-		Tokenizer.getTokens("'abcds''qwe ");
+		assertThrows(LexerException.class, () -> Tokenizer.getTokens("'abcds''qwe "));
 	}
 
-	@Test(expected = LexerException.class)
+	@Test
 	public void testBad4() throws Exception {
-		Tokenizer.getTokens("{ts 1950-01-21T02:00:00}");
+		assertThrows(LexerException.class, () -> Tokenizer.getTokens("{ts 1950-01-21T02:00:00}"));
 	}
 
 }
