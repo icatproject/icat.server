@@ -65,7 +65,6 @@ import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.ParameterValueType;
-import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.PropertyHandler.CallType;
 import org.icatproject.core.manager.PropertyHandler.Operation;
@@ -1072,12 +1071,6 @@ public class EntityBeanManager {
 		return propertyHandler.props();
 	}
 
-	public double getRemainingMinutes(String sessionId, EntityManager manager) throws IcatException {
-		logger.debug("getRemainingMinutes for sessionId " + sessionId);
-		Session session = getSession(sessionId, manager);
-		return session.getRemainingMinutes();
-	}
-
 	private String getRep(Field field, Object value) throws IcatException {
 		String type = field.getType().getSimpleName();
 		if (type.equals("String")) {
@@ -1099,31 +1092,6 @@ public class EntityBeanManager {
 			return value.toString();
 		} else {
 			throw new IcatException(IcatExceptionType.INTERNAL, "Don't know how to export field of type " + type);
-		}
-	}
-
-	private Session getSession(String sessionId, EntityManager manager) throws IcatException {
-		Session session = null;
-		if (sessionId == null || sessionId.equals("")) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session Id cannot be null or empty.");
-		}
-		session = (Session) manager.find(Session.class, sessionId);
-		if (session == null) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION,
-					"Unable to find user by sessionid: " + sessionId);
-		}
-		return session;
-	}
-
-	public String getUserName(String sessionId, EntityManager manager) throws IcatException {
-		try {
-			Session session = getSession(sessionId, manager);
-			String userName = session.getUserName();
-			logger.debug("user: " + userName + " is associated with: " + sessionId);
-			return userName;
-		} catch (IcatException e) {
-			logger.debug("sessionId " + sessionId + " is not associated with valid session " + e.getMessage());
-			throw e;
 		}
 	}
 
@@ -1174,12 +1142,6 @@ public class EntityBeanManager {
 				return false;
 			}
 		}
-	}
-
-	public boolean isLoggedIn(String userName, EntityManager manager) {
-		logger.debug("isLoggedIn for user " + userName);
-		return manager.createNamedQuery(Session.ISLOGGEDIN, Long.class).setParameter("userName", userName)
-				.getSingleResult() > 0;
 	}
 
 	private void isUnique(EntityBaseBean bean, EntityManager manager) throws IcatException {
@@ -1252,91 +1214,6 @@ public class EntityBeanManager {
 			}
 		}
 
-	}
-
-	public String login(String userName, int lifetimeMinutes, EntityManager manager, UserTransaction userTransaction,
-			String ip) throws IcatException {
-		Session session = new Session(userName, lifetimeMinutes);
-		try {
-			userTransaction.begin();
-			try {
-				long startMillis = log ? System.currentTimeMillis() : 0;
-				manager.persist(session);
-				manager.flush();
-				userTransaction.commit();
-				String result = session.getId();
-				logger.debug("Session " + result + " persisted.");
-				if (logRequests.contains(CallType.SESSION)) {
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-						gen.write("userName", userName);
-						gen.writeEnd();
-					}
-					transmitter.processMessage("login", ip, baos.toString(), startMillis);
-				}
-				return result;
-			} catch (Throwable e) {
-				userTransaction.rollback();
-				logger.trace("Transaction rolled back for login because of " + e.getClass() + " " + e.getMessage());
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
-			}
-		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-					"IllegalStateException " + e.getMessage());
-		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException " + e.getMessage());
-		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException " + e.getMessage());
-		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-					"NotSupportedException " + e.getMessage());
-		}
-	}
-
-	public void logout(String sessionId, EntityManager manager, UserTransaction userTransaction, String ip)
-			throws IcatException {
-		logger.debug("logout for sessionId " + sessionId);
-		try {
-			userTransaction.begin();
-			try {
-				long startMillis = log ? System.currentTimeMillis() : 0;
-				Session session = getSession(sessionId, manager);
-				manager.remove(session);
-				manager.flush();
-				userTransaction.commit();
-				logger.debug("Session {} removed.", session.getId());
-				if (logRequests.contains(CallType.SESSION)) {
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-						gen.write("userName", session.getUserName());
-						gen.writeEnd();
-					}
-					transmitter.processMessage("logout", ip, baos.toString(), startMillis);
-				}
-			} catch (IcatException e) {
-				userTransaction.rollback();
-				logger.trace("Transaction rolled back for logout because of " + e.getClass() + " " + e.getMessage());
-				if (e.getType() == IcatExceptionType.SESSION) {
-					throw e;
-				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							e.getClass() + " " + e.getMessage());
-				}
-			} catch (Exception e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-			}
-		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException" + e.getMessage());
-		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException" + e.getMessage());
-		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
-		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage());
-		} catch (RuntimeException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
 	}
 
 	public EntityBaseBean lookup(EntityBaseBean bean, EntityManager manager) throws IcatException {
@@ -1726,49 +1603,6 @@ public class EntityBeanManager {
 		parseEntity(bean, contents, klass, manager, creates, localUpdates, create, userId);
 		return bean;
 
-	}
-
-	public void refresh(String sessionId, int lifetimeMinutes, EntityManager manager, UserTransaction userTransaction,
-			String ip) throws IcatException {
-		logger.debug("logout for sessionId " + sessionId);
-		try {
-			userTransaction.begin();
-			try {
-				long startMillis = log ? System.currentTimeMillis() : 0;
-				Session session = getSession(sessionId, manager);
-				session.refresh(lifetimeMinutes);
-				manager.flush();
-				userTransaction.commit();
-				logger.debug("Session {} refreshed.", session.getId());
-				if (logRequests.contains(CallType.SESSION)) {
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-						gen.write("userName", session.getUserName());
-						gen.writeEnd();
-					}
-					transmitter.processMessage("refresh", ip, baos.toString(), startMillis);
-				}
-			} catch (IcatException e) {
-				userTransaction.rollback();
-				logger.trace("Transaction rolled back for logout because of " + e.getClass() + " " + e.getMessage());
-				if (e.getType() == IcatExceptionType.SESSION) {
-					throw e;
-				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							e.getClass() + " " + e.getMessage());
-				}
-			} catch (Exception e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-			}
-		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException" + e.getMessage());
-		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException" + e.getMessage());
-		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
-		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage());
-		}
 	}
 
 	public List<?> search(String userId, String query, EntityManager manager, String ip) throws IcatException {

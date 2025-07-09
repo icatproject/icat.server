@@ -80,6 +80,7 @@ import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.ParameterPOJO;
 import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
+import org.icatproject.core.manager.SessionManager;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
 import org.icatproject.core.manager.ScoredEntityBaseBean;
 import org.icatproject.utils.ContainerGetter.ContainerType;
@@ -137,6 +138,9 @@ public class ICATRest {
 	@Resource
 	private UserTransaction userTransaction;
 
+	@EJB
+	SessionManager sessionManager;
+
 	private Set<String> rootUserNames;
 
 	private int maxEntities;
@@ -146,7 +150,7 @@ public class ICATRest {
 	private Map<String, String> cluster;
 
 	private void checkRoot(String sessionId) throws IcatException {
-		String userId = beanManager.getUserName(sessionId, manager);
+		String userId = sessionManager.getUserName(sessionId);
 		if (!rootUserNames.contains(userId)) {
 			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES, "user must be in rootUserNames");
 		}
@@ -193,7 +197,7 @@ public class ICATRest {
 	public String write(@Context HttpServletRequest request, @FormParam("sessionId") String sessionId,
 			@FormParam("entities") String json) throws IcatException {
 
-		String userName = beanManager.getUserName(sessionId, manager);
+		String userName = sessionManager.getUserName(sessionId);
 
 		List<Long> beanIds = beanManager.write(userName, json, manager, userTransaction, request.getRemoteAddr());
 
@@ -240,7 +244,7 @@ public class ICATRest {
 			@FormParam("name") String name, @FormParam("id") long id, @FormParam("keys") String keys)
 			throws IcatException {
 
-		String userName = beanManager.getUserName(sessionId, manager);
+		String userName = sessionManager.getUserName(sessionId);
 
 		long beanId = beanManager.cloneEntity(userName, name, id, keys, manager, userTransaction,
 				request.getRemoteAddr());
@@ -292,7 +296,7 @@ public class ICATRest {
 		} catch (JsonException e) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage() + " in json " + json);
 		}
-		String userName = beanManager.getUserName(sessionId, manager);
+		String userName = sessionManager.getUserName(sessionId);
 		beanManager.delete(userName, beans, manager, userTransaction, request.getRemoteAddr());
 	}
 
@@ -504,8 +508,8 @@ public class ICATRest {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getSession(@PathParam("sessionId") String sessionId) throws IcatException {
 
-		String userName = beanManager.getUserName(sessionId, manager);
-		double remainingMinutes = beanManager.getRemainingMinutes(sessionId, manager);
+		String userName = sessionManager.getUserName(sessionId);
+		double remainingMinutes = sessionManager.getRemainingMinutes(sessionId);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
@@ -532,7 +536,7 @@ public class ICATRest {
 	public String isLoggedIn1(@PathParam("userName") String userName) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
-			gen.writeStartObject().write("loggedIn", beanManager.isLoggedIn(userName, manager)).writeEnd();
+			gen.writeStartObject().write("loggedIn", sessionManager.isLoggedIn(userName)).writeEnd();
 		}
 		return baos.toString();
 	}
@@ -586,7 +590,7 @@ public class ICATRest {
 	public String isLoggedIn2(@PathParam("mnemonic") String mnemonic, @PathParam("userName") String userName) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
-			gen.writeStartObject().write("loggedIn", beanManager.isLoggedIn(mnemonic + "/" + userName, manager))
+			gen.writeStartObject().write("loggedIn", sessionManager.isLoggedIn(mnemonic + "/" + userName))
 					.writeEnd();
 		}
 		return baos.toString();
@@ -905,8 +909,7 @@ public class ICATRest {
 		logger.debug("Using " + plugin + " to authenticate");
 
 		String userName = authenticator.authenticate(credentials, request.getRemoteAddr()).getUserName();
-		String sessionId = beanManager.login(userName, lifetimeMinutes, manager, userTransaction,
-				request.getRemoteAddr());
+		String sessionId = sessionManager.login(userName, lifetimeMinutes, request.getRemoteAddr());
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
@@ -932,7 +935,7 @@ public class ICATRest {
 	@Path("session/{sessionId}")
 	public void logout(@Context HttpServletRequest request, @PathParam("sessionId") String sessionId)
 			throws IcatException {
-		beanManager.logout(sessionId, manager, userTransaction, request.getRemoteAddr());
+		sessionManager.logout(sessionId, request.getRemoteAddr());
 	}
 
 	/**
@@ -1042,7 +1045,7 @@ public class ICATRest {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}
-		String userName = beanManager.getUserName(sessionId, manager);
+		String userName = sessionManager.getUserName(sessionId);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonReader jr = Json.createReader(new ByteArrayInputStream(query.getBytes()))) {
 			JsonObject jo = jr.readObject();
@@ -1282,7 +1285,7 @@ public class ICATRest {
 	@Path("session/{sessionId}")
 	public void refresh(@Context HttpServletRequest request, @PathParam("sessionId") String sessionId)
 			throws IcatException {
-		beanManager.refresh(sessionId, lifetimeMinutes, manager, userTransaction, request.getRemoteAddr());
+		sessionManager.refresh(sessionId, lifetimeMinutes, request.getRemoteAddr());
 	}
 
 	/**
@@ -1333,7 +1336,7 @@ public class ICATRest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
 
-		String userName = beanManager.getUserName(sessionId, manager);
+		String userName = sessionManager.getUserName(sessionId);
 		if (id == null) {
 			gen.writeStartArray();
 			for (Object result : beanManager.search(userName, query, manager, request.getRemoteAddr())) {
