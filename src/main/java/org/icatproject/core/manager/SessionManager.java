@@ -37,8 +37,10 @@ public class SessionManager {
 	@Resource
 	UserTransaction userTransaction;
 
+	// This EntityManager is for a different persistence context from the rest of icat.server that only contains the
+	// Session entity.
 	@PersistenceContext(unitName = "session")
-	EntityManager entityManager;
+	EntityManager sessionEntityManager;
 
 	@EJB
 	PropertyHandler propertyHandler;
@@ -58,7 +60,7 @@ public class SessionManager {
 	@Schedule(hour = "*")
 	public void removeExpiredSessions() {
 		try {
-			int n = entityManager.createNamedQuery(Session.DELETE_EXPIRED).executeUpdate();
+			int n = sessionEntityManager.createNamedQuery(Session.DELETE_EXPIRED).executeUpdate();
 			logger.debug(n + " sessions were removed");
 		} catch (Throwable e) {
 			logger.error(e.getClass() + " " + e.getMessage());
@@ -71,13 +73,12 @@ public class SessionManager {
 		return session.getRemainingMinutes();
 	}
 
-
 	private Session getSession(String sessionId) throws IcatException {
 		Session session = null;
 		if (sessionId == null || sessionId.equals("")) {
 			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session Id cannot be null or empty.");
 		}
-		session = (Session) entityManager.find(Session.class, sessionId);
+		session = (Session) sessionEntityManager.find(Session.class, sessionId);
 		if (session == null) {
 			throw new IcatException(IcatException.IcatExceptionType.SESSION,
 					"Unable to find user by sessionid: " + sessionId);
@@ -99,7 +100,7 @@ public class SessionManager {
 
 	public boolean isLoggedIn(String userName) {
 		logger.debug("isLoggedIn for user " + userName);
-		return entityManager.createNamedQuery(Session.ISLOGGEDIN, Long.class).setParameter("userName", userName).getSingleResult() > 0;
+		return sessionEntityManager.createNamedQuery(Session.ISLOGGEDIN, Long.class).setParameter("userName", userName).getSingleResult() > 0;
 	}
 
 	public String login(String userName, String ip) throws IcatException {
@@ -108,8 +109,8 @@ public class SessionManager {
 			userTransaction.begin();
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
-				entityManager.persist(session);
-				entityManager.flush();
+				sessionEntityManager.persist(session);
+				sessionEntityManager.flush();
 				userTransaction.commit();
 				String result = session.getId();
 				logger.debug("Session " + result + " persisted.");
@@ -148,8 +149,8 @@ public class SessionManager {
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 				Session session = getSession(sessionId);
-				entityManager.remove(session);
-				entityManager.flush();
+				sessionEntityManager.remove(session);
+				sessionEntityManager.flush();
 				userTransaction.commit();
 				logger.debug("Session {} removed.", session.getId());
 				if (logRequests.contains(CallType.SESSION)) {
@@ -193,7 +194,7 @@ public class SessionManager {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 				Session session = getSession(sessionId);
 				session.refresh(lifetimeMinutes);
-				entityManager.flush();
+				sessionEntityManager.flush();
 				userTransaction.commit();
 				logger.debug("Session {} refreshed.", session.getId());
 				if (logRequests.contains(CallType.SESSION)) {
