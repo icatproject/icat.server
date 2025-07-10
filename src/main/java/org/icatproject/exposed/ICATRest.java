@@ -880,7 +880,7 @@ public class ICATRest {
 		logger.debug("Using " + plugin + " to authenticate");
 
 		String userName = authenticator.authenticate(credentials, request.getRemoteAddr()).getUserName();
-		String sessionId = sessionManager.login(userName, lifetimeMinutes, request.getRemoteAddr());
+		String sessionId = sessionManager.login(userName, request.getRemoteAddr());
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
@@ -1587,7 +1587,7 @@ public class ICATRest {
 	@Path("session/{sessionId}")
 	public void refresh(@Context HttpServletRequest request, @PathParam("sessionId") String sessionId)
 			throws IcatException {
-		sessionManager.refresh(sessionId, lifetimeMinutes, request.getRemoteAddr());
+		sessionManager.refresh(sessionId, request.getRemoteAddr());
 	}
 
 	/**

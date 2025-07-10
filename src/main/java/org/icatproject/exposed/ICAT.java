@@ -88,8 +88,6 @@ public class ICAT {
 	@EJB
 	EntityBeanManager beanManager;
 
-	private int lifetimeMinutes;
-
 	@EJB
 	PropertyHandler propertyHandler;
 
@@ -275,7 +273,6 @@ public class ICAT {
 	@PostConstruct
 	private void init() {
 		authPlugins = propertyHandler.getAuthPlugins();
-		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
 		rootUserNames = propertyHandler.getRootUserNames();
 	}
 
@@ -308,7 +305,7 @@ public class ICAT {
 		Authenticator authenticator = extendedAuthenticator.getAuthenticator();
 		logger.debug("Using " + plugin + " to authenticate");
 		String userName = authenticator.authenticate(credentials, ip).getUserName();
-		return sessionManager.login(userName, lifetimeMinutes, ip);
+		return sessionManager.login(userName, ip);
 	}
 
 	@AroundInvoke
@@ -347,7 +344,7 @@ public class ICAT {
 	public void refresh(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		String ip = ((HttpServletRequest) webServiceContext.getMessageContext().get(MessageContext.SERVLET_REQUEST))
 				.getRemoteAddr();
-		sessionManager.refresh(sessionId, lifetimeMinutes, ip);
+		sessionManager.refresh(sessionId, ip);
 	}
 
 	private void reportIcatException(IcatException e) throws IcatException {

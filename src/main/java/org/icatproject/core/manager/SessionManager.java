@@ -45,11 +45,13 @@ public class SessionManager {
 
 	private boolean log;
 	private Set<CallType> logRequests;
+	private int lifetimeMinutes;
 
 	@PostConstruct
 	void init() {
 		logRequests = propertyHandler.getLogSet();
 		log = !logRequests.isEmpty();
+		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
 	}
 
 	// Run every hour
@@ -100,7 +102,7 @@ public class SessionManager {
 		return entityManager.createNamedQuery(Session.ISLOGGEDIN, Long.class).setParameter("userName", userName).getSingleResult() > 0;
 	}
 
-	public String login(String userName, int lifetimeMinutes, String ip) throws IcatException {
+	public String login(String userName, String ip) throws IcatException {
 		Session session = new Session(userName, lifetimeMinutes);
 		try {
 			userTransaction.begin();
@@ -183,7 +185,7 @@ public class SessionManager {
 		}
 	}
 
-	public void refresh(String sessionId, int lifetimeMinutes, String ip) throws IcatException {
+	public void refresh(String sessionId, String ip) throws IcatException {
 		logger.debug("logout for sessionId " + sessionId);
 		try {
 			userTransaction.begin();
