@@ -384,8 +384,8 @@ public class TestRS {
 		 * 000Z","dataCollectionDatafiles":[],"dataCollectionDatasets":[],"jobsAsInput":[],"jobsAsOutput":[],"parameters
 		 * ":[]}}]>
 		 */
-		JsonArray dc_response = search(session, "SELECT dc from DataCollection dc", 3);
-		collector.checkThat(dc_response.size(), equalTo(3));
+		JsonArray dc_response = search(session, "SELECT dc from DataCollection dc", 4);
+		collector.checkThat(dc_response.size(), equalTo(4));
 		collector.checkThat(dc_response.getJsonObject(0).containsKey("DataCollection"), is(true));
 
 		/*
@@ -406,6 +406,17 @@ public class TestRS {
 		 */
 		JsonArray j_response = search(session, "SELECT j from Job j", 1);
 		collector.checkThat(j_response.getJsonObject(0).containsKey("Job"), is(true));
+
+		JsonArray dp_response = search(session, "SELECT dp from DataPublication dp WHERE dp.pid = 'dp:12345'", 1);
+		collector.checkThat(dp_response.getJsonObject(0).containsKey("DataPublication"), is(true));
+		collector.checkThat(dp_response.getJsonObject(0).getJsonObject("DataPublication").getString("pid"),
+				is("dp:12345"));
+		collector.checkThat(dp_response.getJsonObject(0).getJsonObject("DataPublication").getString("title"),
+				is("Sample Data Publication"));
+		collector.checkThat(dp_response.getJsonObject(0).getJsonObject("DataPublication").getJsonArray("subjects"),
+				isA(JsonArray.class));
+		collector.checkThat(dp_response.getJsonObject(0).getJsonObject("DataPublication").getJsonArray("subjects").size(),
+				is(0));
 	}
 
 	@Test

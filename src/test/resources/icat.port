@@ -83,6 +83,7 @@ DataCollection(?:0)
 "a"
 "b"
 "c"
+"d"
 
 DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4), dataCollection(?:5))
 "Test port facility", "expt1", "one", "ds2", "df1 \t \r \n \\ \f \b \' \"",  "a"
@@ -90,4 +91,7 @@ DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, 
 
 Job(application(facility(name:0), name:1, version:2), inputDataCollection(?:3), outputDataCollection(?:4))
 "Test port facility", "aprog", "1.2.3", "a", "b"
+
+DataPublication(facility(name:0), pid:1, title:2, description:3, content:4)
+"Test port facility", "dp:12345", "Sample Data Publication", "Test data publication", "d"
 
