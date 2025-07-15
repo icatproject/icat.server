@@ -1,9 +1,7 @@
 package org.icatproject.exposed;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import org.junit.Test;
-import org.junit.BeforeClass;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
@@ -18,10 +16,12 @@ import java.math.BigInteger;
 import jakarta.json.Json;
 import jakarta.json.stream.JsonGenerator;
 
-import org.icatproject.exposed.ICATRest;
 import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.IcatException;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class TestICATRest {
 
@@ -30,7 +30,7 @@ public class TestICATRest {
 
 	private final static DateFormat df8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws Exception {
 
 		jsoniseArray = icatRest.getClass().getDeclaredMethod("jsonise", Object.class, JsonGenerator.class);

@@ -20,10 +20,7 @@ import jakarta.interceptor.InvocationContext;
 import jakarta.jws.WebMethod;
 import jakarta.jws.WebParam;
 import jakarta.jws.WebService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.UserTransaction;
 import jakarta.xml.ws.WebServiceContext;
 import jakarta.xml.ws.handler.MessageContext;
 
@@ -72,7 +69,6 @@ import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfo;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.NotificationTransmitter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
@@ -91,13 +87,7 @@ public class ICAT {
 	@EJB
 	EntityBeanManager beanManager;
 
-	@EJB
-	GateKeeper gatekeeper;
-
 	private int lifetimeMinutes;
-
-	@PersistenceContext(unitName = "icat")
-	private EntityManager manager;
 
 	@EJB
 	PropertyHandler propertyHandler;
@@ -108,13 +98,10 @@ public class ICAT {
 	NotificationTransmitter transmitter;
 
 	@Resource
-	private UserTransaction userTransaction;
-
-	@Resource
 	WebServiceContext webServiceContext;
 
 	private void checkRoot(String sessionId) throws IcatException {
-		String userId = beanManager.getUserName(sessionId, manager);
+		String userId = beanManager.getUserName(sessionId);
 		if (!rootUserNames.contains(userId)) {
 			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES, "user must be in rootUserNames");
 		}
@@ -127,7 +114,7 @@ public class ICAT {
 				.getRemoteAddr();
 		try {
 			String userId = getUserName(sessionId);
-			CreateResponse createResponse = beanManager.create(userId, bean, manager, userTransaction, false, ip);
+			CreateResponse createResponse = beanManager.create(userId, bean, false, ip);
 			transmitter.processMessage(createResponse.getNotificationMessage());
 			return createResponse.getPk();
 		} catch (IcatException e) {
@@ -146,7 +133,7 @@ public class ICAT {
 				.getRemoteAddr();
 		try {
 			String userId = getUserName(sessionId);
-			List<CreateResponse> createResponses = beanManager.createMany(userId, beans, manager, userTransaction, ip);
+			List<CreateResponse> createResponses = beanManager.createMany(userId, beans, ip);
 			List<Long> lo = new ArrayList<Long>();
 			for (CreateResponse createResponse : createResponses) {
 				transmitter.processMessage(createResponse.getNotificationMessage());
@@ -171,7 +158,7 @@ public class ICAT {
 			String userId = getUserName(sessionId);
 			ArrayList<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
 			beans.add(bean);
-			beanManager.delete(userId, beans, manager, userTransaction, ip);
+			beanManager.delete(userId, beans, ip);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -188,7 +175,7 @@ public class ICAT {
 				.getRemoteAddr();
 		try {
 			String userId = getUserName(sessionId);
-			beanManager.delete(userId, beans, manager, userTransaction, ip);
+			beanManager.delete(userId, beans, ip);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -224,7 +211,7 @@ public class ICAT {
 			String userId = getUserName(sessionId);
 			String ip = ((HttpServletRequest) webServiceContext.getMessageContext().get(MessageContext.SERVLET_REQUEST))
 					.getRemoteAddr();
-			return beanManager.get(userId, query, primaryKey, manager, ip);
+			return beanManager.get(userId, query, primaryKey, ip);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -268,12 +255,12 @@ public class ICAT {
 
 	@WebMethod()
 	public double getRemainingMinutes(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		return beanManager.getRemainingMinutes(sessionId, manager);
+		return beanManager.getRemainingMinutes(sessionId);
 	}
 
 	@WebMethod
 	public String getUserName(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		return beanManager.getUserName(sessionId, manager);
+		return beanManager.getUserName(sessionId);
 	}
 
 	@WebMethod()
@@ -285,7 +272,7 @@ public class ICAT {
 	private void init() {
 		authPlugins = propertyHandler.getAuthPlugins();
 		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
-		rootUserNames = gatekeeper.getRootUserNames();
+		rootUserNames = propertyHandler.getRootUserNames();
 	}
 
 	@WebMethod
@@ -294,7 +281,7 @@ public class ICAT {
 			throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			return beanManager.isAccessAllowed(userId, bean, manager, userTransaction, accessType);
+			return beanManager.isAccessAllowed(userId, bean, accessType);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -317,7 +304,7 @@ public class ICAT {
 		Authenticator authenticator = extendedAuthenticator.getAuthenticator();
 		logger.debug("Using " + plugin + " to authenticate");
 		String userName = authenticator.authenticate(credentials, ip).getUserName();
-		return beanManager.login(userName, lifetimeMinutes, manager, userTransaction, ip);
+		return beanManager.login(userName, lifetimeMinutes, ip);
 	}
 
 	@AroundInvoke
@@ -349,14 +336,14 @@ public class ICAT {
 	public void logout(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		String ip = ((HttpServletRequest) webServiceContext.getMessageContext().get(MessageContext.SERVLET_REQUEST))
 				.getRemoteAddr();
-		beanManager.logout(sessionId, manager, userTransaction, ip);
+		beanManager.logout(sessionId, ip);
 	}
 
 	@WebMethod
 	public void refresh(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		String ip = ((HttpServletRequest) webServiceContext.getMessageContext().get(MessageContext.SERVLET_REQUEST))
 				.getRemoteAddr();
-		beanManager.refresh(sessionId, lifetimeMinutes, manager, userTransaction, ip);
+		beanManager.refresh(sessionId, lifetimeMinutes, ip);
 	}
 
 	private void reportIcatException(IcatException e) throws IcatException {
@@ -381,7 +368,7 @@ public class ICAT {
 			String userId = getUserName(sessionId);
 			String ip = ((HttpServletRequest) webServiceContext.getMessageContext().get(MessageContext.SERVLET_REQUEST))
 					.getRemoteAddr();
-			List<?> result = beanManager.search(userId, query, manager, ip);
+			List<?> result = beanManager.search(userId, query, ip);
 			// special handling for fieldsets so they can be marshalled 
 			if (!result.isEmpty() && result.get(0) instanceof Object[]) {
 				List<FieldSet> newResults = new ArrayList<FieldSet>();
@@ -412,7 +399,7 @@ public class ICAT {
 				.getRemoteAddr();
 		try {
 			String userId = getUserName(sessionId);
-			transmitter.processMessage(beanManager.update(userId, bean, manager, userTransaction, false, ip));
+			transmitter.processMessage(beanManager.update(userId, bean, false, ip));
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;

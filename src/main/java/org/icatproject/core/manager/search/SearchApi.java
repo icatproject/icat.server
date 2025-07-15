@@ -156,7 +156,7 @@ public abstract class SearchApi {
 	 *         <code>{`operation`: {"_index": `entityName`, "_id": `id`, "doc": {...}}}</code>
 	 * @throws IcatException
 	 */
-	public static String encodeOperation(EntityManager manager, String operation, EntityBaseBean bean) throws IcatException {
+	public static String encodeOperation(EntityManager entityManager, String operation, EntityBaseBean bean) throws IcatException {
 		Long icatId = bean.getId();
 		if (icatId == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, bean + " had null id");
@@ -167,7 +167,7 @@ public abstract class SearchApi {
 			gen.writeStartObject().writeStartObject(operation);
 			gen.write("_index", entityName).write("_id", icatId);
 			gen.writeStartObject("doc");
-			bean.getDoc(manager, gen);
+			bean.getDoc(entityManager, gen);
 			gen.writeEnd().writeEnd().writeEnd();
 		}
 		return baos.toString();
@@ -320,14 +320,14 @@ public abstract class SearchApi {
 	 * 
 	 * @param entityName         The entity to create documents for.
 	 * @param ids                List of ids corresponding to the documents to add.
-	 * @param manager            EntityManager for finding the beans from their id.
+	 * @param entityManager      EntityManager for finding the beans from their id.
 	 * @param klass              Class of the entity to create documents for.
 	 * @param getBeanDocExecutor
 	 * @throws IcatException
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	public abstract void addNow(String entityName, List<Long> ids, EntityManager manager,
+	public abstract void addNow(String entityName, List<Long> ids, EntityManager entityManager,
 			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor)
 			throws IcatException, IOException, URISyntaxException;
 
