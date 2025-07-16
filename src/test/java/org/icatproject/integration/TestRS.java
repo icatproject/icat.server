@@ -384,8 +384,8 @@ public class TestRS {
 		 * 000Z","dataCollectionDatafiles":[],"dataCollectionDatasets":[],"jobsAsInput":[],"jobsAsOutput":[],"parameters
 		 * ":[]}}]>
 		 */
-		JsonArray dc_response = search(session, "SELECT dc from DataCollection dc", 3);
-		collector.checkThat(dc_response.size(), equalTo(3));
+		JsonArray dc_response = search(session, "SELECT dc from DataCollection dc", 4);
+		collector.checkThat(dc_response.size(), equalTo(4));
 		collector.checkThat(dc_response.getJsonObject(0).containsKey("DataCollection"), is(true));
 
 		/*
