@@ -387,6 +387,11 @@ public class WSession {
 		this.addFastRule("DataPublication", "CRUD");
 		this.addFastRule("DataPublicationType", "CRUD");
 		this.addFastRule("DataPublicationDate", "CRUD");
+		this.addFastRule("DataPublicationUser", "CRUD");
+		this.addFastRule("Affiliation", "CRUD");
+		this.addFastRule("RelatedItem", "CRUD");
+		this.addFastRule("DataPublicationFunding", "CRUD");
+		this.addFastRule("FundingReference", "CRUD");
 		snooze();
 	}
 
