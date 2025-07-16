@@ -60,10 +60,12 @@ public class SessionManager {
 	@Schedule(hour = "*")
 	public void removeExpiredSessions() {
 		try {
+			userTransaction.begin();
 			int n = sessionEntityManager.createNamedQuery(Session.DELETE_EXPIRED).executeUpdate();
+			userTransaction.commit();
 			logger.debug(n + " sessions were removed");
-		} catch (Throwable e) {
-			logger.error(e.getClass() + " " + e.getMessage());
+		} catch (Exception e) {
+			logger.error("Error removing expired sessions", e);
 		}
 	}
 
