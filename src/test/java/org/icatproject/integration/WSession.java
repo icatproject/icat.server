@@ -195,7 +195,7 @@ public class WSession {
 	}
 
 	public void clear() throws Exception {
-		deleteAll(Arrays.asList("Facility", "DataCollection", "Study"));
+		deleteAll(Arrays.asList("Facility", "DataCollection", "Study", "FundingReference", "Technique"));
 	}
 
 	private void deleteAll(List<String> names) throws IcatException_Exception {
