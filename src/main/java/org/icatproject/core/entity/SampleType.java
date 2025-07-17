@@ -95,7 +95,7 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "sample.type.name", name);
 		SearchApi.encodeLong(gen, "sample.type.id", id);
 	}

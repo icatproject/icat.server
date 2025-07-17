@@ -15,8 +15,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -65,12 +63,6 @@ public class GateKeeper {
 		}
 	};
 
-	private final static Pattern tsRegExp = Pattern
-			.compile("\\{\\s*ts\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s*\\}");
-
-	@PersistenceContext(unitName = "icat")
-	private EntityManager gateKeeperManager;
-
 	private final Logger logger = LoggerFactory.getLogger(GateKeeper.class);
 	Marker fatal = MarkerFactory.getMarker("FATAL");
 
@@ -78,6 +70,9 @@ public class GateKeeper {
 
 	@EJB
 	GateKeeperHelper gateKeeperHelper;
+
+	@PersistenceContext(unitName = "icat")
+	EntityManager entityManager;
 
 	@EJB
 	PropertyHandler propertyHandler;
@@ -119,26 +114,6 @@ public class GateKeeper {
 		}
 
 		return false;
-	}
-
-	public void checkJPQL(String query) throws IcatException {
-
-		Matcher m = tsRegExp.matcher(query);
-
-		query = m.replaceAll(" CURRENT_TIMESTAMP ");
-		try {
-			gateKeeperManager.createQuery(query);
-		} catch (Exception e) {
-			m.reset();
-			if (m.find()) {
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-						"Timestamp literals have been replaced... " + e.getMessage());
-			} else {
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
-			}
-
-		}
-
 	}
 
 	@PreDestroy()
@@ -183,11 +158,10 @@ public class GateKeeper {
 	 * 
 	 * @param userId     The user making the READ request.
 	 * @param simpleName The name of the requested entity type.
-	 * @param manager    The EntityManager to use.
 	 * @return Returns a list of restrictions that apply to the requested entity
 	 *         type. If there are no restrictions, then returns null.
 	 */
-	private List<String> getRestrictions(String userId, String simpleName, EntityManager manager) {
+	private List<String> getRestrictions(String userId, String simpleName) {
 		if (rootUserNames.contains(userId)) {
 			logger.info("\"Root\" user " + userId + " is allowed READ to " + simpleName);
 			return null;
@@ -215,10 +189,9 @@ public class GateKeeper {
 	 * 
 	 * @param userId  The user making the READ request.
 	 * @param beans   The entities the user wants to READ.
-	 * @param manager The EntityManager to use.
 	 * @return A list of entities the user has read access to
 	 */
-	public List<EntityBaseBean> getReadable(String userId, List<EntityBaseBean> beans, EntityManager manager) {
+	public List<EntityBaseBean> getReadable(String userId, List<EntityBaseBean> beans) {
 
 		if (beans.size() == 0) {
 			return beans;
@@ -227,12 +200,12 @@ public class GateKeeper {
 		Class<? extends EntityBaseBean> objectClass = object.getClass();
 		String simpleName = objectClass.getSimpleName();
 
-		List<String> restrictions = getRestrictions(userId, simpleName, manager);
+		List<String> restrictions = getRestrictions(userId, simpleName);
 		if (restrictions == null) {
 			return beans;
 		}
 
-		Set<Long> readableIds = getReadableIds(userId, beans, restrictions, manager);
+		Set<Long> readableIds = getReadableIds(userId, beans, restrictions);
 
 		List<EntityBaseBean> results = new ArrayList<>();
 		for (EntityBaseBean bean : beans) {
@@ -252,23 +225,21 @@ public class GateKeeper {
 	 * @param userId     The user making the READ request.
 	 * @param entities   The entities to check.
 	 * @param simpleName The name of the requested entity type.
-	 * @param manager    The EntityManager to use.
 	 * @return Set of the ids that the user has read access to. If there are no
 	 *         restrictions, then returns null.
 	 */
-	public Set<Long> getReadableIds(String userId, List<? extends HasEntityId> entities, String simpleName,
-			EntityManager manager) {
+	public Set<Long> getReadableIds(String userId, List<? extends HasEntityId> entities, String simpleName) {
 
 		if (entities.size() == 0) {
 			return null;
 		}
 
-		List<String> restrictions = getRestrictions(userId, simpleName, manager);
+		List<String> restrictions = getRestrictions(userId, simpleName);
 		if (restrictions == null) {
 			return null;
 		}
 
-		return getReadableIds(userId, entities, restrictions, manager);
+		return getReadableIds(userId, entities, restrictions);
 	}
 
 	/**
@@ -277,11 +248,9 @@ public class GateKeeper {
 	 * @param userId       The user making the READ request.
 	 * @param entities     The entities to check.
 	 * @param restrictions The restrictions applying to the entities.
-	 * @param manager      The EntityManager to use.
 	 * @return Set of the ids that the user has read access to.
 	 */
-	private Set<Long> getReadableIds(String userId, List<? extends HasEntityId> entities, List<String> restrictions,
-			EntityManager manager) {
+	private Set<Long> getReadableIds(String userId, List<? extends HasEntityId> entities, List<String> restrictions) {
 
 		/*
 		 * IDs are processed in batches to avoid Oracle error: ORA-01795:
@@ -317,7 +286,7 @@ public class GateKeeper {
 		Set<Long> readableIds = new HashSet<>();
 		for (String idList : idLists) {
 			for (String qString : restrictions) {
-				TypedQuery<Long> q = manager.createQuery(qString.replace(":pkids", idList), Long.class);
+				TypedQuery<Long> q = entityManager.createQuery(qString.replace(":pkids", idList), Long.class);
 				if (qString.contains(":user")) {
 					q.setParameter("user", userId);
 				}
@@ -352,7 +321,7 @@ public class GateKeeper {
 	/**
 	 * Is the operation allowed
 	 */
-	public boolean isAccessAllowed(String user, EntityBaseBean object, AccessType access, EntityManager manager) {
+	public boolean isAccessAllowed(String user, EntityBaseBean object, AccessType access) {
 
 		Class<? extends EntityBaseBean> objectClass = object.getClass();
 		String simpleName = objectClass.getSimpleName();
@@ -403,7 +372,7 @@ public class GateKeeper {
 		Long keyVal = object.getId();
 
 		for (String qString : sortedQueries) {
-			TypedQuery<Long> q = manager.createQuery(qString, Long.class);
+			TypedQuery<Long> q = entityManager.createQuery(qString, Long.class);
 			if (qString.contains(":user")) {
 				q.setParameter("user", user);
 			}
@@ -435,18 +404,18 @@ public class GateKeeper {
 	 * 
 	 * @throws IcatException
 	 */
-	public void performAuthorisation(String user, EntityBaseBean object, AccessType access, EntityManager manager)
+	public void performAuthorisation(String user, EntityBaseBean object, AccessType access)
 			throws IcatException {
 
-		if (!isAccessAllowed(user, object, access, manager)) {
+		if (!isAccessAllowed(user, object, access)) {
 			throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
 					access + " access to this " + object.getClass().getSimpleName() + " is not allowed.");
 		}
 	}
 
-	public void performUpdateAuthorisation(String user, EntityBaseBean bean, JsonObject contents, EntityManager manager)
+	public void performUpdateAuthorisation(String user, EntityBaseBean bean, JsonObject contents)
 			throws IcatException {
-		if (isAccessAllowed(user, bean, AccessType.UPDATE, manager)) {
+		if (isAccessAllowed(user, bean, AccessType.UPDATE)) {
 			return;
 		}
 
@@ -486,7 +455,7 @@ public class GateKeeper {
 						Long keyVal = bean.getId();
 
 						for (String qString : sortedQueries) {
-							TypedQuery<Long> q = manager.createQuery(qString, Long.class);
+							TypedQuery<Long> q = entityManager.createQuery(qString, Long.class);
 							if (qString.contains(":user")) {
 								q.setParameter("user", user);
 							}

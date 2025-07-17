@@ -15,7 +15,6 @@ import jakarta.persistence.UniqueConstraint;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
-import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.SingletonFinder;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.slf4j.Logger;
@@ -60,7 +59,7 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	public PublicStep() {
 	}
 
-	private void fixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
+	private void fixup() throws IcatException {
 		Class<? extends EntityBaseBean> bean = EntityInfoHandler.getClass(origin);
 		Set<Relationship> rs = EntityInfoHandler.getRelatedEntities(bean);
 		boolean found = false;
@@ -77,16 +76,16 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void postMergeFixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
-		super.postMergeFixup(manager, gateKeeper);
-		this.fixup(manager, gateKeeper);
+	public void postMergeFixup(EntityManager entityManager) throws IcatException {
+		super.postMergeFixup(entityManager);
+		this.fixup();
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
+	public void preparePersist(String modId, EntityManager entityManager, PersistMode persistMode)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode);
-		this.fixup(manager, gateKeeper);
+		super.preparePersist(modId, entityManager, persistMode);
+		this.fixup();
 	}
 
 	@PostRemove()
