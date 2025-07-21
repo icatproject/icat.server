@@ -407,17 +407,6 @@ public class TestRS {
 		JsonArray j_response = search(session, "SELECT j from Job j", 1);
 		collector.checkThat(j_response.getJsonObject(0).containsKey("Job"), is(true));
 
-		JsonArray dp_response = search(session, "SELECT dp from DataPublication dp WHERE dp.pid = 'dp:12345'", 1);
-		collector.checkThat(dp_response.getJsonObject(0).containsKey("DataPublication"), is(true));
-		collector.checkThat(dp_response.getJsonObject(0).getJsonObject("DataPublication").getString("pid"),
-				is("dp:12345"));
-		collector.checkThat(dp_response.getJsonObject(0).getJsonObject("DataPublication").getString("title"),
-				is("Sample Data Publication"));
-		collector.checkThat(dp_response.getJsonObject(0).getJsonObject("DataPublication").getJsonArray("subjects"),
-				isA(JsonArray.class));
-		collector.checkThat(dp_response.getJsonObject(0).getJsonObject("DataPublication").getJsonArray("subjects").size(),
-				is(0));
-
 		/*
 		 * Expected: <[{"DataPublication":{"id":6,"createId":"simple/root","createTime":
 		 * "2025-07-16T22:54:23.000+02:00","modId":"simple/root","modTime":
@@ -433,6 +422,10 @@ public class TestRS {
 		collector.checkThat(
 				datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonString("title").getString(),
 				is("Data from OEIS sequence A000027"));
+		collector.checkThat(datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonArray("subjects"),
+				isA(JsonArray.class));
+		collector.checkThat(datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonArray("subjects").size(),
+				is(0));
 	}
 
 	@Test
