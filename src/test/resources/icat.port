@@ -96,8 +96,8 @@ DataPublicationType(description:0, facility(name:1), name:2)
 "Curated data publication", "Test port facility", "curated"
 "Open access raw data", "Test port facility", "raw"
 
-DataPublication(content(?:0), description:1, facility(name:2), pid:3, publicationDate:4, subject:5, title:6, type(facility(name:7), name:8))
-"d", "We provide the first 65535 integers from sequence A000027 of the On-Line Encyclopedia of Integer Sequences. The data consists of an HDF5 file, having one single entry: a one dimensional integer array.", "Test port facility", "DOI:00.0815/pub-00027", 2022-10-31T00:00:00.000+01:00, "integer sequence; OEIS; On-Line Encyclopedia of Integer Sequences", "Data from OEIS sequence A000027", "Test port facility", "curated"
+DataPublication(content(?:0), description:1, facility(name:2), internalId:3, pid:4, publicationDate:5, subject:6, title:7, type(facility(name:8), name:9))
+"d", "We provide the first 65535 integers from sequence A000027 of the On-Line Encyclopedia of Integer Sequences. The data consists of an HDF5 file, having one single entry: a one dimensional integer array.", "Test port facility", "Test internalId", "DOI:00.0815/pub-00027", 2022-10-31T00:00:00.000+01:00, "integer sequence; OEIS; On-Line Encyclopedia of Integer Sequences", "Data from OEIS sequence A000027", "Test port facility", "curated"
 
 DataPublicationDate(date:0, dateType:1, publication(facility(name:2), pid:3))
 "2012-08-01", "Created", "Test port facility", "DOI:00.0815/pub-00027"
