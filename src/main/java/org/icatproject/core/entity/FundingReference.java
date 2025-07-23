@@ -37,6 +37,10 @@ public class FundingReference extends EntityBaseBean implements Serializable {
 	@Comment("Title or name of the grant")
 	private String awardTitle;
 
+	@Comment("Human readable acknowledgement for the funding, maybe using a specific formulation requested by the funder")
+	@Column(length = 1023)
+	private String acknowledgement;
+
 	/* Needed for JPA */
 	public FundingReference() {
 	}
@@ -65,6 +69,10 @@ public class FundingReference extends EntityBaseBean implements Serializable {
 		return awardTitle;
 	}
 
+	public String getAcknowledgement() {
+		return acknowledgement;
+	}
+
 	public void setInvestigations(List<InvestigationFunding> investigations) {
 		this.investigations = investigations;
 	}
@@ -87,5 +95,9 @@ public class FundingReference extends EntityBaseBean implements Serializable {
 
 	public void setAwardTitle(String awardTitle) {
 		this.awardTitle = awardTitle;
+	}
+
+	public void setAcknowledgement(String acknowledgement) {
+		this.acknowledgement = acknowledgement;
 	}
 }
