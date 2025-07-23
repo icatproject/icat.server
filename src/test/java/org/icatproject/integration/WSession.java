@@ -195,7 +195,7 @@ public class WSession {
 	}
 
 	public void clear() throws Exception {
-		deleteAll(Arrays.asList("Facility", "DataCollection", "Study"));
+		deleteAll(Arrays.asList("Facility", "DataCollection", "Study", "FundingReference", "Technique"));
 	}
 
 	private void deleteAll(List<String> names) throws IcatException_Exception {
@@ -387,6 +387,11 @@ public class WSession {
 		this.addFastRule("DataPublication", "CRUD");
 		this.addFastRule("DataPublicationType", "CRUD");
 		this.addFastRule("DataPublicationDate", "CRUD");
+		this.addFastRule("DataPublicationUser", "CRUD");
+		this.addFastRule("Affiliation", "CRUD");
+		this.addFastRule("RelatedItem", "CRUD");
+		this.addFastRule("DataPublicationFunding", "CRUD");
+		this.addFastRule("FundingReference", "CRUD");
 		snooze();
 	}
 
