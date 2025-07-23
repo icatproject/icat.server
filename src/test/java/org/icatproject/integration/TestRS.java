@@ -412,16 +412,28 @@ public class TestRS {
 		 * "2025-07-16T22:54:23.000+02:00","modId":"simple/root","modTime":
 		 * "2025-07-16T22:54:23.000+02:00","dates":[],"description":
 		 * "We provide the first 65535 integers [...] a one dimensional integer array.",
-		 * "fundingReferences":[],"pid":"DOI:00.0815/pub-00027","publicationDate":
+		 * "fundingReferences":[{'id':1,'createId':'simple/root','createTime':
+		 * '2025-07-23T12:17:24.000+02:00','modId':'simple/root','modTime':
+		 * '2025-07-23T12:17:24.000+02:00','funding':{'id':1,'createId':'simple/root',
+		 * 'createTime':'2025-07-23T12:17:24.000+02:00','modId':'simple/root','modTime':
+		 * '2025-07-23T12:17:24.000+02:00','acknowledgement':
+		 * 'This work [...] supported [...] grant number AIS3241330750 which is greatfully acknowledged',
+		 * 'awardNumber':'AIS3241330750','funderIdentifier':'Crossref Funder ID:10.13039/100005376',
+		 * 'funderName':'American Mathematical Society','investigations':[],'publications':[]}}],
+		 * "pid":"DOI:00.0815/pub-00027","publicationDate":
 		 * "2022-10-31T00:00:00.000+01:00","relatedItems":[],"subject":
 		 * "integer sequence; OEIS; On-Line Encyclopedia of Integer Sequences",
 		 * "title":"Data from OEIS sequence A000027","users":[]}}]>
 		 */
-		JsonArray datapub_response = search(session, "SELECT d FROM DataPublication d", 1);
+		JsonArray datapub_response = search(session, "SELECT d FROM DataPublication d INCLUDE d.fundingReferences AS df, df.funding", 1);
 		collector.checkThat(datapub_response.getJsonObject(0).containsKey("DataPublication"), is(true));
 		collector.checkThat(
 				datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonString("title").getString(),
 				is("Data from OEIS sequence A000027"));
+		collector.checkThat(
+				datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonArray("fundingReferences")
+				.getJsonObject(0).getJsonObject("funding").getJsonString("acknowledgement").getString(),
+				is("This work has partly been supported by American Mathematical Society under grant number AIS3241330750 which is greatfully acknowledged"));
 	}
 
 	@Test

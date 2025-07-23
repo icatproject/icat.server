@@ -113,8 +113,8 @@ Affiliation(fullReference:0, name:1, pid:2, user(contributorType:3, publication(
 RelatedItem(fullReference:0, identifier:1, publication(facility(name:2), pid:3), relatedItemType:4, relationType:5, title:6)
 "OEIS Foundation Inc. (2022), The positive integers, Entry A000027 in The On-Line Encyclopedia of Integer Sequences", "URL:http://oeis.org/A000027", "Test port facility", "DOI:00.0815/pub-00027", "Other", "References", "The positive integers"
 
-FundingReference(awardNumber:0, awardTitle:1, funderIdentifier:2, funderName:3)
-"AIS3241330750", null, "Crossref Funder ID:10.13039/100005376", "American Mathematical Society"
+FundingReference(awardNumber:0, awardTitle:1, funderIdentifier:2, funderName:3, acknowledgement:4)
+"AIS3241330750", null, "Crossref Funder ID:10.13039/100005376", "American Mathematical Society", "This work has partly been supported by American Mathematical Society under grant number AIS3241330750 which is greatfully acknowledged"
 
 DataPublicationFunding(dataPublication(facility(name:0), pid:1), funding(awardNumber:2, funderName:3))
 "Test port facility", "DOI:00.0815/pub-00027", "AIS3241330750", "American Mathematical Society"
