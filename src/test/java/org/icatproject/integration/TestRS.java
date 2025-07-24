@@ -423,8 +423,8 @@ public class TestRS {
 				datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonString("title").getString(),
 				is("Data from OEIS sequence A000027"));
 		collector.checkThat(
-                datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonString("internalId").getString(),
-                is("Test internalId"));
+				datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonString("internalId").getString(),
+				is("Test internalId"));
 	}
 
 	@Test
