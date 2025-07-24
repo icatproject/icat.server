@@ -99,6 +99,12 @@ DataPublicationType(description:0, facility(name:1), name:2)
 DataPublication(content(?:0), description:1, facility(name:2), pid:3, publicationDate:4, subject:5, title:6, type(facility(name:7), name:8))
 "d", "We provide the first 65535 integers from sequence A000027 of the On-Line Encyclopedia of Integer Sequences. The data consists of an HDF5 file, having one single entry: a one dimensional integer array.", "Test port facility", "DOI:00.0815/pub-00027", 2022-10-31T00:00:00.000+01:00, "integer sequence; OEIS; On-Line Encyclopedia of Integer Sequences", "Data from OEIS sequence A000027", "Test port facility", "curated"
 
+Subject(classificationCode:0, dataPublication(facility(name:1), pid:2), name:3, pid:4, schemeURI:5, subjectScheme:6, valueURI:7)
+"11B83", "Test port facility", "DOI:00.0815/pub-00027", "Special sequences and polynomials", null, "https://zbmath.org/classification/", "Mathematics Subject Classification – MSC2020", null
+null, "Test port facility", "DOI:00.0815/pub-00027", "integer sequence", null, null, null, null
+null, "Test port facility", "DOI:00.0815/pub-00027", "OEIS", null, null, null, null
+null, "Test port facility", "DOI:00.0815/pub-00027", "On-Line Encyclopedia of Integer Sequences", null, null, null, null
+
 DataPublicationDate(date:0, dateType:1, publication(facility(name:2), pid:3))
 "2012-08-01", "Created", "Test port facility", "DOI:00.0815/pub-00027"
 "2022-04-29", "Submitted", "Test port facility", "DOI:00.0815/pub-00027"

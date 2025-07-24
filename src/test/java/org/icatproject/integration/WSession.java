@@ -385,6 +385,7 @@ public class WSession {
 		this.addFastRule("Study", "CRUD");
 		this.addFastRule("StudyInvestigation", "CRUD");
 		this.addFastRule("DataPublication", "CRUD");
+		this.addFastRule("Subject", "CRUD");
 		this.addFastRule("DataPublicationType", "CRUD");
 		this.addFastRule("DataPublicationDate", "CRUD");
 		this.addFastRule("DataPublicationUser", "CRUD");
