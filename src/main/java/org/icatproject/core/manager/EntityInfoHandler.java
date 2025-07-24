@@ -86,6 +86,7 @@ import org.icatproject.core.entity.SampleType;
 import org.icatproject.core.entity.Shift;
 import org.icatproject.core.entity.Study;
 import org.icatproject.core.entity.StudyInvestigation;
+import org.icatproject.core.entity.Subject;
 import org.icatproject.core.entity.Technique;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
@@ -216,13 +217,13 @@ public class EntityInfoHandler {
 			UserGroup.class, Rule.class, PublicStep.class, Facility.class, DatafileFormat.class, Application.class,
 			Instrument.class, InvestigationType.class, DatasetType.class, ParameterType.class, SampleType.class,
 			Investigation.class, Sample.class, Dataset.class, Datafile.class, FacilityCycle.class, DataCollection.class,
-			DataCollectionDatafile.class, DataCollectionDataset.class, DataCollectionInvestigation.class, 
-			DataCollectionParameter.class, DatafileParameter.class, DatasetParameter.class, InvestigationParameter.class, 
-			Job.class, Keyword.class, Technique.class, DatasetTechnique.class, PermissibleStringValue.class, 
-			Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class, Study.class, 
-			DataPublication.class, DataPublicationDate.class, DataPublicationUser.class, DataPublicationType.class, 
+			DataCollectionDatafile.class, DataCollectionDataset.class, DataCollectionInvestigation.class,
+			DataCollectionParameter.class, DatafileParameter.class, DatasetParameter.class, InvestigationParameter.class,
+			Job.class, Keyword.class, Technique.class, DatasetTechnique.class, PermissibleStringValue.class,
+			Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class, Study.class,
+			DataPublication.class, Subject.class, DataPublicationDate.class, DataPublicationUser.class, DataPublicationType.class,
 			Affiliation.class, RelatedItem.class, FundingReference.class, DataPublicationFunding.class,
-			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class, 
+			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class,
 			InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class,
 			InvestigationFacilityCycle.class);
 
