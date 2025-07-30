@@ -40,6 +40,7 @@ import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.Session;
+import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.manager.importParser.Attribute;
 import org.icatproject.core.manager.importParser.Input;
 import org.icatproject.core.manager.importParser.ParserException;
@@ -351,6 +352,13 @@ public class Porter {
 						} else {
 							throw new ParserException(
 									"Expected a " + ParameterValueType.values() + " value for column " + offset);
+						}
+					} else if (fType.equals("StudyStatus")) {
+						if (tType == Token.Type.NAME) {
+							setter.invoke(bean, StudyStatus.valueOf(token.getValue().toUpperCase()));
+						} else {
+							throw new ParserException(
+									"Expected a " + StudyStatus.values() + " value for column " + offset);
 						}
 					} else if (tableField.isQmark()) {
 						Long id = ids.get(fType + "." + token.getValue());
