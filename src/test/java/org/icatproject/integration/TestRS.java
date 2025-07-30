@@ -2462,7 +2462,7 @@ public class TestRS {
 
 	private void importMetaData(Attributes attributes, String userName) throws Exception {
 		Session session = rootSession();
-		Path path = Paths.get(this.getClass().getResource("/icat-import-export.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat-import-check.port").toURI());
 
 		start = System.currentTimeMillis();
 		session.importMetaData(path, DuplicateAction.CHECK, attributes);
