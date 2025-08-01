@@ -320,8 +320,11 @@ public class GateKeeper {
 
 	/**
 	 * Is the operation allowed
+	 *
+	 * @throws IcatException
 	 */
-	public boolean isAccessAllowed(String user, EntityBaseBean object, AccessType access) {
+	public boolean isAccessAllowed(String user, EntityBaseBean object, AccessType access)
+			throws IcatException {
 
 		Class<? extends EntityBaseBean> objectClass = object.getClass();
 		String simpleName = objectClass.getSimpleName();
@@ -345,7 +348,7 @@ public class GateKeeper {
 		} else if (access == AccessType.DELETE) {
 			qName = Rule.DELETE_QUERY;
 		} else {
-			throw new RuntimeException(access + " is not handled yet");
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "invalid access type, must be 'READ', 'UPDATE', 'DELETE' or 'CREATE'");
 		}
 
 		logger.debug("Checking " + qName + " " + user + " " + simpleName);
