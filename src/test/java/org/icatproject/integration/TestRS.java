@@ -197,10 +197,15 @@ public class TestRS {
 		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
 		 * "2019-03-11T15:58:33.000Z","fullName":"EDDI - Energy Dispersive Diffraction"
 		 * ,"instrumentScientists":[],"investigationInstruments":[],"name":"EDDI","pid":
-		 * "ig:0815","shifts":[]}}]>
+		 * "ig:0815","shifts":[],"startDate":"2010-01-01T00:00:00.000Z","endDate":"2099-12-31T23:59:59.000Z"
+		 * }}]>
 		 */
 		JsonArray inst_response = search(session, "SELECT i from Instrument i WHERE i.name = 'EDDI'", 1);
 		collector.checkThat(inst_response.getJsonObject(0).containsKey("Instrument"), is(true));
+		collector.checkThat(dft.parse(inst_response.getJsonObject(0).getJsonObject("Instrument")
+				.getString("startDate")), isA(Date.class));
+		collector.checkThat(dft.parse(inst_response.getJsonObject(0).getJsonObject("Instrument")
+				.getString("endDate")), isA(Date.class));
 
 		/*
 		 * Expected:
@@ -420,7 +425,7 @@ public class TestRS {
 		 * 'This work [...] supported [...] grant number AIS3241330750 which is greatfully acknowledged',
 		 * 'awardNumber':'AIS3241330750','funderIdentifier':'Crossref Funder ID:10.13039/100005376',
 		 * 'funderName':'American Mathematical Society','investigations':[],'publications':[]}}],
-		 * "pid":"DOI:00.0815/pub-00027","publicationDate":
+		 * "internalId":"Test internalId","pid":"DOI:00.0815/pub-00027","publicationDate":
 		 * "2022-10-31T00:00:00.000+01:00","relatedItems":[],"subject":
 		 * "integer sequence; OEIS; On-Line Encyclopedia of Integer Sequences",
 		 * "title":"Data from OEIS sequence A000027","users":[]}}]>
@@ -431,9 +436,25 @@ public class TestRS {
 				datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonString("title").getString(),
 				is("Data from OEIS sequence A000027"));
 		collector.checkThat(
+				datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonString("internalId").getString(),
+				is("Test internalId"));
+		collector.checkThat(
 				datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonArray("fundingReferences")
 				.getJsonObject(0).getJsonObject("funding").getJsonString("acknowledgement").getString(),
 				is("This work has partly been supported by American Mathematical Society under grant number AIS3241330750 which is greatfully acknowledged"));
+
+		/*
+		 * Expected: <[{'Subject':{'id':1,'createId':'simple/root','createTime':
+		 * '2025-07-24T15:18:51.000+02:00','modId':'simple/root','modTime':
+		 * '2025-07-24T15:18:51.000+02:00','classificationCode':'11B83','name':
+		 * 'Special sequences and polynomials','schemeURI':'https://zbmath.org/classification/',
+		 * 'subjectScheme':'Mathematics Subject Classification – MSC2020'}}]>
+		 */
+		JsonArray subject_response = search(session, "SELECT s FROM Subject s JOIN s.dataPublication AS d WHERE d.pid = 'DOI:00.0815/pub-00027' AND s.name = 'Special sequences and polynomials'", 1);
+		collector.checkThat(subject_response.getJsonObject(0).containsKey("Subject"), is(true));
+		collector.checkThat(
+				subject_response.getJsonObject(0).getJsonObject("Subject").getJsonString("classificationCode").getString(),
+				is("11B83"));
 	}
 
 	@Test

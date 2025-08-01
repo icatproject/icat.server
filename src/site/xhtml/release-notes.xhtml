@@ -6,6 +6,24 @@
 
 	<h1>ICAT Server Release Notes</h1>
 
+	<h2>6.2.0</h2>
+	<p>Schema additions</p>
+	<ul>
+		<li>Add a new entity type Subject to add keywords to data publications (Issue 327)</li>
+		<li>Add startDate and endDate fields to Instrument (Issue 349)</li>
+		<li>Add internalId attribute to DataPublication (Issue 355)</li>
+	</ul>
+
+	<h2>6.1.1</h2>
+	<p>Bug fixes:</p>
+	<ul>
+		<li>Move the Session table to a separate persistence context</li>
+		<li>Fix error message when an invalid access type is passed to isAccessAllowed()</li>
+		<li>Fix handling of DataPublicationType and StudyStatus during import/export</li>
+		<li>Fix null values being omitted from some search results instead of returning null</li>
+		<li>Various fixes to queue handling when indexing</li>
+	</ul>
+
 	<h2>6.1.0</h2>
 	<p>Add support for Open/Elasticsearch engine backends for free text searches. Adds to REST endpoints for free-text searches, and deprecates old functionality. Significant changes to the functionality and performance of searches:</p>
 	<ul>
