@@ -83,7 +83,6 @@ DataCollection(?:0)
 "a"
 "b"
 "c"
-"d"
 
 DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4), dataCollection(?:5))
 "Test port facility", "expt1", "one", "ds2", "df1 \t \r \n \\ \f \b \' \"",  "a"
@@ -92,35 +91,3 @@ DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, 
 Job(application(facility(name:0), name:1, version:2), inputDataCollection(?:3), outputDataCollection(?:4))
 "Test port facility", "aprog", "1.2.3", "a", "b"
 
-Study(?:0, description:1, endDate:2, name:3, pid:4, startDate:5, status:6, user(name:7))
-"1", "Some Study", 2012-09-30T20:00:00Z, "12-008", "DOI:00.0815/m-00333", 2012-07-09T08:00:00Z, COMPLETE, "db/fred"
-
-StudyInvestigation(investigation(facility(name:0), name:1, visitId:2), study(?:3))
-"Test port facility", "expt1", "zero", "1"
-
-DataPublicationType(description:0, facility(name:1), name:2)
-"Curated data publication", "Test port facility", "curated"
-"Open access raw data", "Test port facility", "raw"
-
-DataPublication(content(?:0), description:1, facility(name:2), pid:3, publicationDate:4, subject:5, title:6, type(facility(name:7), name:8))
-"d", "We provide the first 65535 integers from sequence A000027 of the On-Line Encyclopedia of Integer Sequences. The data consists of an HDF5 file, having one single entry: a one dimensional integer array.", "Test port facility", "DOI:00.0815/pub-00027", 2022-10-31T00:00:00.000+01:00, "integer sequence; OEIS; On-Line Encyclopedia of Integer Sequences", "Data from OEIS sequence A000027", "Test port facility", "curated"
-
-DataPublicationDate(date:0, dateType:1, publication(facility(name:2), pid:3))
-"2012-08-01", "Created", "Test port facility", "DOI:00.0815/pub-00027"
-"2022-04-29", "Submitted", "Test port facility", "DOI:00.0815/pub-00027"
-
-DataPublicationUser(contributorType:0, email:1, familyName:2, fullName:3, givenName:4, orderKey:5, publication(facility(name:6), pid:7), user(name:8))
-"Creator", null, "Brown", "Brown, Fred", "Fred", "01", "Test port facility", "DOI:00.0815/pub-00027", "db/fred"
-
-Affiliation(fullReference:0, name:1, pid:2, user(contributorType:3, publication(facility(name:4), pid:5), user(name:6)))
-"University of Chicago", "02: Chicago", "ROR:024mw5h28", "Creator", "Test port facility", "DOI:00.0815/pub-00027", "db/fred"
-"Université de Nancy", "01: Nancy", null, "Creator", "Test port facility", "DOI:00.0815/pub-00027", "db/fred"
-
-RelatedItem(fullReference:0, identifier:1, publication(facility(name:2), pid:3), relatedItemType:4, relationType:5, title:6)
-"OEIS Foundation Inc. (2022), The positive integers, Entry A000027 in The On-Line Encyclopedia of Integer Sequences", "URL:http://oeis.org/A000027", "Test port facility", "DOI:00.0815/pub-00027", "Other", "References", "The positive integers"
-
-FundingReference(awardNumber:0, awardTitle:1, funderIdentifier:2, funderName:3)
-"AIS3241330750", null, "Crossref Funder ID:10.13039/100005376", "American Mathematical Society"
-
-DataPublicationFunding(dataPublication(facility(name:0), pid:1), funding(awardNumber:2, funderName:3))
-"Test port facility", "DOI:00.0815/pub-00027", "AIS3241330750", "American Mathematical Society"

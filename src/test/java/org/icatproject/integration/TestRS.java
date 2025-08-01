@@ -384,8 +384,8 @@ public class TestRS {
 		 * 000Z","dataCollectionDatafiles":[],"dataCollectionDatasets":[],"jobsAsInput":[],"jobsAsOutput":[],"parameters
 		 * ":[]}}]>
 		 */
-		JsonArray dc_response = search(session, "SELECT dc from DataCollection dc", 3);
-		collector.checkThat(dc_response.size(), equalTo(3));
+		JsonArray dc_response = search(session, "SELECT dc from DataCollection dc", 4);
+		collector.checkThat(dc_response.size(), equalTo(4));
 		collector.checkThat(dc_response.getJsonObject(0).containsKey("DataCollection"), is(true));
 
 		/*
@@ -406,6 +406,22 @@ public class TestRS {
 		 */
 		JsonArray j_response = search(session, "SELECT j from Job j", 1);
 		collector.checkThat(j_response.getJsonObject(0).containsKey("Job"), is(true));
+
+		/*
+		 * Expected: <[{"DataPublication":{"id":6,"createId":"simple/root","createTime":
+		 * "2025-07-16T22:54:23.000+02:00","modId":"simple/root","modTime":
+		 * "2025-07-16T22:54:23.000+02:00","dates":[],"description":
+		 * "We provide the first 65535 integers [...] a one dimensional integer array.",
+		 * "fundingReferences":[],"pid":"DOI:00.0815/pub-00027","publicationDate":
+		 * "2022-10-31T00:00:00.000+01:00","relatedItems":[],"subject":
+		 * "integer sequence; OEIS; On-Line Encyclopedia of Integer Sequences",
+		 * "title":"Data from OEIS sequence A000027","users":[]}}]>
+		 */
+		JsonArray datapub_response = search(session, "SELECT d FROM DataPublication d", 1);
+		collector.checkThat(datapub_response.getJsonObject(0).containsKey("DataPublication"), is(true));
+		collector.checkThat(
+				datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonString("title").getString(),
+				is("Data from OEIS sequence A000027"));
 	}
 
 	@Test
@@ -2446,7 +2462,7 @@ public class TestRS {
 
 	private void importMetaData(Attributes attributes, String userName) throws Exception {
 		Session session = rootSession();
-		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat-import-check.port").toURI());
 
 		start = System.currentTimeMillis();
 		session.importMetaData(path, DuplicateAction.CHECK, attributes);
