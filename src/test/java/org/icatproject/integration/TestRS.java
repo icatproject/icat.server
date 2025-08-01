@@ -422,6 +422,19 @@ public class TestRS {
 		collector.checkThat(
 				datapub_response.getJsonObject(0).getJsonObject("DataPublication").getJsonString("title").getString(),
 				is("Data from OEIS sequence A000027"));
+
+		/*
+		 * Expected: <[{'Subject':{'id':1,'createId':'simple/root','createTime':
+		 * '2025-07-24T15:18:51.000+02:00','modId':'simple/root','modTime':
+		 * '2025-07-24T15:18:51.000+02:00','classificationCode':'11B83','name':
+		 * 'Special sequences and polynomials','schemeURI':'https://zbmath.org/classification/',
+		 * 'subjectScheme':'Mathematics Subject Classification – MSC2020'}}]>
+		 */
+		JsonArray subject_response = search(session, "SELECT s FROM Subject s JOIN s.dataPublication AS d WHERE d.pid = 'DOI:00.0815/pub-00027' AND s.name = 'Special sequences and polynomials'", 1);
+		collector.checkThat(subject_response.getJsonObject(0).containsKey("Subject"), is(true));
+		collector.checkThat(
+				subject_response.getJsonObject(0).getJsonObject("Subject").getJsonString("classificationCode").getString(),
+				is("11B83"));
 	}
 
 	@Test
