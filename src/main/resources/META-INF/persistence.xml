@@ -59,6 +59,7 @@
 		<class>org.icatproject.core.entity.Shift</class>
 		<class>org.icatproject.core.entity.StudyInvestigation</class>
 		<class>org.icatproject.core.entity.Study</class>
+		<class>org.icatproject.core.entity.Subject</class>
 		<class>org.icatproject.core.entity.Technique</class>
 		<class>org.icatproject.core.entity.UserGroup</class>
 		<class>org.icatproject.core.entity.User</class>
