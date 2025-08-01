@@ -70,6 +70,10 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 	@Column(length = 4000)
 	private String description;
 
+	@Comment("An additional identifier used for internal purposes")
+	@Column(length = 255)
+	private String internalId;
+
 	/* Needed for JPA */
 	public DataPublication() {
 	}
@@ -126,6 +130,10 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 		return description;
 	}
 
+	public String getInternalId() {
+		return internalId;
+	}
+
 	public void setFacility(Facility facility) {
 		this.facility = facility;
 	}
@@ -176,5 +184,9 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public void setInternalId(String internalId) {
+		this.internalId = internalId;
 	}
 }
