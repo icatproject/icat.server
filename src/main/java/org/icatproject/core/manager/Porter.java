@@ -39,7 +39,6 @@ import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.ParameterValueType;
-import org.icatproject.core.entity.Session;
 import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.manager.importParser.Attribute;
 import org.icatproject.core.manager.importParser.Input;
@@ -84,6 +83,9 @@ public class Porter {
 
 	@EJB
 	PropertyHandler propertyHandler;
+
+	@EJB
+	SessionManager sessionManager;
 
 	private Set<String> rootUserNames;
 
@@ -186,7 +188,7 @@ public class Porter {
 			}
 		}
 
-		String userId = getUserName(sessionId, entityManager);
+		String userId = sessionManager.getUserName(sessionId);
 		boolean allAttributes = attributes == Attributes.ALL;
 		if (allAttributes && !rootUserNames.contains(userId)) {
 			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES,
@@ -249,31 +251,6 @@ public class Porter {
 		} catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					e.getClass().getSimpleName() + " " + e.getMessage() + " at line " + linum, linum);
-		}
-	}
-
-	private Session getSession(String sessionId, EntityManager entityManager) throws IcatException {
-		Session session = null;
-		if (sessionId == null || sessionId.equals("")) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session Id cannot be null or empty.");
-		}
-		session = entityManager.find(Session.class, sessionId);
-		if (session == null) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION,
-					"Unable to find user by sessionid: " + sessionId);
-		}
-		return session;
-	}
-
-	private String getUserName(String sessionId, EntityManager entityManager) throws IcatException {
-		try {
-			Session session = getSession(sessionId, entityManager);
-			String userName = session.getUserName();
-			logger.debug("user: " + userName + " is associated with: " + sessionId);
-			return userName;
-		} catch (IcatException e) {
-			logger.debug("sessionId " + sessionId + " is not associated with valid session " + e.getMessage());
-			throw e;
 		}
 	}
 
@@ -593,7 +570,7 @@ public class Porter {
 		return table;
 	}
 
-	public Response exportData(String jsonString, EntityManager entityManager) throws IcatException {
+	public Response exportData(String jsonString) throws IcatException {
 		if (jsonString == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "json must not be null");
 		}
@@ -626,7 +603,7 @@ public class Porter {
 			}
 		}
 		logger.debug(sessionId + " issues " + query);
-		String userId = getUserName(sessionId, entityManager);
+		String userId = sessionManager.getUserName(sessionId);
 		if (query != null) {
 			return beanManager.export(userId, query, attributes == Attributes.ALL);
 		} else {
