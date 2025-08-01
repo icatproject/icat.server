@@ -92,6 +92,12 @@ DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, 
 Job(application(facility(name:0), name:1, version:2), inputDataCollection(?:3), outputDataCollection(?:4))
 "Test port facility", "aprog", "1.2.3", "a", "b"
 
+Study(?:0, description:1, endDate:2, name:3, pid:4, startDate:5, status:6, user(name:7))
+"1", "Some Study", 2012-09-30T20:00:00Z, "12-008", "DOI:00.0815/m-00333", 2012-07-09T08:00:00Z, COMPLETE, "db/fred"
+
+StudyInvestigation(investigation(facility(name:0), name:1, visitId:2), study(?:3))
+"Test port facility", "expt1", "zero", "1"
+
 DataPublicationType(description:0, facility(name:1), name:2)
 "Curated data publication", "Test port facility", "curated"
 "Open access raw data", "Test port facility", "raw"

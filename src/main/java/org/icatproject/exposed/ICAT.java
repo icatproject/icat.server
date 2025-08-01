@@ -72,6 +72,7 @@ import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.NotificationTransmitter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
+import org.icatproject.core.manager.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,8 +88,6 @@ public class ICAT {
 	@EJB
 	EntityBeanManager beanManager;
 
-	private int lifetimeMinutes;
-
 	@EJB
 	PropertyHandler propertyHandler;
 
@@ -97,11 +96,14 @@ public class ICAT {
 	@EJB
 	NotificationTransmitter transmitter;
 
+	@EJB
+	SessionManager sessionManager;
+
 	@Resource
 	WebServiceContext webServiceContext;
 
 	private void checkRoot(String sessionId) throws IcatException {
-		String userId = beanManager.getUserName(sessionId);
+		String userId = sessionManager.getUserName(sessionId);
 		if (!rootUserNames.contains(userId)) {
 			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES, "user must be in rootUserNames");
 		}
@@ -255,12 +257,12 @@ public class ICAT {
 
 	@WebMethod()
 	public double getRemainingMinutes(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		return beanManager.getRemainingMinutes(sessionId);
+		return sessionManager.getRemainingMinutes(sessionId);
 	}
 
 	@WebMethod
 	public String getUserName(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		return beanManager.getUserName(sessionId);
+		return sessionManager.getUserName(sessionId);
 	}
 
 	@WebMethod()
@@ -271,7 +273,6 @@ public class ICAT {
 	@PostConstruct
 	private void init() {
 		authPlugins = propertyHandler.getAuthPlugins();
-		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
 		rootUserNames = propertyHandler.getRootUserNames();
 	}
 
@@ -304,7 +305,7 @@ public class ICAT {
 		Authenticator authenticator = extendedAuthenticator.getAuthenticator();
 		logger.debug("Using " + plugin + " to authenticate");
 		String userName = authenticator.authenticate(credentials, ip).getUserName();
-		return beanManager.login(userName, lifetimeMinutes, ip);
+		return sessionManager.login(userName, ip);
 	}
 
 	@AroundInvoke
@@ -336,14 +337,14 @@ public class ICAT {
 	public void logout(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		String ip = ((HttpServletRequest) webServiceContext.getMessageContext().get(MessageContext.SERVLET_REQUEST))
 				.getRemoteAddr();
-		beanManager.logout(sessionId, ip);
+		sessionManager.logout(sessionId, ip);
 	}
 
 	@WebMethod
 	public void refresh(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		String ip = ((HttpServletRequest) webServiceContext.getMessageContext().get(MessageContext.SERVLET_REQUEST))
 				.getRemoteAddr();
-		beanManager.refresh(sessionId, lifetimeMinutes, ip);
+		sessionManager.refresh(sessionId, ip);
 	}
 
 	private void reportIcatException(IcatException e) throws IcatException {
