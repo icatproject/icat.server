@@ -2342,7 +2342,7 @@ public class TestRS {
 	private void exportMetaDataDump(Map<String, String> credentials) throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Session session = icat.login("db", credentials);
-		Path path = Paths.get(this.getClass().getResource("/icat-import-export.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat.port").toURI());
 
 		Map<String, String> rootCredentials = new HashMap<>();
 		rootCredentials.put("username", "root");
@@ -2474,7 +2474,7 @@ public class TestRS {
 
 	private void importMetaData(Attributes attributes, String userName) throws Exception {
 		Session session = rootSession();
-		Path path = Paths.get(this.getClass().getResource("/icat-import-export.port").toURI());
+		Path path = Paths.get(this.getClass().getResource("/icat-import-check.port").toURI());
 
 		start = System.currentTimeMillis();
 		session.importMetaData(path, DuplicateAction.CHECK, attributes);
