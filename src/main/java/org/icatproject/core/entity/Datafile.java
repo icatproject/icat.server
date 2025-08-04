@@ -71,6 +71,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	private Long fileSize = 0L;
 
 	@Comment("The logical location of the file - which may also be the physical location")
+	@Column(length = 511)
 	private String location;
 
 	@Comment("A name given to the file")
