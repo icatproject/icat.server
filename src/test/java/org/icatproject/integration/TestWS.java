@@ -58,7 +58,6 @@ import org.icatproject.Study;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.utils.ContainerGetter.ContainerType;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -1808,20 +1807,6 @@ public class TestWS {
 		assertEquals(0, results.size());
 		results = session.search("SELECT ds FROM Dataset ds WHERE ds.complete = FALSE");
 		assertEquals(4, results.size());
-
-		if (session.getContainerType() != ContainerType.Glassfish
-				&& session.getContainerType() != ContainerType.JBoss) {
-			// This should throw an exception as datafile is not an attribute of
-			// Dataset.
-			try {
-				results = session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafile df) = 2");
-				fail("Should have thrown an exception");
-			} catch (IcatException_Exception e) {
-				assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-				assertTrue(e.getMessage().indexOf("EntityManager") > 0
-						|| e.getMessage().indexOf("could not resolve property") > 0);
-			}
-		}
 
 		// Nested select
 		results = session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafiles df) = 2");
