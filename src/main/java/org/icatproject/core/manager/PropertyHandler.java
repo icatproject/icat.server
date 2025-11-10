@@ -54,8 +54,6 @@ import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.manager.search.SearchManager;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
-import org.icatproject.utils.ContainerGetter;
-import org.icatproject.utils.ContainerGetter.ContainerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -301,7 +299,6 @@ public class PropertyHandler {
 	private int maxIdsInQuery;
 	private long importCacheSize;
 	private long exportCacheSize;
-	private ContainerType containerType;
 	private String jmsTopicConnectionFactory;
 	private String digestKey;
 	private SearchEngine searchEngine;
@@ -596,13 +593,6 @@ public class PropertyHandler {
 					"java:comp/DefaultJMSConnectionFactory");
 			formattedProps.add("jms.topicConnectionFactory " + jmsTopicConnectionFactory);
 
-			/* find type of container and set flags */
-			containerType = ContainerGetter.getContainer();
-			logger.info("ICAT has been deployed in a " + containerType + " container");
-			if (containerType == ContainerType.UNKNOWN) {
-				abend("Container type " + containerType + " is not recognised");
-			}
-
 			key = "search.indexBatchSize";
 			if (props.has(key)) {
 				searchIndexBatchSize = props.getPositiveInt(key);
@@ -675,10 +665,6 @@ public class PropertyHandler {
 
 	public long getExportCacheSize() {
 		return exportCacheSize;
-	}
-
-	public ContainerType getContainerType() {
-		return containerType;
 	}
 
 	public String getJmsTopicConnectionFactory() {
