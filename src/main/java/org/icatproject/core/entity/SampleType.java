@@ -26,7 +26,7 @@ import org.icatproject.core.manager.search.SearchApi;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME",
-		"MOLECULARFORMULA" }) })
+		"PID" }) })
 public class SampleType extends EntityBaseBean implements Serializable {
 
 	@Comment("The facility which has defined this sample type")
@@ -34,8 +34,12 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Facility facility;
 
+	@Comment("A persistent identifier attributed to this sample type, ideally referring to a vocabulary term")
+    @Column(name = "PID", nullable = false)
+    private String pid;
+
 	@Comment("The formula written as a string -e.g. C2H6O2 for ethylene glycol")
-	@Column(nullable = false, name = "MOLECULARFORMULA")
+	@Column(name = "MOLECULARFORMULA")
 	private String molecularFormula;
 
 	@Column(nullable = false, name = "NAME")
@@ -58,6 +62,10 @@ public class SampleType extends EntityBaseBean implements Serializable {
 		return facility;
 	}
 
+	public String getPid() {
+        return pid;
+    }
+
 	public String getMolecularFormula() {
 		return molecularFormula;
 	}
@@ -77,6 +85,10 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	public void setFacility(Facility facility) {
 		this.facility = facility;
 	}
+
+	public void setPid(String pid) {
+        this.pid = pid;
+    }
 
 	public void setMolecularFormula(String molecularFormula) {
 		this.molecularFormula = molecularFormula;
