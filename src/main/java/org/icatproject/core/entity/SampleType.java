@@ -35,8 +35,8 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	private Facility facility;
 
 	@Comment("A persistent identifier attributed to this sample type, ideally referring to a vocabulary term")
-    @Column(name = "PID", nullable = false)
-    private String pid;
+	@Column(name = "PID", nullable = false)
+	private String pid;
 
 	@Comment("The formula written as a string -e.g. C2H6O2 for ethylene glycol")
 	@Column(name = "MOLECULARFORMULA")
@@ -63,8 +63,8 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	}
 
 	public String getPid() {
-        return pid;
-    }
+		return pid;
+	}
 
 	public String getMolecularFormula() {
 		return molecularFormula;
@@ -87,8 +87,8 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	}
 
 	public void setPid(String pid) {
-        this.pid = pid;
-    }
+		this.pid = pid;
+	}
 
 	public void setMolecularFormula(String molecularFormula) {
 		this.molecularFormula = molecularFormula;
