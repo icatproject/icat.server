@@ -104,7 +104,6 @@ public class TestWS {
 
 		SampleType sampleType = new SampleType();
 		/* FIXME: sampleType.setPid("somepid"); */
-		sampleType.setFacility(facility);
 		sampleType.setName("somename");
 		sampleType.setMolecularFormula("Someformula");
 		session.create(sampleType);
@@ -1008,7 +1007,6 @@ public class TestWS {
 
 		SampleType sampleType = new SampleType();
 		/* FIXME: sampleType.setPid("somepid"); */
-		sampleType.setFacility(facility);
 		sampleType.setName("somename");
 		sampleType.setMolecularFormula("Someformula");
 		session.create(sampleType);

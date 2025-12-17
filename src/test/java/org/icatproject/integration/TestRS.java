@@ -187,7 +187,7 @@ public class TestRS {
 		 * "2019-03-11T15:58:33.000Z","applications":[],"datafileFormats":[],
 		 * "datasetTypes":[],"daysUntilRelease":90,"facilityCycles":[],"instruments":[],
 		 * "investigationTypes":[],"investigations":[],"name":"Test port facility"
-		 * ,"parameterTypes":[],"sampleTypes":[]}}]>
+		 * ,"parameterTypes":[]}}]>
 		 */
 		JsonArray fac_response = search(session, "SELECT f from Facility f WHERE f.name = 'Test port facility'", 1);
 		collector.checkThat(fac_response.getJsonObject(0).containsKey("Facility"), is(true));
@@ -293,12 +293,11 @@ public class TestRS {
 		collector.checkThat(st_response.getJsonObject(0).containsKey("SampleType"), is(true));
 
 		/*
-		 * Expected: <[{"SampleType":{"id":????,"createId":"db/notroot","createTime":
-		 * "2019-03-11T15:58:33.000Z","modId":"db/notroot","modTime":
-		 * "2019-03-11T15:58:33.000Z","molecularFormula":null,"name":"N/A",
-		 * "pid":"st:004","safetyInformation":"N/A","samples":[]}}]>
+		 * Expected: <[{"SampleType":{"id":420,"createId":"db/notroot","createTime":
+		 * "2025-12-17T13:23:13.000Z","modId":"db/notroot","modTime":
+		 * "2025-12-17T13:23:13.000Z","name":"fossil","pid":"st:004","samples":[]}}]>
 		 */
-		JsonArray st_null_response = search(session, "SELECT st from SampleType st WHERE st.name = 'N/A'", 1);
+		JsonArray st_null_response = search(session, "SELECT st from SampleType st WHERE st.name = 'fossil'", 1);
 		collector.checkThat(st_null_response.getJsonObject(0).containsKey("SampleType"), is(true));
 		collector.checkThat(st_null_response.getJsonObject(0).getJsonObject("SampleType").getString("pid"), is("st:004"));
 		collector.checkThat(st_null_response.getJsonObject(0).getJsonObject("SampleType").get("molecularFormula"), is(equalTo(null)));
