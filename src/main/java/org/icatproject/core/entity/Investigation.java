@@ -321,7 +321,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "name", name);
 		SearchApi.encodeString(gen, "visitId", visitId);
 		SearchApi.encodeString(gen, "title", title);
@@ -347,14 +347,14 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		SearchApi.encodeLong(gen, "id", id);
 
 		if (facility.getName() == null) {
-			facility = manager.find(facility.getClass(), facility.id);
+			facility = entityManager.find(facility.getClass(), facility.id);
 		}
-		facility.getDoc(manager, gen);
+		facility.getDoc(entityManager, gen);
 
 		if (type.getName() == null) {
-			type = manager.find(type.getClass(), type.id);
+			type = entityManager.find(type.getClass(), type.id);
 		}
-		type.getDoc(manager, gen);
+		type.getDoc(entityManager, gen);
 	}
 
 	/**

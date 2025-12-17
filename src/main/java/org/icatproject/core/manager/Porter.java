@@ -33,14 +33,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.TypedQuery;
-import jakarta.transaction.UserTransaction;
 import jakarta.ws.rs.core.Response;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.ParameterValueType;
-import org.icatproject.core.entity.Session;
+import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.manager.importParser.Attribute;
 import org.icatproject.core.manager.importParser.Input;
 import org.icatproject.core.manager.importParser.ParserException;
@@ -84,6 +83,9 @@ public class Porter {
 
 	@EJB
 	PropertyHandler propertyHandler;
+
+	@EJB
+	SessionManager sessionManager;
 
 	private Set<String> rootUserNames;
 
@@ -130,8 +132,7 @@ public class Porter {
 
 	}
 
-	public void importData(String jsonString, InputStream body, EntityManager manager, UserTransaction userTransaction,
-			String ip) throws IcatException {
+	public void importData(String jsonString, InputStream body, EntityManager entityManager, String ip) throws IcatException {
 
 		@SuppressWarnings("serial")
 		LinkedHashMap<String, EntityBaseBean> jpqlCache = new LinkedHashMap<String, EntityBaseBean>() {
@@ -187,7 +188,7 @@ public class Porter {
 			}
 		}
 
-		String userId = getUserName(sessionId, manager);
+		String userId = sessionManager.getUserName(sessionId);
 		boolean allAttributes = attributes == Attributes.ALL;
 		if (allAttributes && !rootUserNames.contains(userId)) {
 			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES,
@@ -233,8 +234,7 @@ public class Porter {
 				} else if (table == null) {
 					table = processTableHeader(line);
 				} else {
-					processTuple(table, line, userId, jpqlCache, ids, idCache, manager, userTransaction,
-							duplicateAction, attributes, allAttributes, ip);
+					processTuple(table, line, userId, jpqlCache, ids, idCache, entityManager, duplicateAction, attributes, allAttributes, ip);
 				}
 			}
 			if (table != null) {
@@ -254,36 +254,11 @@ public class Porter {
 		}
 	}
 
-	private Session getSession(String sessionId, EntityManager manager) throws IcatException {
-		Session session = null;
-		if (sessionId == null || sessionId.equals("")) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session Id cannot be null or empty.");
-		}
-		session = manager.find(Session.class, sessionId);
-		if (session == null) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION,
-					"Unable to find user by sessionid: " + sessionId);
-		}
-		return session;
-	}
-
-	private String getUserName(String sessionId, EntityManager manager) throws IcatException {
-		try {
-			Session session = getSession(sessionId, manager);
-			String userName = session.getUserName();
-			logger.debug("user: " + userName + " is associated with: " + sessionId);
-			return userName;
-		} catch (IcatException e) {
-			logger.debug("sessionId " + sessionId + " is not associated with valid session " + e.getMessage());
-			throw e;
-		}
-	}
-
 	private void processTuple(Table table, String line, String userId, Map<String, EntityBaseBean> cache,
-			Map<String, Long> ids, LinkedHashMap<Long, EntityBaseBean> idCache, EntityManager manager,
-			UserTransaction userTransaction, DuplicateAction duplicateAction, Attributes attributes,
-			boolean allAttributes, String ip) throws IcatException, LexerException, ParserException,
-			IllegalArgumentException, InvocationTargetException, IllegalAccessException {
+			Map<String, Long> ids, LinkedHashMap<Long, EntityBaseBean> idCache, EntityManager entityManager,
+			DuplicateAction duplicateAction, Attributes attributes, boolean allAttributes, String ip) throws
+			IcatException, LexerException, ParserException, IllegalArgumentException, InvocationTargetException,
+			IllegalAccessException {
 		logger.debug("Requested add " + line + " to " + table.getName());
 		Input input = new Input(Tokenizer.getTokens(line));
 		List<TableField> tableFields = table.getTableFields();
@@ -355,6 +330,13 @@ public class Porter {
 							throw new ParserException(
 									"Expected a " + ParameterValueType.values() + " value for column " + offset);
 						}
+					} else if (fType.equals("StudyStatus")) {
+						if (tType == Token.Type.NAME) {
+							setter.invoke(bean, StudyStatus.valueOf(token.getValue().toUpperCase()));
+						} else {
+							throw new ParserException(
+									"Expected a " + StudyStatus.values() + " value for column " + offset);
+						}
 					} else if (tableField.isQmark()) {
 						Long id = ids.get(fType + "." + token.getValue());
 						if (id == null) {
@@ -362,7 +344,7 @@ public class Porter {
 						}
 						EntityBaseBean eb = idCache.get(id);
 						if (eb == null) {
-							eb = (EntityBaseBean) manager.find(f.getType(), id);
+							eb = (EntityBaseBean) entityManager.find(f.getType(), id);
 							if (eb == null) {
 								throw new ParserException(
 										"? field '" + token.getValue() + "' => id " + id + " no longer exists");
@@ -404,7 +386,7 @@ public class Porter {
 					EntityBaseBean eb = cache.get(key);
 					if (eb == null) {
 						logger.debug("'" + key + "' not found in import cache");
-						TypedQuery<EntityBaseBean> query = manager.createQuery(jpql, EntityBaseBean.class);
+						TypedQuery<EntityBaseBean> query = entityManager.createQuery(jpql, EntityBaseBean.class);
 						for (Attribute attribute : tableField.getAttributes()) {
 							int n = attribute.getFieldNum();
 							token = tokens.get(n);
@@ -452,7 +434,7 @@ public class Porter {
 		boolean modIdSet = bean.getModId() != null;
 		Long id = null;
 		try {
-			id = beanManager.create(userId, bean, manager, userTransaction, allAttributes, ip).getPk();
+			id = beanManager.create(userId, bean, allAttributes, ip).getPk();
 		} catch (IcatException e) {
 			if (e.getType() == IcatExceptionType.OBJECT_ALREADY_EXISTS) {
 				if (duplicateAction == DuplicateAction.IGNORE) {
@@ -461,10 +443,10 @@ public class Porter {
 					return;
 				} else if (duplicateAction == DuplicateAction.CHECK) {
 
-					EntityBaseBean other = beanManager.lookup(bean, manager);
+					EntityBaseBean other = beanManager.lookup(bean);
 					if (other == null) {// Somebody else got rid of it
 										// meanwhile
-						id = beanManager.create(userId, bean, manager, userTransaction, false, ip).getPk();
+						id = beanManager.create(userId, bean, false, ip).getPk();
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but it has now vanished");
 					} else { // Compare bean and other
@@ -551,15 +533,15 @@ public class Porter {
 					}
 
 				} else if (duplicateAction == DuplicateAction.OVERWRITE) {
-					EntityBaseBean other = beanManager.lookup(bean, manager);
+					EntityBaseBean other = beanManager.lookup(bean);
 					if (other == null) {// Somebody else got rid of it meanwhile
-						id = beanManager.create(userId, bean, manager, userTransaction, false, ip).getPk();
+						id = beanManager.create(userId, bean, false, ip).getPk();
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but it has now vanished");
 					} else {
 						id = other.getId();
 						bean.setId(id);
-						beanManager.update(userId, bean, manager, userTransaction, allAttributes, ip);
+						beanManager.update(userId, bean, allAttributes, ip);
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but DuplicateAction is OVERWRITE");
 					}
@@ -588,8 +570,7 @@ public class Porter {
 		return table;
 	}
 
-	public Response exportData(String jsonString, EntityManager manager, UserTransaction userTransaction)
-			throws IcatException {
+	public Response exportData(String jsonString) throws IcatException {
 		if (jsonString == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "json must not be null");
 		}
@@ -622,11 +603,11 @@ public class Porter {
 			}
 		}
 		logger.debug(sessionId + " issues " + query);
-		String userId = getUserName(sessionId, manager);
+		String userId = sessionManager.getUserName(sessionId);
 		if (query != null) {
-			return beanManager.export(userId, query, attributes == Attributes.ALL, manager, userTransaction);
+			return beanManager.export(userId, query, attributes == Attributes.ALL);
 		} else {
-			return beanManager.export(userId, attributes == Attributes.ALL, manager, userTransaction);
+			return beanManager.export(userId, attributes == Attributes.ALL);
 		}
 	}
 

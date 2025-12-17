@@ -1,6 +1,6 @@
 package org.icatproject.integration;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -15,10 +15,11 @@ import org.icatproject.DatasetType;
 import org.icatproject.Facility;
 import org.icatproject.Investigation;
 import org.icatproject.InvestigationType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the DataPublication functionality added in ICAT 5.0
@@ -27,7 +28,7 @@ public class TestDataPublication {
 
 	private static WSession session;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws Exception {
 		try {
 			session = new WSession();
@@ -37,12 +38,12 @@ public class TestDataPublication {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void initializeSession() throws Exception {
 		session.setAuthz();
 	}
 
-	@After
+	@AfterEach
 	public void clearSession() throws Exception {
         // delete the Facility objects (including children)
         // and also DataCollection and Study objects (can span Facilities)
@@ -102,7 +103,7 @@ public class TestDataPublication {
 
 		// now find and check them
 		List<Object> results1 = session.search("SELECT dp FROM DataPublication dp WHERE dp.type IS NULL INCLUDE dp.dates");
-		assertEquals(results1.size(), 1);
+		assertEquals(1, results1.size());
 		DataPublication dp1 = (DataPublication)results1.get(0);
 		System.out.println("Found dp1 with ID: " + dp1.getId());
 		assertEquals(dataPublicationNoType.getId(), dp1.getId());
@@ -111,13 +112,13 @@ public class TestDataPublication {
 		assertEquals(testDateString, ((DataPublicationDate)dp1.getDates().get(0)).getDate());
 
 		List<Object> results2 = session.search("SELECT dp FROM DataPublication dp WHERE dp.type.name = 'investigation'");
-		assertEquals(results2.size(), 1);
+		assertEquals(1, results2.size());
 		DataPublication dp2 = (DataPublication)results2.get(0);
 		System.out.println("Found dp2 with ID: " + dp2.getId());
 		assertEquals(dataPublicationInvType.getId(), dp2.getId());
 
 		List<Object> results3 = session.search("SELECT dp FROM DataPublication dp WHERE dp.type.name = 'user-defined'");
-		assertEquals(results3.size(), 1);
+		assertEquals(1, results3.size());
 		DataPublication dp3 = (DataPublication)results3.get(0);
 		System.out.println("Found dp3 with ID: " + dp3.getId());
 		assertEquals(dataPublicationUserType.getId(), dp3.getId());

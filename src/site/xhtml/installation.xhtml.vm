@@ -125,7 +125,7 @@
 	<h3>Database schema</h3>
 	<p>
 		The direct upgrade of the database schema is supported for icat.server
-		4.7.0 and newer.  This is done automatically: the initialization of
+		4.7.0 and newer.  This is done mostly automatically: the initialization of
 		icat.server will create all missing tables, indices, and columns when
 		the new version is deployed for the first time.
 	</p>
@@ -135,6 +135,14 @@
 		<a href="https://repo.icatproject.org/site/icat/server/4.7.0/installation.html">install
 		instructions of that version</a>. In a second step, you can make use of
 		implied schema upgrade while installing the current version.
+	</p>
+	<h3>Upgrade 6.1.0 schema to 6.2.0</h3>
+	<p>
+		You may increase the size of the "location" column of the Datafile and the Dataset
+		table to 511 to match the size the column has on a brand new installation.  For
+		MySQL run <kbd>mysql -u icat -p icat &lt; upgrade_mysql_6_2.sql</kbd> or for Oracle
+		run <kbd>sqlplus icat @upgrade_oracle_6_2.sql</kbd> where in both cases it is
+		assumed that the tables are owned by user "icat".
 	</p>
 	<h3>Database triggers (optional)</h3>
 	<p>

@@ -320,7 +320,7 @@ public class OpensearchApi extends SearchApi {
 	}
 
 	@Override
-	public void addNow(String entityName, List<Long> ids, EntityManager manager,
+	public void addNow(String entityName, List<Long> ids, EntityManager entityManager,
 			Class<? extends EntityBaseBean> klass, ExecutorService getBeanDocExecutor)
 			throws IcatException, IOException, URISyntaxException {
 		// getBeanDocExecutor is not used for this implementation, but is
@@ -329,12 +329,12 @@ public class OpensearchApi extends SearchApi {
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 			gen.writeStartArray();
 			for (long id : ids) {
-				EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
+				EntityBaseBean bean = (EntityBaseBean) entityManager.find(klass, id);
 				if (bean != null) {
 					gen.writeStartObject().writeStartObject("create");
 					gen.write("_index", entityName).write("_id", bean.getId());
 					gen.writeStartObject("doc");
-					bean.getDoc(manager, gen);
+					bean.getDoc(entityManager, gen);
 					gen.writeEnd().writeEnd().writeEnd();
 				}
 			}

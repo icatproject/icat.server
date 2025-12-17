@@ -1,14 +1,11 @@
 package org.icatproject.core.oldparser;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
-import org.icatproject.core.oldparser.OldLexerException;
-import org.icatproject.core.oldparser.OldToken;
-import org.icatproject.core.oldparser.OldTokenizer;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 
 public class TestTokenizer {
 
@@ -45,7 +42,7 @@ public class TestTokenizer {
 			assertEquals(tostrings[i++], t.toString());
 		}
 	}
-	
+
 	@Test
 	public void testQuotes() throws Exception {
 		List<OldToken> tokens = OldTokenizer.getTokens("c='aaa', d='bbb''qqq', e = ' ', f = '', g = ''''''");
@@ -57,24 +54,24 @@ public class TestTokenizer {
 		}
 	}
 
-	@Test(expected = OldLexerException.class)
+	@Test
 	public void testBad1() throws Exception {
-		OldTokenizer.getTokens("!");
+		assertThrows(OldLexerException.class, () -> OldTokenizer.getTokens("!"));
 	}
 
-	@Test(expected = OldLexerException.class)
+	@Test
 	public void testBad2() throws Exception {
-		OldTokenizer.getTokens("! ");
+		assertThrows(OldLexerException.class, () -> OldTokenizer.getTokens("! "));
 	}
 
-	@Test(expected = OldLexerException.class)
+	@Test
 	public void testBad3() throws Exception {
-		OldTokenizer.getTokens("'abcds''qwe ");
+		assertThrows(OldLexerException.class, () -> OldTokenizer.getTokens("'abcds''qwe "));
 	}
-	
-	@Test(expected = OldLexerException.class)
+
+	@Test
 	public void testBad4() throws Exception {
-		OldTokenizer.getTokens("{ts 1950-01-21T02:00:00}");
+		assertThrows(OldLexerException.class, () -> OldTokenizer.getTokens("{ts 1950-01-21T02:00:00}"));
 	}
 
 }

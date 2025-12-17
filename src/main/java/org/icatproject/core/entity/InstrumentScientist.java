@@ -49,11 +49,11 @@ public class InstrumentScientist extends EntityBaseBean implements Serializable 
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		if (user.getName() == null) {
-			user = manager.find(user.getClass(), user.id);
+			user = entityManager.find(user.getClass(), user.id);
 		}
-		user.getDoc(manager, gen);
+		user.getDoc(entityManager, gen);
 		SearchApi.encodeLong(gen, "instrument.id", instrument.id);
 		SearchApi.encodeLong(gen, "id", id);
 	}

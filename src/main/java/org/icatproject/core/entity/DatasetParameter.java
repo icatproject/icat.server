@@ -14,7 +14,6 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
 import org.icatproject.core.manager.search.SearchApi;
-import org.icatproject.core.manager.GateKeeper;
 
 @Comment("A parameter associated with a data set")
 @SuppressWarnings("serial")
@@ -37,9 +36,8 @@ public class DatasetParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
-			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode);
+	public void preparePersist(String modId, EntityManager entityManager, PersistMode persistMode) throws IcatException {
+		super.preparePersist(modId, entityManager, persistMode);
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}
@@ -54,8 +52,8 @@ public class DatasetParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void getDoc(EntityManager manager, JsonGenerator gen) throws IcatException {
-		super.getDoc(manager, gen);
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
+		super.getDoc(entityManager, gen);
 		SearchApi.encodeLong(gen, "dataset.id", dataset.id);
 	}
 }
