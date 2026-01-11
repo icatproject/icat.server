@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 @XmlRootElement
 public class FieldSet implements Serializable {
-    @XmlElement(name = "fields")
+    @XmlElement(name = "fields", nillable = true)
     private Object[] fields;
 
     public FieldSet() {
@@ -19,9 +19,5 @@ public class FieldSet implements Serializable {
 
     public Object[] getFields() {
         return fields;
-    }
-
-    public void setFields() {
-        this.fields = fields;
     }
 }

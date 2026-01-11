@@ -26,7 +26,6 @@ public class TableField {
 	private String jpql;
 	private List<Attribute> attributes;
 	private boolean qmark;
-	private final static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
 	private static Map<String, Method> systemSetters = new HashMap<>();
 
@@ -46,7 +45,7 @@ public class TableField {
 	}
 
 	@SuppressWarnings("unchecked")
-	public TableField(Input input, Class<EntityBaseBean> tableClass,
+	public TableField(Input input, Class<? extends EntityBaseBean> tableClass,
 			Map<String, Field> fieldsByName, Map<Field, Method> setters) throws ParserException,
 			IcatException {
 		Token next = input.consume(Token.Type.NAME, Token.Type.QMARK);
@@ -84,7 +83,7 @@ public class TableField {
 			} else {
 				Class<EntityBaseBean> entityClass = (Class<EntityBaseBean>) field.getType();
 				parenAttlist = new ParenAttList(input, entityClass,
-						eiHandler.getFieldsByName(entityClass), eiHandler.getSetters(tableClass),
+						EntityInfoHandler.getFieldsByName(entityClass), EntityInfoHandler.getSetters(tableClass),
 						"n0");
 				StringBuilder sb = new StringBuilder("SELECT n0 FROM "
 						+ entityClass.getSimpleName() + " n0" + parenAttlist.getJoins());

@@ -27,7 +27,7 @@ public class IncludeClause {
 
 		public Step(int hereVarNum, String fieldName, int thereVarNum, GateKeeper gateKeeper, Set<String> keys)
 				throws IcatException, ParserException {
-			for (Relationship r : eiHandler.getRelatedEntities(types.get(hereVarNum))) {
+			for (Relationship r : EntityInfoHandler.getRelatedEntities(types.get(hereVarNum))) {
 				if (r.getField().getName().equals(fieldName)) {
 					types.put(thereVarNum, r.getDestinationBean());
 					relationship = r;
@@ -66,8 +66,6 @@ public class IncludeClause {
 		}
 
 	}
-
-	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
 	static Logger logger = LoggerFactory.getLogger(IncludeClause.class);
 

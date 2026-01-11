@@ -51,6 +51,7 @@ import org.icatproject.authentication.Authentication;
 import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
+import org.icatproject.core.manager.search.SearchManager;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 import org.icatproject.utils.ContainerGetter;
@@ -225,6 +226,10 @@ public class PropertyHandler {
 		READ, WRITE, SESSION, INFO
 	}
 
+	public enum SearchEngine {
+		LUCENE, ELASTICSEARCH, OPENSEARCH
+	}
+
 	public class ExtendedAuthenticator {
 
 		private Authenticator authenticator;
@@ -273,16 +278,15 @@ public class PropertyHandler {
 		return rootUserNames;
 	}
 
-	
 	/**
-	 * Configure which entities will be indexed by lucene on ingest
+	 * Configure which entities will be indexed on ingest
 	 */
 	private Set<String> entitiesToIndex = new HashSet<String>();
-	
+
 	public Set<String> getEntitiesToIndex() {
 		return entitiesToIndex;
 	}
-	
+
 	public int getLifetimeMinutes() {
 		return lifetimeMinutes;
 	}
@@ -300,12 +304,21 @@ public class PropertyHandler {
 	private ContainerType containerType;
 	private String jmsTopicConnectionFactory;
 	private String digestKey;
-	private URL luceneUrl;
-	private int lucenePopulateBlockSize;
-	private Path luceneDirectory;
-	private long luceneBacklogHandlerIntervalMillis;
+	private SearchEngine searchEngine;
+	private List<URL> searchUrls = new ArrayList<>();
+	private int searchPopulateBlockSize;
+	private int searchSearchBlockSize;
+	private Path searchDirectory;
+	private long searchBacklogHandlerIntervalMillis;
+	private long searchAggregateFilesIntervalMillis;
+	private long searchMaxSearchTimeMillis;
+	private String unitAliasOptions;
 	private Map<String, String> cluster = new HashMap<>();
-	private long luceneEnqueuedRequestIntervalMillis;
+	private long searchEnqueuedRequestIntervalMillis;
+	private int searchIndexBatchSize;
+	private int searchIndexBatchesPerTimer;
+	private int searchBacklogLinesPerTimer;
+	private long searchQueueFileMaxSize;
 
 	@PostConstruct
 	private void init() {
@@ -379,34 +392,37 @@ public class PropertyHandler {
 			formattedProps.add("rootUserNames " + names);
 
 			/* entitiesToIndex */
-			key = "lucene.entitiesToIndex";
+			key = "search.entitiesToIndex";
 			if (props.has(key)) {
 				String indexableEntities = props.getString(key);
 				for (String indexableEntity : indexableEntities.split("\\s+")) {
 					entitiesToIndex.add(indexableEntity);
 				}
-				logger.info("lucene.entitiesToIndex: {}", entitiesToIndex.toString());
+				logger.info("search.entitiesToIndex: {}", entitiesToIndex.toString());
 			} else {
-				/* If the property is not specified, we default to all the entities which
+				/*
+				 * If the property is not specified, we default to all the entities which
 				 * currently override the EntityBaseBean.getDoc() method. This should
 				 * result in no change to behaviour if the property is not specified.
 				 */
-				entitiesToIndex.addAll(Arrays.asList("Datafile", "Dataset", "Investigation", "InvestigationUser", 
-						"DatafileParameter", "DatasetParameter", "InvestigationParameter", "Sample"));
-				logger.info("lucene.entitiesToIndex not set. Defaulting to: {}", entitiesToIndex.toString());
+				entitiesToIndex.addAll(Arrays.asList("Datafile", "DatafileFormat", "DatafileParameter",
+						"Dataset", "DatasetParameter", "DatasetType", "DatasetTechnique", "Facility", "Instrument",
+						"InstrumentScientist", "Investigation", "InvestigationInstrument", "InvestigationParameter",
+						"InvestigationType", "InvestigationUser", "ParameterType", "Sample", "SampleType",
+						"SampleParameter", "User"));
+				logger.info("search.entitiesToIndex not set. Defaulting to: {}", entitiesToIndex.toString());
 			}
-			formattedProps.add("lucene.entitiesToIndex " + entitiesToIndex.toString());
-			
+			formattedProps.add("search.entitiesToIndex " + entitiesToIndex.toString());
+
 			/* notification.list */
 			key = "notification.list";
 			if (props.has(key)) {
 				String notificationList = props.getString(key);
 				formattedProps.add(key + " " + notificationList);
 
-				EntityInfoHandler ei = EntityInfoHandler.getInstance();
 				for (String entity : notificationList.split("\\s+")) {
 					try {
-						ei.getEntityInfo(entity);
+						EntityInfoHandler.getEntityInfo(entity);
 					} catch (IcatException e) {
 						String msg = "Value '" + entity + "' specified in 'notification.list' is not an ICAT entity";
 						logger.error(fatal, msg);
@@ -455,30 +471,67 @@ public class PropertyHandler {
 				logger.info("'log.list' entry not present so no JMS call logging will be performed");
 			}
 
-			/* Lucene Host */
-			if (props.has("lucene.url")) {
-				luceneUrl = props.getURL("lucene.url");
-				formattedProps.add("lucene.url" + " " + luceneUrl);
+			/* Search Host */
+			if (props.has("search.engine")) {
+				try {
+					searchEngine = SearchEngine.valueOf(props.getString("search.engine").toUpperCase());
+				} catch (IllegalArgumentException e) {
+					String msg = "Value " + props.getString("search.engine") + " of search.engine must be chosen from "
+							+ Arrays.asList(SearchEngine.values());
+					throw new IllegalStateException(msg);
+				}
 
-				lucenePopulateBlockSize = props.getPositiveInt("lucene.populateBlockSize");
-				formattedProps.add("lucene.populateBlockSize" + " " + lucenePopulateBlockSize);
+				for (String urlString : props.getString("search.urls").split("\\s+")) {
+					try {
+						searchUrls.add(new URL(urlString));
+					} catch (MalformedURLException e) {
+						abend("Url in search.urls " + urlString + " is not a valid URL");
+					}
+				}
 
-				luceneDirectory = props.getPath("lucene.directory");
-				if (!luceneDirectory.toFile().isDirectory()) {
-					String msg = luceneDirectory + " is not a directory";
+				// In principle, clustered engines like OPENSEARCH or ELASTICSEARCH should
+				// support multiple urls for the nodes in the cluster, however this is not yet
+				// implemented
+				if (searchUrls.size() != 1) {
+					String msg = "Exactly one value for search.urls must be provided when using " + searchEngine;
+					throw new IllegalStateException(msg);
+				}
+				formattedProps.add("search.urls" + " " + searchUrls.toString());
+				logger.info("Using {} as search engine with url(s) {}", searchEngine, searchUrls);
+
+				searchPopulateBlockSize = props.getPositiveInt("search.populateBlockSize");
+				formattedProps.add("search.populateBlockSize" + " " + searchPopulateBlockSize);
+
+				searchSearchBlockSize = props.getPositiveInt("search.searchBlockSize");
+				formattedProps.add("search.searchBlockSize" + " " + searchSearchBlockSize);
+
+				searchDirectory = props.getPath("search.directory");
+				if (!searchDirectory.toFile().isDirectory()) {
+					String msg = searchDirectory + " is not a directory";
 					logger.error(fatal, msg);
 					throw new IllegalStateException(msg);
 				}
-				formattedProps.add("lucene.directory" + " " + luceneDirectory);
+				formattedProps.add("search.directory" + " " + searchDirectory);
 
-				luceneBacklogHandlerIntervalMillis = props.getPositiveLong("lucene.backlogHandlerIntervalSeconds");
-				formattedProps.add("lucene.backlogHandlerIntervalSeconds" + " " + luceneBacklogHandlerIntervalMillis);
-				luceneBacklogHandlerIntervalMillis *= 1000;
+				searchBacklogHandlerIntervalMillis = props.getPositiveLong("search.backlogHandlerIntervalSeconds");
+				formattedProps.add("search.backlogHandlerIntervalSeconds" + " " + searchBacklogHandlerIntervalMillis);
+				searchBacklogHandlerIntervalMillis *= 1000;
 
-				luceneEnqueuedRequestIntervalMillis = props.getPositiveLong("lucene.enqueuedRequestIntervalSeconds");
-				formattedProps.add("lucene.enqueuedRequestIntervalSeconds" + " " + luceneEnqueuedRequestIntervalMillis);
-				luceneEnqueuedRequestIntervalMillis *= 1000;
+				searchEnqueuedRequestIntervalMillis = props.getPositiveLong("search.enqueuedRequestIntervalSeconds");
+				formattedProps.add("search.enqueuedRequestIntervalSeconds" + " " + searchEnqueuedRequestIntervalMillis);
+				searchEnqueuedRequestIntervalMillis *= 1000;
+
+				searchAggregateFilesIntervalMillis = props.getNonNegativeLong("search.aggregateFilesIntervalSeconds");
+				searchAggregateFilesIntervalMillis *= 1000;
+
+				searchMaxSearchTimeMillis = props.getPositiveLong("search.maxSearchTimeSeconds");
+				formattedProps.add("search.maxSearchTimeSeconds" + " " + searchMaxSearchTimeMillis);
+				searchMaxSearchTimeMillis *= 1000;
+			} else {
+				logger.info("'search.engine' entry not present so no free text search available");
 			}
+
+			unitAliasOptions = props.getString("units", "");
 
 			/*
 			 * maxEntities, importCacheSize, exportCacheSize, maxIdsInQuery, key
@@ -549,6 +602,38 @@ public class PropertyHandler {
 			if (containerType == ContainerType.UNKNOWN) {
 				abend("Container type " + containerType + " is not recognised");
 			}
+
+			key = "search.indexBatchSize";
+			if (props.has(key)) {
+				searchIndexBatchSize = props.getPositiveInt(key);
+				formattedProps.add("search.indexBatchSize " + searchIndexBatchSize);
+			} else {
+				searchIndexBatchSize = SearchManager.DEFAULT_INDEX_BATCH_SIZE;
+			}
+
+			key = "search.indexBatchesPerTimer";
+			if (props.has(key)) {
+				searchIndexBatchesPerTimer = props.getPositiveInt(key);
+				formattedProps.add("search.indexBatchesPerTimer " + searchIndexBatchesPerTimer);
+			} else {
+				searchIndexBatchesPerTimer = SearchManager.DEFAULT_INDEX_BATCHES_PER_TIMER;
+			}
+
+			key = "search.backlogLinesPerTimer";
+			if (props.has(key)) {
+				searchBacklogLinesPerTimer = props.getPositiveInt(key);
+				formattedProps.add("search.backlogLinesPerTimer " + searchBacklogLinesPerTimer);
+			} else {
+				searchBacklogLinesPerTimer = SearchManager.DEFAULT_BACKLOG_LINES_PER_TIMER;
+			}
+
+			key = "search.queueFileMaxSize";
+			if (props.has(key)) {
+				searchQueueFileMaxSize = props.getPositiveLong(key);
+				formattedProps.add("search.queueFileMaxSize " + searchQueueFileMaxSize);
+			} else {
+				searchQueueFileMaxSize = SearchManager.DEFAULT_QUEUE_FILE_MAX_SIZE;
+			}
 		} catch (CheckedPropertyException e) {
 			abend(e.getMessage());
 		}
@@ -604,24 +689,59 @@ public class PropertyHandler {
 		return digestKey;
 	}
 
-	public URL getLuceneUrl() {
-		return luceneUrl;
+	public SearchEngine getSearchEngine() {
+		return searchEngine;
 	}
 
-	public int getLucenePopulateBlockSize() {
-		return lucenePopulateBlockSize;
+	public List<URL> getSearchUrls() {
+		return searchUrls;
 	}
 
-	public long getLuceneBacklogHandlerIntervalMillis() {
-		return luceneBacklogHandlerIntervalMillis;
+	public int getSearchPopulateBlockSize() {
+		return searchPopulateBlockSize;
 	}
 
-	public long getLuceneEnqueuedRequestIntervalMillis() {
-		return luceneEnqueuedRequestIntervalMillis;
+	public int getSearchSearchBlockSize() {
+		return searchSearchBlockSize;
 	}
 
-	public Path getLuceneDirectory() {
-		return luceneDirectory;
+	public long getSearchBacklogHandlerIntervalMillis() {
+		return searchBacklogHandlerIntervalMillis;
 	}
 
+	public long getSearchEnqueuedRequestIntervalMillis() {
+		return searchEnqueuedRequestIntervalMillis;
+	}
+
+	public long getSearchAggregateFilesIntervalMillis() {
+		return searchAggregateFilesIntervalMillis;
+	}
+
+	public long getSearchMaxSearchTimeMillis() {
+		return searchMaxSearchTimeMillis;
+	}
+
+	public Path getSearchDirectory() {
+		return searchDirectory;
+	}
+
+	public String getUnitAliasOptions() {
+		return unitAliasOptions;
+	}
+
+	public int getSearchIndexBatchSize() {
+		return searchIndexBatchSize;
+	}
+
+	public int getSearchIndexBatchesPerTimer() {
+		return searchIndexBatchesPerTimer;
+	}
+
+	public int getSearchBacklogLinesPerTimer() {
+		return searchBacklogLinesPerTimer;
+	}
+
+	public long getSearchQueueFileMaxSize() {
+		return searchQueueFileMaxSize;
+	}
 }

@@ -2,17 +2,23 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("Used by a user within an investigation")
 @SuppressWarnings("serial")
@@ -50,6 +56,12 @@ public class Instrument extends EntityBaseBean implements Serializable {
 
 	@Comment("A URL associated with this instrument")
 	private String url;
+
+	@Comment("Date when the instrument was commissioned")
+	private Date startDate;
+
+	@Comment("Date when the instrument was decommissioned")
+	private Date endDate;
 
 	@Comment("Shifts associated with this instrument")
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
@@ -113,6 +125,14 @@ public class Instrument extends EntityBaseBean implements Serializable {
 		return this.shifts;
 	}
 
+	public Date getStartDate() {
+		return this.startDate;
+	}
+
+	public Date getEndDate() {
+		return this.endDate;
+	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
@@ -147,6 +167,21 @@ public class Instrument extends EntityBaseBean implements Serializable {
 
 	public void setShifts(List<Shift> shifts) {
 		this.shifts = shifts;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	@Override
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
+		SearchApi.encodeNullableString(gen, "instrument.fullName", fullName);
+		SearchApi.encodeString(gen, "instrument.name", name);
+		SearchApi.encodeLong(gen, "instrument.id", id);
 	}
 
 }

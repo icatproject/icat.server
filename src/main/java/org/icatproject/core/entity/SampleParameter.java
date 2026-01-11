@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.JoinColumn;
@@ -12,7 +13,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
-import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A parameter associated with a sample")
 @SuppressWarnings("serial")
@@ -35,9 +36,8 @@ public class SampleParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
-			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode);
+	public void preparePersist(String modId, EntityManager entityManager, PersistMode persistMode) throws IcatException {
+		super.preparePersist(modId, entityManager, persistMode);
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}
@@ -49,6 +49,12 @@ public class SampleParameter extends Parameter implements Serializable {
 
 	public void setSample(Sample sample) {
 		this.sample = sample;
+	}
+
+	@Override
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
+		super.getDoc(entityManager, gen);
+		SearchApi.encodeLong(gen, "sample.id", sample.id);
 	}
 
 }

@@ -2,7 +2,6 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
-import jakarta.ejb.EJB;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
@@ -13,12 +12,10 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.PostRemove;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityBeanManager.PersistMode;
-import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.SingletonFinder;
 import org.icatproject.core.oldparser.OldInput;
 import org.icatproject.core.oldparser.OldLexerException;
@@ -27,6 +24,7 @@ import org.icatproject.core.oldparser.OldSearchQuery;
 import org.icatproject.core.oldparser.OldTokenizer;
 import org.icatproject.core.parser.ParserException;
 import org.icatproject.core.parser.RuleWhat;
+import org.icatproject.core.utils.JpqlChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,10 +54,6 @@ public class Rule extends EntityBaseBean implements Serializable {
 	public static final String UPDATE_QUERY = "Rule.UpdateQuery";
 	public static final String UPDATE_ATTRIBUTE_QUERY = "Rule.UpdateAttributeQuery";
 	public static final String PUBLIC_QUERY = "Rule.PublicQuery";
-	@EJB
-	@XmlTransient
-	@Transient
-	private GateKeeper gatekeeper;
 
 	@XmlTransient
 	private String bean;
@@ -109,7 +103,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 	public Rule() {
 	}
 
-	private void fixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
+	private void fixup(EntityManager entityManager) throws IcatException {
 		this.crudFlags = this.crudFlags.toUpperCase().trim();
 		for (int i = 0; i < this.crudFlags.length(); i++) {
 			final char ch = this.crudFlags.charAt(i);
@@ -146,7 +140,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 			logger.debug("New style rule: " + query);
 		} else {
 			/* This should be pure JPQL so can check it */
-			gateKeeper.checkJPQL(query);
+			JpqlChecker.checkJPQL(query, entityManager);
 		}
 
 		RuleWhat rw;
@@ -225,13 +219,13 @@ public class Rule extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void postMergeFixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
-		super.postMergeFixup(manager, gateKeeper);
+	public void postMergeFixup(EntityManager entityManager) throws IcatException {
+		super.postMergeFixup(entityManager);
 		this.c = false;
 		this.r = false;
 		this.u = false;
 		this.d = false;
-		this.fixup(manager, gateKeeper);
+		this.fixup(entityManager);
 		logger.debug("postMergeFixup of Rule for " + this.crudFlags + " of " + this.what);
 	}
 
@@ -254,10 +248,9 @@ public class Rule extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, PersistMode persistMode)
-			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, persistMode);
-		this.fixup(manager, gateKeeper);
+	public void preparePersist(String modId, EntityManager entityManager, PersistMode persistMode) throws IcatException {
+		super.preparePersist(modId, entityManager, persistMode);
+		this.fixup(entityManager);
 		logger.debug("PreparePersist of Rule for " + this.crudFlags + " of " + this.what);
 	}
 

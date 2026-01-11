@@ -8,12 +8,17 @@ import shutil
 from zipfile import ZipFile
 import subprocess
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     raise RuntimeError("Wrong number of arguments")
 
 containerHome = sys.argv[1]
 icat_url = sys.argv[2]
-lucene_url = sys.argv[3]
+search_engine = sys.argv[3]
+search_urls = sys.argv[4]
+
+if search_engine not in ["LUCENE", "OPENSEARCH", "ELASTICSEARCH"]:
+    raise RuntimeError("Search engine %s unrecognised, " % search_engine
+                       + "should be one of LUCENE, ELASTICSEARCH, OPENSEARCH")
 
 subst = dict(os.environ)
 
@@ -34,15 +39,20 @@ if not os.path.exists("src/test/install/run.properties"):
             "exportCacheSize = 50",
             "authn.list = db",
             "authn.db.url = %s" % icat_url,
+            "authn.simple.url = %s" % icat_url,
             "notification.list = Dataset Datafile",
             "notification.Dataset = CU",
             "notification.Datafile = CU",
             "log.list = SESSION WRITE READ INFO",
-            "lucene.url = %s" % lucene_url,
-            "lucene.populateBlockSize = 10000",
-            "lucene.directory = %s/data/lucene" % subst["HOME"],
-            "lucene.backlogHandlerIntervalSeconds = 60",
-            "lucene.enqueuedRequestIntervalSeconds = 3",
+            "search.engine = %s" % search_engine,
+            "search.urls = %s" % search_urls,
+            "search.populateBlockSize = 10000",
+            "search.searchBlockSize = 1000",
+            "search.directory = %s/data/search" % subst["HOME"],
+            "search.backlogHandlerIntervalSeconds = 60",
+            "search.enqueuedRequestIntervalSeconds = 3",
+            "search.aggregateFilesIntervalSeconds = 3600",
+            "search.maxSearchTimeSeconds = 5",
             "key = wombat"
         ]
         f.write("\n".join(contents))

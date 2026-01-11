@@ -116,7 +116,7 @@ public class SearchQuery {
 		return sb.toString();
 	}
 
-	public String getJPQL(String userId, EntityManager manager) {
+	public String getJPQL(String userId, EntityManager entityManager) {
 		logger.debug("Processing: " + this);
 		logger.debug("=> fromClause: " + fromClause);
 		logger.debug("=> whereClause: " + whereClause);
@@ -150,7 +150,7 @@ public class SearchQuery {
 				logger.info("All are allowed READ to " + beanName);
 				restricted = false;
 			} else {
-				TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)
+				TypedQuery<Rule> query = entityManager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)
 						.setParameter("member", userId).setParameter("bean", beanName);
 				rules = query.getResultList();
 				SearchQuery.logger

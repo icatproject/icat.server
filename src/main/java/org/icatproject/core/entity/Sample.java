@@ -2,12 +2,16 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -15,7 +19,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import org.icatproject.core.manager.LuceneApi;
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.search.SearchApi;
 
 @Comment("A sample to be used in one or more investigations")
 @SuppressWarnings("serial")
@@ -42,6 +47,9 @@ public class Sample extends EntityBaseBean implements Serializable {
 	@JoinColumn(name = "SAMPLETYPE_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private SampleType type;
+
+	public static Set<String> docFields = new HashSet<>(
+			Arrays.asList("sample.name", "sample.id", "sample.investigation.id"));
 
 	/* Needed for JPA */
 	public Sample() {
@@ -96,11 +104,15 @@ public class Sample extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void getDoc(JsonGenerator gen) {
-		StringBuilder sb = new StringBuilder(pid + " " + name);
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
+		SearchApi.encodeString(gen, "sample.name", name);
+		SearchApi.encodeLong(gen, "sample.id", id);
 		if (type != null) {
-			sb.append(" " + type.getName());
+			if (type.getName() == null) {
+				type = entityManager.find(type.getClass(), type.id);
+			}
+			type.getDoc(entityManager, gen);
 		}
-		LuceneApi.encodeTextfield(gen, "text", sb.toString());
 	}
+
 }

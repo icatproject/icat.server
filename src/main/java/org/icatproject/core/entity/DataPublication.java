@@ -47,6 +47,9 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataPublication")
 	private List<DataPublicationFunding> fundingReferences = new ArrayList<>();
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataPublication")
+	private List<Subject> subjects = new ArrayList<Subject>();
+
 	@Comment("Persistent Identifier of the publication, such as a DOI")
 	@Column(name = "PID", nullable = false)
 	private String pid;
@@ -66,6 +69,10 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 	@Comment("Abstract")
 	@Column(length = 4000)
 	private String description;
+
+	@Comment("An additional identifier used for internal purposes")
+	@Column(length = 255)
+	private String internalId;
 
 	/* Needed for JPA */
 	public DataPublication() {
@@ -99,6 +106,10 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 		return fundingReferences;
 	}
 
+	public List<Subject> getSubjects() {
+		return subjects;
+	}
+
 	public String getPid() {
 		return pid;
 	}
@@ -117,6 +128,10 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 
 	public String getDescription() {
 		return description;
+	}
+
+	public String getInternalId() {
+		return internalId;
 	}
 
 	public void setFacility(Facility facility) {
@@ -147,6 +162,10 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 		this.fundingReferences = fundingReferences;
 	}
 
+	public void setSubjects(List<Subject> subjects) {
+		this.subjects = subjects;
+	}
+
 	public void setPid(String pid) {
 		this.pid = pid;
 	}
@@ -165,5 +184,9 @@ public class DataPublication extends EntityBaseBean implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public void setInternalId(String internalId) {
+		this.internalId = internalId;
 	}
 }

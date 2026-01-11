@@ -21,7 +21,6 @@ public class AttWithOptParenList {
 	private String joins = "";
 	private List<String> wheres;
 	private List<Attribute> attributes;
-	private final static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
 	@SuppressWarnings("unchecked")
 	public AttWithOptParenList(Input input, Class<EntityBaseBean> entityClass,
@@ -38,7 +37,7 @@ public class AttWithOptParenList {
 		if (nextT == Token.Type.OPENPAREN) {
 			entityClass = (Class<EntityBaseBean>) field.getType();
 			parenAttList = new ParenAttList(input, entityClass,
-					eiHandler.getFieldsByName(entityClass), eiHandler.getSetters(entityClass),
+					EntityInfoHandler.getFieldsByName(entityClass), EntityInfoHandler.getSetters(entityClass),
 					parentName + relName);
 			joins = " JOIN " + parentName + "." + attribute + " " + parentName + relName
 					+ parenAttList.getJoins();
