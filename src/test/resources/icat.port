@@ -46,9 +46,13 @@ SampleType(name:0, molecularFormula:1, safetyInformation:2, pid:3)
 "rust", "Fe3O4", "messy", "st:003"
 "fossil", null, null, "st:004"
 
-Sample(investigation(facility(name:0), name:1, visitId:2), type(pid:3), name:4, pid:5)
-"Test port facility", "expt1", "one", "st:001", "Koh-I-Noor", "sdb:374717"
-"Test port facility", "expt1", "one", "st:003", "Ford\t\"Anglia\"", null
+Sample(type(pid:0), name:1, pid:2)
+"st:001", "Koh-I-Noor", "sdb:374717"
+"st:003", "Ford\t\"Anglia\"", "local:2"
+
+InvestigationSample(investigation(facility(name:0), name:1, visitId:2), sample(pid:3))
+"Test port facility", "expt1", "one", "sdb:374717"
+"Test port facility", "expt1", "one", "local:2"
 
 InvestigationParameter(investigation(facility(name:0), name:1, visitId:2), type(facility(name:0), name:3 , units:4),stringValue:5)
 "Test port facility", "expt1", "one", "colour" , "name", "green"
@@ -56,7 +60,7 @@ InvestigationParameter(investigation(facility(name:0), name:1, visitId:2), type(
 DatasetType(facility(name:0), name:1)
 "Test port facility", "calibration"
 
-Dataset (investigation(facility(name:0), name:1, visitId:2) , name:3, type(facility(name:0), name:4), complete:5, startDate:6, endDate:7 sample(investigation(facility(name:0), name:1, visitId:2), name:8), description:9)
+Dataset (investigation(facility(name:0), name:1, visitId:2) , name:3, type(facility(name:0), name:4), complete:5, startDate:6, endDate:7 sample(name:8), description:9)
 "Test port facility", "expt1", "one", "ds1", "calibration", true,  2014-05-16T16:58:26.12+12:30, 2014-05-16T16:58:26.12+12:30, "Koh-I-Noor", "alpha"
 "Test port facility", "expt1", "one", "ds2", "calibration", null,  2014-05-16T06:05:26.12Z, 2014-05-16T06:07:26.12+12:30,"Ford\t\"Anglia\"", "beta"
 "Test port facility", "expt1", "one", "ds3", "calibration", False, 2014-05-16T06:09:26.12+01:00, 2014-05-16T06:15:26.12+01:00, null, "gamma"

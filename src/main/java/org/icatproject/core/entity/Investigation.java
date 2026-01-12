@@ -84,7 +84,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	private Date releaseDate;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<Sample> samples = new ArrayList<>();
+	private List<InvestigationSample> samples = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Shift> shifts = new ArrayList<>();
@@ -184,7 +184,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		return this.releaseDate;
 	}
 
-	public List<Sample> getSamples() {
+	public List<InvestigationSample> getSamples() {
 		return samples;
 	}
 
@@ -284,7 +284,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		this.releaseDate = releaseDate;
 	}
 
-	public void setSamples(List<Sample> samples) {
+	public void setSamples(List<InvestigationSample> samples) {
 		this.samples = samples;
 	}
 
@@ -383,11 +383,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			Relationship[] parameterTypeRelationships = {
 					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("parameters"),
 					EntityInfoHandler.getRelationshipsByName(InvestigationParameter.class).get("type") };
-			Relationship[] sampleRelationships = {
-					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("samples") };
-			Relationship[] sampleTypeRelationships = {
-					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("samples"),
-					EntityInfoHandler.getRelationshipsByName(Sample.class).get("type") };
 			documentFields.put("name", null);
 			documentFields.put("visitId", null);
 			documentFields.put("title", null);
@@ -411,9 +406,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			documentFields.put("InvestigationParameter stringValue", parameterRelationships);
 			documentFields.put("InvestigationParameter numericValue", parameterRelationships);
 			documentFields.put("InvestigationParameter dateTimeValue", parameterRelationships);
-			documentFields.put("Sample sample.id", sampleRelationships);
-			documentFields.put("Sample sample.name", sampleRelationships);
-			documentFields.put("Sample type.name", sampleTypeRelationships);
 		}
 		return documentFields;
 	}
