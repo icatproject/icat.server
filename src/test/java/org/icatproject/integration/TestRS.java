@@ -648,9 +648,9 @@ public class TestRS {
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
 
 		// This does not work any more as there is no direct relation between investigation and samples now
-		// JsonArray array = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
-		// 		null, "Professor", 20, 1);
-		// checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
+		JsonArray array = searchInvestigations(session, "db/tr", textAnd, lowerOrigin, upperOrigin, parameters,
+				null, "Professor", 20, 1);
+		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
 		// change user
 		searchInvestigations(session, "db/fred", textAnd, null, null, parameters, null, null, 20, 0);
@@ -659,7 +659,7 @@ public class TestRS {
 		searchInvestigations(session, "db/tr", textTwo, null, null, parameters, null, null, 20, 0);
 
 		// Only working to a minute
-		JsonArray array = searchInvestigations(session, "db/tr", textAnd, lowerSecond, upperOrigin, parameters, null, null, 20,
+		array = searchInvestigations(session, "db/tr", textAnd, lowerSecond, upperOrigin, parameters, null, null, 20,
 				1);
 		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
@@ -999,13 +999,12 @@ public class TestRS {
 				null, 10, null, null, 0);
 
 		// Change samples
-		// FIXME: this test is broken
-		// searchInvestigations(session, "db/tr", samplesSingular, lowerOrigin, upperOrigin, parameters, null, null,
-		//		10, null, null, 1);
-		// searchInvestigations(session, "db/tr", samplesMultiple, lowerOrigin, upperOrigin, parameters, null, null,
-		//		10, null, null, 1);
-		// searchInvestigations(session, "db/tr", samplesBad, lowerOrigin, upperOrigin, parameters, null, null,
-		//		10, null, null, 0);
+		searchInvestigations(session, "db/tr", samplesSingular, lowerOrigin, upperOrigin, parameters, null, null,
+				10, null, null, 1);
+		searchInvestigations(session, "db/tr", samplesMultiple, lowerOrigin, upperOrigin, parameters, null, null,
+				10, null, null, 1);
+		searchInvestigations(session, "db/tr", samplesBad, lowerOrigin, upperOrigin, parameters, null, null,
+				10, null, null, 0);
 
 		// Change userFullName
 		searchInvestigations(session, "db/tr", textPlus, lowerOrigin, upperOrigin, parameters, "Doctor",
@@ -1081,21 +1080,20 @@ public class TestRS {
 				Arrays.asList(1L));
 
 		// Test no facets match on Sample due to lack of READ access
-		// FIXME: this test is broken
-		// facets = buildFacetRequest("Sample", "sample.type.name");
-		// responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
-		//		3);
-		// assertFalse(responseObject.containsKey("search_after"));
-		// assertFalse(responseObject.containsKey("dimensions"), NO_DIMENSIONS);
+		facets = buildFacetRequest("InvestigationSample", "sample.type.name");
+		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
+				3);
+		assertFalse(responseObject.containsKey("search_after"));
+		assertFalse(responseObject.containsKey("dimensions"), NO_DIMENSIONS);
 
 		// Test facets match on Sample
-		// FIXME: this test is broken
-		// wSession.addRule(null, "Sample", "R");
-		// responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
-		//		3);
-		// assertFalse(responseObject.containsKey("search_after"));
-		// checkFacets(responseObject, "Sample.sample.type.name", Arrays.asList("diamond", "rust"),
-		//		Arrays.asList(1L, 1L));
+		wSession.addRule(null, "InvestigationSample", "R");
+		wSession.addRule(null, "Sample", "R");
+		responseObject = searchInvestigations(session, null, null, null, null, null, null, null, 10, null, facets,
+				3);
+		assertFalse(responseObject.containsKey("search_after"));
+		checkFacets(responseObject, "InvestigationSample.sample.type.name", Arrays.asList("diamond", "rust"),
+				Arrays.asList(1L, 1L));
 	}
 
 	@Test

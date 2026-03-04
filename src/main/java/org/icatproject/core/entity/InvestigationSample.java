@@ -2,7 +2,12 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
+import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.search.SearchApi;
+
+import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -37,5 +42,15 @@ public class InvestigationSample extends EntityBaseBean implements Serializable 
 
 	public void setSample(Sample sample) {
 		this.sample = sample;
+	}
+
+	@Override
+	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
+		if (sample.getName() == null) {
+			sample = entityManager.find(sample.getClass(), sample.id);
+		}
+		sample.getDoc(entityManager, gen);
+		SearchApi.encodeLong(gen, "investigation.id", investigation.id);
+		SearchApi.encodeLong(gen, "id", id);
 	}
 }

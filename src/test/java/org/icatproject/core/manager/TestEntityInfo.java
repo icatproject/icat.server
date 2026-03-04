@@ -49,8 +49,8 @@ public class TestEntityInfo {
 		Set<String> docdbeans = new HashSet<>(Arrays.asList("Datafile", "DatafileFormat", "DatafileParameter",
 				"Dataset", "DatasetParameter", "DatasetTechnique", "DatasetType", "Facility", "Instrument",
 				"InstrumentScientist", "Investigation", "InvestigationFacilityCycle", "InvestigationInstrument",
-				"InvestigationParameter", "InvestigationType", "InvestigationUser", "ParameterType", "Sample",
-				"SampleType", "SampleParameter", "Technique", "User"));
+				"InvestigationParameter", "InvestigationSample", "InvestigationType", "InvestigationUser",
+				"ParameterType", "Sample", "SampleType", "SampleParameter", "Technique", "User"));
 		for (String beanName : EntityInfoHandler.getEntityNamesList()) {
 			@SuppressWarnings("unchecked")
 			Class<? extends EntityBaseBean> bean = EntityInfoHandler.getClass(beanName);

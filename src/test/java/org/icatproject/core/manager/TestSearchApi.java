@@ -42,6 +42,7 @@ import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.InvestigationFacilityCycle;
 import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.InvestigationParameter;
+import org.icatproject.core.entity.InvestigationSample;
 import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Parameter;
@@ -505,7 +506,7 @@ public class TestSearchApi {
 		return parameterType;
 	}
 
-	private Sample sample(long id, String name) {
+	private InvestigationSample investigationSample(long id, String name, Investigation investigation) {
 		SampleType sampleType = new SampleType();
 		sampleType.setId(0L);
 		sampleType.setName("test");
@@ -513,7 +514,11 @@ public class TestSearchApi {
 		sample.setId(id);
 		sample.setName(name);
 		sample.setType(sampleType);
-		return sample;
+		InvestigationSample investigationSample = new InvestigationSample();
+		investigationSample.setId(0L);
+		investigationSample.setInvestigation(investigation);
+		investigationSample.setSample(sample);
+		return investigationSample;
 	}
 
 	private void modify(String... operations) throws IcatException {
@@ -623,9 +628,9 @@ public class TestSearchApi {
 
 				if (datasetId < NUMSAMP) {
 					word = word("SType ", datasetId);
-					Sample sample = sample(datasetId, word);
-					queue.add(SearchApi.encodeOperation(entityManager, "create", sample));
-					dataset.setSample(sample);
+					InvestigationSample investigationSample = investigationSample(datasetId, word, investigation);
+					queue.add(SearchApi.encodeOperation(entityManager, "create", investigationSample));
+					dataset.setSample(investigationSample.getSample());
 				}
 
 				queue.add(SearchApi.encodeOperation(entityManager, "create", dataset));
@@ -1165,22 +1170,19 @@ public class TestSearchApi {
 		checkResults(lsr);
 
 		// Target sample.name
-		// FIXME: this test is broken
-		// query = buildQuery("Investigation", null, "sample.name:ddd", null, null, null, null);
-		// lsr = searchApi.getResults(query, 100, null);
-		// checkResults(lsr, 3L);
+		query = buildQuery("Investigation", null, "sample.name:ddd", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L);
 
 		// Multiple samples associated with investigation 3
-		// FIXME: this test is broken
-		// query = buildQuery("Investigation", null, "ddd nnn", null, null, null, null);
-		// lsr = searchApi.getResults(query, 100, null);
-		// checkResults(lsr, 3L);
+		query = buildQuery("Investigation", null, "ddd nnn", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L);
 
 		// By default, sample ddd OR sample mmm gives two investigations
-		// FIXME: this test is broken
-		// query = buildQuery("Investigation", null, "ddd mmm", null, null, null, null);
-		// lsr = searchApi.getResults(query, 100, null);
-		// checkResults(lsr, 2L, 3L);
+		query = buildQuery("Investigation", null, "ddd mmm", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 2L, 3L);
 
 		// AND logic should not return any results
 		query = buildQuery("Investigation", null, "+ddd +mmm", null, null, null, null);
@@ -1188,29 +1190,28 @@ public class TestSearchApi {
 		checkResults(lsr);
 
 		// Fields on Investigation and Sample
-		// FIXME: this test is broken
-		// query = buildQuery("Investigation", null, "visitId ddd", null, null, null, null);
-		// lsr = searchApi.getResults(query, 100, null);
-		// checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
+		query = buildQuery("Investigation", null, "visitId ddd", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
 		// ID 3 should be most relevant since it matches both terms
-		// lsr = searchApi.getResults(query, 1, null);
-		// checkResults(lsr, 3L);
+		lsr = searchApi.getResults(query, 1, null);
+		checkResults(lsr, 3L);
 		// Specifying fields should not alter behaviour
-		// query = buildQuery("Investigation", null, "visitId:visitId sample.name:ddd", null, null, null, null);
-		// lsr = searchApi.getResults(query, 100, null);
-		// checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
+		query = buildQuery("Investigation", null, "visitId:visitId sample.name:ddd", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
 		// Individual MUST should work when applied to either an Investigation or Sample
-		// query = buildQuery("Investigation", null, "+visitId:visitId", null, null, null, null);
-		// lsr = searchApi.getResults(query, 100, null);
-		// checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
-		// query = buildQuery("Investigation", null, "+sample.name:ddd", null, null, null, null);
-		// lsr = searchApi.getResults(query, 100, null);
-		// checkResults(lsr, 3L);
+		query = buildQuery("Investigation", null, "+visitId:visitId", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
+		query = buildQuery("Investigation", null, "+sample.name:ddd", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr, 3L);
 		// This query is expected to fail, as we apply both terms to Investigation and
 		// Sample (since we have no fields) and neither possesses both terms.
-		// query = buildQuery("Investigation", null, "+visitId +ddd", null, null, null, null);
-		// lsr = searchApi.getResults(query, 100, null);
-		// checkResults(lsr);
+		query = buildQuery("Investigation", null, "+visitId +ddd", null, null, null, null);
+		lsr = searchApi.getResults(query, 100, null);
+		checkResults(lsr);
 
 		pojos = new ArrayList<>();
 		pojos.add(new ParameterPOJO("Snm ddd", "u iii", "v9"));
@@ -1220,12 +1221,11 @@ public class TestSearchApi {
 		checkResults(lsr, 3L);
 
 		// Sample filtering
-		// FIXME: this test is broken
-		// query = buildQuery("Investigation", null, null, null, null, null, null, new Filter("sample.sample.type.name", "test"));
-		// lsr = searchApi.getResults(query, 5, null);
-		// checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
+		query = buildQuery("Investigation", null, null, null, null, null, null, new Filter("investigationsample.sample.type.name", "test"));
+		lsr = searchApi.getResults(query, 5, null);
+		checkResults(lsr, 0L, 1L, 2L, 3L, 4L);
 
-		query = buildQuery("Investigation", null, null, null, null, null, null, new Filter("sample.sample.type.name", "fail"));
+		query = buildQuery("Investigation", null, null, null, null, null, null, new Filter("investigationsample.sample.type.name", "fail"));
 		lsr = searchApi.getResults(query, 5, null);
 		checkResults(lsr);
 
@@ -1523,7 +1523,8 @@ public class TestSearchApi {
 		Investigation investigation = investigation(0, "investigation", date, date);
 		Dataset dataset = dataset(1, "dataset", date, date, investigation);
 		Datafile datafile = datafile(2, "datafile", "datafile.txt", date, dataset);
-		Sample sample = sample(3, "sample");
+		InvestigationSample investigationSample = investigationSample(3, "sample", investigation);
+		Sample sample = investigationSample.getSample();
 		ParameterType parameterType = parameterType(4, "parameter", "K");
 		SampleParameter parameter = (SampleParameter) parameter(5, "stringValue", parameterType, sample);
 		dataset.setSample(sample);
@@ -1534,7 +1535,7 @@ public class TestSearchApi {
 		JsonArrayBuilder dimensions = Json.createArrayBuilder().add(dimension);
 		JsonObject sampleParameterFacetQuery = Json.createObjectBuilder().add("query", sampleQuery).add("dimensions", dimensions).build();
 
-		JsonObjectBuilder sampleInvestigationQuery = Json.createObjectBuilder().add("sample.investigation.id", Json.createArrayBuilder().add(0));
+		JsonObjectBuilder sampleInvestigationQuery = Json.createObjectBuilder().add("investigation.id", Json.createArrayBuilder().add(0));
 		JsonObjectBuilder sampleTypeDimension = Json.createObjectBuilder().add("dimension", "sample.type.name");
 		JsonArrayBuilder sampleTypeDimensions = Json.createArrayBuilder().add(sampleTypeDimension);
 		JsonObject sampleTypeFacetQuery = Json.createObjectBuilder().add("query", sampleInvestigationQuery).add("dimensions", sampleTypeDimensions).build();
@@ -1564,14 +1565,13 @@ public class TestSearchApi {
 		modify(SearchApi.encodeOperation(entityManager, "create", investigation),
 				SearchApi.encodeOperation(entityManager, "create", dataset),
 				SearchApi.encodeOperation(entityManager, "create", datafile),
-				SearchApi.encodeOperation(entityManager, "create", sample),
+				SearchApi.encodeOperation(entityManager, "create", investigationSample),
 				SearchApi.encodeOperation(entityManager, "create", parameterType),
 				SearchApi.encodeOperation(entityManager, "create", parameter));
 
 		// Test
 		checkFacets(searchApi.facetSearch("SampleParameter", sampleParameterFacetQuery, 5, 5), sampleParemeterFacet);
-		// FIXME: this test is broken
-		// checkFacets(searchApi.facetSearch("Sample", sampleTypeFacetQuery, 5, 5), sampleTypeFacet);
+		checkFacets(searchApi.facetSearch("InvestigationSample", sampleTypeFacetQuery, 5, 5), sampleTypeFacet);
 		checkFacets(searchApi.facetSearch("Dataset", sparseRequest, 5, 5), datasetTypeFacet, sampleTypeFacet);
 		checkFacets(searchApi.facetSearch("Datafile", sparseRequest, 5, 5), sampleTypeFacet);
 

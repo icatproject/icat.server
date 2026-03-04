@@ -383,6 +383,13 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			Relationship[] parameterTypeRelationships = {
 					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("parameters"),
 					EntityInfoHandler.getRelationshipsByName(InvestigationParameter.class).get("type") };
+			Relationship[] sampleRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("samples"),
+					EntityInfoHandler.getRelationshipsByName(InvestigationSample.class).get("sample") };
+			Relationship[] sampleTypeRelationships = {
+					EntityInfoHandler.getRelationshipsByName(Investigation.class).get("samples"),
+					EntityInfoHandler.getRelationshipsByName(InvestigationSample.class).get("sample"),
+					EntityInfoHandler.getRelationshipsByName(Sample.class).get("type") };
 			documentFields.put("name", null);
 			documentFields.put("visitId", null);
 			documentFields.put("title", null);
@@ -406,6 +413,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			documentFields.put("InvestigationParameter stringValue", parameterRelationships);
 			documentFields.put("InvestigationParameter numericValue", parameterRelationships);
 			documentFields.put("InvestigationParameter dateTimeValue", parameterRelationships);
+			documentFields.put("InvestigationSample sample.id", sampleRelationships);
+			documentFields.put("InvestigationSample sample.name", sampleRelationships);
+			documentFields.put("InvestigationSample type.name", sampleTypeRelationships);
 		}
 		return documentFields;
 	}
