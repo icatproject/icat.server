@@ -59,7 +59,7 @@ search.maxSearchTimeSeconds = 5
 # Configure this option to prevent certain entities being indexed
 # For example, remove Datafile and DatafileParameter if these are not of interest
 # Note then when commented out, the full set of all possible entities will be indexed - to disable all search functionality, instead comment out search.engine or search.urls
-!search.entitiesToIndex = Datafile DatafileFormat DatafileParameter Dataset DatasetParameter DatasetType DatasetTechnique Facility Instrument InstrumentScientist Investigation InvestigationInstrument InvestigationParameter InvestigationType InvestigationUser ParameterType Sample SampleType SampleParameter User
+!search.entitiesToIndex = Datafile DatafileFormat DatafileParameter Dataset DatasetParameter DatasetType DatasetTechnique Facility Instrument InstrumentScientist Investigation InvestigationInstrument InvestigationParameter InvestigationSample InvestigationType InvestigationUser ParameterType Sample SampleType SampleParameter User
 
 # List members of cluster
 !cluster = http://vm200.nubes.stfc.ac.uk:8080 https://smfisher:8181				

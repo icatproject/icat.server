@@ -48,8 +48,7 @@ public class Sample extends EntityBaseBean implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private SampleType type;
 
-	public static Set<String> docFields = new HashSet<>(
-			Arrays.asList("sample.name", "sample.id", "sample.investigation.id"));
+	public static Set<String> docFields = new HashSet<>(Arrays.asList("sample.name", "sample.id"));
 
 	/* Needed for JPA */
 	public Sample() {
