@@ -47,7 +47,11 @@ public class Session implements Serializable {
 	}
 
 	public String getUserName() throws IcatException {
-		if (expireDateTime.before(new Date()))
+		return getUserName(false);
+	}
+
+	public String getUserName(boolean allowExpired) throws IcatException {
+		if (!allowExpired && expireDateTime.before(new Date()))
 			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session id:" + id + " has expired");
 		return userName;
 	}

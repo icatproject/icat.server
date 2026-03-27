@@ -12,6 +12,7 @@ import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.Status;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.UserTransaction;
 
@@ -126,19 +127,26 @@ public class SessionManager {
 				}
 				return result;
 			} catch (Throwable e) {
-				userTransaction.rollback();
-				logger.trace("Transaction rolled back for login because of " + e.getClass() + " " + e.getMessage());
+				logger.trace("Attempt transaction roll back for login because of " + e.getClass() + " " + e.getMessage());
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
+			} finally {
+				if (userTransaction.getStatus() == Status.STATUS_ACTIVE) {
+					userTransaction.rollback();
+				}
 			}
 		} catch (IllegalStateException e) {
+			logger.error("IllegalStateException " + e.getMessage());
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					"IllegalStateException " + e.getMessage());
 		} catch (SecurityException e) {
+			logger.error("SecurityException " + e.getMessage());
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException " + e.getMessage());
 		} catch (SystemException e) {
+			logger.error("SystemException " + e.getMessage());
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException " + e.getMessage());
 		} catch (NotSupportedException e) {
+			logger.error("NotSupportedException " + e.getMessage());
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					"NotSupportedException " + e.getMessage());
 		}
@@ -151,6 +159,7 @@ public class SessionManager {
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 				Session session = getSession(sessionId);
+				String userName = session.getUserName(true);
 				sessionEntityManager.remove(session);
 				sessionEntityManager.flush();
 				userTransaction.commit();
@@ -158,14 +167,13 @@ public class SessionManager {
 				if (logRequests.contains(CallType.SESSION)) {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-						gen.write("userName", session.getUserName());
+						gen.write("userName", userName);
 						gen.writeEnd();
 					}
 					transmitter.processMessage("logout", ip, baos.toString(), startMillis);
 				}
 			} catch (IcatException e) {
-				userTransaction.rollback();
-				logger.trace("Transaction rolled back for logout because of " + e.getClass() + " " + e.getMessage());
+				logger.warn("Attempt transaction roll back for logout because of " + e.getClass() + " " + e.getMessage());
 				if (e.getType() == IcatExceptionType.SESSION) {
 					throw e;
 				} else {
@@ -173,17 +181,27 @@ public class SessionManager {
 							e.getClass() + " " + e.getMessage());
 				}
 			} catch (Exception e) {
+				logger.warn("Attempt transaction roll back for logout because of " + e.getClass() + " " + e.getMessage());
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+			} finally {
+				if (userTransaction.getStatus() == Status.STATUS_ACTIVE) {
+					userTransaction.rollback();
+				}
 			}
 		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException" + e.getMessage());
+			logger.error("IllegalStateException " + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException " + e.getMessage());
 		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException" + e.getMessage());
+			logger.error("SecurityException " + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException " + e.getMessage());
 		} catch (SystemException e) {
+			logger.error("SystemException " + e.getMessage());
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
 		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage());
+			logger.error("NotSupportedException " + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException " + e.getMessage());
 		} catch (RuntimeException e) {
+			logger.error(e.getClass() + " " + e.getMessage());
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
@@ -195,6 +213,7 @@ public class SessionManager {
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 				Session session = getSession(sessionId);
+				String userName = session.getUserName(true);
 				session.refresh(lifetimeMinutes);
 				sessionEntityManager.flush();
 				userTransaction.commit();
@@ -202,14 +221,13 @@ public class SessionManager {
 				if (logRequests.contains(CallType.SESSION)) {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-						gen.write("userName", session.getUserName());
+						gen.write("userName", userName);
 						gen.writeEnd();
 					}
 					transmitter.processMessage("refresh", ip, baos.toString(), startMillis);
 				}
 			} catch (IcatException e) {
-				userTransaction.rollback();
-				logger.trace("Transaction rolled back for logout because of " + e.getClass() + " " + e.getMessage());
+				logger.warn("Attempt transaction roll back for refresh because of " + e.getClass() + " " + e.getMessage());
 				if (e.getType() == IcatExceptionType.SESSION) {
 					throw e;
 				} else {
@@ -217,16 +235,25 @@ public class SessionManager {
 							e.getClass() + " " + e.getMessage());
 				}
 			} catch (Exception e) {
+				logger.warn("Attempt transaction roll back for refresh because of " + e.getClass() + " " + e.getMessage());
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+			} finally {
+				if (userTransaction.getStatus() == Status.STATUS_ACTIVE) {
+					userTransaction.rollback();
+				}
 			}
 		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException" + e.getMessage());
+			logger.error("IllegalStateException " + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException " + e.getMessage());
 		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException" + e.getMessage());
+			logger.error("SecurityException " + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException " + e.getMessage());
 		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
+			logger.error("SystemException " + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException " + e.getMessage());
 		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage());
+			logger.error("NotSupportedException " + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException " + e.getMessage());
 		}
 	}
 }
