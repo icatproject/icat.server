@@ -11,7 +11,12 @@ import jakarta.json.Json;
 import jakarta.json.stream.JsonGenerator;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceException;
+import jakarta.transaction.HeuristicMixedException;
+import jakarta.transaction.HeuristicRollbackException;
 import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.Status;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.UserTransaction;
 
@@ -63,14 +68,14 @@ public class SessionManager {
 			userTransaction.begin();
 			int n = sessionEntityManager.createNamedQuery(Session.DELETE_EXPIRED).executeUpdate();
 			userTransaction.commit();
-			logger.debug(n + " sessions were removed");
+			logger.debug("{} sessions were removed", n);
 		} catch (Exception e) {
 			logger.error("Error removing expired sessions", e);
 		}
 	}
 
 	public double getRemainingMinutes(String sessionId) throws IcatException {
-		logger.debug("getRemainingMinutes for sessionId " + sessionId);
+		logger.debug("getRemainingMinutes for sessionId {}", sessionId);
 		Session session = getSession(sessionId);
 		return session.getRemainingMinutes();
 	}
@@ -78,12 +83,11 @@ public class SessionManager {
 	private Session getSession(String sessionId) throws IcatException {
 		Session session = null;
 		if (sessionId == null || sessionId.equals("")) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session Id cannot be null or empty.");
+			throw new IcatException(IcatExceptionType.SESSION, "Session Id cannot be null or empty.");
 		}
 		session = (Session) sessionEntityManager.find(Session.class, sessionId);
 		if (session == null) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION,
-					"Unable to find user by sessionid: " + sessionId);
+			throw new IcatException(IcatExceptionType.SESSION, "Unable to find user by sessionid: " + sessionId);
 		}
 		return session;
 	}
@@ -92,141 +96,127 @@ public class SessionManager {
 		try {
 			Session session = getSession(sessionId);
 			String userName = session.getUserName();
-			logger.debug("user: " + userName + " is associated with: " + sessionId);
+			logger.debug("user: {} is associated with: {}", userName, sessionId);
 			return userName;
 		} catch (IcatException e) {
-			logger.debug("sessionId " + sessionId + " is not associated with valid session " + e.getMessage());
+			logger.debug("sessionId {} is not associated with valid session ", sessionId, e);
 			throw e;
 		}
 	}
 
 	public boolean isLoggedIn(String userName) {
-		logger.debug("isLoggedIn for user " + userName);
+		logger.debug("isLoggedIn for user {}", userName);
 		return sessionEntityManager.createNamedQuery(Session.ISLOGGEDIN, Long.class).setParameter("userName", userName).getSingleResult() > 0;
 	}
 
 	public String login(String userName, String ip) throws IcatException {
+		long startMillis = log ? System.currentTimeMillis() : 0;
 		Session session = new Session(userName, lifetimeMinutes);
+
 		try {
 			userTransaction.begin();
 			try {
-				long startMillis = log ? System.currentTimeMillis() : 0;
 				sessionEntityManager.persist(session);
 				sessionEntityManager.flush();
 				userTransaction.commit();
-				String result = session.getId();
-				logger.debug("Session " + result + " persisted.");
-				if (logRequests.contains(CallType.SESSION)) {
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-						gen.write("userName", userName);
-						gen.writeEnd();
-					}
-					transmitter.processMessage("login", ip, baos.toString(), startMillis);
+			} catch (PersistenceException e) {
+				logger.error("Database error", e);
+				throw new IcatException(IcatExceptionType.INTERNAL, "Database error: " + e.getMessage());
+			} finally {
+				if (userTransaction.getStatus() != Status.STATUS_NO_TRANSACTION) {
+					userTransaction.rollback();
 				}
-				return result;
-			} catch (Throwable e) {
-				userTransaction.rollback();
-				logger.trace("Transaction rolled back for login because of " + e.getClass() + " " + e.getMessage());
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 			}
-		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-					"IllegalStateException " + e.getMessage());
-		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException " + e.getMessage());
-		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException " + e.getMessage());
-		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-					"NotSupportedException " + e.getMessage());
+		} catch (HeuristicMixedException | HeuristicRollbackException | NotSupportedException | RollbackException | SystemException e) {
+			logger.error("Transaction error", e);
+			throw new IcatException(IcatExceptionType.INTERNAL, "Transaction error: " + e.getMessage());
 		}
+
+		String result = session.getId();
+		logger.debug("Session {} persisted.", result);
+		if (logRequests.contains(CallType.SESSION)) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+				gen.write("userName", userName);
+				gen.writeEnd();
+			}
+			transmitter.processMessage("login", ip, baos.toString(), startMillis);
+		}
+
+		return result;
 	}
 
 	public void logout(String sessionId, String ip) throws IcatException {
-		logger.debug("logout for sessionId " + sessionId);
+		long startMillis = log ? System.currentTimeMillis() : 0;
+		logger.debug("logout for sessionId {}", sessionId);
+
+		String userName;
 		try {
 			userTransaction.begin();
 			try {
-				long startMillis = log ? System.currentTimeMillis() : 0;
 				Session session = getSession(sessionId);
+				userName = session.getUserName(true);
 				sessionEntityManager.remove(session);
 				sessionEntityManager.flush();
 				userTransaction.commit();
-				logger.debug("Session {} removed.", session.getId());
-				if (logRequests.contains(CallType.SESSION)) {
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-						gen.write("userName", session.getUserName());
-						gen.writeEnd();
-					}
-					transmitter.processMessage("logout", ip, baos.toString(), startMillis);
+			} catch (PersistenceException e) {
+				logger.error("Database error", e);
+				throw new IcatException(IcatExceptionType.INTERNAL, "Database error: " + e.getMessage());
+			} finally {
+				if (userTransaction.getStatus() != Status.STATUS_NO_TRANSACTION) {
+					userTransaction.rollback();
 				}
-			} catch (IcatException e) {
-				userTransaction.rollback();
-				logger.trace("Transaction rolled back for logout because of " + e.getClass() + " " + e.getMessage());
-				if (e.getType() == IcatExceptionType.SESSION) {
-					throw e;
-				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							e.getClass() + " " + e.getMessage());
-				}
-			} catch (Exception e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 			}
-		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException" + e.getMessage());
-		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException" + e.getMessage());
-		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
-		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage());
-		} catch (RuntimeException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		} catch (HeuristicMixedException | HeuristicRollbackException | NotSupportedException | RollbackException | SystemException e) {
+			logger.error("Transaction error", e);
+			throw new IcatException(IcatExceptionType.INTERNAL, "Transaction error: " + e.getMessage());
+		}
+
+		logger.debug("Session {} removed.", sessionId);
+		if (logRequests.contains(CallType.SESSION)) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+				gen.write("userName", userName);
+				gen.writeEnd();
+			}
+			transmitter.processMessage("logout", ip, baos.toString(), startMillis);
 		}
 	}
 
 	public void refresh(String sessionId, String ip) throws IcatException {
-		logger.debug("logout for sessionId " + sessionId);
+		long startMillis = log ? System.currentTimeMillis() : 0;
+		logger.debug("logout for sessionId {}", sessionId);
+
+		String userName;
 		try {
 			userTransaction.begin();
 			try {
-				long startMillis = log ? System.currentTimeMillis() : 0;
 				Session session = getSession(sessionId);
+				userName = session.getUserName(true);
 				session.refresh(lifetimeMinutes);
 				sessionEntityManager.flush();
 				userTransaction.commit();
-				logger.debug("Session {} refreshed.", session.getId());
-				if (logRequests.contains(CallType.SESSION)) {
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
-						gen.write("userName", session.getUserName());
-						gen.writeEnd();
-					}
-					transmitter.processMessage("refresh", ip, baos.toString(), startMillis);
+			} catch (PersistenceException e) {
+				logger.error("Database error", e);
+				throw new IcatException(IcatExceptionType.INTERNAL, "Database error: " + e.getMessage());
+			} finally {
+				if (userTransaction.getStatus() != Status.STATUS_NO_TRANSACTION) {
+					userTransaction.rollback();
 				}
-			} catch (IcatException e) {
-				userTransaction.rollback();
-				logger.trace("Transaction rolled back for logout because of " + e.getClass() + " " + e.getMessage());
-				if (e.getType() == IcatExceptionType.SESSION) {
-					throw e;
-				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							e.getClass() + " " + e.getMessage());
-				}
-			} catch (Exception e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 			}
-		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException" + e.getMessage());
-		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException" + e.getMessage());
-		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
-		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage());
+		} catch (HeuristicMixedException | HeuristicRollbackException | NotSupportedException | RollbackException | SystemException e) {
+			logger.error("Transaction error", e);
+			throw new IcatException(IcatExceptionType.INTERNAL, "Transaction error: " + e.getMessage());
+		}
+
+		logger.debug("Session {} refreshed.", sessionId);
+		if (logRequests.contains(CallType.SESSION)) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+				gen.write("userName", userName);
+				gen.writeEnd();
+			}
+			transmitter.processMessage("refresh", ip, baos.toString(), startMillis);
 		}
 	}
 }
