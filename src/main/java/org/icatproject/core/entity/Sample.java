@@ -22,23 +22,23 @@ import jakarta.persistence.UniqueConstraint;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.search.SearchApi;
 
-@Comment("A sample to be used in an investigation")
+@Comment("A sample to be used in one or more investigations")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "INVESTIGATION_ID", "NAME" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "PID" }) })
 public class Sample extends EntityBaseBean implements Serializable {
 
 	@Comment("A persistent identifier attributed to this sample")
+	@Column(nullable = false, name = "PID")
 	private String pid;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
 	private List<Dataset> datasets = new ArrayList<>();
 
-	@JoinColumn(nullable = false, name = "INVESTIGATION_ID")
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Investigation investigation;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
+	private List<InvestigationSample> investigationSamples = new ArrayList<>();
 
-	@Column(nullable = false, name = "NAME")
+	@Column(nullable = false)
 	private String name;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
@@ -67,8 +67,8 @@ public class Sample extends EntityBaseBean implements Serializable {
 		return this.datasets;
 	}
 
-	public Investigation getInvestigation() {
-		return this.investigation;
+	public List<InvestigationSample> getInvestigationSamples() {
+		return this.investigationSamples;
 	}
 
 	public String getName() {
@@ -83,8 +83,8 @@ public class Sample extends EntityBaseBean implements Serializable {
 		this.datasets = datasets;
 	}
 
-	public void setInvestigation(Investigation investigation) {
-		this.investigation = investigation;
+	public void setInvestigationSamples(List<InvestigationSample> investigationSamples) {
+		this.investigationSamples = investigationSamples;
 	}
 
 	public void setName(String name) {
@@ -107,12 +107,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 	public void getDoc(EntityManager entityManager, JsonGenerator gen) throws IcatException {
 		SearchApi.encodeString(gen, "sample.name", name);
 		SearchApi.encodeLong(gen, "sample.id", id);
-		if (investigation != null) {
-			// Investigation is not nullable, but it is possible to pass Samples without their Investigation
-			// relationship populated when creating Datasets, where this field is not needed anyway - so guard against
-			// null pointers
-			SearchApi.encodeLong(gen, "sample.investigation.id", investigation.id);
-		}
 		if (type != null) {
 			if (type.getName() == null) {
 				type = entityManager.find(type.getClass(), type.id);
