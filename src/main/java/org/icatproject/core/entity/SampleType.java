@@ -25,17 +25,15 @@ import org.icatproject.core.manager.search.SearchApi;
 @Comment("A sample to be used in an investigation")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME",
-		"MOLECULARFORMULA" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "PID" }) })
 public class SampleType extends EntityBaseBean implements Serializable {
 
-	@Comment("The facility which has defined this sample type")
-	@JoinColumn(name = "FACILITY_ID", nullable = false)
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Facility facility;
+	@Comment("A persistent identifier attributed to this sample type, ideally referring to a vocabulary term")
+	@Column(name = "PID", nullable = false)
+	private String pid;
 
 	@Comment("The formula written as a string -e.g. C2H6O2 for ethylene glycol")
-	@Column(nullable = false, name = "MOLECULARFORMULA")
+	@Column(name = "MOLECULARFORMULA")
 	private String molecularFormula;
 
 	@Column(nullable = false, name = "NAME")
@@ -54,8 +52,8 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	public SampleType() {
 	}
 
-	public Facility getFacility() {
-		return facility;
+	public String getPid() {
+		return pid;
 	}
 
 	public String getMolecularFormula() {
@@ -74,8 +72,8 @@ public class SampleType extends EntityBaseBean implements Serializable {
 		return samples;
 	}
 
-	public void setFacility(Facility facility) {
-		this.facility = facility;
+	public void setPid(String pid) {
+		this.pid = pid;
 	}
 
 	public void setMolecularFormula(String molecularFormula) {
