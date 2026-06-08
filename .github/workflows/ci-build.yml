@@ -34,7 +34,7 @@ jobs:
 
       # ICAT Ansible clone and install dependencies
       - name: Checkout icat-ansible
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.0.0
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v4.0.0
         with:
           repository: icatproject-contrib/icat-ansible
           path: icat-ansible
@@ -72,7 +72,7 @@ jobs:
           ansible-playbook icat-ansible/icat_server_dev_hosts.yml -i icat-ansible/hosts --vault-password-file icat-ansible/vault_pass.txt -vv
 
       - name: Checkout icat-server
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.0.0
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v4.0.0
 
       # Payara must be sourced otherwise the Maven build command fails
       - name: Run Build
