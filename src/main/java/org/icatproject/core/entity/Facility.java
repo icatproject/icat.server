@@ -63,9 +63,6 @@ public class Facility extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
 	private List<ParameterType> parameterTypes = new ArrayList<ParameterType>();
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
-	private List<SampleType> sampleTypes = new ArrayList<SampleType>();
-
 	@Comment("A URL associated with this facility")
 	private String url;
 
@@ -129,10 +126,6 @@ public class Facility extends EntityBaseBean implements Serializable {
 		return parameterTypes;
 	}
 
-	public List<SampleType> getSampleTypes() {
-		return sampleTypes;
-	}
-
 	public String getUrl() {
 		return url;
 	}
@@ -191,10 +184,6 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	public void setParameterTypes(List<ParameterType> parameterTypes) {
 		this.parameterTypes = parameterTypes;
-	}
-
-	public void setSampleTypes(List<SampleType> sampleTypes) {
-		this.sampleTypes = sampleTypes;
 	}
 
 	public void setUrl(String url) {

@@ -170,7 +170,7 @@ public class TestEntityInfo {
 	public void testFields() throws Exception {
 		testField(
 				"applications,dataPublicationTypes,dataPublications,datafileFormats,datasetTypes,daysUntilRelease,description,facilityCycles,"
-						+ "fullName,instruments,investigationTypes,investigations,name,parameterTypes,sampleTypes,url",
+						+ "fullName,instruments,investigationTypes,investigations,name,parameterTypes,url",
 				Facility.class);
 		testField("description,facility,investigations,name", InvestigationType.class);
 		testField(
