@@ -121,8 +121,6 @@ public class ICATRest {
 
 	private int maxEntities;
 
-	private ContainerType containerType;
-
 	private Map<String, String> cluster;
 
 	private void checkRoot(String sessionId) throws IcatException {
@@ -452,8 +450,11 @@ public class ICATRest {
 			authenticatorArrayBuilder.add(authenticatorBuilder);
 		}
 
-		jsonBuilder.add("maxEntities", maxEntities).add("lifetimeMinutes", lifetimeMinutes)
-				.add("authenticators", authenticatorArrayBuilder).add("containerType", containerType.name());
+		jsonBuilder
+			.add("maxEntities", maxEntities)
+			.add("lifetimeMinutes", lifetimeMinutes)
+			.add("authenticators", authenticatorArrayBuilder)
+			.add("containerType", ContainerType.UNKNOWN.name()); // containerType kept for backwards compatibility but not disclosed
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonWriter writer = Json.createWriter(baos);
@@ -680,7 +681,6 @@ public class ICATRest {
 		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
 		rootUserNames = propertyHandler.getRootUserNames();
 		maxEntities = propertyHandler.getMaxEntities();
-		containerType = propertyHandler.getContainerType();
 		cluster = propertyHandler.getCluster();
 	}
 
