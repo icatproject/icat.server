@@ -74,8 +74,7 @@ public class TestEntityInfo {
 				EntityInfoHandler.getExportHeader(Investigation.class));
 		assertEquals(
 				"Dataset(complete:0,description:1,doi:2,endDate:3,fileCount:4,fileSize:5,investigation(facility(name:6),"
-						+ "name:7,visitId:8),location:9,name:10,sample(investigation(facility(name:11),"
-						+ "name:12,visitId:13),name:14),startDate:15,type(facility(name:16),name:17))",
+						+ "name:7,visitId:8),location:9,name:10,sample(pid:11),startDate:12,type(facility(name:13),name:14))",
 				EntityInfoHandler.getExportHeader(Dataset.class));
 		assertEquals("DataCollection(?:0,doi:1)", EntityInfoHandler.getExportHeader(DataCollection.class));
 		assertEquals(
@@ -118,8 +117,7 @@ public class TestEntityInfo {
 				"Dataset(createId:0,createTime:1,modId:2,modTime:3,"
 						+ "complete:4,description:5,doi:6,endDate:7,fileCount:8,fileSize:9,"
 						+ "investigation(facility(name:10),name:11,visitId:12),location:13,name:14,"
-						+ "sample(investigation(facility(name:15),name:16,visitId:17),"
-						+ "name:18),startDate:19,type(facility(name:20),name:21))",
+						+ "sample(pid:15),startDate:16,type(facility(name:17),name:18))",
 				EntityInfoHandler.getExportHeaderAll(Dataset.class));
 		assertEquals("DataCollection(?:0,createId:1,createTime:2,modId:3,modTime:4,doi:5)",
 				EntityInfoHandler.getExportHeaderAll(DataCollection.class));
@@ -246,7 +244,7 @@ public class TestEntityInfo {
 
 		testRel(Investigation.class, "From Investigation to Keyword by keywords many setInvestigation",
 				"From Investigation to DataCollectionInvestigation by dataCollectionInvestigations many setInvestigation",
-				"From Investigation to Sample by samples many setInvestigation",
+				"From Investigation to InvestigationSample by samples many setInvestigation",
 				"From Investigation to StudyInvestigation by studyInvestigations many setInvestigation",
 				"From Investigation to Shift by shifts many setInvestigation",
 				"From Investigation to Dataset by datasets many setInvestigation",

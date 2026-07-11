@@ -68,6 +68,7 @@ import org.icatproject.core.entity.InvestigationFunding;
 import org.icatproject.core.entity.InvestigationGroup;
 import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.InvestigationParameter;
+import org.icatproject.core.entity.InvestigationSample;
 import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Job;
@@ -223,8 +224,8 @@ public class EntityInfoHandler {
 			Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class, Study.class,
 			DataPublicationType.class, DataPublication.class, Subject.class, DataPublicationDate.class, DataPublicationUser.class,
 			Affiliation.class, RelatedItem.class, FundingReference.class, DataPublicationFunding.class,
-			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class,
-			InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class,
+			InvestigationFunding.class, InvestigationUser.class, InvestigationGroup.class, InvestigationSample.class,
+			StudyInvestigation.class, InvestigationInstrument.class, InstrumentScientist.class, DatasetInstrument.class,
 			InvestigationFacilityCycle.class);
 
 	// All entities, plus the abstract classes Parameter and EntityBaseBean
